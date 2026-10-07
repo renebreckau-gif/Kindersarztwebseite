@@ -186,3 +186,33 @@ Photographic, from the plate. Code adds only:
 - `npm run build` ✓ · `npm run typecheck` ✓ · `npm test` 75 / 75 ✓
 - Routes 200: `/`, `/lab`, `/lab/a`, `/lab/b`, `/lab/c`, `/lab/final`, `/design-system`
 - PRAXIS PULS logic unchanged (domain untouched; all five demo states render).
+
+---
+
+## Addendum — mobile hero correction (Phase 06.2)
+
+**Problem:** on narrow/portrait layouts the room's architecture appeared more than once (wall + opening + reception stacked into an impossible room).
+
+**Root cause:** the phone layout used the room image twice at two different scales:
+- as a CSS background behind the text zone, showing the left wall;
+- in the scene band, which cropped from ≈ 36 % of the width.
+
+The band therefore repeated the wall corner and the large opening arch directly under the wall zone — two crops of one room stacked vertically. The desktop composition was not affected.
+
+**Implementation change (phones and portrait tablets, < 64em only):**
+- **Text zone:** a plain CSS plaster wall in daylight (warm gradient, soft diagonal light, window glow from the right). No photo, so no architecture.
+- **Scene band:** exactly one controlled crop of the master: its right half (x 50–100 %, y 4–96.5 %). It shows the corridor, the window light, the mobile and the child, each once. The crop is fixed by aspect ratio; never stretched, tiled or extended.
+- **Band top:** a short 9 % fade into the wall.
+- **Follow-up link** ("Sprechzeiten ansehen" etc.): now sits beside Notfall in the action row, which frees vertical space so the band does not start under the controls.
+- **Image `sizes`:** updated for the new crop.
+
+**Behaviour:**
+- **360 × 800:** headline on two lines, status, Anrufen, then Notfall with the link beside it. The band shows the mobile (including the cobalt sphere) and the child directly below it; the child's feet stay above the dock.
+- **390 × 844 / 430 × 932:** the same composition with more air; the paths begin at the dock.
+- No duplicated entrance, window or arch; no seams; no stretched background; no child or dock collisions (23 captures, 0 audit issues).
+
+**Intentionally hidden on mobile:** the wall corner and the large opening arch (master x < 50 %), most of the reception area, the left wall's photographic leaf shadows (replaced by CSS daylight), and the far-left room depth. The full composition remains on desktop.
+
+**Desktop:** unchanged; the shared `.follow` link now sits in the action row and wraps below the buttons as before.
+
+Screenshots: [`mobile-hero-360-390-430.png`](phase-06-2/screenshots/mobile-hero-360-390-430.png), `final-open-{360x800,390x844,430x932}.png`, `final-scene-band-390x844.png`.

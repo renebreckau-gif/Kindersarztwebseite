@@ -67,12 +67,13 @@ export function PulsStatement({ puls }: { puls: DemoPuls }) {
           <Icon name="alert" size={20} />
           <span>Notfall</span>
         </a>
+        {/* the state's follow-up sits beside Notfall when there is room */}
+        {follow ? (
+          <a className={s.follow} href={FOLLOW_UP[follow.kind]}>
+            {follow.label}
+          </a>
+        ) : null}
       </div>
-      {follow ? (
-        <p className={s.follow}>
-          <a href={FOLLOW_UP[follow.kind]}>{follow.label}</a>
-        </p>
-      ) : null}
     </section>
   );
 }

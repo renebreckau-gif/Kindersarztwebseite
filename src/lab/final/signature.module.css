@@ -73,11 +73,13 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  /* phones: the sunlit wall of the plate carries the text zone */
+  /* phones: a plain plaster wall in daylight carries the text zone. Pure CSS — no
+     photo here, so no architecture can appear twice (the room photo lives only in
+     the scene band below). Light falls in from the window side (right). */
   background:
-    linear-gradient(180deg, rgb(246 231 214 / 0.55) 0%, rgb(246 231 214 / 0.2) 40%, transparent 70%),
-    image-set(url("/hero/room-960.avif") type("image/avif"), url("/hero/room-960.webp") type("image/webp")) 9% 0 / auto 780px no-repeat,
-    var(--wall);
+    radial-gradient(90% 55% at 100% 100%, rgb(255 241 222 / 0.75) 0%, transparent 70%),
+    linear-gradient(118deg, transparent 38%, rgb(255 246 232 / 0.4) 52%, transparent 66%),
+    linear-gradient(170deg, #f4e3d0 0%, var(--wall) 55%, #e8c9ad 100%);
 }
 .content {
   order: 1;
@@ -88,23 +90,27 @@
   /* clears the header; rem so it grows with enlarged text */
   padding: calc(var(--space-5) + 4rem) var(--space-gutter) 0;
 }
+/* Phones / portrait: ONE controlled crop of the master — its right half only
+   (x 50–100 %, y 4–96.5 %): corridor, window, mobile and child, each exactly once.
+   The wall corner and the big opening arch (x < 50 %) are deliberately excluded,
+   so nothing repeats the wall zone above. Never stretched, tiled or extended. */
 .scene {
   order: 2;
   position: relative;
   z-index: 1;
-  --bw: 172%;
-  height: calc(min(172vw, 64rem) / 1.7684 * 0.97);
-  margin-top: calc(-1 * var(--space-6));
+  --bw: 200%;
+  aspect-ratio: 1 / 1.0461; /* = 0.5 × 2688 wide : 0.925 × 1520 high */
+  margin-top: var(--space-3);
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 16%);
-  mask-image: linear-gradient(180deg, transparent 0, #000 16%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 9%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 9%);
 }
 .frame {
   position: absolute;
   aspect-ratio: 2688 / 1520;
   width: var(--bw);
-  left: calc((100% - var(--bw)) * 0.86);
-  top: 0;
+  left: -100%;
+  top: -4.32%; /* 4 % of the frame height, expressed in scene height */
 }
 .plate {
   position: absolute;
@@ -339,19 +345,17 @@
   background: #fff;
 }
 .follow {
-  margin: 0;
-  font-size: var(--text-small);
-}
-.follow a {
   display: inline-flex;
   align-items: center;
   min-height: var(--target-min);
+  padding: 0 var(--space-2);
+  font-size: var(--text-small);
   color: #2a39c8;
   text-underline-offset: 4px;
 }
 .call:focus-visible,
 .emergency:focus-visible,
-.follow a:focus-visible,
+.follow:focus-visible,
 .path:focus-visible,
 .back:focus-visible,
 .menuButton:focus-visible,
@@ -592,10 +596,6 @@
   .paths {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
-  .scene {
-    --bw: 150%;
-    height: calc(min(150vw, 96rem) / 1.7684 * 0.97);
-  }
 }
 
 /* ================= desktop composition ================= */
@@ -668,6 +668,7 @@
     position: absolute;
     inset: 0;
     height: auto;
+    aspect-ratio: auto;
     margin: 0;
     z-index: 0;
     container-type: size;

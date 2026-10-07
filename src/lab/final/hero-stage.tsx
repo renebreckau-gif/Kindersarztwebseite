@@ -122,12 +122,12 @@ export function HeroStage({ initial, children }: { initial: PathId | null; child
         <div className={s.scene} aria-hidden="true">
           <div className={s.frame}>
             <picture>
-              <source type="image/avif" srcSet="/hero/room-960.avif 960w, /hero/room-1600.avif 1600w, /hero/room-2400.avif 2400w" sizes="(max-width: 63.99em) 170vw, max(100vw, 177svh)" />
+              <source type="image/avif" srcSet="/hero/room-960.avif 960w, /hero/room-1600.avif 1600w, /hero/room-2400.avif 2400w" sizes="(max-width: 63.99em) 200vw, max(100vw, 177svh)" />
               <img
                 className={s.plate}
                 src="/hero/room-1600.webp"
                 srcSet="/hero/room-960.webp 960w, /hero/room-1600.webp 1600w, /hero/room-2400.webp 2400w"
-                sizes="(max-width: 63.99em) 170vw, max(100vw, 177svh)"
+                sizes="(max-width: 63.99em) 200vw, max(100vw, 177svh)"
                 width={W}
                 height={H}
                 alt=""
@@ -147,8 +147,8 @@ export function HeroStage({ initial, children }: { initial: PathId | null; child
               style={{ left: pct(MOBILE.x, W), top: pct(MOBILE.y, H), width: pct(MOBILE.w, W) }}
             >
               <picture>
-                <source type="image/avif" srcSet="/hero/mobile-420.avif 420w, /hero/mobile-830.avif 830w" sizes="(max-width: 63.99em) 55vw, 32vw" />
-                <img src="/hero/mobile-830.webp" srcSet="/hero/mobile-420.webp 420w, /hero/mobile-830.webp 830w" sizes="(max-width: 63.99em) 55vw, 32vw" width={MOBILE.w} height={MOBILE.h} alt="" decoding="async" />
+                <source type="image/avif" srcSet="/hero/mobile-420.avif 420w, /hero/mobile-830.avif 830w" sizes="(max-width: 63.99em) 62vw, 32vw" />
+                <img src="/hero/mobile-830.webp" srcSet="/hero/mobile-420.webp 420w, /hero/mobile-830.webp 830w" sizes="(max-width: 63.99em) 62vw, 32vw" width={MOBILE.w} height={MOBILE.h} alt="" decoding="async" />
               </picture>
               {el ? (
                 <span
@@ -160,12 +160,12 @@ export function HeroStage({ initial, children }: { initial: PathId | null; child
 
             {/* the child, seated low, looking up at the mobile */}
             <picture>
-              <source type="image/avif" srcSet="/hero/child-300.avif 300w, /hero/child-570.avif 570w" sizes="(max-width: 63.99em) 36vw, 22vw" />
+              <source type="image/avif" srcSet="/hero/child-300.avif 300w, /hero/child-570.avif 570w" sizes="(max-width: 63.99em) 43vw, 22vw" />
               <img
                 className={s.child}
                 src="/hero/child-570.webp"
                 srcSet="/hero/child-300.webp 300w, /hero/child-570.webp 570w"
-                sizes="(max-width: 63.99em) 36vw, 22vw"
+                sizes="(max-width: 63.99em) 43vw, 22vw"
                 width={CHILD.w}
                 height={CHILD.h}
                 alt=""

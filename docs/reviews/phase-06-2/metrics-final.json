@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-10-07T12:05:31.439Z",
+  "capturedAt": "2026-10-07T12:34:59.239Z",
   "browser": "Chrome/155.0.8059.39",
   "webglRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 2060 SUPER (0x00001F06) Direct3D11 vs_5_0 ps_5_0, D3D11)",
   "results": [
@@ -20,8 +20,8 @@
         "mobile-830.avif 38KB",
         "child-570.avif 36KB"
       ],
-      "longTasksMs": 0,
-      "longTaskCount": 0,
+      "longTasksMs": 89,
+      "longTaskCount": 1,
       "overflowX": false,
       "clipped": [],
       "smallTargets": [],
@@ -91,8 +91,8 @@
       },
       "images": [
         "room-960.avif 30KB",
-        "child-300.avif 14KB",
-        "mobile-420.avif 23KB"
+        "mobile-420.avif 23KB",
+        "child-300.avif 14KB"
       ],
       "longTasksMs": 0,
       "longTaskCount": 0,
@@ -128,8 +128,8 @@
       },
       "images": [
         "room-960.avif 30KB",
-        "mobile-420.avif 23KB",
-        "child-300.avif 14KB"
+        "child-300.avif 14KB",
+        "mobile-420.avif 23KB"
       ],
       "longTasksMs": 0,
       "longTaskCount": 0,
@@ -455,11 +455,14 @@
       "jsLazyKB": 0,
       "lazyChunks": [],
       "assetKB": {
-        "Image": 135.3,
+        "Image": 270.5,
         "Font": 150,
         "Stylesheet": 17.2
       },
       "images": [
+        "room-1600.avif 61KB",
+        "mobile-830.avif 38KB",
+        "child-570.avif 36KB",
         "room-1600.avif 61KB",
         "mobile-830.avif 38KB",
         "child-570.avif 36KB"
@@ -609,8 +612,8 @@
       },
       "images": [
         "room-1600.avif 61KB",
-        "child-570.avif 36KB",
-        "mobile-830.avif 38KB"
+        "mobile-830.avif 38KB",
+        "child-570.avif 36KB"
       ],
       "longTasksMs": 0,
       "longTaskCount": 0,
@@ -719,12 +722,12 @@
         "Stylesheet": 17.2
       },
       "images": [
+        "mobile-830.avif 38KB",
+        "room-1600.avif 61KB",
+        "child-570.avif 36KB",
         "room-1600.avif 61KB",
         "mobile-830.avif 38KB",
-        "child-570.avif 36KB",
-        "room-1600.avif 61KB",
-        "child-570.avif 36KB",
-        "mobile-830.avif 38KB"
+        "child-570.avif 36KB"
       ],
       "longTasksMs": 0,
       "longTaskCount": 0,
@@ -873,7 +876,7 @@
       "url": "/lab/final",
       "viewport": "390x844",
       "cpuThrottle": 4,
-      "frames": 214,
+      "frames": 213,
       "medianFrameMs": 16.7,
       "p95FrameMs": 16.8,
       "maxFrameMs": 17,
