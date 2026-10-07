@@ -1,0 +1,721 @@
+{
+  "capturedAt": "2026-10-07T11:18:11.556Z",
+  "browser": "Chrome/155.0.8059.39",
+  "webglRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 2060 SUPER (0x00001F06) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "results": [
+    {
+      "url": "/lab/final",
+      "viewport": "1920x1080",
+      "file": "final-open-1920x1080.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 241.5,
+      "lazyChunks": [
+        "2stbtc9-vm6n4.js 4KB",
+        "2dvahz9ckl3sn.js 238KB"
+      ],
+      "longTasksMs": 1481,
+      "longTaskCount": 4,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "1440x900",
+      "file": "final-open-1440x900.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 241.5,
+      "lazyChunks": [
+        "2stbtc9-vm6n4.js 4KB",
+        "2dvahz9ckl3sn.js 238KB"
+      ],
+      "longTasksMs": 65,
+      "longTaskCount": 1,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "430x932",
+      "file": "final-open-430x932.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 241.5,
+      "lazyChunks": [
+        "2stbtc9-vm6n4.js 4KB",
+        "2dvahz9ckl3sn.js 238KB"
+      ],
+      "longTasksMs": 125,
+      "longTaskCount": 2,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "390x844",
+      "file": "final-open-390x844.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 241.5,
+      "lazyChunks": [
+        "2stbtc9-vm6n4.js 4KB",
+        "2dvahz9ckl3sn.js 238KB"
+      ],
+      "longTasksMs": 61,
+      "longTaskCount": 1,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "360x800",
+      "file": "final-open-360x800.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 241.5,
+      "lazyChunks": [
+        "2stbtc9-vm6n4.js 4KB",
+        "2dvahz9ckl3sn.js 238KB"
+      ],
+      "longTasksMs": 56,
+      "longTaskCount": 1,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?status=unknown",
+      "viewport": "390x844",
+      "file": "final-unknown-390x844.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 241.5,
+      "lazyChunks": [
+        "2stbtc9-vm6n4.js 4KB",
+        "2dvahz9ckl3sn.js 238KB"
+      ],
+      "longTasksMs": 58,
+      "longTaskCount": 1,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?status=closed",
+      "viewport": "390x844",
+      "file": "final-closed-390x844.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 241.5,
+      "lazyChunks": [
+        "2stbtc9-vm6n4.js 4KB",
+        "2dvahz9ckl3sn.js 238KB"
+      ],
+      "longTasksMs": 56,
+      "longTaskCount": 1,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?pfad=mein-kind",
+      "viewport": "1440x900",
+      "file": "final-meinkind-1440x900.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 241.5,
+      "lazyChunks": [
+        "2stbtc9-vm6n4.js 4KB",
+        "2dvahz9ckl3sn.js 238KB"
+      ],
+      "longTasksMs": 55,
+      "longTaskCount": 1,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?pfad=mein-kind",
+      "viewport": "390x844",
+      "file": "final-meinkind-390x844.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 241.5,
+      "lazyChunks": [
+        "2stbtc9-vm6n4.js 4KB",
+        "2dvahz9ckl3sn.js 238KB"
+      ],
+      "longTasksMs": 57,
+      "longTaskCount": 1,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "390x844",
+      "file": "final-reducedmotion-390x844.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "reduced-motion"
+      ],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "390x844",
+      "file": "final-cpu4x-390x844.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 241.5,
+      "lazyChunks": [
+        "2stbtc9-vm6n4.js 4KB",
+        "2dvahz9ckl3sn.js 238KB"
+      ],
+      "longTasksMs": 278,
+      "longTaskCount": 2,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "390x844",
+      "file": "final-text200-390x844.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 241.5,
+      "lazyChunks": [
+        "2stbtc9-vm6n4.js 4KB",
+        "2dvahz9ckl3sn.js 238KB"
+      ],
+      "longTasksMs": 156,
+      "longTaskCount": 2,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": false,
+        "action": false,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "1440x900",
+      "file": "final-text200-1440x900.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 241.5,
+      "lazyChunks": [
+        "2stbtc9-vm6n4.js 4KB",
+        "2dvahz9ckl3sn.js 238KB"
+      ],
+      "longTasksMs": 58,
+      "longTaskCount": 1,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": false,
+        "action": false,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?status=unknown",
+      "viewport": "1440x900",
+      "file": "final-unknown-1440x900.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 241.5,
+      "lazyChunks": [
+        "2stbtc9-vm6n4.js 4KB",
+        "2dvahz9ckl3sn.js 238KB"
+      ],
+      "longTasksMs": 58,
+      "longTaskCount": 1,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?status=special",
+      "viewport": "390x844",
+      "file": "final-special-390x844.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 241.5,
+      "lazyChunks": [
+        "2stbtc9-vm6n4.js 4KB",
+        "2dvahz9ckl3sn.js 238KB"
+      ],
+      "longTasksMs": 61,
+      "longTaskCount": 1,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?status=closure",
+      "viewport": "390x844",
+      "file": "final-closure-390x844.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 241.5,
+      "lazyChunks": [
+        "2stbtc9-vm6n4.js 4KB",
+        "2dvahz9ckl3sn.js 238KB"
+      ],
+      "longTasksMs": 63,
+      "longTaskCount": 1,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?pfad=praxis",
+      "viewport": "1440x900",
+      "file": "final-praxis-1440x900.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 241.5,
+      "lazyChunks": [
+        "2stbtc9-vm6n4.js 4KB",
+        "2dvahz9ckl3sn.js 238KB"
+      ],
+      "longTasksMs": 59,
+      "longTaskCount": 1,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?3d=0",
+      "viewport": "1440x900",
+      "file": "final-no3d-1440x900.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "disabled"
+      ],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?3d=0",
+      "viewport": "390x844",
+      "file": "final-no3d-390x844.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "disabled"
+      ],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "1440x900",
+      "file": "final-reducedmotion-1440x900.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "reduced-motion"
+      ],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "1440x900",
+      "file": "final-scene-closeup-1440x900.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 241.5,
+      "lazyChunks": [
+        "2stbtc9-vm6n4.js 4KB",
+        "2dvahz9ckl3sn.js 238KB"
+      ],
+      "longTasksMs": 63,
+      "longTaskCount": 1,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "390x844",
+      "file": "final-scene-closeup-390x844.png",
+      "jsInitialKB": 146.6,
+      "jsLazyKB": 241.5,
+      "lazyChunks": [
+        "2stbtc9-vm6n4.js 4KB",
+        "2dvahz9ckl3sn.js 238KB"
+      ],
+      "longTasksMs": 59,
+      "longTaskCount": 1,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    }
+  ],
+  "smoothness": [
+    {
+      "url": "/lab/final",
+      "viewport": "1440x900",
+      "cpuThrottle": 1,
+      "frames": 213,
+      "medianFrameMs": 16.7,
+      "p95FrameMs": 16.8,
+      "maxFrameMs": 17,
+      "longTasksMs": 58
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "390x844",
+      "cpuThrottle": 4,
+      "frames": 213,
+      "medianFrameMs": 16.7,
+      "p95FrameMs": 16.7,
+      "maxFrameMs": 17,
+      "longTasksMs": 288
+    }
+  ]
+}

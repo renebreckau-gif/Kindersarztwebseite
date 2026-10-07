@@ -157,7 +157,12 @@ async function capture(tabSession, url, vpName, file, opts = {}) {
 
   const audit = (await s.send("Runtime.evaluate", { expression: AUDIT, returnByValue: true })).result.value;
   const lab = (await s.send("Runtime.evaluate", { expression: "window.__lab", returnByValue: true })).result.value;
-  const shot = await s.send("Page.captureScreenshot", { format: "png" });
+  let clip;
+  if (opts.clipSelector) {
+    const r = (await s.send("Runtime.evaluate", { expression: `(() => { const r = document.querySelector('${opts.clipSelector}').getBoundingClientRect(); return { x: r.x, y: r.y + scrollY, width: r.width, height: r.height, scale: 2 }; })()`, returnByValue: true })).result.value;
+    clip = r;
+  }
+  const shot = await s.send("Page.captureScreenshot", clip ? { format: "png", clip, captureBeyondViewport: true } : { format: "png" });
   writeFileSync(join(SHOTS, file), Buffer.from(shot.data, "base64"));
   s.listeners = s.listeners.filter((l) => l !== listener);
 
@@ -226,7 +231,7 @@ const PROTOS = only.length ? only : ["a", "b", "c"];
 const results = [];
 const QUICK = process.env.LAB_QUICK; // e.g. "1440x900,390x844": open state only, no metrics file
 if (QUICK) {
-  for (const p of PROTOS) for (const vp of QUICK.split(",")) results.push(await capture(s, `/lab/${p}${process.env.LAB_QUERY ?? ""}`, vp, `quick-${p}-${vp}.png`, { textScale: Number(process.env.LAB_TEXT) || undefined }));
+  for (const p of PROTOS) for (const vp of QUICK.split(",")) results.push(await capture(s, `/lab/${p}${process.env.LAB_QUERY ?? ""}`, vp, `quick-${p}-${vp}.png`, { textScale: Number(process.env.LAB_TEXT) || undefined, clipSelector: process.env.LAB_CLIP }));
   for (const r of results) console.log(r.file, JSON.stringify({ ovX: r.overflowX, fv: r.firstViewport, enh: r.enhancement, small: r.smallTargets, clip: r.clipped }));
   ws.close();
   chrome.kill();
@@ -254,6 +259,8 @@ for (const p of PROTOS) {
     results.push(await capture(s, `/lab/${p}?3d=0`, "1440x900", `${p}-no3d-1440x900.png`));
     results.push(await capture(s, `/lab/${p}?3d=0`, "390x844", `${p}-no3d-390x844.png`));
     results.push(await capture(s, `/lab/${p}`, "1440x900", `${p}-reducedmotion-1440x900.png`, { reducedMotion: true }));
+    results.push(await capture(s, `/lab/${p}`, "1440x900", `${p}-scene-closeup-1440x900.png`, { clipSelector: '[class*="objectZone"]' }));
+    results.push(await capture(s, `/lab/${p}`, "390x844", `${p}-scene-closeup-390x844.png`, { clipSelector: '[class*="objectZone"]' }));
   }
 }
 if (!only.length) results.push(await capture(s, `/lab`, "1440x900", `lab-index-1440x900.png`));
