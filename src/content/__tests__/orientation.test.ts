@@ -136,3 +136,15 @@ test("U/J line: no links, buttons or age-based highlighting", () => {
   assert.ok(line.length > 0);
   assert.equal(/<Link|<a |<button|onClick|aria-current|tabIndex|age\./.test(line), false);
 });
+
+test("growth scale: hover/current only tint the bar — no badge styles, no geometry", () => {
+  const css = read("src/site/blocks.module.css");
+  // every rule whose selector targets .growthBar in a :hover/aria-current state
+  const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([, sel]) => /growthBar/.test(sel) && /:hover|aria-current/.test(sel));
+  assert.ok(rules.length >= 2);
+  for (const [, sel, body] of rules) {
+    assert.equal(/growthNow/.test(sel), false, `badge shares a selector with the bar: ${sel.trim()}`);
+    const props = body.split(";").map((d) => d.split(":")[0].trim()).filter(Boolean);
+    assert.deepEqual(props, ["background"], `${sel.trim()} sets ${props.join(", ")}`);
+  }
+});

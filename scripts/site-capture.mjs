@@ -161,6 +161,12 @@ async function capture(tabSession, url, vpName, file, opts = {}) {
     await s.send("Runtime.evaluate", { expression: `window.scrollTo({ top: ${opts.scrollY}, behavior: "instant" })` });
     await sleep(400);
   }
+  if (opts.hoverHref) {
+    // real pointer hover (CDP mouse), e.g. to check hover states without geometry changes
+    const c = (await s.send("Runtime.evaluate", { expression: `(() => { const r = document.querySelector('a[href="${opts.hoverHref}"]').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`, returnByValue: true })).result.value;
+    await s.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: c.x, y: c.y });
+    await sleep(500);
+  }
   if (opts.openMenu) {
     await s.send("Runtime.evaluate", { expression: `document.querySelector('nav[aria-label="Schnellzugriff"] button').click()` });
     await sleep(600);
@@ -257,10 +263,11 @@ if (process.env.SITE_QUICK) {
     const full = flag === "full";
     const menu = flag === "menu";
     const reducedMotion = flag === "reduced";
+    const hoverHref = flag.startsWith("hover=") ? flag.slice(6) : "";
     const scrollY = flag.startsWith("scroll") ? Number(flag.slice(6)) : 0;
     const q = path.includes("vorschau=") ? "vorschau" : (path.match(/alter=([a-z0-9-]+)/)?.[1] ?? "");
-    const suffix = full ? "-full" : menu ? "-menu" : reducedMotion ? "-reducedmotion" : scrollY ? `-y${scrollY}` : "";
-    results.push(await capture(s, path, vp, `quick-${name(path.split("?")[0], q)}-${vp}${suffix}.${full ? "jpg" : "png"}`, { fullPage: full, openMenu: menu, scrollY, reducedMotion }));
+    const suffix = full ? "-full" : menu ? "-menu" : reducedMotion ? "-reducedmotion" : hoverHref ? `-hover-${hoverHref.split("/").pop()}` : scrollY ? `-y${scrollY}` : "";
+    results.push(await capture(s, path, vp, `quick-${name(path.split("?")[0], q)}-${vp}${suffix}.${full ? "jpg" : "png"}`, { fullPage: full, openMenu: menu, scrollY, reducedMotion, hoverHref }));
   }
 } else {
   // home: full-page scroll + states

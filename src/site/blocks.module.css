@@ -517,7 +517,7 @@
     transform var(--duration-state) var(--ease-out);
   transform-origin: bottom;
 }
-.growthLink:hover .growthBar,
+/* "Aktuell" badge — the only pill in the scale. Never shares a selector with .growthBar. */
 .growthNow {
   justify-self: start;
   margin-top: var(--space-2);
@@ -527,6 +527,14 @@
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1.5;
+}
+/* Hover and current change the bar's tint ONLY — never its size, position, border or radius.
+   Hover only where real hover exists (no sticky hover after a tap on phones), and a little
+   lighter than the current range so the selection stays distinguishable. */
+@media (hover: hover) and (pointer: fine) {
+  .growthLink:hover .growthBar {
+    background: linear-gradient(180deg, rgb(74 92 255 / 0.13), rgb(74 92 255 / 0.04));
+  }
 }
 .growthLink[aria-current="page"] .growthBar {
   background: linear-gradient(180deg, rgb(74 92 255 / 0.2), rgb(74 92 255 / 0.06));
