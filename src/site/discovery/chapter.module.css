@@ -1,0 +1,96 @@
+/* Mein Arztbesuch chapter frame (Phase 08). Night world, same gutter as ENTDECKEN.
+   Page bottom padding for the glass dock comes from the site main (chrome.module.css). */
+
+.chapter {
+  padding: var(--space-6) var(--space-gutter) var(--space-10);
+  color: #e9e6f2;
+  display: grid;
+  gap: var(--space-7);
+}
+.head {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 44rem;
+}
+.back {
+  margin: 0;
+}
+.back a,
+.gated a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: #c4ccff;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.back a:focus-visible,
+.gated a:focus-visible {
+  outline: 3px solid #8c9bff;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.5rem, 1.8rem + 3.4vw, 5rem);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  color: #fff;
+}
+.intro {
+  margin: 0;
+  max-width: 38rem;
+  color: #c9cbe0;
+  line-height: 1.55;
+}
+.previewFlag {
+  justify-self: start;
+  margin: 0;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px dashed rgb(255 214 120 / 0.75);
+  background: rgb(255 214 120 / 0.08);
+  color: #ffe2a6;
+  font-size: var(--text-small);
+  line-height: 1.45;
+  max-width: 40rem;
+}
+.previewFlag strong {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-right: 4px;
+}
+.gated {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 38rem;
+  padding: var(--space-6);
+  border-radius: 18px;
+  border: 1px solid rgb(233 230 242 / 0.18);
+  background: rgb(255 255 255 / 0.03);
+}
+.gated p {
+  margin: 0;
+  line-height: 1.55;
+}
+.gatedTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--text-h3);
+  color: #c4ccff;
+}
+
+/* 200 % text: explicit shrinkable tracks + wrapping (same rule as pages.module.css) */
+.chapter,
+.head,
+.gated {
+  grid-template-columns: minmax(0, 1fr);
+}
+.chapter :is(h1, h2, p) {
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}

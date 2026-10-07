@@ -146,6 +146,71 @@
   outline-offset: 4px;
 }
 
+/* 116117 — tier 2: clearly below 112 (smaller, cobalt not red, no hero gradient) */
+.onCall {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  padding: var(--space-7) var(--space-gutter);
+  background: var(--plaster);
+  border-bottom: 1px solid rgb(20 22 28 / 0.08);
+}
+.onCallTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--text-h2);
+  line-height: 1.05;
+}
+.onCallWhen,
+.onCallFacts,
+.onCallNot {
+  margin: 0;
+  max-width: 38rem;
+  line-height: 1.5;
+}
+.onCallWhen {
+  font-size: var(--text-body-l);
+}
+.onCallNot {
+  font-weight: 600;
+}
+.onCallCall {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  max-width: 100%;
+  min-height: 56px;
+  padding: var(--space-2) var(--space-6) var(--space-2) var(--space-5);
+  border-radius: 999px;
+  background: var(--call-bg);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+.onCallNum {
+  font-size: clamp(1.75rem, 1.5rem + 1vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.onCallCall:focus-visible {
+  outline: var(--border-focus) solid var(--color-focus);
+  outline-offset: 4px;
+}
+.onCall .fine {
+  margin-top: 0;
+}
+.onCall {
+  grid-template-columns: minmax(0, 1fr);
+}
+.onCall > * {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+
 /* ================= growth pages ================= */
 .growStage {
   padding: var(--space-7) var(--space-gutter) var(--space-9);
@@ -378,7 +443,39 @@
   font-size: clamp(1.75rem, 1.4rem + 1.6vw, 3rem);
   line-height: 1.05;
 }
+.chapterLink {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 1.4rem + 1.6vw, 3rem);
+  line-height: 1.05;
+  color: #fff;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: rgb(140 155 255 / 0.7);
+}
+.chapterLink:hover {
+  text-decoration-thickness: 2px;
+}
+.chapterLink:focus-visible {
+  outline: 3px solid #8c9bff;
+  outline-offset: 4px;
+  border-radius: 4px;
+}
 .chapterText {
+  color: #c9cbe0;
+}
+/* future chapters: quieter, no link, "Bald entdecken" */
+.chapters li[data-later] .chapterNo,
+.chapters li[data-later] .chapterName {
+  color: rgb(233 230 242 / 0.62);
+}
+.chapters li[data-later] .chapterState {
+  border-style: dashed;
+  border-color: rgb(233 230 242 / 0.4);
   color: #c9cbe0;
 }
 .chapterState {

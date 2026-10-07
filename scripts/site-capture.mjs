@@ -256,9 +256,11 @@ if (process.env.SITE_QUICK) {
     const [path, vp, flag = ""] = item.split("@");
     const full = flag === "full";
     const menu = flag === "menu";
+    const reducedMotion = flag === "reduced";
     const scrollY = flag.startsWith("scroll") ? Number(flag.slice(6)) : 0;
-    const suffix = full ? "-full" : menu ? "-menu" : scrollY ? `-y${scrollY}` : "";
-    results.push(await capture(s, path, vp, `quick-${name(path.split("?")[0])}-${vp}${suffix}.${full ? "jpg" : "png"}`, { fullPage: full, openMenu: menu, scrollY }));
+    const q = path.includes("vorschau=") ? "vorschau" : "";
+    const suffix = full ? "-full" : menu ? "-menu" : reducedMotion ? "-reducedmotion" : scrollY ? `-y${scrollY}` : "";
+    results.push(await capture(s, path, vp, `quick-${name(path.split("?")[0], q)}-${vp}${suffix}.${full ? "jpg" : "png"}`, { fullPage: full, openMenu: menu, scrollY, reducedMotion }));
   }
 } else {
   // home: full-page scroll + states

@@ -1,7 +1,7 @@
 // Emergency information and notices — filtered by the domain publication rules.
 
-import type { Announcement, EmergencyInformation } from "@/domain/content-types.ts";
-import { decideAnnouncement, selectPublicEmergency } from "@/domain/publication.ts";
+import type { Announcement, EmergencyInformation } from "../domain/content-types.ts";
+import { decideAnnouncement, selectPublicEmergency } from "../domain/publication.ts";
 import { UNCONFIRMED } from "./practice.ts";
 
 const EMERGENCY_112 = {
@@ -24,9 +24,30 @@ export const EMERGENCY: EmergencyInformation[] = [
     publicVisible: true,
     verification: EMERGENCY_112, // F56 — always rendered (R7)
   },
-  // F57–F65 are TO_BE_CONFIRMED: kept as records so they appear automatically once
-  // verified, but `selectPublicEmergency` omits them today.
-  { id: "116117", type: "MEDICAL_ON_CALL", name: "Ärztlicher Bereitschaftsdienst", whenToUse: "Außerhalb der Sprechzeiten, wenn es nicht bis zum nächsten Praxistag warten kann", phone: "116117", priority: 2, publicVisible: true, verification: UNCONFIRMED },
+  // F58–F65 (Giftnotruf, local KV on-call practices, clinics, pharmacies) stay
+  // TO_BE_CONFIRMED: kept as records, omitted by `selectPublicEmergency` until verified.
+  // F57 — 116117 is a nationwide official service fact, not a practice fact: verified
+  // against the official source (KBV_116117) on 2026-10-07. Nothing practice-specific is
+  // derived from it. Short review interval because emergency data has no grace period.
+  {
+    id: "116117",
+    type: "MEDICAL_ON_CALL",
+    name: "Ärztlicher Bereitschaftsdienst",
+    description: "Deutschlandweit, ohne Vorwahl, rund um die Uhr. Der Anruf ist kostenfrei.",
+    whenToUse: "Wenn die Praxis geschlossen ist und es nicht bis zum nächsten Praxistag warten kann – nicht bei Lebensgefahr.",
+    phone: "116117",
+    availability: { always: true, text: "24 Stunden am Tag, 7 Tage die Woche" },
+    sourceUrl: "https://www.116117.de/de/aerztlicher-bereitschaftsdienst.php",
+    priority: 2,
+    publicVisible: true,
+    verification: {
+      status: "VERIFIED_CURRENT",
+      lastVerified: "2026-10-07",
+      reviewDue: "2027-01-07",
+      verifiedBy: "Projektprüfung der offiziellen Quelle 116117.de (Phase 08)",
+      sourceIds: ["KBV_116117"],
+    },
+  },
   { id: "giftnotruf", type: "POISON_CONTROL", name: "Giftnotruf", whenToUse: "Bei Verdacht auf Vergiftung", priority: 3, publicVisible: true, verification: UNCONFIRMED },
 ];
 

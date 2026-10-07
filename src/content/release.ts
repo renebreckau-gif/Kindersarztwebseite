@@ -10,6 +10,13 @@ export const RELEASE = {
    * acute hours (F44–F46) stay unconfirmed and still resolve to UNKNOWN.
    */
   pulsPracticeSignOff: true,
+  /**
+   * ENTDECKEN · Mein Arztbesuch (V1, S04). The story describes a visit to THIS practice;
+   * its order and wording need practice + physician approval, and the final D1
+   * illustrations do not exist yet. Until both: public route shows "In Vorbereitung";
+   * the full story is only reachable in the review preview (?vorschau=freigabe).
+   */
+  meinArztbesuchApproved: false,
   /** Indexing stays off until launch blockers are resolved. Pages are built indexable. */
   indexable: false,
   /** Internal "Freigabe ausstehend" notes are visible in this pre-launch build. */

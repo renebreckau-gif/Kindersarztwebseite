@@ -1,0 +1,261 @@
+/* Concept placeholders (Phase 08). Night stage, warm light from the upper right (as in the
+   hero), established forms only. Positions follow the asset briefs' compositions so the
+   layout can be reviewed now and the final art dropped in later (same 4:3 frame). */
+
+.frame {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 18px;
+  background:
+    radial-gradient(60% 70% at 82% 12%, rgb(255 228 196 / 0.22), transparent 70%),
+    radial-gradient(70% 60% at 30% 100%, rgb(74 92 255 / 0.18), transparent 70%),
+    linear-gradient(180deg, #1a1e33 0%, #10132a 100%);
+  box-shadow: inset 0 0 0 1px rgb(233 230 242 / 0.12);
+}
+.floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 26%;
+  background: linear-gradient(180deg, transparent, rgb(255 236 214 / 0.07));
+  border-top: 1px solid rgb(233 230 242 / 0.1);
+}
+.a,
+.b,
+.c,
+.d {
+  position: absolute;
+  display: block;
+}
+.badge {
+  position: absolute;
+  left: 14px;
+  top: 12px;
+  display: grid;
+  gap: 2px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px dashed rgb(233 230 242 / 0.45);
+  background: rgb(15 18 32 / 0.6);
+  color: #e9e6f2;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.motif {
+  font-weight: 400;
+  color: #c9cbe0;
+}
+
+/* ---- 01 arrive: open arch (right third), light floor, small warm sphere at threshold ---- */
+.arrive .a {
+  right: 17%;
+  bottom: 26%;
+  width: 33%;
+  height: 66%;
+  border-radius: 999px 999px 0 0;
+  border: 2px solid rgb(255 236 214 / 0.55);
+  border-bottom: 0;
+  background: radial-gradient(70% 60% at 50% 40%, rgb(255 240 220 / 0.28), transparent 75%);
+}
+.arrive .b {
+  right: 10%;
+  bottom: 14%;
+  width: 38%;
+  height: 10%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 236 214 / 0.3), transparent);
+}
+.arrive .c {
+  left: 30%;
+  bottom: 26%;
+  width: 7%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff1c4, #f1cf68 45%, #b98f2e);
+}
+.arrive .d {
+  left: 22%;
+  bottom: 26%;
+  width: 4%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffc9b4, #f28b74 50%, #b9533b);
+}
+
+/* ---- 02 wait: calm bench line, pale ring "time" without a clock face ---- */
+.wait .a {
+  right: 16%;
+  top: 18%;
+  width: 26%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 10px solid rgb(240 236 250 / 0.35);
+}
+.wait .b {
+  left: 14%;
+  bottom: 30%;
+  width: 46%;
+  height: 4%;
+  border-radius: 999px;
+  background: rgb(233 230 242 / 0.22);
+}
+.wait .c {
+  left: 22%;
+  bottom: 34%;
+  width: 9%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #b9c2ff, #4a5cff 35%, #1a2499 75%);
+}
+.wait .d {
+  left: 38%;
+  bottom: 34%;
+  width: 6%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffc9b4, #f28b74 50%, #b9533b);
+}
+
+/* ---- 03 measure: brass rod at x 1000, marker at head height (y 430), platform ---- */
+.measure .a {
+  left: 40.8%;
+  bottom: 26%;
+  width: 1.8%;
+  height: 62%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f3dca4, #c9a25e 55%, #8a6631);
+}
+.measure .b {
+  left: 37.5%;
+  bottom: 26%;
+  width: 3.3%;
+  height: 62%;
+  background: repeating-linear-gradient(0deg, rgb(233 230 242 / 0.55) 0 1px, transparent 1px 14px);
+}
+.measure .c {
+  left: 39.2%;
+  bottom: 73%;
+  width: 5%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff1c4, #f1cf68 45%, #b98f2e);
+  box-shadow: 0 0 22px 4px rgb(241 207 104 / 0.3);
+}
+.measure .d {
+  left: 31%;
+  bottom: 23.5%;
+  width: 22%;
+  height: 2.5%;
+  border-radius: 6px;
+  background: rgb(238 233 223 / 0.5);
+}
+
+/* ---- 04 listen: cobalt chest piece (brief: x 1080 / y 1080, Ø 300), tubing up, sound arcs right ---- */
+.listen .a {
+  left: 38.8%;
+  top: 51.7%;
+  width: 12.5%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 5px solid #c9a25e;
+  background: radial-gradient(circle at 40% 35%, #b9c2ff, #4a5cff 55%, #1a2499);
+}
+.listen .b,
+.listen .c {
+  top: 60%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 2px solid rgb(233 230 242 / 0.3);
+  border-left-color: transparent;
+  border-bottom-color: transparent;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.listen .b {
+  left: 45%;
+  width: 22%;
+}
+.listen .c {
+  left: 45%;
+  width: 36%;
+  border-color: rgb(233 230 242 / 0.16);
+  border-left-color: transparent;
+  border-bottom-color: transparent;
+}
+.listen .d {
+  left: 45%;
+  top: 0;
+  width: 2px;
+  height: 52%;
+  background: linear-gradient(180deg, transparent, #3a3f4a 40%, #5b6170);
+}
+
+/* ---- 05 look: lamp tip right (x 1500 / y 700), light cone toward the head ring (left) ---- */
+.look .a {
+  left: 61%;
+  top: 36%;
+  width: 6%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff8e0, #f1cf68 55%, #b98f2e);
+  box-shadow: 0 0 24px 6px rgb(241 207 104 / 0.35);
+}
+.look .b {
+  left: 48%;
+  top: 30%;
+  width: 14%;
+  height: 18%;
+  clip-path: polygon(100% 45%, 0 0, 0 100%);
+  background: linear-gradient(270deg, rgb(255 236 180 / 0.45), rgb(255 236 180 / 0.05));
+}
+.look .c {
+  left: 27%;
+  top: 14%;
+  width: 22%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 9px solid rgb(240 236 250 / 0.45);
+}
+.look .d {
+  display: none;
+}
+
+/* ---- 06 done: arch on the left (mirror of 01), ENTDECKEN forms resting at C9–C11 ---- */
+.done .a {
+  left: 7%;
+  bottom: 26%;
+  width: 35%;
+  height: 66%;
+  border-radius: 999px 999px 0 0;
+  border: 2px solid rgb(255 236 214 / 0.45);
+  border-bottom: 0;
+  background: radial-gradient(70% 60% at 50% 40%, rgb(255 240 220 / 0.22), transparent 75%);
+}
+.done .b {
+  left: 72%;
+  bottom: 26%;
+  width: 11%;
+  aspect-ratio: 2 / 1;
+  border-radius: 999px 999px 0 0;
+  background: radial-gradient(120% 140% at 30% 100%, #ffc9b4, #f28b74 45%, #b9533b);
+}
+.done .c {
+  left: 62%;
+  bottom: 26%;
+  width: 9%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #b9c2ff, #4a5cff 35%, #1a2499 75%);
+}
+.done .d {
+  left: 84%;
+  bottom: 26%;
+  width: 5.5%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff1c4, #f1cf68 45%, #b98f2e);
+}

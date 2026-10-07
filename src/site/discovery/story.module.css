@@ -1,0 +1,260 @@
+/* Mein Arztbesuch story (Phase 08) — ENTDECKEN night world. Calm: one scene at a time,
+   large type, large buttons, no timers. Mobile order: visual → title → text → Weiter/Zurück
+   → Warum? → parent note. Desktop: visual left (7/12), text right (5/12). */
+
+.story {
+  color: #e9e6f2;
+}
+/* 200 % text: words may break rather than widen the page */
+.story :is(p, h2, summary) {
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+.scenes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-9);
+}
+/* enhanced: exactly one scene, no gap */
+.story[data-enhanced] .scenes {
+  gap: 0;
+}
+.sceneItem[hidden] {
+  display: none;
+}
+.scene {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  scroll-margin-top: var(--space-5);
+}
+.story[data-enhanced] .scene {
+  animation: sceneIn 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes sceneIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.visual {
+  min-width: 0;
+}
+.text {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin: 0;
+}
+.count {
+  font-size: var(--text-small);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #b9c2ff;
+}
+.dots {
+  display: inline-flex;
+  gap: 6px;
+}
+.dots span {
+  width: 18px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgb(233 230 242 / 0.22);
+}
+.dots span[data-on] {
+  background: #8c9bff;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.25rem, 1.7rem + 2.6vw, 4rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: #fff;
+  outline: none;
+}
+.title:focus-visible {
+  outline: 3px solid #8c9bff;
+  outline-offset: 6px;
+  border-radius: 4px;
+}
+.childCopy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+}
+.childCopy p {
+  margin: 0;
+  font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.625rem);
+  line-height: 1.4;
+  color: #f3efe7;
+  max-width: 28ch;
+}
+
+.why {
+  border-top: 1px solid rgb(233 230 242 / 0.16);
+  padding-top: var(--space-3);
+  max-width: 34rem;
+}
+.why summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid rgb(140 155 255 / 0.55);
+  color: #c4ccff;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.why summary::-webkit-details-marker {
+  display: none;
+}
+.why summary::before {
+  content: "?";
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgb(140 155 255 / 0.25);
+  font-size: 0.8125rem;
+}
+.why[open] summary::before {
+  content: "–";
+}
+.why p {
+  margin: var(--space-3) 0 0;
+  font-size: 1.125rem;
+  line-height: 1.5;
+  color: #e9e6f2;
+}
+.why summary:focus-visible,
+.back:focus-visible,
+.next:focus-visible {
+  outline: 3px solid #8c9bff;
+  outline-offset: 3px;
+}
+
+.parent {
+  margin: var(--space-2) 0 0;
+  max-width: 34rem;
+  font-size: var(--text-small);
+  line-height: 1.5;
+  color: #b8bad0;
+}
+.reviewTag {
+  justify-self: start;
+  margin: 0;
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px dashed rgb(255 214 120 / 0.7);
+  color: #ffe2a6;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.nav {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  /* keep the controls clear of the glass dock on phones */
+  scroll-margin-bottom: calc(var(--dock-height) + 28px);
+}
+.nav > :only-child {
+  grid-column: 1 / -1;
+}
+.back,
+.next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: 0 20px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.back {
+  border: 1.5px solid rgb(233 230 242 / 0.4);
+  background: transparent;
+  color: #e9e6f2;
+}
+.next {
+  border: 0;
+  color: #0f1220;
+  background: linear-gradient(180deg, #c4ccff, #8c9bff);
+}
+
+.exit {
+  margin: calc(-1 * var(--space-2)) 0 0;
+}
+.exit a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: #c4ccff;
+  font-size: var(--text-small);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.exit a:focus-visible {
+  outline: 3px solid #8c9bff;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (min-width: 64em) {
+  .scene {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: center;
+    gap: var(--space-9);
+  }
+  .nav {
+    max-width: 26rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story[data-enhanced] .scene {
+    animation: none;
+  }
+}
+@media (forced-colors: active) {
+  .next,
+  .back,
+  .why summary {
+    border: 1px solid ButtonText;
+    color: ButtonText;
+    background: ButtonFace;
+  }
+}

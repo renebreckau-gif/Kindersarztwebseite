@@ -1,6 +1,6 @@
 # Required Production Assets
 
-Phase: 07 · Date: 2026-10-07
+Phase: 07 · updated Phase 08 · Date: 2026-10-07
 Policy: [media-policy.md](../architecture/media-policy.md) (REAL / PLACEHOLDER / AI_CONCEPTUAL) · [photography-direction.md](photography-direction.md) · [placeholder-system.md](placeholder-system.md) · Hero lock: [hero-reference/README.md](hero-reference/README.md)
 
 Nothing in this list may be generated as a stand-in for real people, real rooms or the real practice. Until an asset exists, the page uses the designed placeholder (hatched arch/portrait frame with "Platzhalter" badge) or no image at all.
@@ -22,7 +22,14 @@ All REAL assets: warm natural daylight (light from one side, soft falloff, match
 | C4 | Treatment room | Reduce fear | Praxis & Räume (P-36, later); Mein Arztbesuch | REAL | Room overview, friendly, instruments not foregrounded | 3 : 2 | Daylight | Treatment room | Editorial | Full | P3 |
 | C5 | Accessibility details | Step-free access, lift, stroller parking — only if they exist | Neu bei uns; Kontakt | REAL | Documentary, factual | 4 : 3 | Daylight | Location | Inline | Inline | P2 (with F77–F88) |
 | C6 | Practice arch (chapter 04 placeholder replacement) | Human, warm editorial moment on the start page | Start chapter 04; Praxis intro | REAL | Architectural detail of the real practice in arch crop (window, light, plaster) — not people | 4 : 5, arch mask | Warm side light | Practice interior | 24rem arch | 15rem arch | P2 |
-| D1 | Mein Arztbesuch illustrations | Child-facing explanation | Entdecken / Mein Arztbesuch (Phase 08+) | AI_CONCEPTUAL or illustration, physician-approved | Object/scene language of the hero world, no realistic patients | Per chapter | Soft | Night/paper | — | — | P3 |
+| D1 | Mein Arztbesuch scenes 01–06 (**V1 SIGNATURE S04**) | Child-facing story of a visit; the signature experience of ENTDECKEN | /entdecken/mein-arztbesuch | ORIGINAL ART (commissioned illustration / 2.5D) or AI_CONCEPTUAL — never photoreal; content, practice and physician approved | Per scene brief: [mein-arztbesuch-assets/](mein-arztbesuch-assets/00-overview.md); world rules: [mein-arztbesuch-art-direction.md](mein-arztbesuch-art-direction.md) | 4 : 3 master 2400 × 1800, layered | Warm key light from upper right, cobalt fill lower left | Night ENTDECKEN stage | 4 : 3 in the 7/12 column | Same 4 : 3 master, mobile safe zone (centre 80 %) | **P1** — blocks release of S04 |
+
+## Phase 08 — release rule for D1
+
+- D1 moved from P3 to **P1**: Mein Arztbesuch is the V1 signature experience (S04).
+- **The public release of Mein Arztbesuch may not use placeholders.** This is enforced in code: `chapterPublishable()` (`src/content/discovery.ts`) returns false while any scene has `visual.class === "PLACEHOLDER"`, independent of `RELEASE.meinArztbesuchApproved`.
+- Order: art direction (done, Phase 08) → **approved visual reference** (one key frame, scene 03 recommended) → asset production 01–06 → code integration. No step may be skipped.
+- Real practice photography is a separate track: [real-practice-photo-brief.md](real-practice-photo-brief.md) (B1, B2, C1, then C2, C3). Real photos never appear inside the story scenes.
 
 ## Placeholders currently in use (Phase 07)
 
@@ -31,6 +38,7 @@ All REAL assets: warm natural daylight (light from one side, soft falloff, match
 | Start chapter 04, Praxis intro | Arch frame "Foto der Praxis – folgt mit echter Fotografie" | C6 (or C3) |
 | Ärztinnen (preview mode only) | Portrait frame "Porträt folgt" | B1, B2 |
 | Team (preview mode only) | Text "Fotos folgen." | B3 |
-| Entdecken | CSS orbs (graphic language, not imagery) | D1 (optional) |
+| Entdecken | CSS orbs (graphic language, not imagery) | — (stays) |
+| Mein Arztbesuch (preview only) | Labelled concept geometry per scene, "Platzhalter · Konzept" | D1 scenes 01–06 |
 
 No placeholder is used for: rooms presented as real, doctors, patients, maps.

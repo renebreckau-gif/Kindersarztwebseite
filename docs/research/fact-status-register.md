@@ -86,7 +86,7 @@ Critical review of the five Phase 00 documents before assigning statuses:
 | F54 | Upcoming closures 2026/2027 | TO_BE_CONFIRMED | HIGH |
 | F55 | 2020 Corona notice | OUTDATED_DO_NOT_PUBLISH | HIGH |
 | F56 | Emergency number 112 | VERIFIED_CURRENT | HIGH |
-| F57 | 116117 (not on site) | TO_BE_CONFIRMED | HIGH |
+| F57 | 116117 — nationwide on-call service (official) | VERIFIED_CURRENT (external, 2026-10-07) | HIGH |
 | F58 | Giftnotruf Erfurt | TO_BE_CONFIRMED | HIGH |
 | F59 | KV on-call service Hettstedt | TO_BE_CONFIRMED | HIGH |
 | F60 | KV on-call service Halle | TO_BE_CONFIRMED | HIGH |
@@ -624,14 +624,19 @@ Shared fields for F35–F39:
 - **NOTES:** Only emergency fact independent of the practice and of time.
 
 ### F57 — 116117
-- **CURRENT VALUE / CLAIM:** not mentioned on the site
-- **SOURCE:** —
-- **SOURCE DATE:** —
-- **STATUS:** TO_BE_CONFIRMED
+- **CURRENT VALUE / CLAIM:** 116117, ärztlicher Bereitschaftsdienst; without area code; nationwide; 24/7; for urgent help when practices are closed; not for life-threatening emergencies (→ 112)
+- **SOURCE:** KBV_116117 — https://www.116117.de/de/aerztlicher-bereitschaftsdienst.php (official, Patientenservice der Kassenärztlichen Vereinigungen)
+- **SOURCE DATE:** checked 2026-10-07 (verbatim quotes in `src/content/sources.ts`)
+- **STATUS:** VERIFIED_CURRENT — external official fact (Phase 08); review due 2027-01-07
 - **RISK IF INCORRECT:** HIGH
-- **REQUIRED CONFIRMATION:** Practice: include? Wording verified against 116117.de / KVSA
-- **FEATURES AFFECTED:** Notfall, PRAXIS PULS (outside hours)
-- **NOTES:** The number exists nationally; inclusion and wording are the open points.
+- **REQUIRED CONFIRMATION:** None for the national facts. Anything local (Bereitschaftspraxis address, practice substitution, regional hours) stays separate and unconfirmed (F59, F60).
+- **FEATURES AFFECTED:** Notfall (tier 2, below 112, above practice contact)
+- **NOTES:** Published without any practice-specific claim. Never shown as the answer to a life-threatening situation.
+
+### F57a — U10 (new G-BA examination) — governance note
+- **CURRENT VALUE / CLAIM:** G-BA decision 2026-08-20 (verified, g-ba.de/beschluesse/7982); page states "noch nicht in Kraft" (2026-10-07). BMG non-objection 2026-09-30 per brief — TO_BE_CONFIRMED. Bundesanzeiger: pending. Physician wording approval: none. Practice offer: unknown.
+- **STATUS:** model in `src/content/examinations.ts`; public output = none until IN_KRAFT verified + editorial approval
+- **RISK IF INCORRECT:** HIGH (parents could expect an examination that does not exist yet)
 
 ### F58 — Giftnotruf Erfurt
 - **CURRENT VALUE / CLAIM:** 0361 730730, "ganztägig erreichbar"

@@ -26,7 +26,7 @@ const read = (f: string) => readFileSync(join(ROOT, f), "utf8");
 test("no public file links or scrolls to #menue", () => {
   const offenders = PUBLIC.filter((f) => {
     const src = read(f).replace(/id="menue"/g, ""); // the footer anchor itself is allowed
-    return /#menue/.test(src) || /menuHref/.test(src) || /scrollIntoView|scrollTo\([^)]*menue/i.test(src);
+    return /#menue/.test(src) || /menuHref/.test(src) || /(scrollIntoView|scrollTo)[^\n]*menue/i.test(src) || /getElementById\(\s*["']menue/.test(src);
   });
   assert.deepEqual(offenders, []);
 });

@@ -4,6 +4,7 @@ import { PageIntro, Section, SourceList, CallAction, Prose } from "@/site/blocks
 import u from "@/site/pages.module.css";
 import { resolvePuls } from "@/content/puls";
 import { EXAMINATIONS } from "@/content/site";
+import { U10, publicDecisionStatement } from "@/content/examinations";
 
 export const metadata: Metadata = {
   title: "Vorsorge – U-Untersuchungen und J1",
@@ -45,6 +46,8 @@ export default async function Vorsorge({ searchParams }: { searchParams: Search 
             Bundesausschusses fest, für die J1 gilt eine eigene Richtlinie.
           </p>
           <p>Die Ergebnisse werden im Gelben Heft dokumentiert.</p>
+          {/* U10: only once verifiably in force AND physician-approved (examinations.ts) */}
+          {publicDecisionStatement(U10) ? <p>{publicDecisionStatement(U10)}</p> : null}
           <p>Welche Untersuchung bei Ihrem Kind als Nächstes ansteht, können wir hier nicht wissen – fragen Sie die Praxis.</p>
         </Prose>
         <CallAction />
@@ -52,6 +55,11 @@ export default async function Vorsorge({ searchParams }: { searchParams: Search 
           <p>
             Altersfenster und Erläuterungen pro Untersuchung erscheinen nach ärztlicher Freigabe (source-policy §4). Welche U/J die Praxis durchführt (F67), ist unbestätigt und wird nicht
             behauptet.
+          </p>
+          <p>
+            U10 (G-BA-Beschluss {U10.decisionDate.split("-").reverse().join(".")}): Beschluss geprüft, laut G-BA „noch nicht in Kraft“ (Stand {U10.lastVerified.split("-").reverse().join(".")}).
+            BMG-Nichtbeanstandung 30.09.2026 laut Auftrag – nicht selbst geprüft. Bundesanzeiger ausstehend. Keine ärztliche Text-Freigabe, Praxisangebot unbekannt. Öffentlich erscheint
+            nichts, bis Inkrafttreten und Freigabe bestätigt sind.
           </p>
         </InternalNote>
       </Section>

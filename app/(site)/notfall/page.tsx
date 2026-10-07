@@ -5,10 +5,11 @@ import { Section, CallAction } from "@/site/blocks";
 import u from "@/site/pages.module.css";
 import { resolvePuls } from "@/content/puls";
 import { publicEmergency } from "@/content/notices";
+import { SOURCES } from "@/content/sources";
 
 export const metadata: Metadata = {
   title: "Notfall",
-  description: "Notfall-Hinweise der Kinderarztpraxis in Hettstedt: Bei Lebensgefahr 112. Während der Sprechzeiten: Praxis anrufen.",
+  description: "Notfall-Hinweise der Kinderarztpraxis in Hettstedt: Bei Lebensgefahr 112. Wenn die Praxis geschlossen ist: ärztlicher Bereitschaftsdienst 116117. Während der Sprechzeiten: Praxis anrufen.",
 };
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
@@ -20,7 +21,9 @@ export default async function Notfall({ searchParams }: { searchParams: Search }
   const today = puls.result.evaluatedAt.localDate;
   const list = publicEmergency(today);
   const immediate = list.find((e) => e.type === "IMMEDIATE_EMERGENCY");
-  const others = list.filter((e) => e.type !== "IMMEDIATE_EMERGENCY");
+  // tier 2: nationwide on-call service (116117) — official, verified; no local claims
+  const onCall = list.find((e) => e.type === "MEDICAL_ON_CALL" && e.phone === "116117");
+  const others = list.filter((e) => e.type !== "IMMEDIATE_EMERGENCY" && e !== onCall);
   const stand = list.map((e) => e.verification.lastVerified).filter(Boolean).sort()[0];
 
   return (
@@ -38,6 +41,25 @@ export default async function Notfall({ searchParams }: { searchParams: Search }
           </a>
         </div>
       </section>
+
+      {onCall ? (
+        <section className={u.onCall} aria-labelledby="bereitschaft-t">
+          <h2 id="bereitschaft-t" className={u.onCallTitle}>
+            Wenn die Praxis geschlossen ist
+          </h2>
+          <p className={u.onCallWhen}>Wenn es nicht bis zum nächsten Praxistag warten kann: der ärztliche Bereitschaftsdienst.</p>
+          <a className={u.onCallCall} href={`tel:${onCall.phone}`} aria-label="116117 – ärztlichen Bereitschaftsdienst anrufen">
+            <span className={u.onCallNum}>116117</span>
+            <span>Anrufen</span>
+          </a>
+          <p className={u.onCallFacts}>{onCall.description}</p>
+          <p className={u.onCallNot}>Nicht bei Lebensgefahr – dann immer 112.</p>
+          <p className={u.fine}>
+            Quelle: <a href={onCall.sourceUrl ?? SOURCES.KBV_116117.url}>{SOURCES.KBV_116117.publisher}</a>
+            {onCall.verification.lastVerified ? `, geprüft am ${deDate(onCall.verification.lastVerified)}` : ""}.
+          </p>
+        </section>
+      ) : null}
 
       <Section id="praxis" title="Während der Sprechzeiten" tone="paper">
         <p className={u.lead}>Rufen Sie die Praxis an. Wann wir erreichbar sind, steht unter <Link href="/heute/sprechzeiten">Sprechzeiten</Link>.</p>
@@ -62,8 +84,9 @@ export default async function Notfall({ searchParams }: { searchParams: Search }
         {stand ? <p className={u.fine}>Stand der Notfallangaben: {deDate(stand)}</p> : null}
         <InternalNote>
           <p>
-            Ärztlicher Bereitschaftsdienst 116117 (F57), Giftnotruf (F58), KV-Bereitschaftsdienste (F59, F60), Kliniken (F61–F64) und Apothekennotdienst (F65) sind unbestätigt. Sie erscheinen
-            automatisch, sobald sie geprüft sind (LB-10). Die alten Angaben der WordPress-Seite werden nicht übernommen.
+            116117 (F57) ist als bundesweite, offizielle Angabe geprüft (116117.de, 07.10.2026) – ohne Aussage zu Praxisvertretung oder örtlichen Bereitschaftspraxen. Giftnotruf (F58),
+            KV-Bereitschaftspraxen vor Ort (F59, F60), Kliniken (F61–F64) und Apothekennotdienst (F65) sind unbestätigt. Sie erscheinen automatisch, sobald sie geprüft sind (LB-10). Die
+            alten Angaben der WordPress-Seite werden nicht übernommen.
           </p>
         </InternalNote>
       </div>
