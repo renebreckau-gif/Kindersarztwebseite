@@ -10,6 +10,7 @@ import { PRACTICE, publicAddress } from "@/content/practice";
 import { LEGAL, PRIMARY, SITEMAP, type PathKey } from "@/content/site";
 import { RELEASE } from "@/content/release";
 import type { PulsView } from "@/content/puls";
+import { MenuButton, MobileMenu } from "./mobile-menu";
 
 export function SkipLink() {
   return (
@@ -77,10 +78,10 @@ export function SiteHeader({ current, puls, home = false }: { current?: PathKey;
 export function SiteDock({ puls }: { puls: PulsView }) {
   return (
     <nav aria-label="Schnellzugriff" className={s.dock}>
-      <a href="#menue" className={s.dockCell}>
+      <MenuButton className={s.dockCell}>
         <Icon name="menu" />
         <span>Menü</span>
-      </a>
+      </MenuButton>
       <Link href="/heute" className={s.dockCell}>
         <span className={s.dockToday}>
           <Icon name="today" />
@@ -184,6 +185,11 @@ export function PreviewBanner({ puls }: { puls: PulsView }) {
   );
 }
 
+/** The shared Hauptmenü overlay, mounted once per page. */
+export function SiteMenu() {
+  return <MobileMenu phone={PRACTICE.phone.value} />;
+}
+
 /** Standard frame for every page except the start page (which keeps the approved hero chrome). */
 export function PageFrame({ current, puls, children, tone = "paper" }: { current?: PathKey; puls: PulsView; children: ReactNode; tone?: "paper" | "night" }) {
   return (
@@ -196,6 +202,7 @@ export function PageFrame({ current, puls, children, tone = "paper" }: { current
         {children}
       </main>
       <SiteFooter />
+      <SiteMenu />
     </div>
   );
 }

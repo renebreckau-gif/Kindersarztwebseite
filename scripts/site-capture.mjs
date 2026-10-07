@@ -157,6 +157,14 @@ async function capture(tabSession, url, vpName, file, opts = {}) {
     await s.send("Runtime.evaluate", { expression: `document.documentElement.style.fontSize='${opts.textScale * 100}%'` });
   }
   await sleep(opts.settle ?? Number(process.env.LAB_SETTLE ?? 3500));
+  if (opts.scrollY) {
+    await s.send("Runtime.evaluate", { expression: `window.scrollTo({ top: ${opts.scrollY}, behavior: "instant" })` });
+    await sleep(400);
+  }
+  if (opts.openMenu) {
+    await s.send("Runtime.evaluate", { expression: `document.querySelector('nav[aria-label="Schnellzugriff"] button').click()` });
+    await sleep(600);
+  }
 
   const audit = (await s.send("Runtime.evaluate", { expression: AUDIT, returnByValue: true })).result.value;
   const lab = (await s.send("Runtime.evaluate", { expression: "window.__lab", returnByValue: true })).result.value;
@@ -245,8 +253,12 @@ const name = (p, q = "") => (p === "/" ? "home" : p.slice(1).replace(/\//g, "_")
 const results = [];
 if (process.env.SITE_QUICK) {
   for (const item of process.env.SITE_QUICK.split(",")) {
-    const [path, vp, full] = item.split("@");
-    results.push(await capture(s, path, vp, `quick-${name(path.split("?")[0])}-${vp}${full ? "-full" : ""}.${full ? "jpg" : "png"}`, { fullPage: !!full }));
+    const [path, vp, flag = ""] = item.split("@");
+    const full = flag === "full";
+    const menu = flag === "menu";
+    const scrollY = flag.startsWith("scroll") ? Number(flag.slice(6)) : 0;
+    const suffix = full ? "-full" : menu ? "-menu" : scrollY ? `-y${scrollY}` : "";
+    results.push(await capture(s, path, vp, `quick-${name(path.split("?")[0])}-${vp}${suffix}.${full ? "jpg" : "png"}`, { fullPage: full, openMenu: menu, scrollY }));
   }
 } else {
   // home: full-page scroll + states

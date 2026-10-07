@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import s from "@/lab/final/signature.module.css";
 import { EntryHeader, PulsStatement } from "@/lab/final/entry-chrome";
 import { HeroStage } from "@/lab/final/hero-stage";
-import { SiteDock, SiteFooter, PreviewBanner } from "@/site/chrome";
+import { SiteDock, SiteFooter, SiteMenu, PreviewBanner } from "@/site/chrome";
+import { MenuButton } from "@/site/mobile-menu";
+import { Icon } from "@/design-system/icons";
 import { HomeChapters } from "@/site/home";
 import { resolvePuls } from "@/content/puls";
 import { PRIMARY } from "@/content/site";
@@ -25,7 +27,14 @@ export default async function Start({ searchParams }: { searchParams: Search }) 
       <a className={s.skip} href="#inhalt">
         Zum Inhalt springen
       </a>
-      <EntryHeader links={[{ id: "start", label: "Start", href: "/", current: true }, ...PRIMARY.map((p) => ({ id: p.id, label: p.label, href: p.href }))]} homeHref="/" />
+      <EntryHeader links={[{ id: "start", label: "Start", href: "/", current: true }, ...PRIMARY.map((p) => ({ id: p.id, label: p.label, href: p.href }))]}
+        homeHref="/"
+        menu={(className) => (
+          <MenuButton className={className}>
+            <Icon name="menu" size={20} />
+          </MenuButton>
+        )}
+      />
       <SiteDock puls={puls} />
       <main id="inhalt">
         <HeroStage initial={null} routes={ROUTES}>
@@ -39,6 +48,7 @@ export default async function Start({ searchParams }: { searchParams: Search }) 
         <HomeChapters puls={puls} />
       </main>
       <SiteFooter />
+      <SiteMenu />
     </div>
   );
 }

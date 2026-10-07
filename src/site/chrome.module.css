@@ -443,3 +443,55 @@
   min-width: var(--target-min);
   justify-content: center;
 }
+
+/* ================= dock: dark smoked glass (Phase 07.1.1) =================
+   One shared glass object. Body rgb(28 30 36 / 0.78) → rgb(20 22 28 / 0.84): the page
+   shows through as ~16–22 % tone, never as readable shapes; blur 22px + saturate 1.25 so warm/lilac/night
+   surfaces tint it subtly. Hairline edge + inner highlight give it physical definition;
+   a broad, low-contrast shadow separates it from content.
+   Contrast, worst case (pure white behind the glass): label #f3efe7 ≈ 8.7 : 1,
+   Notfall #ffa69c ≈ 5.3 : 1; over the night sections it only improves. Without backdrop-filter / with reduced transparency:
+   near-opaque ink (same as before). */
+.dock {
+  background: rgb(23 26 29 / 0.94);
+  border: 1px solid rgb(255 255 255 / 0.08);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    0 18px 40px -18px rgb(15 18 32 / 0.5),
+    0 2px 8px rgb(15 18 32 / 0.12);
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .dock {
+    background: linear-gradient(180deg, rgb(28 30 36 / 0.78), rgb(20 22 28 / 0.84));
+    -webkit-backdrop-filter: blur(22px) saturate(1.25);
+    backdrop-filter: blur(22px) saturate(1.25);
+  }
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .dock {
+    background: rgb(23 26 29);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+.dockCell {
+  color: #f3efe7;
+}
+.dockEmergency {
+  color: #ffa69c;
+}
+/* the Menü trigger is a <button>: same look as the link cells */
+button.dockCell {
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  width: 100%;
+}
+@media (forced-colors: active) {
+  .dock {
+    background: Canvas;
+    border: 1px solid CanvasText;
+  }
+}

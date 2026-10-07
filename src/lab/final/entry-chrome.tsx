@@ -1,6 +1,7 @@
 // Signature entry chrome (Phase 06): header, PRAXIS PULS statement, actions and
 // the mobile dock. Server components — everything here works without JavaScript.
 
+import type { ReactNode } from "react";
 import s from "./signature.module.css";
 import { Icon } from "@/design-system/icons";
 import { StatusMark } from "@/design-system/components/primitives";
@@ -8,7 +9,8 @@ import type { DemoPuls } from "@/design-system/demo-fixtures";
 import { PATHS, PHONE_DISPLAY, PHONE_HREF } from "../fixtures";
 
 /** `links` connects the hero nav to real routes on the public start page; the lab keeps its previews. */
-export function EntryHeader({ links, homeHref = "#inhalt", menuHref = "#menue" }: { links?: { id: string; label: string; href: string; current?: boolean }[]; homeHref?: string; menuHref?: string } = {}) {
+/** `menu`: the public site passes the shared Hauptmenü button; the lab keeps its in-page anchor. */
+export function EntryHeader({ links, homeHref = "#inhalt", menu }: { links?: { id: string; label: string; href: string; current?: boolean }[]; homeHref?: string; menu?: (className: string) => ReactNode } = {}) {
   const items: { id: string; label: string; href: string; current?: boolean }[] = links ?? PATHS.map((p) => ({ id: p.id, label: p.label, href: `?pfad=${p.id}#pfade` }));
   return (
     <header className={s.header}>
@@ -27,10 +29,14 @@ export function EntryHeader({ links, homeHref = "#inhalt", menuHref = "#menue" }
           ))}
         </ul>
       </nav>
-      <a className={s.menuButton} href={menuHref}>
-        <Icon name="menu" size={20} />
-        <span className="visually-hidden">Menü</span>
-      </a>
+      {menu ? (
+        menu(s.menuButton)
+      ) : (
+        <a className={s.menuButton} href="#menue">
+          <Icon name="menu" size={20} />
+          <span className="visually-hidden">Menü</span>
+        </a>
+      )}
     </header>
   );
 }
