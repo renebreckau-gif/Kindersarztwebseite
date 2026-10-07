@@ -4,7 +4,7 @@
 
 import type { Doctor, TeamMember } from "@/domain/content-types.ts";
 import { decidePerson } from "@/domain/publication.ts";
-import { UNCONFIRMED, WORKING } from "./practice";
+import { UNCONFIRMED, WORKING } from "./practice.ts";
 
 const PERSON_VERIFIED = { ...WORKING, sourceIds: ["S04"] };
 const CONSENT_PENDING = { value: false, verification: UNCONFIRMED };

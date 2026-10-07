@@ -1,8 +1,8 @@
 // Practice master data — every value carries its register status
 // (docs/research/fact-status-register.md). Components never hard-code these facts.
 
-import type { FactVerification } from "@/domain/verification.ts";
-import type { VerifiedValue } from "@/domain/content-types.ts";
+import type { FactVerification } from "../domain/verification.ts";
+import type { VerifiedValue } from "../domain/content-types.ts";
 
 /** Register state "VERIFIED_CURRENT (as working data)": research-verified, practice sign-off (LB-00) pending. */
 export const WORKING: FactVerification = {

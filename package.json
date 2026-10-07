@@ -10,7 +10,7 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "lab:capture": "node scripts/lab-capture.mjs",
-    "test": "node --test \"src/domain/__tests__/*.test.ts\""
+    "test": "node --test \"src/domain/__tests__/*.test.ts\" \"src/content/__tests__/*.test.ts\""
   },
   "dependencies": {
     "@react-three/fiber": "9.8.1",

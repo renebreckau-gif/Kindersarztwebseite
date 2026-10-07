@@ -3,9 +3,9 @@
 // holidays (F49) and acute consultation (F44–F46) are TO_BE_CONFIRMED — they are
 // NOT encoded as facts, so the engine resolves those days to UNKNOWN.
 
-import type { ConsultationType, ConsultationTypeCode, IsoWeekday, OpeningHoursRule } from "@/domain/index.ts";
-import type { PulsData } from "@/domain/practice-status.ts";
-import { WORKING, UNCONFIRMED } from "./practice";
+import type { ConsultationType, ConsultationTypeCode, IsoWeekday, OpeningHoursRule } from "../domain/index.ts";
+import type { PulsData } from "../domain/practice-status.ts";
+import { WORKING, UNCONFIRMED } from "./practice.ts";
 
 const r = (id: string, weekday: IsoWeekday, start: string, end: string, consultationType: ConsultationTypeCode = "GENERAL"): OpeningHoursRule => ({
   id,

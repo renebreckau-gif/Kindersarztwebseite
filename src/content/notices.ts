@@ -2,7 +2,7 @@
 
 import type { Announcement, EmergencyInformation } from "@/domain/content-types.ts";
 import { decideAnnouncement, selectPublicEmergency } from "@/domain/publication.ts";
-import { UNCONFIRMED } from "./practice";
+import { UNCONFIRMED } from "./practice.ts";
 
 const EMERGENCY_112 = {
   status: "VERIFIED_CURRENT" as const,

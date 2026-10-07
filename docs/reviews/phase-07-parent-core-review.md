@@ -238,3 +238,19 @@ No AI imagery was added in Phase 07. The register lists 14 assets. P1 items:
 - The **orientation copy** (age intros, needs list, Vorsorge/Impfungen texts) — editorial and physician sign-off.
 - The **asset register priorities** (P1: hero child decision, physician portraits, entrance).
 - The working practice name in hero/header (F01).
+
+---
+
+## Addendum — PRAXIS PULS live (LB-00 approved, 2026-10-07)
+
+- **Decision:** LB-00 approved for this project (human decision). `src/content/release.ts` → `pulsPracticeSignOff: true`.
+- **Unchanged:** the PRAXIS PULS design, the domain engine `getPracticeStatus()` (no hardcoded state) and every other gate:
+  - weekend (F40), holidays (F49) and acute hours (F44–F46) still resolve to UNKNOWN;
+  - people, services, street, emergency numbers and medical content remain gated.
+- **Public behaviour (no `?vorschau` needed):**
+  - during verified hours: "Praxis geöffnet · Heute bis …", plus "Jetzt bis 10:00 Uhr: Bitte nur gesunde Kinder" in the F41 window;
+  - outside hours: "Praxis geschlossen · Öffnet …";
+  - Saturday, Sunday and holidays: neutral UNKNOWN.
+- **Verified over HTTP:** `/` and `/heute` at Wednesday 07.10.2026 13:34 (Berlin) show "Praxis geschlossen · Öffnet morgen um 08:00 Uhr", with no Demo/Vorschau tag. Screenshots: `phase-07/screenshots/home-live-{1440x900,390x844}.png`.
+- **Regression tests:** `src/content/__tests__/puls-live.test.ts` (8 tests) — gate open; a normal visit (`resolvePuls({})`, as called by the start page without search params) returns LIVE open/closed states; weekend, holiday and acute stay safe; live equals preview at the same time. `npm test`: 83/83.
+- **Testability:** `src/content` imports are now relative with `.ts` extensions (same pattern as `src/domain`) so Node's test runner can load them; `resolvePuls` takes an optional `now` for tests (pages never pass it).

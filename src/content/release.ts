@@ -4,10 +4,12 @@
 export const RELEASE = {
   /**
    * LB-00 — the practice has signed off the opening hours for PRAXIS PULS.
-   * The register allows showing the hours (VERIFIED_CURRENT as working data) but
-   * PRAXIS PULS may only derive a live state after sign-off. Until then: UNKNOWN.
+   * Approved for this project on 2026-10-07 (human decision after Phase 07 review).
+   * PRAXIS PULS now derives the live state from the verified weekly hours via the
+   * domain engine. All other gates are unchanged: weekend (F40), holidays (F49),
+   * acute hours (F44–F46) stay unconfirmed and still resolve to UNKNOWN.
    */
-  pulsPracticeSignOff: false,
+  pulsPracticeSignOff: true,
   /** Indexing stays off until launch blockers are resolved. Pages are built indexable. */
   indexable: false,
   /** Internal "Freigabe ausstehend" notes are visible in this pre-launch build. */

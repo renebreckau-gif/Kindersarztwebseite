@@ -2,12 +2,12 @@
 // No independent status logic — this only chooses the input and maps the output
 // to the approved hero component's view model.
 
-import { getPracticeStatus, type PracticeStatusResult } from "@/domain/practice-status.ts";
-import { zonedToInstant } from "@/domain/time.ts";
-import type { DemoPuls } from "@/design-system/demo-fixtures";
-import { PULS_DATA, CONSULTATION_TYPES } from "./schedule";
-import { RELEASE } from "./release";
-import { UNCONFIRMED } from "./practice";
+import { getPracticeStatus, type PracticeStatusResult } from "../domain/practice-status.ts";
+import { zonedToInstant } from "../domain/time.ts";
+import type { DemoPuls } from "../design-system/demo-fixtures.ts";
+import { PULS_DATA, CONSULTATION_TYPES } from "./schedule.ts";
+import { RELEASE } from "./release.ts";
+import { UNCONFIRMED } from "./practice.ts";
 
 export type PulsMode = "LIVE" | "PREVIEW";
 
@@ -27,19 +27,20 @@ const ACTION_KIND: Record<string, DemoPuls["action"]["kind"]> = {
 };
 
 /** Parse a review time "YYYY-MM-DDTHH:MM" (Europe/Berlin). Invalid → now. */
-function reviewInstant(zeit: string | undefined): Date {
-  const m = zeit?.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})$/);
+function reviewInstant(zeit: string): Date {
+  const m = zeit.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})$/);
   return m ? zonedToInstant(m[1], m[2]) : new Date();
 }
 
-export function resolvePuls(params: { vorschau?: string | string[]; zeit?: string | string[] } = {}): PulsView {
+/** `now` is injectable for tests only; pages never pass it (live = real time). */
+export function resolvePuls(params: { vorschau?: string | string[]; zeit?: string | string[] } = {}, now: Date = new Date()): PulsView {
   const preview = params.vorschau === "freigabe";
-  const now = preview ? reviewInstant(typeof params.zeit === "string" ? params.zeit : undefined) : new Date();
+  const at = preview && typeof params.zeit === "string" ? reviewInstant(params.zeit) : now;
   // Until LB-00 the schedule may be displayed but not used for a live state: the engine
   // receives it as unconfirmed and resolves to UNKNOWN by its own rules.
   const usable = RELEASE.pulsPracticeSignOff || preview;
   const data = usable ? PULS_DATA : { ...PULS_DATA, schedule: { ...PULS_DATA.schedule!, verification: UNCONFIRMED } };
-  const result = getPracticeStatus(now, data);
+  const result = getPracticeStatus(at, data);
   const [secondary] = result.secondaryActions;
   // Current consultation type (verified data, e.g. F41 "bitte nur gesunde Kinder") — the engine
   // reports it; we only put it into words. No new status logic.

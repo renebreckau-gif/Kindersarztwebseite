@@ -52,7 +52,7 @@ export default async function Sprechzeiten({ searchParams }: { searchParams: Sea
           An Feiertagen, Brückentagen und bei kurzfristigen Änderungen erfragen Sie die Zeiten bitte telefonisch. Außerhalb der Sprechzeiten: <Link href="/notfall">Notfall-Hinweise</Link>.
         </p>
         <InternalNote>
-          <p>Wochenende (F40), Feiertage (F49), Telefonzeiten (F19) und kommende Schließungen (F54) sind unbestätigt. Die Zeiten oben sind bestätigte Arbeitsdaten; die Praxisfreigabe (LB-00) steht aus.</p>
+          <p>Wochenende (F40), Feiertage (F49), Telefonzeiten (F19) und kommende Schließungen (F54) sind unbestätigt. Die Zeiten oben sind bestätigt; PRAXIS PULS nutzt sie seit der Freigabe LB-00 (07.10.2026) live.</p>
         </InternalNote>
       </Section>
     </PageFrame>
