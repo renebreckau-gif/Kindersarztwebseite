@@ -1,0 +1,123 @@
+.figure {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+.frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-frame);
+  background-color: var(--color-surface-sunken);
+  /* fine diagonal hatch: reads as "drawing", never as "photo" */
+  background-image: repeating-linear-gradient(135deg, color-mix(in srgb, var(--color-text) 7%, transparent) 0 1px, transparent 1px 9px);
+}
+.frame::after {
+  /* measured corner marks, like a layout proof */
+  content: "";
+  position: absolute;
+  inset: var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--color-text) 22%, transparent);
+  -webkit-mask:
+    linear-gradient(#000 0 0) top left / 18px 18px no-repeat,
+    linear-gradient(#000 0 0) top right / 18px 18px no-repeat,
+    linear-gradient(#000 0 0) bottom left / 18px 18px no-repeat,
+    linear-gradient(#000 0 0) bottom right / 18px 18px no-repeat;
+  mask:
+    linear-gradient(#000 0 0) top left / 18px 18px no-repeat,
+    linear-gradient(#000 0 0) top right / 18px 18px no-repeat,
+    linear-gradient(#000 0 0) bottom left / 18px 18px no-repeat,
+    linear-gradient(#000 0 0) bottom right / 18px 18px no-repeat;
+}
+.glyph {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  color: color-mix(in srgb, var(--color-text) 38%, transparent);
+}
+/* abstract glyphs per kind — geometry only, no figures or faces */
+.k-portrait .glyph {
+  /* head ring + shoulder arc: a neutral silhouette outline, never a face */
+  width: 62%;
+  aspect-ratio: 1;
+  top: 52%;
+  background:
+    radial-gradient(circle at 50% 32%, transparent 19%, currentColor 19.4% 20.4%, transparent 20.8%),
+    radial-gradient(ellipse 46% 40% at 50% 100%, transparent 98%, currentColor 98.4% 100%, transparent 100.4%) bottom / 100% 60% no-repeat;
+}
+.k-team .glyph {
+  width: 58%;
+  height: 34%;
+  background:
+    radial-gradient(circle at 18% 40%, transparent 13%, currentColor 13.5% 15%, transparent 15.5%),
+    radial-gradient(circle at 50% 36%, transparent 13%, currentColor 13.5% 15%, transparent 15.5%),
+    radial-gradient(circle at 82% 40%, transparent 13%, currentColor 13.5% 15%, transparent 15.5%);
+  border-bottom: 1.5px solid currentColor;
+}
+.k-room .glyph {
+  width: 62%;
+  height: 46%;
+  border: 1.5px solid currentColor;
+  background: linear-gradient(currentColor, currentColor) 0 72% / 100% 1px no-repeat,
+    linear-gradient(currentColor, currentColor) 64% 0 / 1px 72% no-repeat;
+}
+.k-child .glyph {
+  width: 26%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-accent-discovery) 70%, transparent);
+  box-shadow: 46px 22px 0 -10px color-mix(in srgb, var(--color-accent-human) 75%, transparent), -40px 28px 0 -16px color-mix(in srgb, var(--color-accent-explore) 90%, transparent);
+}
+.k-video .glyph {
+  width: 0;
+  height: 0;
+  border-left: 34px solid currentColor;
+  border-top: 21px solid transparent;
+  border-bottom: 21px solid transparent;
+  margin-left: 6px;
+}
+.k-model3d .glyph {
+  width: 34%;
+  aspect-ratio: 1;
+  border: 1.5px solid currentColor;
+  transform: translate(-50%, -50%) rotate(45deg) skew(-8deg, -8deg);
+}
+.kind {
+  position: absolute;
+  left: var(--space-5);
+  bottom: var(--space-4);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.badge {
+  position: absolute;
+  right: var(--space-4);
+  top: var(--space-4);
+  padding: 3px 7px 2px;
+  border-radius: var(--radius-control);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+}
+.b-PLACEHOLDER {
+  border: 1px dashed var(--color-text-secondary);
+  color: var(--color-text-secondary);
+}
+.b-AI_CONCEPTUAL {
+  background: var(--color-surface-inverse);
+  color: var(--color-text-inverse);
+}
+.b-REAL {
+  background: var(--color-status-open-text);
+  color: #fff;
+}
+.c-AI_CONCEPTUAL {
+  background-color: color-mix(in srgb, var(--color-accent-explore) 45%, var(--color-surface-sunken));
+}
+.caption {
+  font-size: var(--text-caption);
+  color: var(--color-text-secondary);
+}

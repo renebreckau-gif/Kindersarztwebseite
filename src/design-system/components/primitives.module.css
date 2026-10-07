@@ -1,0 +1,304 @@
+/* ================= actions ================= */
+.action {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  min-height: var(--target);
+  padding: var(--space-3) var(--space-6) var(--space-3) var(--space-5);
+  border-radius: var(--radius-control);
+  font-family: var(--font-text);
+  font-size: var(--text-action);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.005em;
+  text-decoration: none;
+  text-align: left;
+  transition:
+    transform var(--duration-instant) var(--ease-standard),
+    box-shadow var(--duration-instant) var(--ease-standard),
+    background-color var(--duration-quick) var(--ease-standard),
+    color var(--duration-quick) var(--ease-standard);
+}
+.sm {
+  min-height: var(--target-min);
+  padding: var(--space-2) var(--space-5) var(--space-2) var(--space-4);
+  font-size: var(--text-small);
+}
+.actionMeta {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.78;
+}
+
+/* primary: an ink "key" resting on a cobalt edge — presses down */
+.primary {
+  background: var(--color-surface-inverse);
+  color: var(--color-text-inverse);
+  box-shadow: 0 3px 0 0 var(--color-brand);
+  transform: translateY(-1px);
+}
+.primary:hover,
+.primary.is-hover {
+  background: color-mix(in srgb, var(--color-surface-inverse) 88%, var(--color-brand));
+}
+.primary:active,
+.primary.is-press {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 0 var(--color-brand);
+}
+
+/* secondary: drawn outline, no fill */
+.secondary {
+  background: transparent;
+  color: var(--color-text);
+  box-shadow: inset 0 0 0 var(--border-strong) var(--color-rule-strong);
+}
+.secondary:hover,
+.secondary.is-hover {
+  background: color-mix(in srgb, var(--color-text) 6%, transparent);
+}
+.secondary:active,
+.secondary.is-press {
+  transform: translateY(1px);
+}
+
+/* quiet / utility: text with a measured underline */
+.quiet {
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+  color: var(--color-text);
+  font-weight: 500;
+}
+.quiet .actionLabel {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.28em;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  transition: text-decoration-color var(--duration-quick) var(--ease-standard);
+}
+.quiet:hover .actionLabel,
+.quiet.is-hover .actionLabel {
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 2px;
+}
+
+/* emergency: its own red language, never used for status */
+.emergency {
+  background: var(--color-emergency-text);
+  color: #fff;
+  box-shadow: 0 3px 0 0 var(--palette-ink);
+  transform: translateY(-1px);
+}
+.emergency:active,
+.emergency.is-press {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.action:focus-visible,
+.action.is-focus {
+  outline: var(--border-focus) solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+/* ================= links ================= */
+.textLink {
+  color: var(--color-brand-text);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  border-radius: 2px;
+}
+.textLink:hover {
+  text-decoration-thickness: 2px;
+}
+
+.demoTag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px 1px;
+  border: 1px dashed currentColor;
+  border-radius: var(--radius-control);
+  font-family: var(--font-text);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  font-style: normal;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+/* ================= status marks ================= */
+.mark {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 11px;
+  height: 11px;
+  border-radius: var(--radius-round);
+}
+/* OPEN: filled functional green with a halo */
+.markOpen {
+  background: var(--color-status-open);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-status-open) 24%, transparent);
+}
+/* CLOSED: an empty ring — calm, not alarming */
+.markNeutral {
+  border: 1.5px solid var(--color-status-neutral);
+}
+/* SPECIAL HOURS: half-filled — "part of the day" */
+.markAttention {
+  border: 1.5px solid var(--color-status-neutral);
+  background: linear-gradient(90deg, var(--color-status-neutral) 50%, transparent 50%);
+}
+/* CLOSURE: ring with a bar — "paused" */
+.markClosure {
+  border: 1.5px solid var(--color-status-neutral);
+}
+.markClosure::after {
+  content: "";
+  position: absolute;
+  left: 1.5px;
+  right: 1.5px;
+  top: 50%;
+  height: 1.5px;
+  margin-top: -0.75px;
+  background: var(--color-status-neutral);
+}
+.markInverse.markNeutral,
+.markInverse.markAttention,
+.markInverse.markClosure {
+  --color-status-neutral: var(--palette-paper);
+}
+
+/* ================= PULS chip (utility line) ================= */
+.chip {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--target-min);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-control);
+  font-family: var(--font-text);
+  font-size: var(--text-small);
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--color-text);
+}
+.chip:hover {
+  background: color-mix(in srgb, var(--color-text) 6%, transparent);
+}
+.chipTime {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+}
+.chipUnknown {
+  font-weight: 500;
+  color: var(--color-brand-text);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+/* ================= PULS inline ================= */
+.inline {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  padding-top: var(--space-4);
+  border-top: var(--border-strong) solid var(--color-rule-strong);
+}
+.inlineMeta,
+.heroMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+}
+.inlineHeadline {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--text-h2);
+  line-height: var(--leading-heading);
+  letter-spacing: var(--tracking-heading);
+  margin-top: var(--space-2);
+}
+.inlineDetail {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-body-l);
+  line-height: var(--leading-tight);
+}
+.inlineReason,
+.heroReason {
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+}
+.inlineActions,
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-4);
+  align-items: center;
+  margin-top: var(--space-4);
+}
+/* UNKNOWN: no status colour, no mark; headline styled like a calm question */
+.ind-NONE .inlineHeadline,
+.ind-NONE .heroHeadline {
+  color: var(--color-text);
+}
+
+/* ================= PULS hero (first viewport) ================= */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+.heroHeadline {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--text-display-l);
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display);
+  margin-top: var(--space-3);
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+.heroDetail {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1.375rem, 1.1rem + 1.4vw, 2.5rem);
+  line-height: 1.15;
+}
+.heroActions {
+  margin-top: var(--space-6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .action {
+    transition: background-color var(--duration-quick) linear, color var(--duration-quick) linear;
+  }
+  .primary,
+  .emergency {
+    transform: none;
+  }
+  .primary:active,
+  .emergency:active {
+    transform: none;
+    box-shadow: 0 1px 0 0 var(--color-brand);
+  }
+}
+
+@media (forced-colors: active) {
+  .action {
+    border: 2px solid ButtonText;
+  }
+  .mark {
+    forced-color-adjust: none;
+  }
+}

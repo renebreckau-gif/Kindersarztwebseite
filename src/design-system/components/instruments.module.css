@@ -1,0 +1,157 @@
+/* ================= age scale ================= */
+.ages {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.agesLegend {
+  padding: 0;
+  margin-bottom: var(--space-4);
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+}
+.agesTrack {
+  display: grid;
+  border-bottom: var(--border-strong) solid var(--color-rule-strong);
+}
+.age {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 84px;
+  min-width: 44px;
+  padding: 0 var(--space-2) var(--space-3);
+  cursor: pointer;
+  border-left: var(--border-hairline) solid var(--color-rule);
+  transition: background-color var(--duration-state) var(--ease-standard);
+}
+.age:first-child {
+  border-left-color: var(--color-rule-strong);
+}
+.age input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+/* ticks rise with age — growth as measurement */
+.ageTicks {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--rise);
+  background: repeating-linear-gradient(90deg, var(--color-rule-strong) 0 1px, transparent 1px 10px);
+  opacity: 0.35;
+  transition: height var(--duration-state) var(--ease-physical), opacity var(--duration-state) var(--ease-standard);
+}
+.ageLabel {
+  position: relative;
+  font-family: var(--font-text);
+  font-size: var(--text-body);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  padding-bottom: calc(var(--rise) + var(--space-1));
+}
+.ageUnit {
+  display: block;
+  font-size: var(--text-caption);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+.age:hover .ageTicks {
+  opacity: 0.6;
+}
+.age:has(input:checked) {
+  background: var(--color-surface-inverse);
+  color: var(--color-text-inverse);
+}
+.age:has(input:checked) .ageUnit {
+  color: color-mix(in srgb, var(--color-text-inverse) 78%, transparent);
+}
+.age:has(input:checked) .ageTicks {
+  --color-rule-strong: var(--color-brand);
+  height: calc(var(--rise) + 8px);
+  opacity: 1;
+}
+.age:has(input:focus-visible) {
+  outline: var(--border-focus) solid var(--color-focus);
+  outline-offset: 2px;
+  z-index: 1;
+}
+.agesDark .age:has(input:checked) {
+  background: var(--color-brand-text);
+  color: var(--palette-night);
+}
+.agesDark .age:has(input:checked) .ageUnit {
+  color: var(--palette-night);
+}
+
+/* ================= day ruler ================= */
+.ruler {
+  margin: 0;
+  max-width: 44rem;
+}
+.rulerTrack {
+  position: relative;
+  height: 46px;
+  border-bottom: var(--border-hairline) solid var(--color-rule-strong);
+}
+.tick,
+.tickMajor {
+  position: absolute;
+  bottom: 0;
+  width: 1px;
+  height: 7px;
+  background: var(--color-rule-strong);
+}
+.tickMajor {
+  height: 13px;
+}
+.tickMajor em {
+  position: absolute;
+  bottom: 18px;
+  left: 0;
+  transform: translateX(-50%);
+  font-style: normal;
+  font-size: var(--text-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+}
+.span {
+  position: absolute;
+  bottom: -2px;
+  height: 5px;
+  background: var(--color-rule-strong);
+}
+.now {
+  position: absolute;
+  bottom: -7px;
+  width: 2px;
+  height: 22px;
+  background: var(--color-accent-human);
+}
+.now em {
+  position: absolute;
+  top: 26px;
+  left: 0;
+  transform: translateX(-50%);
+  font-style: normal;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.rulerCaption {
+  margin-top: var(--space-7);
+  font-size: var(--text-caption);
+  color: var(--color-text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ageTicks {
+    transition: opacity var(--duration-quick) linear;
+  }
+}

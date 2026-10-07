@@ -5,12 +5,17 @@
 import { AGE_STOP_Y, layout, ROD, VIEW, type Pose } from "./mobile-geometry";
 import type { PathId } from "./fixtures";
 
-export type Palette = "color" | "ink";
+export type Palette = "color" | "ink" | "material";
 
 export const ELEMENT_COLORS: Record<Palette, Record<PathId, string>> = {
   color: { heute: "#F28B74", "mein-kind": "#F1CF68", praxis: "#4A5CFF", entdecken: "#D8CFF1" },
   ink: { heute: "#171A1D", "mein-kind": "#171A1D", praxis: "#171A1D", entdecken: "#171A1D" },
+  // Phase 05 material direction: coral soft-touch, yellow, cobalt enamel, warm ceramic
+  material: { heute: "#F28B74", "mein-kind": "#F1CF68", praxis: "#4A5CFF", entdecken: "#EEE9DF" },
 };
+
+/** Structure colour per palette (dark anodized metal in the material direction). */
+export const STRUCTURE: Record<Palette, string> = { color: "#171A1D", ink: "#171A1D", material: "#202327" };
 export const LINE = "#171A1D";
 export const HIGHLIGHT = "#4A5CFF";
 
@@ -26,6 +31,7 @@ export function MobilePoster({
   className?: string;
 }) {
   const L = layout(pose);
+  const line = STRUCTURE[palette];
   const lineOpacity = 1 - pose.inst;
   const colors = ELEMENT_COLORS[palette];
   const fill = (id: PathId) => (highlight === id && palette === "ink" ? HIGHLIGHT : colors[id]);
@@ -47,7 +53,7 @@ export function MobilePoster({
       {/* y-up world → SVG y-down */}
       <g transform="scale(1,-1)" strokeLinecap="round">
         {/* measuring rod (instrument mode) */}
-        <g opacity={pose.inst} stroke={LINE}>
+        <g opacity={pose.inst} stroke={line}>
           <line x1={ROD.x} y1={ROD.y0} x2={ROD.x} y2={ROD.y1} strokeWidth={0.035} />
           {Array.from({ length: 18 }, (_, i) => {
             const y = ROD.y0 + 0.2 + (i * (ROD.y1 - ROD.y0 - 0.4)) / 17;
@@ -55,12 +61,12 @@ export function MobilePoster({
             return <line key={i} x1={ROD.x - (major ? 0.16 : 0.08)} y1={y} x2={ROD.x} y2={y} strokeWidth={0.012} />;
           })}
           {AGE_STOP_Y.map((y) => (
-            <circle key={y} cx={ROD.x} cy={y} r={0.035} fill={LINE} stroke="none" />
+            <circle key={y} cx={ROD.x} cy={y} r={0.035} fill={line} stroke="none" />
           ))}
         </g>
 
         {/* hanging structure */}
-        <g opacity={lineOpacity} stroke={LINE} fill="none">
+        <g opacity={lineOpacity} stroke={line} fill="none">
           {L.wires.map(([a, b], i) => (
             <line key={`w${i}`} x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} strokeWidth={0.012} />
           ))}
@@ -76,7 +82,7 @@ export function MobilePoster({
             return <line key={`t${i}`} x1={x} y1={y} x2={x} y2={y - (i % 5 === 0 ? 0.11 : 0.06)} strokeWidth={0.01} />;
           })}
           {L.pivots.map((p, i) => (
-            <circle key={`p${i}`} cx={p[0]} cy={p[1]} r={0.04} fill={LINE} stroke="none" />
+            <circle key={`p${i}`} cx={p[0]} cy={p[1]} r={0.04} fill={line} stroke="none" />
           ))}
           <circle cx={L.hook[0]} cy={L.hook[1]} r={0.06} strokeWidth={0.02} />
         </g>
@@ -91,7 +97,7 @@ export function MobilePoster({
               return (
                 <g key={e.id}>
                   <circle cx={x} cy={y} r={r} fill={c} />
-                  <circle cx={x} cy={y} r={r * 0.62} fill="none" stroke={LINE} strokeOpacity={0.35} strokeWidth={0.01} />
+                  <circle cx={x} cy={y} r={r * 0.62} fill="none" stroke={line} strokeOpacity={0.35} strokeWidth={0.01} />
                 </g>
               );
             case "sphere":

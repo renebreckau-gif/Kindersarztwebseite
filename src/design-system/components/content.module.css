@@ -1,0 +1,246 @@
+/* ================= Messlinie ================= */
+.measure {
+  position: relative;
+  height: 14px;
+  color: var(--color-rule-strong);
+  background:
+    linear-gradient(currentColor, currentColor) left bottom / 100% 1px no-repeat,
+    repeating-linear-gradient(90deg, currentColor 0 1px, transparent 1px 48px) left bottom / 100% 11px no-repeat,
+    repeating-linear-gradient(90deg, color-mix(in srgb, currentColor 40%, transparent) 0 1px, transparent 1px 8px) left bottom / 100% 5px no-repeat;
+}
+.measureMark {
+  position: absolute;
+  bottom: 16px;
+  transform: translateX(-50%);
+  font-size: var(--text-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+.measureMark:first-child {
+  transform: none;
+}
+.measureMark:last-child {
+  transform: translateX(-100%);
+}
+
+/* ================= section intro ================= */
+.intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  scroll-margin-top: calc(var(--header-height) + var(--space-5));
+}
+.introGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3) var(--space-6);
+}
+@media (min-width: 900px) {
+  .introGrid {
+    grid-template-columns: minmax(4rem, 1fr) minmax(0, 7fr) minmax(0, 4fr);
+    align-items: baseline;
+  }
+}
+.introIndex {
+  font-size: var(--text-small);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+}
+.introTitle {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--text-h1);
+  line-height: var(--leading-heading);
+  letter-spacing: var(--tracking-heading);
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+.introLede {
+  max-width: var(--width-reading);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+}
+
+/* ================= info block (unboxed) ================= */
+.info {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: var(--border-hairline) solid var(--color-rule);
+}
+.infoLabel {
+  font-family: var(--font-text);
+  font-size: var(--text-label);
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  color: var(--color-text-secondary);
+}
+.infoBody {
+  max-width: var(--width-reading);
+}
+
+/* ================= notices ================= */
+.notice {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-5) var(--space-5) var(--space-6);
+  background: var(--color-surface-raised);
+  border-left: 3px solid var(--color-rule-strong);
+  max-width: var(--width-reading);
+}
+.noticeWarning {
+  background: var(--color-surface-sunken);
+}
+.noticeKind {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-label);
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  color: var(--color-text-secondary);
+}
+.noticeTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  line-height: var(--leading-tight);
+}
+.noticeBody {
+  font-size: var(--text-body);
+}
+.noticeValidity {
+  font-size: var(--text-caption);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ================= emergency ================= */
+.emergency {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-6);
+  border: var(--border-strong) solid var(--color-emergency-text);
+  border-top-width: 6px;
+  background: var(--color-canvas);
+  max-width: 34rem;
+  scroll-margin-top: calc(var(--header-height) + var(--space-5));
+}
+.emergencyKind {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-emergency-text);
+  font-weight: 600;
+  font-size: var(--text-small);
+}
+.emergencyTitle {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--text-h2);
+  line-height: var(--leading-heading);
+}
+.emergencyAction {
+  margin-top: var(--space-2);
+}
+.emergencyMore {
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+}
+
+/* ================= source note ================= */
+.source {
+  display: flex;
+  gap: var(--space-3);
+  font-size: var(--text-caption);
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.sourceTick {
+  flex: none;
+  width: 9px;
+  margin-top: 0.3em;
+  height: 1.9em;
+  border-left: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+}
+
+/* ================= help topics (list, not cards) ================= */
+.topics {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.topics li {
+  border-top: var(--border-hairline) solid var(--color-rule);
+}
+.topics li:last-child {
+  border-bottom: var(--border-hairline) solid var(--color-rule);
+}
+.topics a {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-1);
+  padding: var(--space-4) 0;
+  min-height: var(--target);
+  text-decoration: none;
+}
+@media (min-width: 600px) {
+  .topics a {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: baseline;
+    gap: var(--space-6);
+  }
+}
+.topicLabel {
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  line-height: var(--leading-tight);
+  transition: transform var(--duration-quick) var(--ease-out), color var(--duration-quick) var(--ease-standard);
+}
+.topics a:hover .topicLabel {
+  color: var(--color-brand-text);
+  transform: translateX(4px);
+}
+.topicText {
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+}
+
+/* ================= person card ================= */
+.person {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  align-content: start;
+}
+.personName {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--text-h3);
+  line-height: var(--leading-tight);
+  margin-top: var(--space-3);
+}
+.personRole {
+  font-size: var(--text-small);
+  font-weight: 600;
+}
+.personTitles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topics a:hover .topicLabel {
+    transform: none;
+  }
+}

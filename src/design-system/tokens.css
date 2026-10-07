@@ -1,0 +1,173 @@
+/* =====================================================================
+   Warm Editorial + Cobalt — design tokens (Phase 05)
+   Semantic tokens first; raw palette values live only in this file.
+   Spec: docs/design/design-system.md
+   ===================================================================== */
+
+:root {
+  /* ---------- palette (raw — do not use directly in components) ---------- */
+  --palette-paper: #f3efe7;
+  --palette-paper-raised: #f8f5ef;
+  --palette-paper-sunken: #e9e3d7;
+  --palette-ink: #171a1d;
+  --palette-ink-soft: #4a4f55;
+  --palette-cobalt: #4a5cff;
+  --palette-cobalt-text: #3446e8; /* 5.75:1 on paper — small text */
+  --palette-coral: #f28b74;
+  --palette-yellow: #f1cf68;
+  --palette-lilac: #d8cff1;
+  --palette-green: #3e9b72; /* functional status only */
+  --palette-green-text: #2c7553; /* 4.85:1 on paper */
+  --palette-red: #c63831; /* emergency only */
+  --palette-red-text: #a82b25; /* 6.03:1 on paper */
+  --palette-night: #0f1220;
+  --palette-night-raised: #181c30;
+  --palette-night-text: #e9e6f2;
+  --palette-night-soft: #a9adc4;
+  --palette-cobalt-luminous: #8c9bff; /* 7.31:1 on night */
+
+  /* ---------- semantic colour ---------- */
+  --color-canvas: var(--palette-paper);
+  --color-surface-raised: var(--palette-paper-raised);
+  --color-surface-sunken: var(--palette-paper-sunken);
+  --color-surface-inverse: var(--palette-ink);
+  --color-text: var(--palette-ink);
+  --color-text-secondary: var(--palette-ink-soft);
+  --color-text-inverse: var(--palette-paper);
+  --color-rule: color-mix(in srgb, var(--palette-ink) 14%, transparent);
+  --color-rule-strong: var(--palette-ink);
+
+  --color-brand: var(--palette-cobalt); /* graphics, large type, selection fills */
+  --color-brand-text: var(--palette-cobalt-text); /* links and small brand text */
+  --color-selection: var(--palette-cobalt);
+  --color-focus: var(--palette-cobalt);
+
+  --color-status-open: var(--palette-green);
+  --color-status-open-text: var(--palette-green-text);
+  --color-status-neutral: var(--palette-ink);
+
+  --color-emergency: var(--palette-red);
+  --color-emergency-text: var(--palette-red-text);
+
+  --color-accent-human: var(--palette-coral); /* warmth — never text */
+  --color-accent-discovery: var(--palette-yellow); /* growth / child — never text */
+  --color-accent-explore: var(--palette-lilac); /* education — never text */
+
+  /* ---------- typography ---------- */
+  --font-display: var(--font-serif), "Iowan Old Style", Georgia, serif;
+  --font-text: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* fluid scale: mobile ratio ≈1.2, desktop ≈1.333 */
+  --text-display-xl: clamp(2.75rem, 1.6rem + 5.6vw, 8rem);
+  --text-display-l: clamp(2.375rem, 1.55rem + 3.6vw, 5.25rem);
+  --text-h1: clamp(2rem, 1.55rem + 2vw, 3.5rem);
+  --text-h2: clamp(1.625rem, 1.38rem + 1.1vw, 2.5rem);
+  --text-h3: clamp(1.1875rem, 1.12rem + 0.3vw, 1.375rem);
+  --text-body-l: clamp(1.1875rem, 1.1rem + 0.4vw, 1.4375rem);
+  --text-body: 1.0625rem;
+  --text-small: 0.9375rem;
+  --text-label: 0.8125rem;
+  --text-caption: 0.8125rem;
+  --text-status: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+  --text-action: 1.0625rem;
+
+  --leading-display: 0.96;
+  --leading-heading: 1.1;
+  --leading-body: 1.55;
+  --leading-serif-body: 1.6;
+  --leading-tight: 1.25;
+  --tracking-display: -0.03em;
+  --tracking-heading: -0.015em;
+  --tracking-label: 0.015em;
+
+  /* ---------- spacing (4-based) ---------- */
+  --space-1: 0.125rem; /* 2 */
+  --space-2: 0.25rem; /* 4 */
+  --space-3: 0.5rem; /* 8 */
+  --space-4: 0.75rem; /* 12 */
+  --space-5: 1rem; /* 16 */
+  --space-6: 1.5rem; /* 24 */
+  --space-7: 2rem; /* 32 */
+  --space-8: 3rem; /* 48 */
+  --space-9: 4rem; /* 64 */
+  --space-10: 6rem; /* 96 */
+  --space-11: 8rem; /* 128 */
+  --space-section: clamp(4rem, 2.5rem + 6vw, 9rem);
+  --space-gutter: clamp(1rem, 0.4rem + 3vw, 3.5rem);
+
+  /* ---------- layout ---------- */
+  --width-reading: 38rem; /* ~66 characters sans */
+  --width-reading-serif: 40rem;
+  --width-content: 76rem;
+  --width-wide: 90rem;
+  --grid-columns: 4;
+  --grid-gap: var(--space-5);
+  --target-min: 44px;
+  --target: 48px;
+  --dock-height: 64px;
+  --header-height: 56px;
+
+  /* ---------- shape ---------- */
+  --radius-none: 0;
+  --radius-control: 4px; /* buttons, inputs, tags */
+  --radius-frame: 10px; /* media frames, sheets */
+  --radius-round: 999px; /* status dots only */
+  --border-hairline: 1px;
+  --border-strong: 1.5px;
+  --border-focus: 3px;
+  /* no soft shadows: one physical "pressable" edge for primary actions */
+  --edge-press: 0 2px 0 0 var(--palette-ink);
+
+  /* ---------- motion ---------- */
+  --duration-instant: 90ms; /* press feedback */
+  --duration-quick: 160ms; /* hover, focus */
+  --duration-state: 260ms; /* status / selection change */
+  --duration-nav: 360ms; /* menu, navigation */
+  --duration-reveal: 520ms; /* content reveal (once) */
+  --duration-transform: 720ms; /* larger transformation */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  /* gentle physical settle (≈4% overshoot) — object & discovery motion only */
+  --ease-physical: linear(0, 0.18 7%, 0.6 18%, 0.92 32%, 1.035 46%, 1.012 62%, 0.998 80%, 1);
+
+  /* ---------- 3D material palette (Phase 06 object) ---------- */
+  --material-ceramic: #eee9df;
+  --material-anodized: #202327;
+  --material-enamel-cobalt: #4a5cff;
+  --material-coral: #f28b74;
+  --material-yellow: #f1cf68;
+}
+
+@media (min-width: 600px) {
+  :root {
+    --grid-columns: 6;
+    --grid-gap: var(--space-6);
+  }
+}
+@media (min-width: 900px) {
+  :root {
+    --grid-columns: 12;
+  }
+}
+
+/* ENTDECKEN mode: applied to a subtree, never the whole site */
+.mode-entdecken {
+  --color-canvas: var(--palette-night);
+  --color-surface-raised: var(--palette-night-raised);
+  --color-surface-sunken: #0a0d18;
+  /* inverse flips at night: primary keys become paper with a luminous edge */
+  --color-surface-inverse: var(--palette-night-text);
+  --color-text-inverse: var(--palette-night);
+  --color-brand: var(--palette-cobalt-luminous);
+  --color-text: var(--palette-night-text);
+  --color-text-secondary: var(--palette-night-soft);
+  --color-rule: color-mix(in srgb, var(--palette-night-text) 16%, transparent);
+  --color-rule-strong: var(--palette-night-text);
+  --color-brand-text: var(--palette-cobalt-luminous);
+  --color-focus: var(--palette-cobalt-luminous);
+  --edge-press: 0 2px 0 0 var(--palette-cobalt-luminous);
+  color-scheme: dark;
+  background: var(--color-canvas);
+  color: var(--color-text);
+}

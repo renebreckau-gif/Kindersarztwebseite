@@ -8,7 +8,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { layout, targetPose, VIEW, ROD, AGE_STOP_Y, type Pose, type V2 } from "./mobile-geometry";
-import { ELEMENT_COLORS, HIGHLIGHT, LINE, type Palette } from "./mobile-poster";
+import { ELEMENT_COLORS, HIGHLIGHT, STRUCTURE, type Palette } from "./mobile-poster";
 import type { PathId } from "./fixtures";
 
 interface Props {
@@ -64,13 +64,14 @@ function Mobile({ selected, highlight, palette, onSelect }: Omit<Props, "onReady
   const elements = useRef<Record<string, THREE.Mesh | null>>({});
   const beamTicks = useRef<(THREE.Mesh | null)[]>([]);
   const pivots = useRef<(THREE.Mesh | null)[]>([]);
+  // Anodized structure: dark, satin, slightly metallic (docs/design/3d-language.md)
   const structureMat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: LINE, roughness: 0.35, metalness: 0.55, transparent: true }),
-    [],
+    () => new THREE.MeshStandardMaterial({ color: STRUCTURE[palette], roughness: palette === "material" ? 0.42 : 0.35, metalness: palette === "material" ? 0.7 : 0.55, transparent: true }),
+    [palette],
   );
   const rodMat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: LINE, roughness: 0.35, metalness: 0.55, transparent: true, opacity: 0 }),
-    [],
+    () => new THREE.MeshStandardMaterial({ color: STRUCTURE[palette], roughness: 0.35, metalness: 0.55, transparent: true, opacity: 0 }),
+    [palette],
   );
   const lineGeo = useMemo(() => new THREE.CylinderGeometry(1, 1, 1, 10), []);
   const L0 = layout(pose.current);
@@ -89,8 +90,18 @@ function Mobile({ selected, highlight, palette, onSelect }: Omit<Props, "onReady
 
   const mats = useMemo(() => {
     const m: Record<string, THREE.MeshStandardMaterial> = {};
+    // Material direction: coral soft-touch polymer, yellow satin, cobalt enamel (clearcoat), warm ceramic.
+    const MATERIAL: Record<string, Partial<THREE.MeshPhysicalMaterialParameters>> = {
+      heute: { roughness: 0.78, metalness: 0, sheen: 0.4, sheenRoughness: 0.8 },
+      "mein-kind": { roughness: 0.5, metalness: 0 },
+      praxis: { roughness: 0.22, metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.12 },
+      entdecken: { roughness: 0.38, metalness: 0, clearcoat: 0.35, clearcoatRoughness: 0.4 },
+    };
     for (const [id, c] of Object.entries(ELEMENT_COLORS[palette])) {
-      m[id] = new THREE.MeshStandardMaterial({ color: c, roughness: palette === "ink" ? 0.4 : 0.62, metalness: palette === "ink" ? 0.35 : 0.04 });
+      m[id] =
+        palette === "material"
+          ? new THREE.MeshPhysicalMaterial({ color: c, ...MATERIAL[id] })
+          : new THREE.MeshStandardMaterial({ color: c, roughness: palette === "ink" ? 0.4 : 0.62, metalness: palette === "ink" ? 0.35 : 0.04 });
     }
     return m;
   }, [palette]);

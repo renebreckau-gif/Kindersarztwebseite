@@ -3,19 +3,18 @@ import { Newsreader, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 
 // next/font downloads at build time and self-hosts: no request to Google at runtime.
+// Latin covers German (ä ö ü ß). Capital ẞ (latin-ext) falls back to the system serif.
 const serif = Newsreader({
-  subsets: ["latin", "latin-ext"],
+  subsets: ["latin"],
   variable: "--font-serif",
   display: "swap",
   style: ["normal", "italic"],
-  axes: ["opsz"],
 });
 
 const sans = Instrument_Sans({
-  subsets: ["latin", "latin-ext"],
+  subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
-  axes: ["wdth"],
 });
 
 export const metadata: Metadata = {

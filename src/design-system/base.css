@@ -1,0 +1,45 @@
+/* Base element styles for surfaces that use the design system (.ds-root).
+   Scoped so the Phase 02.5 lab keeps its own styles. */
+
+.ds-root {
+  background: var(--color-canvas);
+  color: var(--color-text);
+  font-family: var(--font-text);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  font-variant-numeric: proportional-nums;
+}
+
+:where(.ds-root) :where(h1, h2, h3, h4, p, ul, ol, figure) {
+  margin: 0;
+}
+
+:where(.ds-root) :where(h1, h2, h3, p, li, a, span, label, legend) {
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  overflow-wrap: break-word;
+  hyphenate-limit-chars: 10 4 4;
+}
+
+:where(.ds-root) :where(a) {
+  color: inherit;
+}
+
+:where(.ds-root) :focus-visible {
+  outline: var(--border-focus) solid var(--color-focus);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.ds-root ::selection {
+  background: color-mix(in srgb, var(--color-brand) 28%, transparent);
+}
+
+/* reduced motion: components define their own alternatives; this is a safety net */
+@media (prefers-reduced-motion: reduce) {
+  .ds-root *,
+  .ds-root *::before,
+  .ds-root *::after {
+    scroll-behavior: auto !important;
+  }
+}

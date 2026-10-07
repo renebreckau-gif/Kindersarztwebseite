@@ -1,0 +1,445 @@
+{
+  "capturedAt": "2026-10-07T10:06:31.018Z",
+  "results": [
+    {
+      "file": "ds-top-1920x1080.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 19484,
+      "h1": 1
+    },
+    {
+      "file": "ds-top-1440x900.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 18476,
+      "h1": 1
+    },
+    {
+      "file": "ds-top-430x932.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28295,
+      "h1": 1
+    },
+    {
+      "file": "ds-top-390x844.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28740,
+      "h1": 1
+    },
+    {
+      "file": "ds-top-360x800.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28883,
+      "h1": 1
+    },
+    {
+      "file": "ds-puls-open-390x844.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28740,
+      "h1": 1
+    },
+    {
+      "file": "ds-puls-closed-390x844.png",
+      "transferKB": 369,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28594,
+      "h1": 1
+    },
+    {
+      "file": "ds-puls-unknown-390x844.png",
+      "transferKB": 369,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28594,
+      "h1": 1
+    },
+    {
+      "file": "ds-puls-special-390x844.png",
+      "transferKB": 369,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28606,
+      "h1": 1
+    },
+    {
+      "file": "ds-puls-closure-390x844.png",
+      "transferKB": 369,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28594,
+      "h1": 1
+    },
+    {
+      "file": "ds-puls-open-1440x900.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 18476,
+      "h1": 1
+    },
+    {
+      "file": "ds-puls-closed-1440x900.png",
+      "transferKB": 369,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 18345,
+      "h1": 1
+    },
+    {
+      "file": "ds-puls-unknown-1440x900.png",
+      "transferKB": 369,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 18345,
+      "h1": 1
+    },
+    {
+      "file": "ds-farbe-1440x900.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 18476,
+      "h1": 1
+    },
+    {
+      "file": "ds-farbe-390x844.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28740,
+      "h1": 1
+    },
+    {
+      "file": "ds-typografie-1440x900.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 18476,
+      "h1": 1
+    },
+    {
+      "file": "ds-typografie-390x844.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28740,
+      "h1": 1
+    },
+    {
+      "file": "ds-raster-1440x900.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 18476,
+      "h1": 1
+    },
+    {
+      "file": "ds-raster-390x844.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28740,
+      "h1": 1
+    },
+    {
+      "file": "ds-aktionen-1440x900.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 18476,
+      "h1": 1
+    },
+    {
+      "file": "ds-aktionen-390x844.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28740,
+      "h1": 1
+    },
+    {
+      "file": "ds-navigation-1440x900.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 18476,
+      "h1": 1
+    },
+    {
+      "file": "ds-navigation-390x844.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28740,
+      "h1": 1
+    },
+    {
+      "file": "ds-inhalte-1440x900.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 18476,
+      "h1": 1
+    },
+    {
+      "file": "ds-inhalte-390x844.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28740,
+      "h1": 1
+    },
+    {
+      "file": "ds-mein-kind-1440x900.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 18476,
+      "h1": 1
+    },
+    {
+      "file": "ds-mein-kind-390x844.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28740,
+      "h1": 1
+    },
+    {
+      "file": "ds-medien-1440x900.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 18476,
+      "h1": 1
+    },
+    {
+      "file": "ds-medien-390x844.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28740,
+      "h1": 1
+    },
+    {
+      "file": "ds-bewegung-1440x900.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 18476,
+      "h1": 1
+    },
+    {
+      "file": "ds-bewegung-390x844.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28740,
+      "h1": 1
+    },
+    {
+      "file": "ds-fokus-1440x900.png",
+      "transferKB": 608,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 18476,
+      "h1": 1
+    },
+    {
+      "file": "ds-fokus-390x844.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28740,
+      "h1": 1
+    },
+    {
+      "file": "ds-material-1440x900.png",
+      "transferKB": 608,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 18476,
+      "h1": 1
+    },
+    {
+      "file": "ds-material-390x844.png",
+      "transferKB": 608,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28740,
+      "h1": 1
+    },
+    {
+      "file": "ds-entdecken-1440x900.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 18476,
+      "h1": 1
+    },
+    {
+      "file": "ds-entdecken-390x844.png",
+      "transferKB": 608,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28740,
+      "h1": 1
+    },
+    {
+      "file": "ds-text200-390x844.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 70272,
+      "h1": 1
+    },
+    {
+      "file": "ds-text200-puls-390x844.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 70272,
+      "h1": 1
+    },
+    {
+      "file": "ds-text200-1440x900.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 41875,
+      "h1": 1
+    },
+    {
+      "file": "ds-typografie-360x800.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28883,
+      "h1": 1
+    },
+    {
+      "file": "ds-reducedmotion-390x844.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28740,
+      "h1": 1
+    },
+    {
+      "file": "ds-reducedmotion-material-1440x900.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 18476,
+      "h1": 1
+    },
+    {
+      "file": "ds-no3d-material-390x844.png",
+      "transferKB": 370,
+      "overflowX": false,
+      "offscreen": [],
+      "small": [],
+      "clipped": [],
+      "pageHeight": 28740,
+      "h1": 1
+    }
+  ]
+}

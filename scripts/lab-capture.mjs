@@ -105,8 +105,8 @@ const PROBE = `
 `;
 
 const AUDIT = `(() => {
-  const vw = innerWidth;
-  const out = { overflowX: document.documentElement.scrollWidth > vw + 1, clipped: [], smallTargets: [], h1: document.querySelectorAll('h1').length,
+  const vw = document.documentElement.clientWidth;
+  const out = { overflowX: document.documentElement.scrollWidth > vw + 1 || innerWidth > vw + 1, clipped: [], smallTargets: [], h1: document.querySelectorAll('h1').length,
     lang: document.documentElement.lang, landmarks: { main: !!document.querySelector('main'), nav: document.querySelectorAll('nav').length },
     enhancement: [...document.querySelectorAll('[data-enhancement]')].map(e => e.dataset.enhancement),
     canvases: document.querySelectorAll('canvas').length, unnamed: 0, firstViewport: {} };
