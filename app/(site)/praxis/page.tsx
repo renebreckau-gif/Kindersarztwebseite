@@ -17,7 +17,7 @@ export default async function Praxis({ searchParams }: { searchParams: Search })
   const addr = publicAddress();
   return (
     <PageFrame current="praxis" puls={puls}>
-      <PageIntro variant="editorial" title="Eine Kinderarztpraxis in Hettstedt." lede="Wer wir sind, wie Sie uns erreichen und was Sie beim ersten Besuch erwartet.">
+      <PageIntro variant="editorial" title="Eine Kinderarztpraxis in Hettstedt." back={{ href: "/", label: "Start" }} lede="Wer wir sind, wie Sie uns erreichen und was Sie beim ersten Besuch erwartet.">
         <div className={u.introMedia}>
           <PlaceholderFrame label="Foto der Praxis – folgt mit echter Fotografie" />
         </div>

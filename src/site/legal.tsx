@@ -9,7 +9,8 @@ import type { PulsView } from "@/content/puls";
 export function LegalPlaceholder({ title, puls, blockers }: { title: string; puls: PulsView; blockers: string }) {
   return (
     <PageFrame puls={puls}>
-      <PageIntro variant="utility" title={title} />
+      {/* legal pages have no hierarchy of their own: one level up is Start */}
+      <PageIntro variant="utility" title={title} back={{ href: "/", label: "Start" }} />
       <Section id="text" tone="paper">
         <p className={u.lead}>Dieser Text wird derzeit fachlich geprüft und erscheint hier nach der Freigabe.</p>
         <InternalNote>

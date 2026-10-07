@@ -97,9 +97,11 @@
 
 /* ================= Notfall: fast, calm, unambiguous ================= */
 .emergencyHero {
+  --back-gap: var(--space-6);
   display: grid;
   gap: var(--space-6);
-  padding: var(--space-8) var(--space-gutter) var(--space-8);
+  /* top 0: the back control is the first row (same offset as every other page) */
+  padding: 0 var(--space-gutter) var(--space-8);
   background: linear-gradient(180deg, #f8ece6 0%, var(--paper) 100%);
   border-bottom: 1px solid rgb(198 56 49 / 0.25);
 }
@@ -503,7 +505,7 @@
   .emergencyHero {
     grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
     align-items: end;
-    padding-top: var(--space-10);
+    padding-top: 0;
     padding-bottom: var(--space-10);
   }
   .trio {

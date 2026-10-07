@@ -18,16 +18,24 @@ const deDate = (d: string) => `${d.slice(8, 10)}.${d.slice(5, 7)}.${d.slice(0, 4
 // ---------------------------------------------------------------- back navigation
 
 /**
- * The one back control for public subpages (Phase 08.1). Always the first thing below the
- * site header, top-left at the page gutter. Deterministic parent route — never the browser history,
- * because visitors arrive from search, bookmarks and links.
+ * The one back control for every public page except Start (Phase 08.1 / 08.2).
+ * Rule taught by the interface: TOP LEFT = ONE LEVEL UP. Always the first thing below the
+ * site header, at the page gutter: a 48 px circle with a left arrow (not a chevron-triangle,
+ * so it never reads as "play" or "previous slide") plus the destination name.
+ * Deterministic parent route — never the browser history (visitors arrive from search,
+ * bookmarks and links).
  */
 export function PageBackNav({ href, label, ariaLabel, tone }: { href: string; label: string; ariaLabel?: string; tone?: "night" }) {
   return (
     <nav className={`${s.backNav} ${tone === "night" ? s.backNavNight : ""}`} aria-label="Übergeordnete Seite">
-      <Link href={href} aria-label={ariaLabel ?? `Zurück zu ${label}`}>
-        <Icon name="back" size={16} />
-        {label}
+      <Link href={href} className={s.backLink} aria-label={ariaLabel ?? `Zurück zu ${label}`}>
+        <span className={s.backCircle} aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5" />
+            <path d="M11 6l-6 6 6 6" />
+          </svg>
+        </span>
+        <span className={s.backLabel}>{label}</span>
       </Link>
     </nav>
   );

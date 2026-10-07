@@ -22,6 +22,7 @@ export default async function Entdecken({ searchParams }: { searchParams: Search
       <PageIntro
         variant="discovery"
         title="Entdecken"
+        back={{ href: preview ? "/?vorschau=freigabe" : "/", label: "Start" }}
         lede="Ein eigener Bereich für Kinder: neugierig machen, erklären, Unbekanntes vertrauter machen. Für Eltern: Alles hier wird von unseren Ärztinnen geprüft, bevor es erscheint."
       >
         <div className={u.nightOrbs} aria-hidden="true">

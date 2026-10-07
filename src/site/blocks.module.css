@@ -32,9 +32,10 @@
   line-height: 1.5;
   color: var(--ink-2);
 }
-/* back navigation (Phase 08.1): same place on every subpage — first row of the intro,
-   directly below the header, at the gutter. The intro drops its top padding so the
-   offset is identical across page families and breakpoints. */
+/* back navigation (Phase 08.1/08.2): same place on every page except Start — first row of
+   the intro (or of the page's first section), directly below the header, at the gutter.
+   The container drops its top padding so the offset is identical everywhere.
+   --back-gap = the container's row gap, cancelled down to a calm space before the H1. */
 .intro.introWithBack {
   padding-top: 0;
 }
@@ -44,32 +45,95 @@
   justify-self: start;
   position: relative;
   z-index: 1;
-  padding-top: var(--space-3);
-  /* the intro's row gap (space-7) is too loose between back link and H1 */
-  margin-bottom: calc(var(--space-5) - var(--space-7));
+  padding-top: var(--space-4);
+  margin-bottom: calc(var(--space-5) - var(--back-gap, var(--space-7)));
 }
-.backNav a {
+.backLink {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  min-height: 44px;
-  min-width: 44px;
+  gap: var(--space-4);
+  min-height: 48px;
+  padding-right: var(--space-3);
+  border-radius: 999px;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.backCircle {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgb(23 26 29 / 0.2);
+  background: rgb(255 252 246 / 0.78);
+  color: var(--color-text);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+.backCircle svg {
+  transition: transform 160ms ease;
+}
+.backLabel {
   font-size: var(--text-small);
   font-weight: 600;
   color: var(--ink-2);
-  text-decoration: none;
 }
-.backNav a:hover {
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
+.backLink:hover .backCircle {
+  border-color: rgb(23 26 29 / 0.45);
+  background: rgb(255 252 246 / 0.95);
 }
-.backNav a:focus-visible {
+.backLink:hover .backCircle svg {
+  transform: translateX(-2px);
+}
+.backLink:hover .backLabel {
+  color: var(--color-text);
+}
+.backLink:active .backCircle svg {
+  transform: translateX(-3px);
+}
+.backLink:focus-visible {
   outline: var(--border-focus) solid var(--color-focus);
   outline-offset: 3px;
-  border-radius: 4px;
 }
-.backNavNight a {
+/* night (Entdecken): same geometry, glass tone */
+.backNavNight .backCircle {
+  border-color: rgb(233 230 242 / 0.3);
+  background: rgb(255 255 255 / 0.07);
+  color: #f3efe7;
+}
+.backNavNight .backLabel {
   color: #c9cbe0;
+}
+.backNavNight .backLink:hover .backCircle {
+  border-color: rgb(233 230 242 / 0.55);
+  background: rgb(255 255 255 / 0.12);
+}
+.backNavNight .backLink:hover .backLabel {
+  color: #fff;
+}
+@media (prefers-reduced-motion: reduce) {
+  .backCircle,
+  .backCircle svg {
+    transition: none;
+  }
+  .backLink:hover .backCircle svg,
+  .backLink:active .backCircle svg {
+    transform: none;
+  }
+}
+@media (forced-colors: active) {
+  .backCircle {
+    border-color: LinkText;
+    color: LinkText;
+  }
+}
+@media (min-width: 48em) {
+  /* desktop: a little more air between the back control and the H1 */
+  .backNav {
+    margin-bottom: calc(var(--space-7) - var(--back-gap, var(--space-7)));
+  }
 }
 .introContext {
   margin: var(--space-4) 0 0;

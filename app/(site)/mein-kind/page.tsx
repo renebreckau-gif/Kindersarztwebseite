@@ -15,7 +15,7 @@ export default async function MeinKind({ searchParams }: { searchParams: Search 
   const puls = resolvePuls(await searchParams);
   return (
     <PageFrame current="mein-kind" puls={puls}>
-      <PageIntro variant="growth" title="Mein Kind" lede="Wählen Sie das Alter Ihres Kindes. Sie geben dabei nichts preis: kein Geburtsdatum, kein Konto, keine gespeicherten Daten." />
+      <PageIntro variant="growth" title="Mein Kind" back={{ href: "/", label: "Start" }} lede="Wählen Sie das Alter Ihres Kindes. Sie geben dabei nichts preis: kein Geburtsdatum, kein Konto, keine gespeicherten Daten." />
       <section className={u.growStage} aria-label="Altersstufen">
         <GrowthScale />
       </section>

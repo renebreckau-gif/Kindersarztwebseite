@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageFrame, InternalNote } from "@/site/chrome";
-import { Section, CallAction } from "@/site/blocks";
+import { Section, CallAction, PageBackNav } from "@/site/blocks";
 import u from "@/site/pages.module.css";
 import { resolvePuls } from "@/content/puls";
 import { publicEmergency } from "@/content/notices";
@@ -30,6 +30,8 @@ export default async function Notfall({ searchParams }: { searchParams: Search }
     <PageFrame puls={puls}>
       {/* 112 is unconditional (R7) — first, largest, no decoration */}
       <section className={u.emergencyHero} aria-labelledby="notfall-t">
+        {/* secondary: neutral, small, above the title — never inside or near the 112 action */}
+        <PageBackNav href="/" label="Start" />
         <h1 id="notfall-t" className={u.emergencyTitle}>
           Notfall
         </h1>

@@ -79,8 +79,11 @@ test("back navigation never uses the browser history", () => {
   }
 });
 
-test("subpages use the shared back pattern; top-level pages have none", () => {
+test("every public page except Start has the shared back control (deterministic parent)", () => {
   const sub: Record<string, string> = {
+    heute: "/",
+    "mein-kind": "/",
+    praxis: "/",
     "heute/sprechzeiten": "/heute",
     "heute/aktuelles": "/heute",
     "praxis/aerztinnen": "/praxis",
@@ -93,11 +96,38 @@ test("subpages use the shared back pattern; top-level pages have none", () => {
   for (const [route, parent] of Object.entries(sub)) {
     assert.match(read(`app/(site)/${route}/page.tsx`), new RegExp(`back=\\{\\{ href: "${parent}"`), route);
   }
+  // Entdecken: Start (keeps the review parameter in preview)
+  assert.match(read("app/(site)/entdecken/page.tsx"), /back=\{\{ href: preview \? "\/\?vorschau=freigabe" : "\/", label: "Start" \}\}/);
   assert.match(read("app/(site)/entdecken/mein-arztbesuch/page.tsx"), /<PageBackNav[^>]*label="Entdecken"/);
-  for (const top of ["page.tsx", "heute/page.tsx", "mein-kind/page.tsx", "praxis/page.tsx", "entdecken/page.tsx"]) {
-    const src = read(`app/(site)/${top}`);
-    assert.equal(/back=\{|<PageBackNav/.test(src), false, top);
+  // Notfall: Start, placed before (and outside) the 112 action
+  const notfall = read("app/(site)/notfall/page.tsx");
+  assert.match(notfall, /<PageBackNav href="\/" label="Start" \/>/);
+  assert.ok(notfall.indexOf("<PageBackNav") < notfall.indexOf("tel:112"));
+  // legal pages: through the shared LegalPlaceholder
+  assert.match(read("src/site/legal.tsx"), /back=\{\{ href: "\/", label: "Start" \}\}/);
+  for (const legal of ["impressum", "datenschutz", "barrierefreiheit"]) assert.match(read(`app/(site)/${legal}/page.tsx`), /<LegalPlaceholder/, legal);
+  // Start is the root: no back control
+  assert.equal(/back=\{|<PageBackNav/.test(read("app/(site)/page.tsx")), false);
+});
+
+test("route coverage: every public page file except Start carries the back pattern", () => {
+  const pages = files("app/(site)")
+    .map((f) => f.replace(/\\/g, "/"))
+    .filter((f) => f.endsWith("/page.tsx"));
+  assert.ok(pages.length >= 20); // 20 files = 24 routes (the four age pages share [alter])
+  for (const f of pages) {
+    const isStart = f === "app/(site)/page.tsx";
+    assert.equal(/back=\{|<PageBackNav|<LegalPlaceholder/.test(read(f)), !isStart, f);
   }
+});
+
+test("the back control is an arrow in a circle, not a play/carousel triangle", () => {
+  const src = read("src/site/blocks.tsx");
+  const nav = src.slice(src.indexOf("export function PageBackNav"), src.indexOf("// ---------------------------------------------------------------- page intro"));
+  assert.match(nav, /<Link /);
+  assert.match(nav, /aria-label=\{ariaLabel \?\? `Zurück zu \$\{label\}`\}/);
+  assert.match(nav, /d="M19 12H5"/, "arrow shaft present");
+  assert.equal(/fill="currentColor"|polygon/.test(nav), false, "no filled triangle");
 });
 
 test("U/J line: no links, buttons or age-based highlighting", () => {

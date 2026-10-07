@@ -29,7 +29,7 @@ export default async function Heute({ searchParams }: { searchParams: Search }) 
 
   return (
     <PageFrame current="heute" puls={puls}>
-      <PageIntro variant="utility" title="Heute in der Praxis">
+      <PageIntro variant="utility" title="Heute in der Praxis" back={{ href: "/", label: "Start" }}>
         <StatusStatement puls={puls} />
         <div className={u.actions}>
           <CallAction />
