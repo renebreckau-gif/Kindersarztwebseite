@@ -28,7 +28,7 @@ Content without any status is treated as `TO_BE_CONFIRMED`.
 
 **R4 — Expiry is structural.** Anything with an end date disappears after it, automatically. A notice without end date must be explicitly marked "unbefristet" by an editor.
 
-**R5 — Stale is unverified.** A fact whose re-verification date has passed is treated as `TO_BE_CONFIRMED` for safety-critical categories (emergency, hours, replacement practices). Intervals are still to be agreed (source-policy §6).
+**R5 — Stale is unverified (after grace).** A fact whose re-verification date has passed is treated as unverified for safety-critical categories. Emergency information and replacement practices have no grace period; opening hours stay public with an editor warning for a short grace period (stale but not contradicted) and then fall back. Exact intervals: [content-governance.md](../architecture/content-governance.md) §4 (refined in Phase 04).
 
 **R6 — Pages need a verified core.** A page is published only if its core content is verified. Missing optional sections are omitted, not filled. Empty pages are never published (old site: empty "Praxis" page, F76).
 

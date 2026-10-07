@@ -2,13 +2,15 @@
   "name": "kinderarztpraxis-probst-boehme",
   "version": "0.1.0",
   "private": true,
-  "description": "Kinderarztpraxis Probst & Böhme — Phase 02.5 signature entry experience lab (internal prototypes)",
+  "type": "module",
+  "description": "Kinderarztpraxis Probst & Böhme — website project (internal prototypes and domain model)",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "lab:capture": "node scripts/lab-capture.mjs"
+    "lab:capture": "node scripts/lab-capture.mjs",
+    "test": "node --test \"src/domain/__tests__/*.test.ts\""
   },
   "dependencies": {
     "@react-three/fiber": "9.8.1",
