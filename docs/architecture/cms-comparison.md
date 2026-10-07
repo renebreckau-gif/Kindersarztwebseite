@@ -14,7 +14,8 @@ Scope: this project only — a small paediatric practice, a handful of non-techn
 | Payload: open source, MIT, actively maintained | GitHub API `payloadcms/payload` | Verified |
 | Payload admin panel translated into 30+ languages incl. German (`@payloadcms/translations/languages/de`) | https://payloadcms.com/docs/configuration/i18n | Verified on vendor page |
 | Payload scheduled publish/unpublish (`schedulePublish`) | https://payloadcms.com/docs/versions/drafts | Verified on vendor page |
-| Payload acquired by Figma; Payload Cloud paused new registrations | Secondary sources only (e.g. [daviesmeyer](https://ai-solutions.daviesmeyer.com/en/blog/payload-cms-figma-nextjs-headless-cms)) | **Not verified on vendor site** — treated as a vendor-direction risk |
+| Payload team joined Figma (announced 17 June 2025); Payload remains open source; self-hosting remains supported | https://www.figma.com/blog/payload-joins-figma/ · https://payloadcms.com/posts/blog/payload-is-joining-figma | **Verified** — official Figma and Payload announcements; Payload is under Figma ownership/stewardship |
+| Payload Cloud (vendor-hosted offering) availability for new projects | Secondary sources only | Not verified — irrelevant to the recommendation (self-hosting) |
 | Sanity data residency options | — | **Not verified** — to be clarified with vendor if Sanity is chosen |
 
 Note: this project's expiry logic does **not** depend on scheduled publishing — validity windows are evaluated at request time by the domain layer (`src/domain/`). Scheduling is a convenience, not a requirement.
@@ -37,7 +38,7 @@ Scale: ++ strong · + good · ○ neutral · – weak · –– problematic (for
 | Maintenance | ++ | – | Payload: DB backups, updates, security patches are ours. |
 | Next.js integration | + (client/GROQ, separate Studio or embedded) | ++ (runs inside the Next.js app, Local API, shared TypeScript types) | |
 | Developer experience | + | ++ | Domain types and CMS collections can share one TypeScript model. |
-| Vendor dependency | – (proprietary Content Lake) | + (MIT, own DB) — ○ given reported ownership change | |
+| Vendor dependency | – (proprietary Content Lake) | + (MIT, own DB; under Figma ownership) | Future product direction under Figma ownership should be monitored |
 | Long-term cost | – ($15/seat/month for private data + roles; scales with editors) | + (no licence fee; hosting + maintenance cost) | Real total cost depends on the maintenance contract. |
 | Data portability | + (export via CLI/API) | ++ (own Postgres/Mongo) | |
 | **Privacy / data control** | –– on Free (public datasets expose published documents incl. internal metadata), ○ on Growth (vendor cloud, DPA needed) | ++ (EU hosting of our choice, internal fields never leave our infrastructure) | Decisive for verification metadata (`verifiedBy`, internal notes) and staff consent records. |
@@ -48,7 +49,7 @@ Scale: ++ strong · + good · ○ neutral · – weak · –– problematic (for
 2. **Payload's main weakness is operations**: someone must own hosting, database backups and updates — for a medical practice this must be a contracted service, not an assumption.
 3. **The domain layer favours Payload**: PULS rules, publish-blocking validation and freshness logic already exist as TypeScript (`src/domain/`) and can run as Payload hooks in the same process, giving server-side guarantees.
 4. **Editor UX can be made good in both**; the decisive work is a minimal, German, task-oriented configuration (see cms-requirements.md), not the product choice.
-5. **Vendor direction**: Payload's reported change of ownership is a risk to watch; the MIT licence and self-hosting limit the impact (the code and data stay usable).
+5. **Vendor direction**: Payload is under Figma ownership (verified, June 2025); Payload states it remains open source and that self-hosting remains supported. Future product direction under Figma ownership should be monitored; the MIT licence and self-hosting limit the impact (the code and data stay usable).
 
 ## 3. Recommendation
 
@@ -59,7 +60,7 @@ Why, in one sentence: it keeps sensitive internal verification and consent data 
 Conditions for this recommendation (to confirm before Phase 05):
 - A named party accepts hosting, backups, updates and security patching (maintenance agreement).
 - EU hosting and database provider chosen with a DPA (privacy review).
-- Re-check Payload's ownership/roadmap status at decision time.
+- Future product direction under Figma ownership should be monitored (re-check roadmap and licence at decision time).
 
 **Fallback:** Sanity Growth if no one can own operations — accepting per-seat cost, vendor-cloud data (DPA), and client-side-centric validation (mitigated by re-validating with `src/domain/` at render time, which the site does anyway).
 

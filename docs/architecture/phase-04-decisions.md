@@ -39,7 +39,7 @@ Practice · Location · WeeklySchedule + OpeningHoursRule · ConsultationType ·
 - Server-side validation hooks can reuse `src/domain/` directly — publication safety is enforced, not just suggested.
 - German admin translation in core; code-defined, field-level roles (restricted emergency role).
 - No per-editor licence cost; MIT licence and own database limit vendor risk.
-- Trade-off accepted explicitly: hosting, backups, updates and security become a contracted responsibility. Payload's reported ownership change (secondary sources) must be re-checked at decision time.
+- Trade-off accepted explicitly: hosting, backups, updates and security become a contracted responsibility. Payload is under Figma ownership (verified: official announcements of 17 June 2025; open source and self-hosting remain supported). Future product direction under Figma ownership should be monitored.
 
 ## 5. PRAXIS PULS ARCHITECTURE
 
@@ -63,7 +63,7 @@ Practice · Location · WeeklySchedule + OpeningHoursRule · ConsultationType ·
 ## 7. TOP 5 CMS RISKS
 
 1. **Operational ownership** of a self-hosted Payload instance (backups, updates, security) not contracted.
-2. **Vendor direction** of Payload (reported acquisition) — roadmap/licensing changes.
+2. **Vendor direction** — future product direction under Figma ownership should be monitored (roadmap/licensing).
 3. **Editor UX drift** — default admin screens instead of the task-oriented German configuration.
 4. **Validation gaps** — rules enforced only in the UI rather than server-side.
 5. **Preview fidelity** — PULS preview must use the same engine as production, not a re-implementation.
