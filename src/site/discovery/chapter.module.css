@@ -2,7 +2,8 @@
    Page bottom padding for the glass dock comes from the site main (chrome.module.css). */
 
 .chapter {
-  padding: var(--space-6) var(--space-gutter) var(--space-10);
+  /* top padding 0: PageBackNav sits at the same offset as on every other subpage */
+  padding: 0 var(--space-gutter) var(--space-10);
   color: #e9e6f2;
   display: grid;
   gap: var(--space-7);
@@ -12,10 +13,6 @@
   gap: var(--space-3);
   max-width: 44rem;
 }
-.back {
-  margin: 0;
-}
-.back a,
 .gated a {
   display: inline-flex;
   align-items: center;
@@ -25,7 +22,6 @@
   text-decoration: underline;
   text-underline-offset: 0.2em;
 }
-.back a:focus-visible,
 .gated a:focus-visible {
   outline: 3px solid #8c9bff;
   outline-offset: 3px;

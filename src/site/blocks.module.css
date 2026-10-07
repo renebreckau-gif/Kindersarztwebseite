@@ -32,20 +32,52 @@
   line-height: 1.5;
   color: var(--ink-2);
 }
-.back {
-  margin: 0 0 var(--space-5);
+/* back navigation (Phase 08.1): same place on every subpage — first row of the intro,
+   directly below the header, at the gutter. The intro drops its top padding so the
+   offset is identical across page families and breakpoints. */
+.intro.introWithBack {
+  padding-top: 0;
 }
-.back a {
+.backNav {
+  grid-column: 1 / -1;
+  align-self: start;
+  justify-self: start;
+  position: relative;
+  z-index: 1;
+  padding-top: var(--space-3);
+  /* the intro's row gap (space-7) is too loose between back link and H1 */
+  margin-bottom: calc(var(--space-5) - var(--space-7));
+}
+.backNav a {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  min-height: var(--target-min);
+  min-height: 44px;
+  min-width: 44px;
   font-size: var(--text-small);
+  font-weight: 600;
   color: var(--ink-2);
   text-decoration: none;
 }
-.back a:hover {
+.backNav a:hover {
   text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.backNav a:focus-visible {
+  outline: var(--border-focus) solid var(--color-focus);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.backNavNight a {
+  color: #c9cbe0;
+}
+.introContext {
+  margin: var(--space-4) 0 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1.25rem, 1.05rem + 1vw, 2rem);
+  line-height: 1.2;
+  color: var(--ink-2);
 }
 .introAside {
   position: relative;
@@ -93,9 +125,6 @@
   background: radial-gradient(60% 80% at 80% 20%, rgb(74 92 255 / 0.28), transparent 70%), var(--night);
 }
 .intro-discovery .lede {
-  color: #c9cbe0;
-}
-.intro-discovery .back a {
   color: #c9cbe0;
 }
 
@@ -187,7 +216,6 @@
 .bigLink:focus-visible,
 .growthLink:focus-visible,
 .sourceLink:focus-visible,
-.back a:focus-visible,
 .prose a:focus-visible {
   outline: var(--border-focus) solid var(--color-focus);
   outline-offset: 3px;
@@ -426,6 +454,16 @@
   transform-origin: bottom;
 }
 .growthLink:hover .growthBar,
+.growthNow {
+  justify-self: start;
+  margin-top: var(--space-2);
+  padding: 1px 8px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
 .growthLink[aria-current="page"] .growthBar {
   background: linear-gradient(180deg, rgb(74 92 255 / 0.2), rgb(74 92 255 / 0.06));
 }

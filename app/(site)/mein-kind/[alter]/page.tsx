@@ -4,7 +4,7 @@ import { PageFrame } from "@/site/chrome";
 import { PageIntro, Section, GrowthScale, BigLinks, CallAction } from "@/site/blocks";
 import u from "@/site/pages.module.css";
 import { resolvePuls } from "@/content/puls";
-import { AGES } from "@/content/site";
+import { AGES, ageTopics, ageSectionTitle } from "@/content/site";
 
 type Params = Promise<{ alter: string }>;
 type Search = Promise<Record<string, string | string[] | undefined>>;
@@ -26,14 +26,13 @@ export default async function Altersstufe({ params, searchParams }: { params: Pa
   const puls = resolvePuls(await searchParams);
   return (
     <PageFrame current="mein-kind" puls={puls}>
-      <PageIntro variant="growth" title={`${age.label} Jahre`} back={{ href: "/mein-kind", label: "Mein Kind" }} lede={age.intro}>
-        <p className={u.ageName}>{age.name}</p>
-      </PageIntro>
+      <PageIntro variant="growth" title={`${age.label} Jahre`} context={age.name} back={{ href: "/mein-kind", label: "Mein Kind" }} lede={age.intro} />
       <section className={u.growStage} aria-label="Altersstufen">
         <GrowthScale compact current={age.id} />
       </section>
-      <Section id="themen" title="Orientierung für dieses Alter" tone="paper">
-        <BigLinks items={age.topics} />
+      <Section id="themen" title={ageSectionTitle(age)} tone="paper">
+        {/* Vorsorge/Impfungen carry ?alter= so the age range and the way back survive */}
+        <BigLinks items={ageTopics(age)} />
       </Section>
       <Section id="fragen" title="Fragen zu Ihrem Kind?" tone="plaster">
         <p className={u.lead}>Ob eine Untersuchung oder Impfung gerade ansteht, klären Sie am besten direkt mit der Praxis. Diese Seiten geben Orientierung, keine individuelle Empfehlung.</p>

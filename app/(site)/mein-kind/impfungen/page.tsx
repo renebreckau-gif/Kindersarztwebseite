@@ -3,19 +3,31 @@ import { PageFrame, InternalNote } from "@/site/chrome";
 import { PageIntro, Section, SourceList, CallAction, Prose } from "@/site/blocks";
 import u from "@/site/pages.module.css";
 import { resolvePuls } from "@/content/puls";
-
-export const metadata: Metadata = {
-  title: "Impfungen",
-  description: "Impfungen bei Kindern: wie Impfempfehlungen in Deutschland entstehen, wo sie gepflegt werden und wo Sie die offiziellen Informationen finden.",
-};
+import { AGE_PARAM, ageFromQuery, topicBack, ageContextLine } from "@/content/site";
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
+const DESCRIPTION = "Impfungen bei Kindern: wie Impfempfehlungen in Deutschland entstehen, wo sie gepflegt werden und wo Sie die offiziellen Informationen finden.";
+
+export async function generateMetadata({ searchParams }: { searchParams: Search }): Promise<Metadata> {
+  const age = ageFromQuery((await searchParams)[AGE_PARAM]);
+  return { title: age ? `Impfungen – ${age.label} Jahre` : "Impfungen", description: DESCRIPTION };
+}
+
 export default async function Impfungen({ searchParams }: { searchParams: Search }) {
-  const puls = resolvePuls(await searchParams);
+  const q = await searchParams;
+  const puls = resolvePuls(q);
+  // navigation context only: the age range never selects vaccinations or recommendations
+  const age = ageFromQuery(q[AGE_PARAM]);
   return (
     <PageFrame current="mein-kind" puls={puls}>
-      <PageIntro variant="growth" title="Impfungen" back={{ href: "/mein-kind", label: "Mein Kind" }} lede="Wie Impfempfehlungen entstehen, wo sie stehen – und warum das Gespräch mit der Praxis zählt." />
+      <PageIntro
+        variant="growth"
+        title="Impfungen"
+        back={topicBack(age)}
+        context={age ? ageContextLine(age) : undefined}
+        lede="Wie Impfempfehlungen entstehen, wo sie stehen – und warum das Gespräch mit der Praxis zählt."
+      />
 
       <section className={u.trio} aria-label="Überblick">
         <div>

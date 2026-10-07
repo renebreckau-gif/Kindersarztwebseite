@@ -258,7 +258,7 @@ if (process.env.SITE_QUICK) {
     const menu = flag === "menu";
     const reducedMotion = flag === "reduced";
     const scrollY = flag.startsWith("scroll") ? Number(flag.slice(6)) : 0;
-    const q = path.includes("vorschau=") ? "vorschau" : "";
+    const q = path.includes("vorschau=") ? "vorschau" : (path.match(/alter=([a-z0-9-]+)/)?.[1] ?? "");
     const suffix = full ? "-full" : menu ? "-menu" : reducedMotion ? "-reducedmotion" : scrollY ? `-y${scrollY}` : "";
     results.push(await capture(s, path, vp, `quick-${name(path.split("?")[0], q)}-${vp}${suffix}.${full ? "jpg" : "png"}`, { fullPage: full, openMenu: menu, scrollY, reducedMotion }));
   }

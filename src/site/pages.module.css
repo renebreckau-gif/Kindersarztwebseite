@@ -216,14 +216,6 @@
   padding: var(--space-7) var(--space-gutter) var(--space-9);
   background: linear-gradient(180deg, #f1ecf3 0%, #f4efea 100%);
 }
-.ageName {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: clamp(1.75rem, 1.3rem + 1.8vw, 3rem);
-  font-style: italic;
-  color: var(--ink-2);
-}
-
 .examStage {
   padding: var(--space-7) var(--space-gutter) var(--space-9);
   background: linear-gradient(180deg, #f1ecf3 0%, #f4efea 100%);
@@ -234,36 +226,43 @@
   font-weight: 400;
   font-size: var(--text-h2);
 }
+/* Phase 08.1: a measuring line, not tabs — plain labels over rising ticks on one baseline.
+   Nothing here is interactive, highlighted or filtered by age. */
+.examNote {
+  margin: calc(-1 * var(--space-4)) 0 var(--space-6);
+  max-width: 40rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
 .examLine {
   list-style: none;
   margin: 0;
-  padding: 0 0 var(--space-5);
+  padding: 0;
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
-  gap: var(--space-2);
-  border-bottom: 1px solid rgb(23 26 29 / 0.55);
-  overflow-x: auto;
-  scrollbar-width: thin;
-  position: relative;
+  row-gap: var(--space-5);
 }
 .examLine li {
   flex: 1 0 auto;
   display: grid;
   justify-items: center;
   align-content: end;
-  min-width: 2.75rem;
-  height: calc(2.5rem + var(--i) * 0.55rem);
-  border-radius: 10px 10px 0 0;
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.85), rgb(255 255 255 / 0.3));
+  gap: var(--space-2);
+  min-width: 1.75rem;
+  border-bottom: 1px solid rgb(23 26 29 / 0.55);
   scroll-margin-top: var(--space-8);
-}
-.examLine li:last-child {
-  background: linear-gradient(180deg, rgb(74 92 255 / 0.22), rgb(74 92 255 / 0.06));
+  cursor: default;
 }
 .examName {
-  padding-bottom: var(--space-2);
   font-family: var(--font-display);
-  font-size: clamp(1.125rem, 1rem + 0.6vw, 1.625rem);
+  font-size: clamp(1rem, 0.9rem + 0.6vw, 1.625rem);
+  line-height: 1;
+}
+.examTick {
+  width: 1px;
+  height: calc(0.75rem + var(--i) * 0.3rem);
+  background: rgb(23 26 29 / 0.55);
 }
 .sourcesWrap {
   padding: var(--space-8) var(--space-gutter) var(--space-9);
@@ -589,15 +588,6 @@
   }
 }
 @media (max-width: 47.99em) {
-  .examLine {
-    overflow: visible;
-    gap: 3px;
-  }
-  .examLine li {
-    flex: 1 1 0;
-    min-width: 0;
-    height: calc(2.25rem + var(--i) * 0.45rem);
-  }
   .examName {
     font-size: 0.9375rem;
   }

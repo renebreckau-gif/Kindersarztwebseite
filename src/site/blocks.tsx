@@ -15,33 +15,48 @@ import type { IsoWeekday } from "@/domain/time.ts";
 
 const deDate = (d: string) => `${d.slice(8, 10)}.${d.slice(5, 7)}.${d.slice(0, 4)}`;
 
+// ---------------------------------------------------------------- back navigation
+
+/**
+ * The one back control for public subpages (Phase 08.1). Always the first thing below the
+ * site header, top-left at the page gutter. Deterministic parent route — never the browser history,
+ * because visitors arrive from search, bookmarks and links.
+ */
+export function PageBackNav({ href, label, ariaLabel, tone }: { href: string; label: string; ariaLabel?: string; tone?: "night" }) {
+  return (
+    <nav className={`${s.backNav} ${tone === "night" ? s.backNavNight : ""}`} aria-label="Übergeordnete Seite">
+      <Link href={href} aria-label={ariaLabel ?? `Zurück zu ${label}`}>
+        <Icon name="back" size={16} />
+        {label}
+      </Link>
+    </nav>
+  );
+}
+
 // ---------------------------------------------------------------- page intro
 
 export function PageIntro({
   title,
   lede,
   back,
+  context,
   variant = "editorial",
   children,
 }: {
   title: string;
   lede?: string;
-  back?: { href: string; label: string };
+  back?: { href: string; label: string; ariaLabel?: string };
+  /** Short orientation line directly under the H1 (e.g. the age range). */
+  context?: string;
   variant?: "utility" | "editorial" | "growth" | "guidance" | "discovery";
   children?: ReactNode;
 }) {
   return (
-    <header className={`${s.intro} ${s[`intro-${variant}`]}`}>
+    <header className={`${s.intro} ${s[`intro-${variant}`]} ${back ? s.introWithBack : ""}`}>
+      {back ? <PageBackNav {...back} tone={variant === "discovery" ? "night" : undefined} /> : null}
       <div className={s.introText}>
-        {back ? (
-          <p className={s.back}>
-            <Link href={back.href}>
-              <Icon name="back" size={16} />
-              {back.label}
-            </Link>
-          </p>
-        ) : null}
         <h1>{title}</h1>
+        {context ? <p className={s.introContext}>{context}</p> : null}
         {lede ? <p className={s.lede}>{lede}</p> : null}
       </div>
       {children ? <div className={s.introAside}>{children}</div> : null}
@@ -196,6 +211,8 @@ export function GrowthScale({ ages = AGES, compact = false, current }: { ages?: 
             <span className={s.growthNum}>{a.label}</span>
             <span className={s.growthUnit}>Jahre</span>
             <span className={s.growthName}>{a.name}</span>
+            {/* not colour alone: the current range is also named */}
+            {current === a.id ? <span className={s.growthNow}>Aktuell</span> : null}
           </Link>
         </li>
       ))}

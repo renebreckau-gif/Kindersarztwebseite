@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageFrame, InternalNote } from "@/site/chrome";
 import { Story } from "@/site/discovery/story";
+import { PageBackNav } from "@/site/blocks";
 import u from "@/site/pages.module.css";
 import d from "@/site/discovery/chapter.module.css";
 import { resolvePuls } from "@/content/puls";
@@ -29,10 +30,9 @@ export default async function MeinArztbesuch({ searchParams }: { searchParams: S
   return (
     <PageFrame current="entdecken" puls={puls} tone="night">
       <div className={d.chapter}>
+        {/* page hierarchy back — separate from the story's own "Schließen – zur Übersicht" */}
+        <PageBackNav href={view.mode === "PREVIEW" ? "/entdecken?vorschau=freigabe" : "/entdecken"} label="Entdecken" tone="night" />
         <header className={d.head}>
-          <p className={d.back}>
-            <Link href={view.mode === "PREVIEW" ? "/entdecken?vorschau=freigabe" : "/entdecken"}>Übersicht Entdecken</Link>
-          </p>
           <h1 className={d.title}>{c.title}</h1>
           {view.mode === "GATED" ? null : <p className={d.intro}>{c.parentIntro}</p>}
           {view.mode === "PREVIEW" ? (

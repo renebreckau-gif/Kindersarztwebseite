@@ -66,11 +66,19 @@ export interface AgeRange {
   intro: string;
   /** Relative "height" on the growth scale (0–1). */
   scale: number;
-  topics: { label: string; href: string; text: string }[];
+  topics: AgeTopic[];
 }
 
-const VORSORGE = { label: "Vorsorge", href: "/mein-kind/vorsorge", text: "Was die U-Untersuchungen sind und wo Sie die offiziellen Zeiträume finden" };
-const IMPFEN = { label: "Impfungen", href: "/mein-kind/impfungen", text: "Wie Impfempfehlungen entstehen und wo sie gepflegt werden" };
+export interface AgeTopic {
+  label: string;
+  href: string;
+  text: string;
+  /** Carries the age range along (?alter=<slug>) — Vorsorge/Impfungen only. */
+  ageContext?: boolean;
+}
+
+const VORSORGE: AgeTopic = { label: "Vorsorge", href: "/mein-kind/vorsorge", text: "Was die U-Untersuchungen sind und wo Sie die offiziellen Zeiträume finden", ageContext: true };
+const IMPFEN: AgeTopic = { label: "Impfungen", href: "/mein-kind/impfungen", text: "Wie Impfempfehlungen entstehen und wo sie gepflegt werden", ageContext: true };
 
 export const AGES: AgeRange[] = [
   {
@@ -107,9 +115,47 @@ export const AGES: AgeRange[] = [
     name: "Jugendliche",
     intro: "Eigene Wege, eigene Fragen. Hier finden Sie Orientierung für das Jugendalter.",
     scale: 1,
-    topics: [{ label: "J1", href: "/mein-kind/vorsorge#j1", text: "Die Jugendgesundheitsuntersuchung – mit offizieller Quelle" }, IMPFEN],
+    topics: [{ label: "J1", href: "/mein-kind/vorsorge#j1", text: "Die Jugendgesundheitsuntersuchung – mit offizieller Quelle", ageContext: true }, IMPFEN],
   },
 ];
+
+// ---------------------------------------------------------------- age context (Phase 08.1)
+// The age range a parent chose is NAVIGATIONAL context only: it labels pages and keeps the
+// way back. It never selects examinations, vaccinations or recommendations.
+
+export const AGE_PARAM = "alter";
+
+/** A valid age range for a query value, or null (unknown, empty, repeated → generic page). */
+export function ageFromQuery(value: string | string[] | undefined): AgeRange | null {
+  if (typeof value !== "string") return null;
+  return AGES.find((a) => a.slug === value) ?? null;
+}
+
+/** Topic URL as linked from an age page: Vorsorge/Impfungen keep ?alter=, others stay plain. */
+export function ageTopicHref(age: AgeRange, topic: AgeTopic): string {
+  if (!topic.ageContext) return topic.href;
+  const [path, hash] = topic.href.split("#");
+  return `${path}?${AGE_PARAM}=${age.slug}${hash ? `#${hash}` : ""}`;
+}
+
+export const ageTopics = (age: AgeRange): AgeTopic[] => age.topics.map((t) => ({ ...t, href: ageTopicHref(age, t) }));
+
+export interface BackTarget {
+  href: string;
+  label: string;
+  ariaLabel: string;
+}
+
+/** Deterministic parent for Vorsorge/Impfungen: the age page if a valid context exists. */
+export function topicBack(age: AgeRange | null): BackTarget {
+  return age
+    ? { href: `/mein-kind/${age.slug}`, label: `${age.label} Jahre`, ariaLabel: `Zurück zu ${age.label} Jahre` }
+    : { href: "/mein-kind", label: "Mein Kind", ariaLabel: "Zurück zu Mein Kind" };
+}
+
+export const ageSectionTitle = (age: AgeRange) => `Orientierung für ${age.label} Jahre`;
+/** Context line under the H1 of Vorsorge/Impfungen. */
+export const ageContextLine = (age: AgeRange) => `Orientierung für ${age.label} Jahre · ${age.name}`;
 
 // ---------------------------------------------------------------- "Wobei können wir helfen?"
 
