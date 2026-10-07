@@ -1,0 +1,177 @@
+/* Convergence: B's editorial hierarchy + A's object + C's mobile discipline. */
+
+.page {
+  min-height: 100svh;
+}
+
+.main {
+  display: grid;
+  padding: 16px var(--gutter) 0;
+  gap: 4px;
+}
+
+.lead {
+  min-width: 0;
+}
+
+/* The day instrument stays quiet on small screens. */
+.lead :global(figure) {
+  margin-top: 20px;
+}
+
+.colophon {
+  font-family: var(--serif);
+  font-size: 1.0625rem;
+  color: var(--ink-soft);
+  margin-top: 20px;
+}
+
+/* ---------- object column (mobile first) ---------- */
+.objectCol {
+  min-width: 0;
+  margin-top: 8px;
+}
+
+.stage {
+  /* Never let the object push utility: it is capped and sits after it. */
+  max-width: min(100%, 36svh);
+  margin: 0 auto;
+}
+
+.paths {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.paths a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+  text-decoration: none;
+  font-size: 1rem;
+}
+.paths a[aria-current="true"] {
+  background: var(--ink);
+  color: var(--canvas);
+  border-color: var(--ink);
+}
+.key {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--c);
+}
+
+.inst {
+  display: grid;
+  gap: 6px;
+}
+.ages {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.ages legend {
+  font-family: var(--serif);
+  font-size: 1.125rem;
+  margin-bottom: 6px;
+}
+.ages label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.ages input {
+  position: absolute;
+  opacity: 0;
+}
+.ages label:has(input:checked) {
+  background: var(--ink);
+  color: var(--canvas);
+}
+.ages label:has(input:focus-visible) {
+  outline: 3px solid var(--cobalt);
+  outline-offset: 2px;
+}
+.back {
+  justify-self: start;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--cobalt-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.preview {
+  min-height: 1.4em;
+  margin-top: 10px;
+  font-size: 0.9375rem;
+  color: var(--ink-soft);
+}
+
+/* ---------- desktop ---------- */
+@media (min-width: 900px) {
+  .main {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 6fr);
+    grid-template-rows: 1fr auto;
+    gap: 0 clamp(32px, 4vw, 80px);
+    min-height: calc(100svh - var(--util-h));
+    padding-top: clamp(24px, 4vh, 56px);
+    padding-bottom: 28px;
+  }
+  .lead {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    padding-bottom: 2vh;
+  }
+  .lead :global(figure) {
+    margin-top: 32px;
+  }
+  .colophon {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: end;
+    margin: 0;
+  }
+  .objectCol {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0;
+  }
+  .stage {
+    max-width: min(100%, calc((100svh - var(--util-h) - 140px) * 1.04));
+    margin: 0 0 0 auto;
+  }
+  .paths,
+  .inst {
+    display: none;
+  }
+  .preview {
+    text-align: right;
+  }
+}

@@ -37,9 +37,10 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 24px;
-    height: var(--util-h);
-    padding: 0 var(--gutter);
+    flex-wrap: wrap;
+    gap: 0 24px;
+    min-height: var(--util-h);
+    padding: 2px var(--gutter);
     background: color-mix(in srgb, var(--canvas) 92%, transparent);
     backdrop-filter: blur(6px);
     border-bottom: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
@@ -53,13 +54,15 @@
 }
 .utilNav {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: 0 6px;
 }
 .utilStatus,
 .utilItem {
   display: inline-flex;
   align-items: center;
+  white-space: nowrap;
   gap: 8px;
   min-height: 44px;
   padding: 0 12px;

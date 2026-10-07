@@ -7,6 +7,18 @@ Inputs: [strategy-lock.md](../product/strategy-lock.md), [phase-02-recommendatio
 
 No winner is chosen in this document. Scores are an internal first read for the human review.
 
+## HUMAN DECISION (Phase 02.6, 2026-10-07)
+
+The human review of Phase 02.5 is complete. Direction locked:
+
+- **A selected as interaction foundation** — asymmetric Growing Mobile, four functional paths, object responds to selection, Mein Kind transformation.
+- **B selected for information hierarchy** — editorial PRAXIS PULS hierarchy, status as the clearest element, restrained typography, whitespace, day/time instrument where useful.
+- **C retained as mobile/performance reference** — mobile-first composition, lightweight fallbacks, strong no-WebGL behaviour, performance discipline.
+- **Final object geometry remains unresolved** — the current spheres/disc/capsule/ring are prototype geometry only, not approved art direction.
+- **`/lab/final` is the convergence reference** for the later Signature Entry. No new concepts or competing directions.
+
+Convergence notes: see §11.
+
 ---
 
 ## 1. What was built
@@ -173,3 +185,27 @@ npm run build
 npm run start -- -p 3100
 node scripts/lab-capture.mjs   # screenshots + metrics into docs/reviews/phase-02-5/
 ```
+
+## 11. Convergence reference — `/lab/final` (Phase 02.6)
+
+**Combined**
+- From A: asymmetric Growing Mobile (shared geometry, poster-first, render-on-demand), four DOM-labelled paths, balance change on selection, Mein Kind instrument transformation, colour-keyed 2 × 2 path controls on mobile.
+- From B: PRAXIS PULS as the dominant editorial element (large serif status, italic detail), calm whitespace, vertically centred lead, quiet colophon, hairline day ruler (open demo state only).
+- From C: mobile-first order (status → action → day ruler → object → paths), object capped at 36 svh so it can never push utility out of the first viewport, 3D only when the stage is near the viewport (IntersectionObserver) and never with reduced motion / no WebGL / Save-Data / weak hardware.
+
+**Fixes made during convergence (shared chrome, also benefit A–C)**
+- Skip link no longer peeks into view with enlarged text.
+- Desktop utility layer grows and wraps with enlarged text instead of overflowing a fixed 52 px bar.
+- Status headline sized so long German words fit at 360 px without hyphenation in the default state.
+
+**Captures** (`phase-02-5/screenshots/final-*.png`, metrics in `phase-02-5/metrics-final.json`): 1440 × 900 and 390 × 844 (required), plus 1920 × 1080, 430 × 932, 360 × 800, UNKNOWN and CLOSED mobile, Mein Kind desktop/mobile, reduced motion, 4× CPU, and 200 % root text at 390 × 844 and 1440 × 900.
+
+**Results:** no horizontal overflow at any size; status, primary action and dock/utility inside the first viewport in every capture including 200 % text; 0 first-viewport targets under 44 px; initial JS 143.3 KB gzip, 3D chunk +238 KB loaded lazily; 60 fps in the (desktop-GPU) test environment.
+
+**Remaining issues**
+1. Object geometry and materials are placeholders (by decision).
+2. 200 % text is approximated by scaling the root font size; real browser text-size settings and OS font scaling still need a device test.
+3. Low-end Android GPU/battery test and real screen-reader passes are still outstanding.
+4. Three.js tree-shaking not done (3D chunk 898 KB raw / 235 KB gzip).
+5. With 200 % text on mobile the dock labels are tight and the phone number wraps inside the action pill — acceptable, to refine in the design phase.
+6. The 5-second comprehension test with parents (do they read the arms as navigation?) has not been run.

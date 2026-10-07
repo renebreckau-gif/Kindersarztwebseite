@@ -4,7 +4,7 @@
 // allowed, and real DOM controls positioned from the same geometry.
 
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import s from "./growing-mobile-stage.module.css";
 import { MobilePoster, type Palette } from "./mobile-poster";
 import { AGE_STOP_Y, ROD, layout, targetPose, toPct, VIEW } from "./mobile-geometry";
@@ -26,10 +26,13 @@ export interface StageProps {
   className?: string;
   /** Render label set only above this width (mobile uses its own controls). */
   labelsFrom?: "always" | "desktop";
+  /** Defer the WebGL layer until the stage is near the viewport (mobile discipline). */
+  loadWhenVisible?: boolean;
 }
 
 export function GrowingMobileStage(p: StageProps) {
-  const reason = useEnhancement(p.disable3d);
+  const root = useRef<HTMLDivElement>(null);
+  const reason = useEnhancement(p.disable3d, p.loadWhenVisible ? root : undefined);
   const [ready, setReady] = useState(false);
   const pose = targetPose(p.selected);
   const L = layout(pose);
@@ -37,6 +40,7 @@ export function GrowingMobileStage(p: StageProps) {
 
   return (
     <div
+      ref={root}
       className={`${s.stage} ${p.className ?? ""}`}
       style={{ aspectRatio: `${VIEW.w} / ${VIEW.h}` }}
       data-enhancement={reason ?? "pending"}

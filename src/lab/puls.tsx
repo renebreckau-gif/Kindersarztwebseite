@@ -5,7 +5,7 @@ import s from "./puls.module.css";
 import { StatusDot, Icon } from "./chrome";
 import { PHONE_DISPLAY, type PulsFixture } from "./fixtures";
 
-export function PulsStatement({ puls, variant }: { puls: PulsFixture; variant: "a" | "b" | "c" }) {
+export function PulsStatement({ puls, variant }: { puls: PulsFixture; variant: "a" | "b" | "c" | "final" }) {
   const isUnknown = puls.status === "unknown";
   return (
     <section id="heute" className={`${s.puls} ${s[variant]}`} aria-labelledby="puls-title" data-status={puls.status}>

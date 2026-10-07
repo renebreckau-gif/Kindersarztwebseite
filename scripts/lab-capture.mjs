@@ -149,6 +149,10 @@ async function capture(tabSession, url, vpName, file, opts = {}) {
   await s.send("Page.navigate", { url: BASE + url });
   await loadEv;
   loaded = true;
+  if (opts.textScale) {
+    // Approximates enlarged browser text: every rem-based size scales.
+    await s.send("Runtime.evaluate", { expression: `document.documentElement.style.fontSize='${opts.textScale * 100}%'` });
+  }
   await sleep(opts.settle ?? 3500);
 
   const audit = (await s.send("Runtime.evaluate", { expression: AUDIT, returnByValue: true })).result.value;
@@ -216,8 +220,11 @@ const gl = await (async () => {
   return r.result.value;
 })();
 
+// Usage: node scripts/lab-capture.mjs [a b c final] — default: a b c
+const only = process.argv.slice(2);
+const PROTOS = only.length ? only : ["a", "b", "c"];
 const results = [];
-for (const p of ["a", "b", "c"]) {
+for (const p of PROTOS) {
   for (const vp of Object.keys(VIEWPORTS)) {
     results.push(await capture(s, `/lab/${p}`, vp, `${p}-open-${vp}.png`));
   }
@@ -227,17 +234,19 @@ for (const p of ["a", "b", "c"]) {
   results.push(await capture(s, `/lab/${p}?pfad=mein-kind`, "390x844", `${p}-meinkind-390x844.png`));
   results.push(await capture(s, `/lab/${p}`, "390x844", `${p}-reducedmotion-390x844.png`, { reducedMotion: true }));
   results.push(await capture(s, `/lab/${p}`, "390x844", `${p}-cpu4x-390x844.png`, { cpu: 4, settle: 5000 }));
+  results.push(await capture(s, `/lab/${p}`, "390x844", `${p}-text200-390x844.png`, { textScale: 2 }));
+  results.push(await capture(s, `/lab/${p}`, "1440x900", `${p}-text200-1440x900.png`, { textScale: 2 }));
 }
-results.push(await capture(s, `/lab`, "1440x900", `lab-index-1440x900.png`));
+if (!only.length) results.push(await capture(s, `/lab`, "1440x900", `lab-index-1440x900.png`));
 
 const smoothness = [];
-for (const p of ["a", "b", "c"]) {
+for (const p of PROTOS) {
   smoothness.push(await interaction(s, `/lab/${p}`, "1440x900", 1));
   smoothness.push(await interaction(s, `/lab/${p}`, "390x844", 4));
 }
 
 writeFileSync(
-  join(OUT, "metrics.json"),
+  join(OUT, only.length ? `metrics-${only.join("-")}.json` : "metrics.json"),
   JSON.stringify({ capturedAt: new Date().toISOString(), browser: version.Browser, webglRenderer: gl, results, smoothness }, null, 2),
 );
 console.log(JSON.stringify({ browser: version.Browser, webglRenderer: gl }, null, 2));

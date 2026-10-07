@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type RefObject } from "react";
 
 export type EnhancementReason = "ok" | "disabled" | "reduced-motion" | "no-webgl" | "save-data" | "low-power";
 
@@ -8,10 +8,31 @@ export type EnhancementReason = "ok" | "disabled" | "reduced-motion" | "no-webgl
  * Decides whether a real-time 3D layer may load. Utility never depends on it.
  * Returns null until checked on the client (server render = poster).
  */
-export function useEnhancement(disabled: boolean): EnhancementReason | null {
+export function useEnhancement(
+  disabled: boolean,
+  /** Optional: only enhance once this element is (nearly) in view. */
+  target?: RefObject<Element | null>,
+): EnhancementReason | null {
   const [reason, setReason] = useState<EnhancementReason | null>(null);
+  const [inView, setInView] = useState(!target);
 
   useEffect(() => {
+    if (!target?.current) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setInView(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "120px" },
+    );
+    io.observe(target.current);
+    return () => io.disconnect();
+  }, [target]);
+
+  useEffect(() => {
+    if (!inView) return;
     if (disabled) return setReason("disabled");
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return setReason("reduced-motion");
     const nav = navigator as Navigator & { connection?: { saveData?: boolean }; deviceMemory?: number };
@@ -27,7 +48,7 @@ export function useEnhancement(disabled: boolean): EnhancementReason | null {
     const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number };
     if (w.requestIdleCallback) w.requestIdleCallback(() => setReason("ok"), { timeout: 1200 });
     else setTimeout(() => setReason("ok"), 300);
-  }, [disabled]);
+  }, [disabled, inView]);
 
   return reason;
 }

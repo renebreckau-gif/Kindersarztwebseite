@@ -102,6 +102,22 @@
   box-shadow: inset 0 0 0 1.5px var(--emergency);
 }
 
+/* ----- final: B's hierarchy, sized so long German words fit at 360 px ----- */
+.final .title {
+  font-size: clamp(2.5rem, 7.4vw, 8rem);
+  line-height: 0.94;
+  letter-spacing: -0.03em;
+}
+.final .detail {
+  font-size: clamp(1.375rem, 2.9vw, 2.875rem);
+  font-style: italic;
+  color: var(--ink);
+  margin-top: 8px;
+}
+.final .actions {
+  margin-top: 24px;
+}
+
 /* ----- C: status sits on the height chart ----- */
 .c .title {
   font-size: clamp(2.5rem, 5.4vw, 5.5rem);

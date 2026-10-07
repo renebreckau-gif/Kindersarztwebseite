@@ -8,6 +8,7 @@ const PROTOTYPES = [
   { href: "/lab/a", name: "Prototyp A", title: "Funktionales Growing Mobile" },
   { href: "/lab/b", name: "Prototyp B", title: "Editorial Instrument" },
   { href: "/lab/c", name: "Prototyp C", title: "2D/3D-Hybrid" },
+  { href: "/lab/final", name: "Konvergenz", title: "Referenz für den Signature Entry" },
 ];
 
 const STATES = [
