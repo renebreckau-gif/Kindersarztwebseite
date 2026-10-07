@@ -1,0 +1,1104 @@
+{
+  "capturedAt": "2026-10-07T08:14:19.135Z",
+  "browser": "Chrome/155.0.8059.39",
+  "webglRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 2060 SUPER (0x00001F06) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "results": [
+    {
+      "url": "/lab/a",
+      "viewport": "1920x1080",
+      "file": "a-open-1920x1080.png",
+      "jsInitialKB": 143.3,
+      "jsLazyKB": 238.2,
+      "lazyChunks": [
+        "3pt1pdwngoabs.js 238KB"
+      ],
+      "longTasksMs": 196,
+      "longTaskCount": 3,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 100px"
+    },
+    {
+      "url": "/lab/a",
+      "viewport": "1440x900",
+      "file": "a-open-1440x900.png",
+      "jsInitialKB": 143.3,
+      "jsLazyKB": 238.2,
+      "lazyChunks": [
+        "3pt1pdwngoabs.js 238KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 89.28px"
+    },
+    {
+      "url": "/lab/a",
+      "viewport": "430x932",
+      "file": "a-open-430x932.png",
+      "jsInitialKB": 143.3,
+      "jsLazyKB": 238.2,
+      "lazyChunks": [
+        "3pt1pdwngoabs.js 238KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 41.6px"
+    },
+    {
+      "url": "/lab/a",
+      "viewport": "390x844",
+      "file": "a-open-390x844.png",
+      "jsInitialKB": 143.3,
+      "jsLazyKB": 238.2,
+      "lazyChunks": [
+        "3pt1pdwngoabs.js 238KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 41.6px"
+    },
+    {
+      "url": "/lab/a",
+      "viewport": "360x800",
+      "file": "a-open-360x800.png",
+      "jsInitialKB": 143.3,
+      "jsLazyKB": 238.2,
+      "lazyChunks": [
+        "3pt1pdwngoabs.js 238KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 41.6px"
+    },
+    {
+      "url": "/lab/a?status=unknown",
+      "viewport": "390x844",
+      "file": "a-unknown-390x844.png",
+      "jsInitialKB": 143.3,
+      "jsLazyKB": 238.2,
+      "lazyChunks": [
+        "3pt1pdwngoabs.js 238KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 41.6px"
+    },
+    {
+      "url": "/lab/a?status=closed",
+      "viewport": "390x844",
+      "file": "a-closed-390x844.png",
+      "jsInitialKB": 143.3,
+      "jsLazyKB": 238.2,
+      "lazyChunks": [
+        "3pt1pdwngoabs.js 238KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 41.6px"
+    },
+    {
+      "url": "/lab/a?pfad=mein-kind",
+      "viewport": "1440x900",
+      "file": "a-meinkind-1440x900.png",
+      "jsInitialKB": 143.3,
+      "jsLazyKB": 238.2,
+      "lazyChunks": [
+        "3pt1pdwngoabs.js 238KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 89.28px"
+    },
+    {
+      "url": "/lab/a?pfad=mein-kind",
+      "viewport": "390x844",
+      "file": "a-meinkind-390x844.png",
+      "jsInitialKB": 143.3,
+      "jsLazyKB": 238.2,
+      "lazyChunks": [
+        "3pt1pdwngoabs.js 238KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 41.6px"
+    },
+    {
+      "url": "/lab/a",
+      "viewport": "390x844",
+      "file": "a-reducedmotion-390x844.png",
+      "jsInitialKB": 143.3,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [
+        "reduced-motion"
+      ],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 41.6px"
+    },
+    {
+      "url": "/lab/a",
+      "viewport": "390x844",
+      "file": "a-cpu4x-390x844.png",
+      "jsInitialKB": 143.3,
+      "jsLazyKB": 238.2,
+      "lazyChunks": [
+        "3pt1pdwngoabs.js 238KB"
+      ],
+      "longTasksMs": 129,
+      "longTaskCount": 2,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 41.6px"
+    },
+    {
+      "url": "/lab/b",
+      "viewport": "1920x1080",
+      "file": "b-open-1920x1080.png",
+      "jsInitialKB": 143.2,
+      "jsLazyKB": 238.2,
+      "lazyChunks": [
+        "3pt1pdwngoabs.js 238KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 152px"
+    },
+    {
+      "url": "/lab/b",
+      "viewport": "1440x900",
+      "file": "b-open-1440x900.png",
+      "jsInitialKB": 143.2,
+      "jsLazyKB": 238.2,
+      "lazyChunks": [
+        "3pt1pdwngoabs.js 238KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 135.36px"
+    },
+    {
+      "url": "/lab/b",
+      "viewport": "430x932",
+      "file": "b-open-430x932.png",
+      "jsInitialKB": 143.2,
+      "jsLazyKB": 238.2,
+      "lazyChunks": [
+        "3pt1pdwngoabs.js 238KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 49.6px"
+    },
+    {
+      "url": "/lab/b",
+      "viewport": "390x844",
+      "file": "b-open-390x844.png",
+      "jsInitialKB": 143.2,
+      "jsLazyKB": 238.2,
+      "lazyChunks": [
+        "3pt1pdwngoabs.js 238KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 49.6px"
+    },
+    {
+      "url": "/lab/b",
+      "viewport": "360x800",
+      "file": "b-open-360x800.png",
+      "jsInitialKB": 143.2,
+      "jsLazyKB": 238.2,
+      "lazyChunks": [
+        "3pt1pdwngoabs.js 238KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 49.6px"
+    },
+    {
+      "url": "/lab/b?status=unknown",
+      "viewport": "390x844",
+      "file": "b-unknown-390x844.png",
+      "jsInitialKB": 143.2,
+      "jsLazyKB": 238.2,
+      "lazyChunks": [
+        "3pt1pdwngoabs.js 238KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 49.6px"
+    },
+    {
+      "url": "/lab/b?status=closed",
+      "viewport": "390x844",
+      "file": "b-closed-390x844.png",
+      "jsInitialKB": 143.2,
+      "jsLazyKB": 238.2,
+      "lazyChunks": [
+        "3pt1pdwngoabs.js 238KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 49.6px"
+    },
+    {
+      "url": "/lab/b?pfad=mein-kind",
+      "viewport": "1440x900",
+      "file": "b-meinkind-1440x900.png",
+      "jsInitialKB": 143.2,
+      "jsLazyKB": 238.2,
+      "lazyChunks": [
+        "3pt1pdwngoabs.js 238KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 135.36px"
+    },
+    {
+      "url": "/lab/b?pfad=mein-kind",
+      "viewport": "390x844",
+      "file": "b-meinkind-390x844.png",
+      "jsInitialKB": 143.2,
+      "jsLazyKB": 238.2,
+      "lazyChunks": [
+        "3pt1pdwngoabs.js 238KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 49.6px"
+    },
+    {
+      "url": "/lab/b",
+      "viewport": "390x844",
+      "file": "b-reducedmotion-390x844.png",
+      "jsInitialKB": 143.2,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "reduced-motion"
+      ],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 49.6px"
+    },
+    {
+      "url": "/lab/b",
+      "viewport": "390x844",
+      "file": "b-cpu4x-390x844.png",
+      "jsInitialKB": 143.2,
+      "jsLazyKB": 238.2,
+      "lazyChunks": [
+        "3pt1pdwngoabs.js 238KB"
+      ],
+      "longTasksMs": 60,
+      "longTaskCount": 1,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [
+        "ok"
+      ],
+      "canvases": 1,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 49.6px"
+    },
+    {
+      "url": "/lab/c",
+      "viewport": "1920x1080",
+      "file": "c-open-1920x1080.png",
+      "jsInitialKB": 140.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 88px"
+    },
+    {
+      "url": "/lab/c",
+      "viewport": "1440x900",
+      "file": "c-open-1440x900.png",
+      "jsInitialKB": 140.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 77.76px"
+    },
+    {
+      "url": "/lab/c",
+      "viewport": "430x932",
+      "file": "c-open-430x932.png",
+      "jsInitialKB": 140.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 40px"
+    },
+    {
+      "url": "/lab/c",
+      "viewport": "390x844",
+      "file": "c-open-390x844.png",
+      "jsInitialKB": 140.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 40px"
+    },
+    {
+      "url": "/lab/c",
+      "viewport": "360x800",
+      "file": "c-open-360x800.png",
+      "jsInitialKB": 140.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 40px"
+    },
+    {
+      "url": "/lab/c?status=unknown",
+      "viewport": "390x844",
+      "file": "c-unknown-390x844.png",
+      "jsInitialKB": 140.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 40px"
+    },
+    {
+      "url": "/lab/c?status=closed",
+      "viewport": "390x844",
+      "file": "c-closed-390x844.png",
+      "jsInitialKB": 140.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 40px"
+    },
+    {
+      "url": "/lab/c?pfad=mein-kind",
+      "viewport": "1440x900",
+      "file": "c-meinkind-1440x900.png",
+      "jsInitialKB": 140.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 77.76px"
+    },
+    {
+      "url": "/lab/c?pfad=mein-kind",
+      "viewport": "390x844",
+      "file": "c-meinkind-390x844.png",
+      "jsInitialKB": 140.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 40px"
+    },
+    {
+      "url": "/lab/c",
+      "viewport": "390x844",
+      "file": "c-reducedmotion-390x844.png",
+      "jsInitialKB": 140.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 40px"
+    },
+    {
+      "url": "/lab/c",
+      "viewport": "390x844",
+      "file": "c-cpu4x-390x844.png",
+      "jsInitialKB": 140.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "longTasksMs": 99,
+      "longTaskCount": 1,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 2
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      },
+      "titleFont": "Newsreader 40px"
+    },
+    {
+      "url": "/lab",
+      "viewport": "1440x900",
+      "file": "lab-index-1440x900.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 0
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": null,
+        "action": null,
+        "dockOrUtil": null
+      }
+    }
+  ],
+  "smoothness": [
+    {
+      "url": "/lab/a",
+      "viewport": "1440x900",
+      "cpuThrottle": 1,
+      "frames": 213,
+      "medianFrameMs": 16.7,
+      "p95FrameMs": 16.8,
+      "maxFrameMs": 17,
+      "longTasksMs": 0
+    },
+    {
+      "url": "/lab/a",
+      "viewport": "390x844",
+      "cpuThrottle": 4,
+      "frames": 214,
+      "medianFrameMs": 16.7,
+      "p95FrameMs": 16.7,
+      "maxFrameMs": 17,
+      "longTasksMs": 196
+    },
+    {
+      "url": "/lab/b",
+      "viewport": "1440x900",
+      "cpuThrottle": 1,
+      "frames": 212,
+      "medianFrameMs": 16.7,
+      "p95FrameMs": 16.7,
+      "maxFrameMs": 17,
+      "longTasksMs": 0
+    },
+    {
+      "url": "/lab/b",
+      "viewport": "390x844",
+      "cpuThrottle": 4,
+      "frames": 215,
+      "medianFrameMs": 16.7,
+      "p95FrameMs": 16.8,
+      "maxFrameMs": 17,
+      "longTasksMs": 142
+    },
+    {
+      "url": "/lab/c",
+      "viewport": "1440x900",
+      "cpuThrottle": 1,
+      "frames": 214,
+      "medianFrameMs": 16.7,
+      "p95FrameMs": 16.8,
+      "maxFrameMs": 17,
+      "longTasksMs": 0
+    },
+    {
+      "url": "/lab/c",
+      "viewport": "390x844",
+      "cpuThrottle": 4,
+      "frames": 227,
+      "medianFrameMs": 16.7,
+      "p95FrameMs": 16.7,
+      "maxFrameMs": 17,
+      "longTasksMs": 98
+    }
+  ]
+}

@@ -1,0 +1,168 @@
+.page {
+  min-height: 100svh;
+}
+
+.main {
+  display: grid;
+  gap: 32px;
+  padding: 24px var(--gutter) 0;
+}
+
+.lead {
+  min-width: 0;
+}
+
+/* ----- day ruler ----- */
+.ruler {
+  margin: 28px 0 0;
+  max-width: 720px;
+}
+.rulerTrack {
+  position: relative;
+  height: 46px;
+  border-bottom: 1px solid var(--ink);
+}
+.tick,
+.tickMajor {
+  position: absolute;
+  bottom: 0;
+  width: 1px;
+  background: var(--ink);
+  height: 7px;
+}
+.tickMajor {
+  height: 13px;
+}
+.tickMajor em {
+  position: absolute;
+  bottom: 18px;
+  left: 0;
+  transform: translateX(-50%);
+  font-style: normal;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+.span {
+  position: absolute;
+  bottom: -2px;
+  height: 5px;
+  background: var(--ink);
+}
+.now {
+  position: absolute;
+  bottom: -6px;
+  width: 2px;
+  height: 22px;
+  background: var(--coral);
+}
+.now em {
+  position: absolute;
+  top: 26px;
+  left: 0;
+  transform: translateX(-50%);
+  font-style: normal;
+  font-size: 0.75rem;
+  color: var(--ink);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----- instrument column ----- */
+.instrument {
+  display: grid;
+  grid-template-columns: minmax(120px, 42%) 1fr;
+  align-items: center;
+  gap: 8px 20px;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+  padding-top: 16px;
+}
+.stage {
+  width: 100%;
+}
+.indexNav {
+  min-width: 0;
+}
+.index {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.index li + li {
+  border-top: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+}
+.index a {
+  display: grid;
+  min-height: 48px;
+  align-content: center;
+  padding: 6px 0;
+  text-decoration: none;
+}
+.indexLabel {
+  font-family: var(--serif);
+  font-size: 1.375rem;
+  line-height: 1.15;
+  transition: color 200ms var(--ease-out), transform 300ms var(--ease-out);
+}
+.indexPreview {
+  display: none;
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
+.index a:hover .indexLabel,
+.index a:focus-visible .indexLabel {
+  color: var(--cobalt-ink);
+}
+.index a[aria-current="true"] .indexLabel {
+  color: var(--cobalt-ink);
+  font-style: italic;
+}
+.live {
+  grid-column: 1 / -1;
+  font-size: 0.9375rem;
+  color: var(--ink-soft);
+  min-height: 1.4em;
+}
+
+.colophon {
+  font-family: var(--serif);
+  font-size: 1.125rem;
+  color: var(--ink-soft);
+}
+
+@media (min-width: 900px) {
+  .main {
+    grid-template-columns: minmax(0, 8fr) minmax(260px, 3.4fr);
+    grid-template-rows: 1fr auto;
+    gap: 24px clamp(32px, 5vw, 96px);
+    min-height: calc(100svh - var(--util-h));
+    padding-top: clamp(32px, 7vh, 96px);
+    padding-bottom: 28px;
+  }
+  .lead {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    padding-bottom: 4vh;
+  }
+  .instrument {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    grid-template-columns: 1fr;
+    align-content: center;
+    border-top: 0;
+    border-left: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+    padding: 0 0 0 clamp(20px, 2.4vw, 40px);
+  }
+  .stage {
+    max-width: 300px;
+  }
+  .indexPreview {
+    display: block;
+  }
+  .colophon {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: end;
+  }
+}

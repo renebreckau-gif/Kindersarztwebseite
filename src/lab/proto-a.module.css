@@ -1,0 +1,178 @@
+.page {
+  min-height: 100svh;
+}
+
+.main {
+  display: grid;
+  padding: 20px var(--gutter) 0;
+  gap: 8px;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  padding-top: 8px;
+}
+
+.claim {
+  font-family: var(--serif);
+  font-size: 1.125rem;
+  line-height: 1.3;
+  color: var(--ink-soft);
+  margin-top: 28px;
+}
+
+.objectCol {
+  position: relative;
+}
+
+.stage {
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+/* Mobile path grid: 2 × 2, thumb sized */
+.pathGrid {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.pathGrid a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 0 16px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+  text-decoration: none;
+  font-size: 1.0625rem;
+}
+.pathGrid a[aria-current="true"] {
+  background: var(--ink);
+  color: var(--canvas);
+  border-color: var(--ink);
+}
+.swatch {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  background: var(--c);
+}
+.swDisc,
+.swSphere {
+  border-radius: 50%;
+}
+.swCapsule {
+  width: 10px;
+  border-radius: 6px;
+}
+.swRing {
+  background: transparent;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 5px var(--c);
+}
+
+.mobileInst {
+  display: grid;
+  gap: 8px;
+}
+.ageRow {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.ageRow legend {
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+}
+.ageRow label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.ageRow input {
+  position: absolute;
+  opacity: 0;
+}
+.ageRow label:has(input:checked) {
+  background: var(--ink);
+  color: var(--canvas);
+}
+.ageRow label:has(input:focus-visible) {
+  outline: 3px solid var(--cobalt);
+  outline-offset: 2px;
+}
+.back {
+  justify-self: start;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--cobalt-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.preview {
+  min-height: 1.5em;
+  margin-top: 12px;
+  font-size: 0.9375rem;
+  color: var(--ink-soft);
+}
+
+@media (min-width: 900px) {
+  .pathGrid,
+  .mobileInst {
+    display: none;
+  }
+  .main {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    align-items: stretch;
+    gap: clamp(24px, 4vw, 72px);
+    min-height: calc(100svh - var(--util-h));
+    padding-top: clamp(24px, 5vh, 64px);
+    padding-bottom: 32px;
+  }
+  .info {
+    justify-content: space-between;
+    padding-top: clamp(16px, 6vh, 72px);
+  }
+  .claim {
+    font-size: clamp(1.25rem, 1.6vw, 1.625rem);
+    margin-top: 0;
+  }
+  .objectCol {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .stage {
+    max-width: min(100%, calc((100svh - var(--util-h) - 120px) * 1.04));
+    margin: 0 0 0 auto;
+  }
+  .preview {
+    text-align: right;
+  }
+}
+
+@media (max-width: 899px) {
+  .stage {
+    max-width: min(100%, 46svh);
+  }
+}
