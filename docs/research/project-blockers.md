@@ -4,6 +4,8 @@ Phase: 00.5 — Research Acceptance Gate
 Date: 2026-10-07
 Fact IDs (F01 …) refer to [fact-status-register.md](fact-status-register.md). Rules: [source-policy.md](source-policy.md).
 
+> **Clarification (Phase 01.5):** blockers gate *public release of a claim or feature*, not design or development. Work continues with safe fallbacks, marked mock data, disabled states and `TO_BE_CONFIRMED` markers. See [strategy-lock.md](../product/strategy-lock.md).
+
 Classes:
 - **LAUNCH BLOCKER** — must be resolved before the public launch.
 - **FEATURE BLOCKER** — must be resolved before a specific feature goes live. The site may launch without that feature, or with its fail-safe fallback.
