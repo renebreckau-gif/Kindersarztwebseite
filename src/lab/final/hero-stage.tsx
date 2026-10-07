@@ -37,8 +37,6 @@ const ELEMENT: Record<PathId, { x: number; y: number; r: number; tilt: number }>
 const ROD = { x: 1336, yFloor: 1418, yTop: 760 };
 const AGE_Y = [1300, 1150, 990, 830];
 
-const AGE_SLUGS = ["0-2-jahre", "3-6-jahre", "7-12-jahre", "13-17-jahre"];
-
 const PATH_TEXT: Record<PathId, string> = {
   heute: "Sprechzeiten, Telefon und Anfahrt",
   "mein-kind": "Vorsorge und Orientierung nach Alter",
@@ -98,9 +96,10 @@ function useSway(target: number, pointer: boolean) {
 }
 
 /**
- * `routes` (public start page): path links point to real pages without JavaScript; with
- * JavaScript a choice previews on the mobile first and offers an explicit "Zu …" link
- * (docs/ux/navigation-model.md §12). Without `routes` the lab keeps `?pfad=` previews.
+ * `routes` (public start page): every path link navigates with one click/tap (Phase 07.1,
+ * usability test). Mouse hover or keyboard focus previews the mobile's state as progressive
+ * enhancement; touch never previews. Without `routes` the lab keeps its in-place previews
+ * (`?pfad=`, age rail) for internal demonstration.
  */
 export function HeroStage({ initial, children, routes }: { initial: PathId | null; children: ReactNode; routes?: Record<PathId, string> }) {
   const [selected, setSelected] = useState<PathId | null>(initial);
@@ -116,6 +115,12 @@ export function HeroStage({ initial, children, routes }: { initial: PathId | nul
     if (inst && focusAges.current) ageRef.current?.focus({ preventScroll: false });
     focusAges.current = false;
   }, [inst]);
+
+  /** Public hover/focus preview: visual only, never blocks the link. */
+  const preview = (id: PathId | null) => {
+    setSelected(id);
+    setAge(null);
+  };
 
   const select = (id: PathId | null) => {
     focusAges.current = id === "mein-kind";
@@ -210,7 +215,7 @@ export function HeroStage({ initial, children, routes }: { initial: PathId | nul
         </div>
         <div className={s.content}>
           {children}
-          {inst ? (
+          {inst && !routes ? (
             <div className={s.ageRail}>
               {/* appears in the text column (not the ledge) so the scene never shifts;
                   focus moves here when Mein Kind is chosen */}
@@ -241,11 +246,29 @@ export function HeroStage({ initial, children, routes }: { initial: PathId | nul
                 <a
                   href={routes ? routes[p.id] : `?pfad=${p.id}#pfade`}
                   className={s.path}
-                  aria-current={selected === p.id ? "true" : undefined}
-                  onClick={(ev) => {
-                    ev.preventDefault();
-                    select(selected === p.id ? null : p.id);
-                  }}
+                  aria-current={!routes && selected === p.id ? "true" : undefined}
+                  {...(routes
+                    ? {
+                        // Public site: one intent = one tap. The link always navigates; a mouse
+                        // hover or keyboard focus only previews the mobile (progressive enhancement).
+                        onPointerEnter: (ev: React.PointerEvent) => {
+                          if (ev.pointerType === "mouse") preview(p.id);
+                        },
+                        onPointerLeave: (ev: React.PointerEvent) => {
+                          if (ev.pointerType === "mouse") preview(null);
+                        },
+                        onFocus: (ev: React.FocusEvent<HTMLAnchorElement>) => {
+                          if (ev.currentTarget.matches(":focus-visible")) preview(p.id);
+                        },
+                        onBlur: () => preview(null),
+                      }
+                    : {
+                        // Lab (/lab/final): click previews in place, as approved in Phase 06.
+                        onClick: (ev: React.MouseEvent) => {
+                          ev.preventDefault();
+                          select(selected === p.id ? null : p.id);
+                        },
+                      })}
                 >
                   <span className={s.pathIcon}>
                     <PathIcon id={p.id} />
@@ -258,24 +281,17 @@ export function HeroStage({ initial, children, routes }: { initial: PathId | nul
           </ul>
         </nav>
 
+        {routes ? null : (
         <p className={s.preview} aria-live="polite">
           {inst
             ? age !== null
-              ? routes
-                ? `${AGE_RANGES[age]} Jahre gewählt. `
-                : `${AGE_RANGES[age]} Jahre gewählt. Inhalte folgen in einer späteren Phase.`
+              ? `${AGE_RANGES[age]} Jahre gewählt. Inhalte folgen in einer späteren Phase.`
               : "Mein Kind: Der Messstab zeigt die Altersstufen. Wählen Sie ein Alter."
             : current
-              ? routes
-                ? `${current.label}: ${PATH_TEXT[current.id]}. `
-                : `${current.label}: Inhalte folgen in einer späteren Phase.`
+              ? `${current.label}: Inhalte folgen in einer späteren Phase.`
               : ""}
-          {current && routes ? (
-            <a className={s.previewLink} href={inst && age !== null ? `${routes["mein-kind"]}/${AGE_SLUGS[age]}` : routes[current.id]}>
-              {inst && age !== null ? `Zu ${AGE_RANGES[age]} Jahre` : `Zu ${current.label}`}
-            </a>
-          ) : null}
         </p>
+        )}
       </div>
     </div>
   );

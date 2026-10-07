@@ -792,3 +792,8 @@
     border-top-color: CanvasText;
   }
 }
+/* Phase 07.1: short nav labels ("Start") still get a 44 px target — no visual change */
+.nav a {
+  min-width: var(--target-min);
+  justify-content: center;
+}

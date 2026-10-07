@@ -25,7 +25,7 @@ export default async function Start({ searchParams }: { searchParams: Search }) 
       <a className={s.skip} href="#inhalt">
         Zum Inhalt springen
       </a>
-      <EntryHeader links={PRIMARY.map((p) => ({ id: p.id, label: p.label, href: p.href }))} homeHref="/" />
+      <EntryHeader links={[{ id: "start", label: "Start", href: "/", current: true }, ...PRIMARY.map((p) => ({ id: p.id, label: p.label, href: p.href }))]} homeHref="/" />
       <SiteDock puls={puls} />
       <main id="inhalt">
         <HeroStage initial={null} routes={ROUTES}>

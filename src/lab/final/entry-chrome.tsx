@@ -8,8 +8,8 @@ import type { DemoPuls } from "@/design-system/demo-fixtures";
 import { PATHS, PHONE_DISPLAY, PHONE_HREF } from "../fixtures";
 
 /** `links` connects the hero nav to real routes on the public start page; the lab keeps its previews. */
-export function EntryHeader({ links, homeHref = "#inhalt", menuHref = "#menue" }: { links?: { id: string; label: string; href: string }[]; homeHref?: string; menuHref?: string } = {}) {
-  const items = links ?? PATHS.map((p) => ({ id: p.id, label: p.label, href: `?pfad=${p.id}#pfade` }));
+export function EntryHeader({ links, homeHref = "#inhalt", menuHref = "#menue" }: { links?: { id: string; label: string; href: string; current?: boolean }[]; homeHref?: string; menuHref?: string } = {}) {
+  const items: { id: string; label: string; href: string; current?: boolean }[] = links ?? PATHS.map((p) => ({ id: p.id, label: p.label, href: `?pfad=${p.id}#pfade` }));
   return (
     <header className={s.header}>
       <a className={s.wordmark} href={homeHref}>
@@ -20,7 +20,9 @@ export function EntryHeader({ links, homeHref = "#inhalt", menuHref = "#menue" }
         <ul>
           {items.map((p) => (
             <li key={p.id}>
-              <a href={p.href}>{p.label}</a>
+              <a href={p.href} aria-current={p.current ? "page" : undefined}>
+                {p.label}
+              </a>
             </li>
           ))}
         </ul>
@@ -80,13 +82,13 @@ export function PulsStatement({ puls, hoursHref, emergencyHref = "#notfall", tag
   );
 }
 
-/** Mobile dock: Anrufen · Heute · Notfall · Menü (order fixed). */
+/** Mobile dock: Menü · Heute · Notfall · Anrufen (order fixed, Phase 07.1). */
 export function EntryDock({ puls }: { puls: DemoPuls }) {
   return (
     <nav aria-label="Schnellzugriff" className={s.dock}>
-      <a href={PHONE_HREF} className={s.dockCell}>
-        <Icon name="phone" />
-        <span>Anrufen</span>
+      <a href="#menue" className={s.dockCell}>
+        <Icon name="menu" />
+        <span>Menü</span>
       </a>
       <a href="#heute" className={s.dockCell}>
         <span className={s.dockToday}>
@@ -101,9 +103,9 @@ export function EntryDock({ puls }: { puls: DemoPuls }) {
         <Icon name="alert" />
         <span>Notfall</span>
       </a>
-      <a href="#menue" className={s.dockCell}>
-        <Icon name="menu" />
-        <span>Menü</span>
+      <a href={PHONE_HREF} className={s.dockCell}>
+        <Icon name="phone" />
+        <span>Anrufen</span>
       </a>
     </nav>
   );

@@ -433,3 +433,13 @@
 .footerLegal a {
   min-width: 44px;
 }
+@media (min-width: 64em) {
+  .footerCols {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+/* short labels ("Start", "Team") still get a 44 px target */
+.nav a {
+  min-width: var(--target-min);
+  justify-content: center;
+}

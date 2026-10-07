@@ -30,7 +30,7 @@ export function StatusChip({ puls }: { puls: PulsView }) {
   );
 }
 
-export function SiteHeader({ current, puls }: { current?: PathKey; puls: PulsView }) {
+export function SiteHeader({ current, puls, home = false }: { current?: PathKey; puls: PulsView; home?: boolean }) {
   return (
     <header className={s.header}>
       <Link className={s.wordmark} href="/">
@@ -39,6 +39,11 @@ export function SiteHeader({ current, puls }: { current?: PathKey; puls: PulsVie
       </Link>
       <nav aria-label="Hauptnavigation" className={s.nav}>
         <ul>
+          <li>
+            <Link href="/" aria-current={current === undefined && home ? "page" : undefined}>
+              Start
+            </Link>
+          </li>
           {PRIMARY.map((p) => (
             <li key={p.id}>
               <Link href={p.href} aria-current={current === p.id ? "page" : undefined}>
@@ -65,13 +70,16 @@ export function SiteHeader({ current, puls }: { current?: PathKey; puls: PulsVie
   );
 }
 
-/** Mobile dock: Anrufen · Heute · Notfall · Menü (order fixed). */
+/**
+ * Mobile dock: Menü · Heute · Notfall · Anrufen (Phase 07.1). Menü sits far left where
+ * users expect navigation; the call stays one tap away at the far right.
+ */
 export function SiteDock({ puls }: { puls: PulsView }) {
   return (
     <nav aria-label="Schnellzugriff" className={s.dock}>
-      <a href={PRACTICE.phone.value.href} className={s.dockCell}>
-        <Icon name="phone" />
-        <span>Anrufen</span>
+      <a href="#menue" className={s.dockCell}>
+        <Icon name="menu" />
+        <span>Menü</span>
       </a>
       <Link href="/heute" className={s.dockCell}>
         <span className={s.dockToday}>
@@ -86,9 +94,9 @@ export function SiteDock({ puls }: { puls: PulsView }) {
         <Icon name="alert" />
         <span>Notfall</span>
       </Link>
-      <a href="#menue" className={s.dockCell}>
-        <Icon name="menu" />
-        <span>Menü</span>
+      <a href={PRACTICE.phone.value.href} className={s.dockCell}>
+        <Icon name="phone" />
+        <span>Anrufen</span>
       </a>
     </nav>
   );
@@ -131,13 +139,15 @@ export function SiteFooter() {
                 <Link href={g.href} className={s.footerGroup}>
                   {g.label}
                 </Link>
-                <ul>
-                  {g.children.map((c) => (
-                    <li key={c.href}>
-                      <Link href={c.href}>{c.label}</Link>
-                    </li>
-                  ))}
-                </ul>
+                {g.children.length ? (
+                  <ul>
+                    {g.children.map((c) => (
+                      <li key={c.href}>
+                        <Link href={c.href}>{c.label}</Link>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
               </div>
             ))}
           </div>

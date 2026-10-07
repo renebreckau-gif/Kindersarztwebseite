@@ -14,6 +14,7 @@ export const PRIMARY: { id: PathKey; label: string; href: string; text: string }
 ];
 
 export const SITEMAP: { label: string; href: string; children: { label: string; href: string }[] }[] = [
+  { label: "Start", href: "/", children: [] },
   {
     label: "Heute",
     href: "/heute",
