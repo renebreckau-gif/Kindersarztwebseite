@@ -149,13 +149,24 @@ export function LabSections({ base }: { base: string }) {
   );
 }
 
+const DEFAULT_STATES: { id: DemoStatus; label: string }[] = [
+  { id: "open", label: "Geöffnet" },
+  { id: "closed", label: "Geschlossen" },
+  { id: "unknown", label: "Unbekannt" },
+];
+
 /** Internal toolbar at the very end of the page: switch demo states without JS. */
-export function LabToolbar({ base, label, status }: { base: string; label: string; status: DemoStatus }) {
-  const states: { id: DemoStatus; label: string }[] = [
-    { id: "open", label: "Geöffnet" },
-    { id: "closed", label: "Geschlossen" },
-    { id: "unknown", label: "Unbekannt" },
-  ];
+export function LabToolbar({
+  base,
+  label,
+  status,
+  states = DEFAULT_STATES,
+}: {
+  base: string;
+  label: string;
+  status: string;
+  states?: { id: string; label: string }[];
+}) {
   return (
     <footer className={s.toolbar}>
       <p>

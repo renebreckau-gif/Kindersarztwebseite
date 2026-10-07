@@ -11,7 +11,7 @@ import { join, resolve } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 
 const BASE = process.env.LAB_URL ?? "http://localhost:3100";
-const OUT = resolve("docs/reviews/phase-02-5");
+const OUT = resolve(process.env.LAB_OUT ?? "docs/reviews/phase-02-5");
 const SHOTS = join(OUT, "screenshots");
 const PORT = 9333;
 const CHROME =
@@ -122,7 +122,7 @@ const AUDIT = `(() => {
   }
   const inView = (sel) => { const e = document.querySelector(sel); if (!e) return null; const r = e.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight; };
   out.firstViewport = {
-    status: inView('#puls-title'),
+    status: inView('#puls-title') ?? inView('#heute p'),
     action: inView('#heute a[href^="tel:"], #heute a[href="#notfall"]'),
     dockOrUtil: inView('nav[aria-label="Schnellzugriff"]'),
   };
@@ -153,7 +153,7 @@ async function capture(tabSession, url, vpName, file, opts = {}) {
     // Approximates enlarged browser text: every rem-based size scales.
     await s.send("Runtime.evaluate", { expression: `document.documentElement.style.fontSize='${opts.textScale * 100}%'` });
   }
-  await sleep(opts.settle ?? 3500);
+  await sleep(opts.settle ?? Number(process.env.LAB_SETTLE ?? 3500));
 
   const audit = (await s.send("Runtime.evaluate", { expression: AUDIT, returnByValue: true })).result.value;
   const lab = (await s.send("Runtime.evaluate", { expression: "window.__lab", returnByValue: true })).result.value;
@@ -224,6 +224,16 @@ const gl = await (async () => {
 const only = process.argv.slice(2);
 const PROTOS = only.length ? only : ["a", "b", "c"];
 const results = [];
+const QUICK = process.env.LAB_QUICK; // e.g. "1440x900,390x844": open state only, no metrics file
+if (QUICK) {
+  for (const p of PROTOS) for (const vp of QUICK.split(",")) results.push(await capture(s, `/lab/${p}${process.env.LAB_QUERY ?? ""}`, vp, `quick-${p}-${vp}.png`, { textScale: Number(process.env.LAB_TEXT) || undefined }));
+  for (const r of results) console.log(r.file, JSON.stringify({ ovX: r.overflowX, fv: r.firstViewport, enh: r.enhancement, small: r.smallTargets, clip: r.clipped }));
+  ws.close();
+  chrome.kill();
+  await sleep(500);
+  rmSync(profile, { recursive: true, force: true });
+  process.exit(0);
+}
 for (const p of PROTOS) {
   for (const vp of Object.keys(VIEWPORTS)) {
     results.push(await capture(s, `/lab/${p}`, vp, `${p}-open-${vp}.png`));
@@ -236,6 +246,15 @@ for (const p of PROTOS) {
   results.push(await capture(s, `/lab/${p}`, "390x844", `${p}-cpu4x-390x844.png`, { cpu: 4, settle: 5000 }));
   results.push(await capture(s, `/lab/${p}`, "390x844", `${p}-text200-390x844.png`, { textScale: 2 }));
   results.push(await capture(s, `/lab/${p}`, "1440x900", `${p}-text200-1440x900.png`, { textScale: 2 }));
+  if (p === "final") {
+    results.push(await capture(s, `/lab/${p}?status=unknown`, "1440x900", `${p}-unknown-1440x900.png`));
+    results.push(await capture(s, `/lab/${p}?status=special`, "390x844", `${p}-special-390x844.png`));
+    results.push(await capture(s, `/lab/${p}?status=closure`, "390x844", `${p}-closure-390x844.png`));
+    results.push(await capture(s, `/lab/${p}?pfad=praxis`, "1440x900", `${p}-praxis-1440x900.png`));
+    results.push(await capture(s, `/lab/${p}?3d=0`, "1440x900", `${p}-no3d-1440x900.png`));
+    results.push(await capture(s, `/lab/${p}?3d=0`, "390x844", `${p}-no3d-390x844.png`));
+    results.push(await capture(s, `/lab/${p}`, "1440x900", `${p}-reducedmotion-1440x900.png`, { reducedMotion: true }));
+  }
 }
 if (!only.length) results.push(await capture(s, `/lab`, "1440x900", `lab-index-1440x900.png`));
 

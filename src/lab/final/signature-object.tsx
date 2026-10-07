@@ -1,0 +1,139 @@
+"use client";
+
+// Signature entry — object zone + four paths (Phase 06).
+// The object hangs in the sunlit arch: designed SVG poster first, WebGL on top
+// when allowed, a soft cast shadow on the wall and a ceramic bowl below.
+// The four paths are real links (?pfad=…) that work without JavaScript; with
+// JavaScript they tip the mobile toward the chosen element instead of reloading.
+
+import dynamic from "next/dynamic";
+import { useRef, useState } from "react";
+import s from "./signature.module.css";
+import { SignaturePoster } from "./signature-poster";
+import { PathIcon } from "./path-icons";
+import { SAGE_STOP_Y, SROD, SVIEW, sigTarget, sPct } from "./signature-geometry";
+import { AGE_RANGES, PATHS, type PathId } from "../fixtures";
+import { useEnhancement } from "../use-enhancement";
+
+const SignatureScene = dynamic(() => import("./signature-scene"), { ssr: false });
+
+/** Short orientation lines for the path row. Navigation copy, not practice facts. */
+const PATH_TEXT: Record<PathId, string> = {
+  heute: "Sprechzeiten, Telefon und Anfahrt",
+  "mein-kind": "Vorsorge und Orientierung nach Alter",
+  praxis: "Ärztinnen, Team und erster Besuch",
+  entdecken: "Für Kinder: So läuft ein Arztbesuch",
+};
+
+export function SignatureEntry({ initial, disable3d }: { initial: PathId | null; disable3d: boolean }) {
+  const [selected, setSelected] = useState<PathId | null>(initial);
+  const [age, setAge] = useState<number | null>(null);
+  const root = useRef<HTMLDivElement>(null);
+  const reason = useEnhancement(disable3d, root);
+  const [ready, setReady] = useState(false);
+  const pose = sigTarget(selected);
+  const inst = selected === "mein-kind";
+  const current = PATHS.find((p) => p.id === selected);
+
+  const select = (id: PathId | null) => {
+    setSelected(id);
+    setAge(null);
+  };
+
+  return (
+    <>
+      <div className={s.objectZone} data-selected={selected ?? ""} data-inst={inst ? "" : undefined}>
+        <div ref={root} className={s.stage} style={{ aspectRatio: `${SVIEW.w} / ${SVIEW.h}` }} data-enhancement={reason ?? "pending"}>
+          <SignaturePoster pose={pose} selected={selected} shadow className={s.castShadow} />
+          <SignaturePoster pose={pose} selected={selected} className={`${s.layer} ${ready ? s.hidden : ""}`} />
+          {reason === "ok" ? (
+            <div className={`${s.layer} ${ready ? s.visible : s.hidden}`}>
+              <SignatureScene selected={selected} onSelect={(id) => select(selected === id ? null : id)} onReady={() => setReady(true)} />
+            </div>
+          ) : null}
+          {inst ? (
+            <ol className={s.rodLabels} aria-hidden="true">
+              {AGE_RANGES.map((r, i) => (
+                <li key={r} style={sPct([SROD.x - 0.2, SAGE_STOP_Y[i]])} data-active={age === i ? "" : undefined}>
+                  {r}
+                </li>
+              ))}
+            </ol>
+          ) : null}
+        </div>
+        <svg className={s.bowl} viewBox="0 0 200 70" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="bowl-body" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stopColor="#DCCDBC" />
+              <stop offset="0.35" stopColor="#F6EEE4" />
+              <stop offset="1" stopColor="#C9B49E" />
+            </linearGradient>
+            <radialGradient id="bowl-shadow" cx="50%" cy="50%" r="50%">
+              <stop offset="0" stopColor="#8A6A4C" stopOpacity="0.32" />
+              <stop offset="1" stopColor="#8A6A4C" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          <ellipse cx="96" cy="62" rx="98" ry="8" fill="url(#bowl-shadow)" />
+          <path d="M22 18 C 24 52, 58 62, 100 62 C 142 62, 176 52, 178 18 Z" fill="url(#bowl-body)" />
+          <ellipse cx="100" cy="18" rx="78" ry="9" fill="#E9DDCF" />
+          <ellipse cx="100" cy="19.5" rx="70" ry="6.5" fill="#D6C5B2" />
+        </svg>
+      </div>
+
+      <div className={s.pathsArea} id="pfade">
+        <nav aria-label="Bereiche">
+          <ul className={s.paths}>
+            {PATHS.map((p) => (
+              <li key={p.id}>
+                <a
+                  href={`?pfad=${p.id}#pfade`}
+                  className={s.path}
+                  aria-current={selected === p.id ? "true" : undefined}
+                  onClick={(ev) => {
+                    ev.preventDefault();
+                    select(selected === p.id ? null : p.id);
+                  }}
+                >
+                  <span className={s.pathIcon}>
+                    <PathIcon id={p.id} />
+                  </span>
+                  <span className={s.pathTitle}>{p.label}</span>
+                  <span className={s.pathText}>{PATH_TEXT[p.id]}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        {inst ? (
+          <div className={s.ageRail}>
+            <fieldset>
+              <legend>Alter Ihres Kindes</legend>
+              <div className={s.ageOptions}>
+                {AGE_RANGES.map((r, i) => (
+                  <label key={r}>
+                    <input type="radio" name="alter" checked={age === i} onChange={() => setAge(i)} />
+                    <span>{r} Jahre</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <button type="button" className={s.back} onClick={() => select(null)}>
+              Zurück zur Übersicht
+            </button>
+          </div>
+        ) : null}
+
+        <p className={s.preview} aria-live="polite">
+          {inst
+            ? age !== null
+              ? `${AGE_RANGES[age]} Jahre gewählt. Inhalte folgen in einer späteren Phase.`
+              : "Mein Kind: Das Mobile wird zum Messstab. Wählen Sie ein Alter."
+            : current
+              ? `${current.label}: Inhalte folgen in einer späteren Phase.`
+              : ""}
+        </p>
+      </div>
+    </>
+  );
+}

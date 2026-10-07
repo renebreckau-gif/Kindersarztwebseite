@@ -1,0 +1,775 @@
+/* Signature entry (Phase 06) — translated from the approved reference (middle variant):
+   a warm, softly sunlit room with an arched window; large serif statement; PRAXIS PULS
+   as a lit pill; deep cobalt call; separate red Notfall; brass mobile in the light;
+   four paths on a translucent ledge. Mobile first. */
+
+.page {
+  /* room light — documented Phase 06 token additions (see review §tokens) */
+  --room-ivory: #f8f2e9;
+  --room-wall: #f3e6d6;
+  --room-peach: #f1d5bd;
+  --room-glow: #fffaf1;
+  --room-floor: #e6d0bb;
+  --room-shade: #8a6248;
+  --glass-panel: rgb(255 251 245 / 0.62);
+  --glass-edge: rgb(255 255 255 / 0.75);
+  --radius-pill: 999px;
+  --radius-ledge: 22px;
+  --call-bg: #3446e8;
+  --call-bg-deep: #2433c4;
+
+  min-height: 100vh;
+  background: var(--room-ivory);
+  color: var(--color-text);
+  padding-bottom: calc(var(--dock-height) + 28px + env(safe-area-inset-bottom));
+}
+@media (min-width: 64em) {
+  .page {
+    padding-bottom: 0;
+  }
+}
+
+.skip {
+  position: absolute;
+  left: 12px;
+  top: 8px;
+  z-index: 30;
+  padding: 12px 16px;
+  background: var(--color-surface-inverse);
+  color: var(--color-text-inverse);
+  border-radius: var(--radius-control);
+  transform: translateY(-160%);
+}
+.skip:focus {
+  transform: none;
+}
+
+/* ================= header ================= */
+.header {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  padding: var(--space-5) var(--space-gutter) var(--space-3);
+  background: linear-gradient(180deg, var(--room-ivory), color-mix(in srgb, var(--room-ivory) 0%, transparent));
+}
+.wordmark {
+  display: grid;
+  font-family: var(--font-display);
+  font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.3125rem);
+  line-height: 1.08;
+  letter-spacing: -0.005em;
+  color: var(--color-text);
+  text-decoration: none;
+  min-height: var(--target-min);
+  align-content: center;
+}
+.nav {
+  display: none;
+}
+.menuButton {
+  display: none;
+}
+@media (min-width: 64em) {
+  .header {
+    padding-top: var(--space-6);
+  }
+  .nav {
+    display: block;
+    margin-left: auto;
+  }
+  .nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 clamp(1.25rem, 0.2rem + 2vw, 2.75rem);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--target-min);
+    font-size: 1.0625rem;
+    color: var(--color-text);
+    text-decoration: none;
+    background: linear-gradient(currentColor, currentColor) 0 calc(100% - 8px) / 0 1px no-repeat;
+    transition: background-size var(--duration-quick) var(--ease-standard);
+  }
+  .nav a:hover {
+    background-size: 100% 1px;
+  }
+  .menuButton {
+    display: inline-grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    flex: none;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-inverse);
+    color: var(--color-text-inverse);
+    box-shadow: 0 8px 18px -10px rgb(23 26 29 / 0.6);
+  }
+}
+
+/* ================= the room ================= */
+.room {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  display: grid;
+  /* the statement column never drops below its longest word: with very large
+     text the object yields, the words never break */
+  grid-template-columns: minmax(min-content, 1.5fr) minmax(0, 1fr);
+  grid-template-areas:
+    "head obj"
+    "puls puls"
+    "paths paths";
+  column-gap: var(--space-4);
+  padding: var(--space-3) var(--space-gutter) var(--space-7);
+  background:
+    radial-gradient(120% 70% at 92% 18%, var(--room-glow) 0%, transparent 55%),
+    linear-gradient(104deg, var(--room-ivory) 0%, var(--room-wall) 52%, var(--room-peach) 100%);
+  margin-top: calc(-1 * var(--space-3));
+}
+
+/* light: arched window, sun shafts, floor — pure CSS, no images */
+.light {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.arch {
+  --arch-w: 62vw;
+  position: absolute;
+  right: -14vw;
+  top: -2%;
+  width: var(--arch-w);
+  height: 72%;
+  border-radius: calc(var(--arch-w) / 2) calc(var(--arch-w) / 2) 0 0;
+  background:
+    radial-gradient(70% 55% at 62% 26%, #fffefa 0%, #fff4e6 40%, #f9e2cb 78%, #f3d4b8 100%);
+  box-shadow:
+    inset 26px 0 44px -18px rgb(160 110 70 / 0.3),
+    inset 0 -40px 60px -30px rgb(214 168 128 / 0.35),
+    0 0 160px 40px rgb(255 238 214 / 0.7);
+  opacity: 0.9;
+  animation: dawn var(--duration-transform) var(--ease-out) both;
+}
+.shafts {
+  position: absolute;
+  inset: -10% -10% 0 -10%;
+  background:
+    linear-gradient(242deg, transparent 30%, rgb(255 250 238 / 0.7) 38%, transparent 47%),
+    linear-gradient(242deg, transparent 50%, rgb(255 250 238 / 0.5) 56%, transparent 63%),
+    radial-gradient(34% 20% at 34% 88%, rgb(255 226 190 / 0.8) 0%, transparent 70%),
+    radial-gradient(30% 40% at 8% 40%, rgb(255 236 214 / 0.55) 0%, transparent 70%);
+  filter: blur(16px);
+}
+.floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 22%;
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--room-floor) 70%, transparent));
+}
+@keyframes dawn {
+  from {
+    opacity: 0.35;
+  }
+}
+
+/* ================= statement ================= */
+.headline {
+  grid-area: head;
+  align-self: start;
+  padding-top: var(--space-5);
+  animation: rise var(--duration-transform) var(--ease-out) both;
+}
+.headline h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.5rem, 1.5rem + 4.6vw, 6.25rem);
+  line-height: 0.98;
+  letter-spacing: -0.032em;
+  color: var(--color-text);
+  text-wrap: balance;
+}
+.headline p {
+  margin: var(--space-5) 0 0;
+  max-width: 30ch;
+  font-size: clamp(1rem, 0.95rem + 0.3vw, 1.1875rem);
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* ================= PRAXIS PULS ================= */
+.puls {
+  grid-area: puls;
+  display: grid;
+  justify-items: start;
+  gap: var(--space-5);
+  margin-top: var(--space-6);
+  scroll-margin-top: var(--space-8);
+}
+.pill {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-4);
+  max-width: 100%;
+  padding: 12px 14px 12px 18px;
+  border-radius: 26px;
+  background: var(--glass-panel);
+  border: 1px solid var(--glass-edge);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.8),
+    0 16px 32px -24px rgb(120 80 40 / 0.45);
+  backdrop-filter: blur(10px) saturate(1.1);
+}
+.puls[data-indicator="NONE"] .pill {
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding-left: 20px;
+  background: rgb(255 255 255 / 0.42);
+  border-color: color-mix(in srgb, var(--color-text) 16%, transparent);
+  box-shadow: none;
+}
+.pillMark {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+}
+.pillText {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+.pillText strong {
+  font-size: var(--text-status);
+  font-weight: 600;
+  line-height: 1.25;
+}
+.pillText > span {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.0625rem;
+  line-height: 1.3;
+  color: var(--color-text-secondary);
+}
+.pillText > .pillReason {
+  font-family: var(--font-text);
+  font-style: normal;
+  font-size: var(--text-small);
+}
+.demo {
+  align-self: start;
+  font-size: 0.75rem;
+  line-height: 1;
+  padding: 4px 7px;
+  border-radius: var(--radius-pill);
+  border: 1px solid color-mix(in srgb, var(--color-text) 22%, transparent);
+  color: var(--color-text-secondary);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-4);
+  width: 100%;
+}
+.call,
+.emergency {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: 10px 26px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-action);
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  transition:
+    transform var(--duration-instant) var(--ease-standard),
+    box-shadow var(--duration-quick) var(--ease-standard),
+    background-color var(--duration-quick) var(--ease-standard);
+}
+.call {
+  flex: 1 1 15rem;
+  max-width: 24rem;
+  color: #fff;
+  background: linear-gradient(180deg, var(--call-bg), var(--call-bg-deep));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.25),
+    0 14px 26px -14px rgb(36 51 196 / 0.75);
+}
+.call:hover {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.25),
+    0 18px 30px -14px rgb(36 51 196 / 0.85);
+}
+.call:active,
+.emergency:active {
+  transform: translateY(1px);
+}
+.num {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  margin-left: 0.25em;
+}
+.emergency {
+  flex: 0 1 auto;
+  color: var(--color-emergency-text);
+  background: rgb(255 250 246 / 0.66);
+  border: 1.5px solid var(--color-emergency);
+}
+.emergency:hover {
+  background: #fff;
+}
+.call:focus-visible,
+.emergency:focus-visible,
+.path:focus-visible,
+.back:focus-visible,
+.menuButton:focus-visible,
+.dockCell:focus-visible {
+  outline: var(--border-focus) solid var(--color-focus);
+  outline-offset: 3px;
+}
+.follow {
+  margin: 0;
+  font-size: var(--text-small);
+}
+.follow a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  color: var(--color-brand-text);
+  text-underline-offset: 4px;
+}
+
+/* ================= object zone ================= */
+.objectZone {
+  grid-area: obj;
+  position: relative;
+  align-self: start;
+  justify-self: start;
+  width: 128%;
+  margin-top: calc(-1 * var(--space-5));
+  pointer-events: none;
+}
+.objectZone canvas {
+  pointer-events: auto;
+}
+.stage {
+  position: relative;
+  width: 100%;
+}
+.layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity var(--duration-reveal) var(--ease-standard);
+}
+.hidden {
+  opacity: 0;
+}
+.visible {
+  opacity: 1;
+}
+.castShadow {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: rgb(110 72 44 / 0.24);
+  filter: blur(5px);
+  transform: translate(-9%, 3%) skewX(10deg);
+  transform-origin: 50% 0;
+}
+.bowl {
+  display: none;
+}
+.rodLabels {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.rodLabels li {
+  position: absolute;
+  transform: translate(-100%, -50%);
+  font-size: var(--text-label);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  transition: color var(--duration-state) var(--ease-standard);
+}
+.rodLabels li[data-active] {
+  color: var(--color-brand-text);
+  font-weight: 600;
+}
+
+/* ================= four paths ================= */
+.pathsArea {
+  grid-area: paths;
+  margin-top: var(--space-7);
+  display: grid;
+  gap: var(--space-5);
+  scroll-margin-top: var(--space-6);
+}
+.paths {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-radius: var(--radius-ledge);
+  background: var(--glass-panel);
+  border: 1px solid var(--glass-edge);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.8),
+    0 24px 40px -32px rgb(120 80 40 / 0.5);
+  backdrop-filter: blur(12px) saturate(1.1);
+  overflow: hidden;
+}
+.paths li {
+  display: grid;
+  min-width: 0;
+}
+.paths li:nth-child(even) {
+  border-left: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
+}
+.paths li:nth-child(n + 3) {
+  border-top: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
+}
+.path {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 4px;
+  min-height: var(--target);
+  padding: var(--space-5) var(--space-5) var(--space-5);
+  color: var(--color-text);
+  text-decoration: none;
+  transition: background-color var(--duration-quick) var(--ease-standard);
+}
+.path:hover {
+  background: rgb(255 255 255 / 0.45);
+}
+.path::before {
+  content: "";
+  position: absolute;
+  left: var(--space-5);
+  right: var(--space-5);
+  top: 0;
+  height: 2px;
+  background: var(--color-brand);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duration-state) var(--ease-out);
+}
+.path[aria-current="true"]::before {
+  transform: none;
+}
+.pathIcon {
+  display: inline-flex;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-2);
+  transition: color var(--duration-state) var(--ease-standard);
+}
+.path[aria-current="true"] .pathIcon,
+.path[aria-current="true"] .pathTitle {
+  color: var(--color-brand-text);
+}
+.pathTitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.625rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  overflow-wrap: break-word;
+}
+.pathText {
+  font-size: var(--text-small);
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+
+.ageRail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-4) var(--space-6);
+}
+.ageRail fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.ageRail legend {
+  padding: 0;
+  margin-bottom: var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+}
+.ageOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.ageOptions label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target);
+  padding: 0 18px;
+  border-radius: var(--radius-pill);
+  border: 1px solid color-mix(in srgb, var(--color-text) 22%, transparent);
+  background: rgb(255 255 255 / 0.5);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-state) var(--ease-standard),
+    color var(--duration-state) var(--ease-standard);
+}
+.ageOptions input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.ageOptions label:has(input:checked) {
+  background: var(--call-bg);
+  border-color: var(--call-bg);
+  color: #fff;
+}
+.ageOptions label:has(input:focus-visible) {
+  outline: var(--border-focus) solid var(--color-focus);
+  outline-offset: 3px;
+}
+.back {
+  min-height: var(--target);
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--color-brand-text);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+.preview {
+  margin: 0;
+  min-height: 1.5em;
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+}
+
+/* ================= mobile dock ================= */
+.dock {
+  position: fixed;
+  z-index: 20;
+  left: 8px;
+  right: 8px;
+  bottom: calc(8px + env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  min-height: var(--dock-height);
+  padding: 4px;
+  border-radius: 22px;
+  background: rgb(23 26 29 / 0.94);
+  box-shadow: 0 16px 32px -16px rgb(23 26 29 / 0.6);
+  backdrop-filter: blur(8px);
+}
+.dockCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 56px;
+  border-radius: 18px;
+  color: var(--palette-paper);
+  font-size: 0.8125rem;
+  line-height: 1.15;
+  text-align: center;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.dockCell:active {
+  background: rgb(255 255 255 / 0.08);
+}
+.dockToday {
+  position: relative;
+  display: inline-flex;
+}
+.dockMark {
+  position: absolute;
+  right: -5px;
+  top: -3px;
+  display: inline-flex;
+}
+.dockEmergency {
+  color: #ff9a90;
+}
+@media (max-width: 20em) {
+  .dock {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .page {
+    padding-bottom: calc(2 * var(--dock-height) + 28px);
+  }
+}
+@media (min-width: 64em) {
+  .dock {
+    display: none;
+  }
+}
+
+/* ================= tablet ================= */
+@media (min-width: 40em) {
+  .room {
+    grid-template-columns: minmax(min-content, 1.3fr) minmax(0, 1fr);
+    column-gap: var(--space-6);
+  }
+  .objectZone {
+    width: 112%;
+    margin-top: calc(-1 * var(--space-8));
+  }
+  .paths {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .paths li:nth-child(n) {
+    border-top: 0;
+    border-left: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
+  }
+  .paths li:first-child {
+    border-left: 0;
+  }
+  .castShadow {
+    filter: blur(7px);
+  }
+}
+
+/* ================= desktop composition ================= */
+@media (min-width: 64em) {
+  .room {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "head obj"
+      "puls obj"
+      "paths paths";
+    column-gap: var(--space-8);
+    min-height: calc(100svh - 84px);
+    padding: var(--space-6) var(--space-gutter) var(--space-7);
+    margin-top: -84px;
+    padding-top: calc(84px + var(--space-6));
+  }
+  .arch {
+    --arch-w: min(36vw, 600px);
+    right: max(4vw, calc(50% - 600px));
+    top: 7%;
+    height: 84%;
+    opacity: 1;
+  }
+  .floor {
+    height: 26%;
+  }
+  .headline {
+    padding-top: clamp(1rem, 4svh, 4rem);
+  }
+  .headline p {
+    margin-top: var(--space-6);
+  }
+  .puls {
+    margin-top: var(--space-6);
+    align-self: start;
+  }
+  .objectZone {
+    grid-row: 1 / 3;
+    align-self: center;
+    justify-self: center;
+    width: min(100%, 47svh, 34rem);
+    margin-top: calc(-1 * var(--space-5));
+  }
+  .bowl {
+    display: block;
+    position: absolute;
+    left: 31%;
+    width: 38%;
+    bottom: -1%;
+  }
+  .castShadow {
+    filter: blur(9px);
+    transform: translate(-12%, 4%) skewX(12deg);
+  }
+  .pathsArea {
+    align-self: end;
+    margin-top: var(--space-5);
+  }
+  .path {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "icon title"
+      "icon text";
+    column-gap: var(--space-4);
+    padding: var(--space-6);
+  }
+  .path::before {
+    left: var(--space-6);
+    right: var(--space-6);
+  }
+  .pathIcon {
+    grid-area: icon;
+    margin: 0;
+    align-self: start;
+  }
+  .pathTitle {
+    grid-area: title;
+  }
+  .pathText {
+    grid-area: text;
+  }
+}
+
+/* ================= motion preferences ================= */
+@media (prefers-reduced-motion: reduce) {
+  .headline,
+  .arch {
+    animation: none;
+  }
+  .layer,
+  .path::before,
+  .pathIcon,
+  .ageOptions label,
+  .nav a {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .pill,
+  .paths,
+  .call,
+  .emergency,
+  .dock {
+    border: 1px solid CanvasText;
+  }
+}
