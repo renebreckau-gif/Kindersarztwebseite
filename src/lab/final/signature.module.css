@@ -1,32 +1,24 @@
-/* Signature entry (Phase 06) — translated from the approved reference (middle variant):
-   a warm, softly sunlit room with an arched window; large serif statement; PRAXIS PULS
-   as a lit pill; deep cobalt call; separate red Notfall; brass mobile in the light;
-   four paths on a translucent ledge. Mobile first. */
+/* Signature hero (Phase 06.2) — the approved master reference as a responsive page.
+   Layers: room plate · mobile · child · overlays (hero-stage.tsx), typography and
+   utility on the sunlit wall (left), four paths on a ruled ledge over the floor.
+   Mobile first; desktop composition from 64em. */
 
 .page {
-  /* room light — documented Phase 06 token additions (see review §tokens) */
-  --room-ivory: #f8f2e9;
-  --room-wall: #f3e6d6;
-  --room-peach: #f1d5bd;
-  --room-glow: #fffaf1;
-  --room-floor: #e6d0bb;
+  /* colours sampled from the approved plate (Phase 06.2) */
+  --wall: #ecd2b9;
+  --wall-light: #f6e7d6;
+  --floor: #e2bfa3;
+  --floor-light: #f1dfcc;
   --room-shade: #8a6248;
-  --glass-panel: rgb(255 251 245 / 0.62);
-  --glass-edge: rgb(255 255 255 / 0.75);
   --radius-pill: 999px;
-  --radius-ledge: 22px;
-  --call-bg: #3446e8;
+  --call-bg: #3446e8; /* = cobalt text token, 6.9 : 1 with white */
   --call-bg-deep: #2433c4;
+  --ledge-h: 8.75rem;
 
   min-height: 100vh;
-  background: var(--room-ivory);
+  background: var(--floor-light);
   color: var(--color-text);
   padding-bottom: calc(var(--dock-height) + 28px + env(safe-area-inset-bottom));
-}
-@media (min-width: 64em) {
-  .page {
-    padding-bottom: 0;
-  }
 }
 
 .skip {
@@ -46,14 +38,16 @@
 
 /* ================= header ================= */
 .header {
-  position: relative;
-  z-index: 3;
+  position: absolute;
+  z-index: 5;
+  left: 0;
+  right: 0;
+  top: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-6);
   padding: var(--space-5) var(--space-gutter) var(--space-3);
-  background: linear-gradient(180deg, var(--room-ivory), color-mix(in srgb, var(--room-ivory) 0%, transparent));
 }
 .wordmark {
   display: grid;
@@ -66,225 +60,225 @@
   min-height: var(--target-min);
   align-content: center;
 }
-.nav {
-  display: none;
-}
+.nav,
 .menuButton {
   display: none;
 }
-@media (min-width: 64em) {
-  .header {
-    padding-top: var(--space-6);
-  }
-  .nav {
-    display: block;
-    margin-left: auto;
-  }
-  .nav ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 clamp(1.25rem, 0.2rem + 2vw, 2.75rem);
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-  .nav a {
-    display: inline-flex;
-    align-items: center;
-    min-height: var(--target-min);
-    font-size: 1.0625rem;
-    color: var(--color-text);
-    text-decoration: none;
-    background: linear-gradient(currentColor, currentColor) 0 calc(100% - 8px) / 0 1px no-repeat;
-    transition: background-size var(--duration-quick) var(--ease-standard);
-  }
-  .nav a:hover {
-    background-size: 100% 1px;
-  }
-  .menuButton {
-    display: inline-grid;
-    place-items: center;
-    width: 48px;
-    height: 48px;
-    flex: none;
-    border-radius: var(--radius-pill);
-    background: var(--color-surface-inverse);
-    color: var(--color-text-inverse);
-    box-shadow: 0 8px 18px -10px rgb(23 26 29 / 0.6);
-  }
-}
 
-/* ================= the room ================= */
-.room {
+/* ================= hero + stage ================= */
+.hero {
   position: relative;
-  isolation: isolate;
-  overflow: clip;
-  display: grid;
-  /* the statement column never drops below its longest word: with very large
-     text the object yields, the words never break */
-  grid-template-columns: minmax(min-content, 1.5fr) minmax(0, 1fr);
-  grid-template-areas:
-    "head obj"
-    "puls puls"
-    "paths paths";
-  column-gap: var(--space-4);
-  padding: var(--space-3) var(--space-gutter) var(--space-7);
-  background:
-    radial-gradient(60% 55% at 78% 34%, rgb(255 246 232 / 0.9) 0%, transparent 70%),
-    radial-gradient(120% 70% at 92% 18%, var(--room-glow) 0%, transparent 55%),
-    linear-gradient(104deg, var(--room-ivory) 0%, var(--room-wall) 52%, var(--room-peach) 100%);
-  margin-top: calc(-1 * var(--space-3));
 }
-
-/* light: arched window, sun shafts, floor — pure CSS, no images */
-.light {
+.stageArea {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  /* phones: the sunlit wall of the plate carries the text zone */
+  background:
+    linear-gradient(180deg, rgb(246 231 214 / 0.55) 0%, rgb(246 231 214 / 0.2) 40%, transparent 70%),
+    image-set(url("/hero/room-960.avif") type("image/avif"), url("/hero/room-960.webp") type("image/webp")) 9% 0 / auto 780px no-repeat,
+    var(--wall);
+}
+.content {
+  order: 1;
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: var(--space-5);
+  /* clears the header; rem so it grows with enlarged text */
+  padding: calc(var(--space-5) + 4rem) var(--space-gutter) 0;
+}
+.scene {
+  order: 2;
+  position: relative;
+  z-index: 1;
+  --bw: 172%;
+  height: calc(min(172vw, 64rem) / 1.7684 * 0.97);
+  margin-top: calc(-1 * var(--space-6));
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 16%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 16%);
+}
+.frame {
+  position: absolute;
+  aspect-ratio: 2688 / 1520;
+  width: var(--bw);
+  left: calc((100% - var(--bw)) * 0.86);
+  top: 0;
+}
+.plate {
   position: absolute;
   inset: 0;
-  z-index: -1;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.child {
+  position: absolute;
+  height: auto;
+  display: block;
+}
+.contact {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(110 70 42 / 0.32), rgb(110 70 42 / 0.12) 55%, transparent);
+  filter: blur(4px);
+}
+
+/* the mobile hangs from the ceiling and pivots at its top */
+.mobile {
+  position: absolute;
+  transform-origin: 30% 0;
+  transform: rotate(var(--sway, 0deg));
+  transition: translate var(--duration-transform) var(--ease-out);
+}
+.mobile img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.mobile[data-lift] {
+  translate: 0 -3%;
+}
+/* selection: a fine measuring ring around the chosen element, lit like the brass */
+.mark {
+  position: absolute;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1.5px solid rgb(255 244 222 / 0.95);
+  box-shadow:
+    0 0 0 1px rgb(52 70 232 / 0.55),
+    0 0 28px 6px rgb(255 236 200 / 0.55);
+  animation: markIn var(--duration-state) var(--ease-out) both;
   pointer-events: none;
 }
-/* the window itself now lives in the scene (room-scene.tsx); this is only the
-   broad daylight wash it throws across the room */
-.arch {
-  display: none;
-  --arch-w: 62vw;
-  position: absolute;
-  right: -14vw;
-  top: -2%;
-  width: var(--arch-w);
-  height: 72%;
-  border-radius: calc(var(--arch-w) / 2) calc(var(--arch-w) / 2) 0 0;
-  background:
-    radial-gradient(70% 55% at 62% 26%, #fffefa 0%, #fff4e6 40%, #f9e2cb 78%, #f3d4b8 100%);
-  box-shadow:
-    inset 26px 0 44px -18px rgb(160 110 70 / 0.3),
-    inset 0 -40px 60px -30px rgb(214 168 128 / 0.35),
-    0 0 160px 40px rgb(255 238 214 / 0.7);
-  opacity: 0.9;
-  animation: dawn var(--duration-transform) var(--ease-out) both;
-}
-.shafts {
-  position: absolute;
-  inset: -10% -10% 0 -10%;
-  background:
-    linear-gradient(242deg, transparent 30%, rgb(255 250 238 / 0.7) 38%, transparent 47%),
-    linear-gradient(242deg, transparent 50%, rgb(255 250 238 / 0.5) 56%, transparent 63%),
-    radial-gradient(34% 20% at 34% 88%, rgb(255 226 190 / 0.8) 0%, transparent 70%),
-    radial-gradient(30% 40% at 8% 40%, rgb(255 236 214 / 0.55) 0%, transparent 70%);
-  filter: blur(16px);
-}
-.floor {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 22%;
-  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--room-floor) 70%, transparent));
-}
-@keyframes dawn {
+@keyframes markIn {
   from {
-    opacity: 0.35;
+    opacity: 0;
+    scale: 0.92;
+  }
+}
+
+/* Mein Kind: brass measuring rod beside the child */
+.rod {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.rodBody {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transform: scaleY(0);
+  opacity: 0;
+  transition:
+    transform var(--duration-transform) var(--ease-out),
+    opacity var(--duration-state) var(--ease-standard);
+}
+.rod[data-on] .rodBody {
+  transform: none;
+  opacity: 1;
+}
+.rodText {
+  font-family: var(--font-text);
+  font-size: 34px;
+  font-weight: 600;
+  fill: #5b4026;
+  paint-order: stroke;
+  stroke: rgb(255 246 232 / 0.85);
+  stroke-width: 6px;
+}
+.rodText[data-active] {
+  fill: var(--call-bg);
+}
+@media (max-width: 63.99em) {
+  .rodText {
+    display: none;
   }
 }
 
 /* ================= statement ================= */
-.headline {
-  grid-area: head;
-  align-self: start;
-  padding-top: var(--space-5);
-  animation: rise var(--duration-transform) var(--ease-out) both;
-}
 .headline h1 {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(2.5rem, 1.5rem + 4.6vw, 6.25rem);
+  font-size: clamp(2.4rem, 1.6rem + 3.4vw, 6.25rem);
   line-height: 0.98;
   letter-spacing: -0.032em;
   color: var(--color-text);
   text-wrap: balance;
 }
 .headline p {
+  display: none;
   margin: var(--space-5) 0 0;
   max-width: 30ch;
   font-size: clamp(1rem, 0.95rem + 0.3vw, 1.1875rem);
   line-height: 1.45;
-  color: var(--color-text-secondary);
-}
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
+  color: #3a3e43;
 }
 
 /* ================= PRAXIS PULS ================= */
 .puls {
-  grid-area: puls;
   display: grid;
   justify-items: start;
-  gap: var(--space-5);
-  margin-top: var(--space-6);
+  gap: var(--space-4);
   scroll-margin-top: var(--space-8);
 }
-.pill {
+/* typography on the wall: a ruled status line, no panel */
+.status {
   margin: 0;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--space-4);
-  max-width: 100%;
-  padding: 12px 14px 12px 18px;
-  border-radius: 26px;
-  background: var(--glass-panel);
-  border: 1px solid var(--glass-edge);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.8),
-    0 16px 32px -24px rgb(120 80 40 / 0.45);
-  backdrop-filter: blur(10px) saturate(1.1);
+  align-items: start;
+  gap: 2px var(--space-4);
+  width: 100%;
+  max-width: 26rem;
+  padding-top: var(--space-4);
+  border-top: 1px solid rgb(23 26 29 / 0.22);
 }
-.puls[data-indicator="NONE"] .pill {
+.puls[data-indicator="NONE"] .status {
   grid-template-columns: minmax(0, 1fr) auto;
-  padding-left: 20px;
-  background: rgb(255 255 255 / 0.42);
-  border-color: color-mix(in srgb, var(--color-text) 16%, transparent);
-  box-shadow: none;
 }
-.pillMark {
+.statusMark {
   display: inline-grid;
   place-items: center;
-  width: 20px;
+  width: 16px;
+  height: 1.6rem;
 }
-.pillText {
+.statusText {
   display: grid;
   gap: 1px;
   min-width: 0;
 }
-.pillText strong {
-  font-size: var(--text-status);
+.statusText strong {
+  font-size: clamp(1.1875rem, 1.1rem + 0.35vw, 1.4375rem);
   font-weight: 600;
   line-height: 1.25;
+  letter-spacing: -0.005em;
 }
-.pillText > span {
+.statusText > span {
   font-family: var(--font-display);
   font-style: italic;
-  font-size: 1.0625rem;
+  font-size: 1.125rem;
   line-height: 1.3;
-  color: var(--color-text-secondary);
+  color: #33373b;
 }
-.pillText > .pillReason {
+.statusText > .statusReason {
   font-family: var(--font-text);
   font-style: normal;
   font-size: var(--text-small);
 }
 .demo {
-  align-self: start;
+  margin-top: 4px;
   font-size: 0.75rem;
   line-height: 1;
   padding: 4px 7px;
   border-radius: var(--radius-pill);
-  border: 1px solid color-mix(in srgb, var(--color-text) 22%, transparent);
-  color: var(--color-text-secondary);
+  border: 1px solid rgb(23 26 29 / 0.28);
+  color: #33373b;
 }
 
 .actions {
@@ -300,7 +294,7 @@
   justify-content: center;
   gap: var(--space-3);
   min-height: 56px;
-  padding: 10px 26px;
+  padding: 10px 24px;
   border-radius: var(--radius-pill);
   font-size: var(--text-action);
   font-weight: 600;
@@ -312,7 +306,7 @@
     background-color var(--duration-quick) var(--ease-standard);
 }
 .call {
-  flex: 1 1 15rem;
+  flex: 1 1 16.5rem;
   max-width: 24rem;
   color: #fff;
   background: linear-gradient(180deg, var(--call-bg), var(--call-bg-deep));
@@ -330,6 +324,7 @@
   transform: translateY(1px);
 }
 .num {
+  white-space: nowrap; /* a phone number never breaks */
   font-variant-numeric: tabular-nums;
   font-weight: 500;
   margin-left: 0.25em;
@@ -337,20 +332,11 @@
 .emergency {
   flex: 0 1 auto;
   color: var(--color-emergency-text);
-  background: rgb(255 250 246 / 0.66);
+  background: rgb(255 250 246 / 0.82);
   border: 1.5px solid var(--color-emergency);
 }
 .emergency:hover {
   background: #fff;
-}
-.call:focus-visible,
-.emergency:focus-visible,
-.path:focus-visible,
-.back:focus-visible,
-.menuButton:focus-visible,
-.dockCell:focus-visible {
-  outline: var(--border-focus) solid var(--color-focus);
-  outline-offset: 3px;
 }
 .follow {
   margin: 0;
@@ -360,176 +346,98 @@
   display: inline-flex;
   align-items: center;
   min-height: var(--target-min);
-  color: var(--color-brand-text);
+  color: #2a39c8;
   text-underline-offset: 4px;
 }
-
-/* ================= object zone ================= */
-.objectZone {
-  grid-area: obj;
-  position: relative;
-  align-self: start;
-  justify-self: end;
-  width: 145%;
-  margin-right: calc(-1 * var(--space-gutter));
-  margin-top: calc(-1 * var(--space-6));
-  pointer-events: none;
-}
-.headline {
-  position: relative;
-  z-index: 1;
-}
-.objectZone canvas {
-  pointer-events: auto;
-}
-/* one composed scene: window + floor (backdrop), mobile (stage), child */
-.scene {
-  position: relative;
-  aspect-ratio: 1000 / 1100;
-}
-.backdrop {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  /* no scene rectangle: wall light and floor dissolve into the page */
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 22%, #000 88%, transparent), linear-gradient(180deg, transparent, #000 12%, #000 94%, transparent);
-  -webkit-mask-composite: source-in;
-  mask-image: linear-gradient(90deg, transparent, #000 22%, #000 88%, transparent), linear-gradient(180deg, transparent, #000 12%, #000 94%, transparent);
-  mask-composite: intersect;
-}
-.stage {
-  position: absolute;
-  left: 10%;
-  top: 0;
-  width: 70%;
-}
-.child {
-  position: absolute;
-  left: 52.2%;
-  bottom: 0.5%;
-  width: 28.8%;
-  height: auto;
-}
-.layer {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  transition: opacity var(--duration-reveal) var(--ease-standard);
-}
-.hidden {
-  opacity: 0;
-}
-.visible {
-  opacity: 1;
-}
-.castShadow {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  color: rgb(110 72 44 / 0.24);
-  filter: blur(5px);
-  transform: translate(-9%, 3%) skewX(10deg);
-  transform-origin: 50% 0;
-}
-.rodLabels {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.rodLabels li {
-  position: absolute;
-  transform: translate(-100%, -50%);
-  font-size: var(--text-label);
-  font-variant-numeric: tabular-nums;
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-  transition: color var(--duration-state) var(--ease-standard);
-}
-.rodLabels li[data-active] {
-  color: var(--color-brand-text);
-  font-weight: 600;
+.call:focus-visible,
+.emergency:focus-visible,
+.follow a:focus-visible,
+.path:focus-visible,
+.back:focus-visible,
+.menuButton:focus-visible,
+.wordmark:focus-visible,
+.nav a:focus-visible,
+.dockCell:focus-visible {
+  outline: var(--border-focus) solid var(--color-focus);
+  outline-offset: 3px;
 }
 
-/* ================= four paths ================= */
-.pathsArea {
-  grid-area: paths;
-  margin-top: var(--space-7);
+/* ================= four paths: a ruled ledge on the floor ================= */
+.ledge {
+  position: relative;
+  z-index: 2;
   display: grid;
-  gap: var(--space-5);
+  gap: var(--space-4);
+  padding: 0 var(--space-gutter) var(--space-6);
+  background: linear-gradient(180deg, var(--floor) 0%, var(--floor-light) 100%);
   scroll-margin-top: var(--space-6);
 }
 .paths {
+  position: relative;
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  /* a lit ledge, not a panel: one hairline of light on top, fading glass below */
-  background: linear-gradient(180deg, rgb(255 251 245 / 0.55), rgb(255 251 245 / 0.12));
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.9),
-    0 -1px 0 rgb(120 80 40 / 0.1);
-  backdrop-filter: blur(6px);
+  border-top: 1px solid rgb(23 26 29 / 0.3);
+}
+/* measuring ticks along the rule */
+.paths::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 6px;
+  background: repeating-linear-gradient(90deg, rgb(23 26 29 / 0.3) 0 1px, transparent 1px 14px);
+  pointer-events: none;
 }
 .paths li {
   display: grid;
   min-width: 0;
-}
-/* separators fade out at both ends instead of boxing the paths */
-.paths li:nth-child(even) {
-  border-left: 1px solid;
-  border-image: linear-gradient(transparent, rgb(23 26 29 / 0.12) 25%, rgb(23 26 29 / 0.12) 75%, transparent) 1;
-}
-.paths li:nth-child(n + 3) {
-  border-top: 1px solid;
-  border-image: linear-gradient(90deg, transparent, rgb(23 26 29 / 0.1) 20%, rgb(23 26 29 / 0.1) 80%, transparent) 1;
 }
 .path {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-content: start;
-  gap: 4px;
+  gap: 2px;
   min-height: var(--target);
-  padding: var(--space-5) var(--space-5) var(--space-5);
+  padding: var(--space-5) var(--space-3) var(--space-3) 0;
   color: var(--color-text);
   text-decoration: none;
-  transition: background-color var(--duration-quick) var(--ease-standard);
-}
-.path:hover {
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.5), transparent);
 }
 .path::before {
   content: "";
   position: absolute;
-  left: var(--space-5);
-  right: var(--space-5);
-  top: 0;
-  height: 2px;
-  background: var(--color-brand);
+  left: 0;
+  right: var(--space-4);
+  top: -1px;
+  height: 3px;
+  background: var(--call-bg);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform var(--duration-state) var(--ease-out);
+}
+.path:hover .pathTitle {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
 }
 .path[aria-current="true"]::before {
   transform: none;
 }
 .pathIcon {
-  display: inline-flex;
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-2);
-  transition: color var(--duration-state) var(--ease-standard);
+  display: none;
+  color: #3a3e43;
 }
 .path[aria-current="true"] .pathIcon,
 .path[aria-current="true"] .pathTitle {
-  color: var(--color-brand-text);
+  color: var(--call-bg);
 }
 .pathTitle {
   font-family: var(--font-display);
-  font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.625rem);
+  font-size: clamp(1.3125rem, 1.15rem + 0.5vw, 1.75rem);
   line-height: 1.1;
   letter-spacing: -0.01em;
   overflow-wrap: break-word;
@@ -537,7 +445,7 @@
 .pathText {
   font-size: var(--text-small);
   line-height: 1.4;
-  color: var(--color-text-secondary);
+  color: #3a3e43;
 }
 
 .ageRail {
@@ -546,6 +454,10 @@
   align-items: end;
   justify-content: space-between;
   gap: var(--space-4) var(--space-6);
+}
+.ageRail fieldset:focus-visible {
+  outline: var(--border-focus) solid var(--color-focus);
+  outline-offset: 6px;
 }
 .ageRail fieldset {
   border: 0;
@@ -571,8 +483,8 @@
   min-height: var(--target);
   padding: 0 18px;
   border-radius: var(--radius-pill);
-  border: 1px solid color-mix(in srgb, var(--color-text) 22%, transparent);
-  background: rgb(255 255 255 / 0.5);
+  border: 1px solid rgb(23 26 29 / 0.3);
+  background: rgb(255 250 244 / 0.6);
   font-variant-numeric: tabular-nums;
   cursor: pointer;
   transition:
@@ -601,7 +513,7 @@
   border: 0;
   background: none;
   font: inherit;
-  color: var(--color-brand-text);
+  color: #2a39c8;
   text-decoration: underline;
   text-underline-offset: 4px;
   cursor: pointer;
@@ -610,7 +522,10 @@
   margin: 0;
   min-height: 1.5em;
   font-size: var(--text-small);
-  color: var(--color-text-secondary);
+  color: #3a3e43;
+}
+.preview:empty {
+  display: none;
 }
 
 /* ================= mobile dock ================= */
@@ -668,83 +583,135 @@
     padding-bottom: calc(2 * var(--dock-height) + 28px);
   }
 }
-@media (min-width: 64em) {
-  .dock {
-    display: none;
-  }
-}
 
-/* ================= tablet ================= */
+/* ================= tablet portrait ================= */
 @media (min-width: 40em) {
-  .room {
-    grid-template-columns: minmax(min-content, 1.3fr) minmax(0, 1fr);
-    column-gap: var(--space-6);
-  }
-  .objectZone {
-    width: 120%;
-    margin-right: 0;
-    margin-top: calc(-1 * var(--space-8));
+  .headline p {
+    display: block;
   }
   .paths {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
-  .paths li:nth-child(n) {
-    border-top: 0;
-    border-left: 1px solid;
-    border-image: linear-gradient(transparent, rgb(23 26 29 / 0.12) 25%, rgb(23 26 29 / 0.12) 75%, transparent) 1;
-  }
-  .paths li:first-child {
-    border-left: 0;
-  }
-  .castShadow {
-    filter: blur(7px);
+  .scene {
+    --bw: 150%;
+    height: calc(min(150vw, 96rem) / 1.7684 * 0.97);
   }
 }
 
 /* ================= desktop composition ================= */
 @media (min-width: 64em) {
-  .room {
-    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-    grid-template-rows: auto minmax(0, 1fr) auto;
-    grid-template-areas:
-      "head obj"
-      "puls obj"
-      "paths paths";
-    column-gap: var(--space-8);
-    min-height: calc(100svh - 84px);
-    padding: var(--space-6) var(--space-gutter) var(--space-7);
-    margin-top: -84px;
-    padding-top: calc(84px + var(--space-6));
+  .page {
+    padding-bottom: 0;
+  }
+  .dock {
+    display: none;
+  }
+  .header {
+    padding-top: var(--space-6);
+  }
+  /* the nav sits on the calm wall beside the wordmark; the ceiling belongs to the mobile */
+  .header {
+    justify-content: flex-start;
+  }
+  .nav {
+    display: block;
+    margin-left: clamp(2rem, 5vw, 5.5rem);
+  }
+  .nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 clamp(1.25rem, 0.2rem + 2vw, 2.75rem);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--target-min);
+    font-size: 1.0625rem;
+    font-weight: 500;
+    color: var(--color-text);
+    text-decoration: none;
+    text-shadow: 0 0 12px rgb(255 248 238 / 0.9);
+    background: linear-gradient(currentColor, currentColor) 0 calc(100% - 8px) / 0 1px no-repeat;
+    transition: background-size var(--duration-quick) var(--ease-standard);
+  }
+  .nav a:hover {
+    background-size: 100% 1px;
+  }
+  .menuButton {
+    display: inline-grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    flex: none;
+    margin-left: auto;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-inverse);
+    color: var(--color-text-inverse);
+    box-shadow: 0 8px 18px -10px rgb(23 26 29 / 0.6);
   }
 
-  .floor {
-    height: 26%;
+  /* one full-height scene; the ledge lies on its floor */
+  .hero {
+    min-height: max(40rem, 100svh);
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
   }
-  .headline {
-    padding-top: clamp(1rem, 4svh, 4rem);
+  .stageArea {
+    position: static;
+    display: block;
+    background: none;
+  }
+  .scene {
+    position: absolute;
+    inset: 0;
+    height: auto;
+    margin: 0;
+    z-index: 0;
+    container-type: size;
+    background: var(--floor);
+    -webkit-mask-image: none;
+    mask-image: none;
+    /* frame covers the scene; the child's feet rest just above the ledge */
+    --fw: max(100cqw, calc((100cqh - var(--ledge-h)) * 1.875));
+  }
+  .frame {
+    width: var(--fw);
+    left: calc((100cqw - var(--fw)) * 0.62);
+    top: calc(100cqh - var(--ledge-h) - 0.952 * var(--fw) / 1.7684);
+    -webkit-mask-image: linear-gradient(180deg, #000 90%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 90%, transparent 100%);
+  }
+  /* calm daylight scrims: wall side for the text, ceiling for the header */
+  .scene::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, rgb(248 234 218 / 0.3) 0%, rgb(248 234 218 / 0.12) 26%, transparent 42%),
+      linear-gradient(180deg, rgb(248 236 222 / 0.55) 0, transparent 120px);
+    pointer-events: none;
+  }
+  .content {
+    position: relative;
+    align-self: center;
+    width: min(40%, 34rem);
+    padding: calc(5.25rem + var(--space-6)) 0 var(--space-7) var(--space-gutter);
+    gap: var(--space-7);
   }
   .headline p {
     margin-top: var(--space-6);
   }
-  .puls {
-    margin-top: var(--space-6);
-    align-self: start;
+  .ledge {
+    background: none;
+    padding-bottom: var(--space-7);
+    min-height: var(--ledge-h);
+    align-content: start;
   }
-  .objectZone {
-    grid-row: 1 / 3;
-    align-self: end;
-    justify-self: end;
-    width: min(100%, 64svh, 46rem);
-    margin-right: 0;
-    margin-top: calc(-1 * var(--space-6));
-  }
-  .castShadow {
-    filter: blur(9px);
-    transform: translate(-12%, 4%) skewX(12deg);
-  }
-  .pathsArea {
-    align-self: end;
-    margin-top: var(--space-5);
+  .paths {
+    border-top-color: rgb(23 26 29 / 0.35);
   }
   .path {
     grid-template-columns: auto minmax(0, 1fr);
@@ -752,16 +719,12 @@
       "icon title"
       "icon text";
     column-gap: var(--space-4);
-    padding: var(--space-6);
-  }
-  .path::before {
-    left: var(--space-6);
-    right: var(--space-6);
+    padding: var(--space-5) var(--space-6) var(--space-3) 0;
   }
   .pathIcon {
+    display: inline-flex;
     grid-area: icon;
-    margin: 0;
-    align-self: start;
+    margin-top: 2px;
   }
   .pathTitle {
     grid-area: title;
@@ -769,29 +732,50 @@
   .pathText {
     grid-area: text;
   }
+  .preview {
+    position: absolute;
+    right: var(--space-gutter);
+    bottom: var(--space-3);
+  }
+}
+
+/* very wide screens: keep the whole mobile in view, extend the wall to the left */
+@media (min-width: 64em) and (min-aspect-ratio: 21 / 10) {
+  .scene {
+    --fw: calc((100cqh - var(--ledge-h)) * 1.875);
+    background: linear-gradient(90deg, var(--wall) 0%, var(--wall) 40%, var(--floor) 100%);
+  }
+  .frame {
+    left: auto;
+    right: 0;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 18%), linear-gradient(180deg, #000 90%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(90deg, transparent 0, #000 18%), linear-gradient(180deg, #000 90%, transparent 100%);
+    mask-composite: intersect;
+  }
 }
 
 /* ================= motion preferences ================= */
 @media (prefers-reduced-motion: reduce) {
-  .headline,
-  .arch {
-    animation: none;
-  }
-  .layer,
+  .mobile,
+  .rodBody,
   .path::before,
-  .pathIcon,
   .ageOptions label,
   .nav a {
     transition: none;
   }
+  .mark {
+    animation: none;
+  }
 }
 
 @media (forced-colors: active) {
-  .pill,
-  .paths,
   .call,
   .emergency,
   .dock {
     border: 1px solid CanvasText;
+  }
+  .status {
+    border-top-color: CanvasText;
   }
 }

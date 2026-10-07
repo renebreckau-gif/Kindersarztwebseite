@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import s from "@/lab/final/signature.module.css";
 import { LabSections, LabToolbar } from "@/lab/chrome";
 import { EntryDock, EntryHeader, PulsStatement } from "@/lab/final/entry-chrome";
-import { SignatureEntry } from "@/lab/final/signature-object";
+import { HeroStage } from "@/lab/final/hero-stage";
 import { parsePath } from "@/lab/fixtures";
 import { DEMO_PULS, parseDemoState } from "@/design-system/demo-fixtures";
 
@@ -32,18 +32,14 @@ export default async function SignatureEntryPage({ searchParams }: { searchParam
       </a>
       <EntryHeader />
       <EntryDock puls={puls} />
-      <main id="inhalt" className={s.room}>
-        <div className={s.light} aria-hidden="true">
-          <span className={s.arch} />
-          <span className={s.shafts} />
-          <span className={s.floor} />
-        </div>
-        <div className={s.headline}>
-          <h1>Gesund groß werden.</h1>
-          <p>Alles für heute auf einen Blick. Und Begleitung, die mit Ihrem Kind mitwächst.</p>
-        </div>
-        <PulsStatement puls={puls} />
-        <SignatureEntry initial={parsePath(q.pfad)} disable3d={q["3d"] === "0"} />
+      <main id="inhalt">
+        <HeroStage initial={parsePath(q.pfad)}>
+          <div className={s.headline}>
+            <h1>Gesund groß werden.</h1>
+            <p>Alles für heute auf einen Blick. Und Begleitung, die mit Ihrem Kind mitwächst.</p>
+          </div>
+          <PulsStatement puls={puls} />
+        </HeroStage>
       </main>
       <LabSections base="/lab/final" />
       <LabToolbar base="/lab/final" label="Signature Entry" status={state} states={STATES} />

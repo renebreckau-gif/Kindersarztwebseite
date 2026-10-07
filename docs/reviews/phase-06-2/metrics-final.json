@@ -1,0 +1,883 @@
+{
+  "capturedAt": "2026-10-07T12:05:31.439Z",
+  "browser": "Chrome/155.0.8059.39",
+  "webglRenderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 2060 SUPER (0x00001F06) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "results": [
+    {
+      "url": "/lab/final",
+      "viewport": "1920x1080",
+      "file": "final-open-1920x1080.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 176.9,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-2400.avif 102KB",
+        "mobile-830.avif 38KB",
+        "child-570.avif 36KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "1440x900",
+      "file": "final-open-1440x900.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 135.3,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-1600.avif 61KB",
+        "mobile-830.avif 38KB",
+        "child-570.avif 36KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "430x932",
+      "file": "final-open-430x932.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 67.8,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-960.avif 30KB",
+        "child-300.avif 14KB",
+        "mobile-420.avif 23KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "390x844",
+      "file": "final-open-390x844.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 67.8,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-960.avif 30KB",
+        "mobile-420.avif 23KB",
+        "child-300.avif 14KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "360x800",
+      "file": "final-open-360x800.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 67.8,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-960.avif 30KB",
+        "mobile-420.avif 23KB",
+        "child-300.avif 14KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?status=unknown",
+      "viewport": "390x844",
+      "file": "final-unknown-390x844.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 67.8,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-960.avif 30KB",
+        "mobile-420.avif 23KB",
+        "child-300.avif 14KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?status=closed",
+      "viewport": "390x844",
+      "file": "final-closed-390x844.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 67.8,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-960.avif 30KB",
+        "mobile-420.avif 23KB",
+        "child-300.avif 14KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?pfad=mein-kind",
+      "viewport": "1440x900",
+      "file": "final-meinkind-1440x900.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 135.3,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-1600.avif 61KB",
+        "mobile-830.avif 38KB",
+        "child-570.avif 36KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?pfad=mein-kind",
+      "viewport": "390x844",
+      "file": "final-meinkind-390x844.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 67.8,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-960.avif 30KB",
+        "mobile-420.avif 23KB",
+        "child-300.avif 14KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "390x844",
+      "file": "final-reducedmotion-390x844.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 67.8,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-960.avif 30KB",
+        "mobile-420.avif 23KB",
+        "child-300.avif 14KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "390x844",
+      "file": "final-cpu4x-390x844.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 67.8,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-960.avif 30KB",
+        "mobile-420.avif 23KB",
+        "child-300.avif 14KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "390x844",
+      "file": "final-text200-390x844.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 67.8,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-960.avif 30KB",
+        "mobile-420.avif 23KB",
+        "child-300.avif 14KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "1440x900",
+      "file": "final-text200-1440x900.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 135.3,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-1600.avif 61KB",
+        "mobile-830.avif 38KB",
+        "child-570.avif 36KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?status=unknown",
+      "viewport": "1440x900",
+      "file": "final-unknown-1440x900.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 135.3,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-1600.avif 61KB",
+        "mobile-830.avif 38KB",
+        "child-570.avif 36KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?status=special",
+      "viewport": "390x844",
+      "file": "final-special-390x844.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 67.8,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-960.avif 30KB",
+        "mobile-420.avif 23KB",
+        "child-300.avif 14KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?status=closure",
+      "viewport": "390x844",
+      "file": "final-closure-390x844.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 67.8,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-960.avif 30KB",
+        "mobile-420.avif 23KB",
+        "child-300.avif 14KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?pfad=praxis",
+      "viewport": "1440x900",
+      "file": "final-praxis-1440x900.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 135.3,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-1600.avif 61KB",
+        "child-570.avif 36KB",
+        "mobile-830.avif 38KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?3d=0",
+      "viewport": "1440x900",
+      "file": "final-no3d-1440x900.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 135.3,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-1600.avif 61KB",
+        "mobile-830.avif 38KB",
+        "child-570.avif 36KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?3d=0",
+      "viewport": "390x844",
+      "file": "final-no3d-390x844.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 67.8,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-960.avif 30KB",
+        "mobile-420.avif 23KB",
+        "child-300.avif 14KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "1440x900",
+      "file": "final-reducedmotion-1440x900.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 270.5,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-1600.avif 61KB",
+        "mobile-830.avif 38KB",
+        "child-570.avif 36KB",
+        "room-1600.avif 61KB",
+        "child-570.avif 36KB",
+        "mobile-830.avif 38KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?status=closed",
+      "viewport": "1440x900",
+      "file": "final-closed-1440x900.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 135.3,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-1600.avif 61KB",
+        "mobile-830.avif 38KB",
+        "child-570.avif 36KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final?pfad=mein-kind",
+      "viewport": "430x932",
+      "file": "final-meinkind-430x932.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 67.8,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-960.avif 30KB",
+        "mobile-420.avif 23KB",
+        "child-300.avif 14KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "390x844",
+      "file": "final-scene-band-390x844.png",
+      "jsInitialKB": 141.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 67.8,
+        "Font": 150,
+        "Stylesheet": 17.2
+      },
+      "images": [
+        "room-960.avif 30KB",
+        "mobile-420.avif 23KB",
+        "child-300.avif 14KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    }
+  ],
+  "smoothness": [
+    {
+      "url": "/lab/final",
+      "viewport": "1440x900",
+      "cpuThrottle": 1,
+      "frames": 212,
+      "medianFrameMs": 16.7,
+      "p95FrameMs": 16.8,
+      "maxFrameMs": 17,
+      "longTasksMs": 0
+    },
+    {
+      "url": "/lab/final",
+      "viewport": "390x844",
+      "cpuThrottle": 4,
+      "frames": 214,
+      "medianFrameMs": 16.7,
+      "p95FrameMs": 16.8,
+      "maxFrameMs": 17,
+      "longTasksMs": 0
+    }
+  ]
+}

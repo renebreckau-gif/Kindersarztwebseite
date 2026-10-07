@@ -37,22 +37,22 @@ const FOLLOW_UP: Partial<Record<DemoPuls["action"]["kind"], string>> = {
   details: "#sprechzeiten",
 };
 
-/** PRAXIS PULS as part of the composition: a lit statement, not a widget. */
+/** PRAXIS PULS as typography on the sunlit wall: a statement, not a widget. */
 export function PulsStatement({ puls }: { puls: DemoPuls }) {
   const unknown = puls.indicator === "NONE";
   const follow = [puls.action, puls.secondary].find((a) => a && FOLLOW_UP[a.kind]);
   return (
     <section id="heute" className={s.puls} aria-label="Heute in der Praxis" data-indicator={puls.indicator}>
-      <p className={s.pill}>
+      <p className={s.status}>
         {unknown ? null : (
-          <span className={s.pillMark}>
+          <span className={s.statusMark}>
             <StatusMark indicator={puls.indicator} />
           </span>
         )}
-        <span className={s.pillText}>
+        <span className={s.statusText}>
           <strong>{puls.headline}</strong>
           <span>{puls.detail}</span>
-          {puls.reason ? <span className={s.pillReason}>{puls.reason}</span> : null}
+          {puls.reason ? <span className={s.statusReason}>{puls.reason}</span> : null}
         </span>
         <span className={s.demo}>Demo</span>
       </p>

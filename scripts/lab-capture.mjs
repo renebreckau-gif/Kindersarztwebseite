@@ -139,9 +139,12 @@ async function capture(tabSession, url, vpName, file, opts = {}) {
   await s.send("Emulation.setCPUThrottlingRate", { rate: opts.cpu ?? 1 });
 
   const scripts = new Map();
+  const assets = new Map();
   let loaded = false;
   const listener = (m) => {
     if (m.method === "Network.responseReceived" && m.params.type === "Script") scripts.set(m.params.requestId, { url: m.params.response.url, bytes: 0, afterLoad: loaded });
+    if (m.method === "Network.responseReceived" && ["Image", "Font", "Stylesheet"].includes(m.params.type)) assets.set(m.params.requestId, { type: m.params.type, url: m.params.response.url, bytes: 0 });
+    if (m.method === "Network.loadingFinished" && assets.has(m.params.requestId)) assets.get(m.params.requestId).bytes = m.params.encodedDataLength;
     if (m.method === "Network.loadingFinished" && scripts.has(m.params.requestId)) scripts.get(m.params.requestId).bytes = m.params.encodedDataLength;
   };
   s.on(listener);
@@ -175,6 +178,8 @@ async function capture(tabSession, url, vpName, file, opts = {}) {
     jsInitialKB: kb(all.filter((x) => !x.afterLoad)),
     jsLazyKB: kb(all.filter((x) => x.afterLoad)),
     lazyChunks: all.filter((x) => x.afterLoad).map((x) => `${x.url.split("/").pop()} ${Math.round(x.bytes / 1024)}KB`),
+    assetKB: Object.fromEntries(["Image", "Font", "Stylesheet"].map((ty) => [ty, kb([...assets.values()].filter((x) => x.type === ty))])),
+    images: [...assets.values()].filter((x) => x.type === "Image").map((x) => `${x.url.split("/").pop()} ${Math.round(x.bytes / 1024)}KB`),
     longTasksMs: Math.round(lab?.long ?? 0),
     longTaskCount: lab?.longCount ?? 0,
     ...audit,
@@ -232,7 +237,7 @@ const results = [];
 const QUICK = process.env.LAB_QUICK; // e.g. "1440x900,390x844": open state only, no metrics file
 if (QUICK) {
   for (const p of PROTOS) for (const vp of QUICK.split(",")) results.push(await capture(s, `/lab/${p}${process.env.LAB_QUERY ?? ""}`, vp, `quick-${p}-${vp}.png`, { textScale: Number(process.env.LAB_TEXT) || undefined, clipSelector: process.env.LAB_CLIP }));
-  for (const r of results) console.log(r.file, JSON.stringify({ ovX: r.overflowX, fv: r.firstViewport, enh: r.enhancement, small: r.smallTargets, clip: r.clipped }));
+  for (const r of results) console.log(r.file, JSON.stringify({ assets: r.assetKB, images: r.images, ovX: r.overflowX, fv: r.firstViewport, enh: r.enhancement, small: r.smallTargets, clip: r.clipped }));
   ws.close();
   chrome.kill();
   await sleep(500);
@@ -259,8 +264,9 @@ for (const p of PROTOS) {
     results.push(await capture(s, `/lab/${p}?3d=0`, "1440x900", `${p}-no3d-1440x900.png`));
     results.push(await capture(s, `/lab/${p}?3d=0`, "390x844", `${p}-no3d-390x844.png`));
     results.push(await capture(s, `/lab/${p}`, "1440x900", `${p}-reducedmotion-1440x900.png`, { reducedMotion: true }));
-    results.push(await capture(s, `/lab/${p}`, "1440x900", `${p}-scene-closeup-1440x900.png`, { clipSelector: '[class*="objectZone"]' }));
-    results.push(await capture(s, `/lab/${p}`, "390x844", `${p}-scene-closeup-390x844.png`, { clipSelector: '[class*="objectZone"]' }));
+    results.push(await capture(s, `/lab/${p}?status=closed`, "1440x900", `${p}-closed-1440x900.png`));
+    results.push(await capture(s, `/lab/${p}?pfad=mein-kind`, "430x932", `${p}-meinkind-430x932.png`));
+    results.push(await capture(s, `/lab/${p}`, "390x844", `${p}-scene-band-390x844.png`, { clipSelector: '[class*="scene"]' }));
   }
 }
 if (!only.length) results.push(await capture(s, `/lab`, "1440x900", `lab-index-1440x900.png`));
