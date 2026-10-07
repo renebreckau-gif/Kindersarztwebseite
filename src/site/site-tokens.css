@@ -1,0 +1,22 @@
+/* Public site surfaces (Phase 07) — continuing the approved hero world.
+   Scoped to .ds-root; components use these names, not raw hex. */
+.ds-root {
+  --paper: #f3efe7;
+  --plaster: #efe3d3;
+  --plaster-deep: #e7d3bd;
+  --floor: #e2bfa3;
+  --sun: #fbefdd;
+  --night: #0f1220;
+  --night-raised: #181c30;
+  --cobalt-luminous: #8c9bff;
+  --call-bg: #3446e8;
+  --call-bg-deep: #2433c4;
+  --ink-2: #3a3e43;
+}
+
+/* German text wraps, never clips (mobile-priorities §5): hyphenation for long compounds */
+.ds-root main,
+.ds-root footer {
+  hyphens: auto;
+  overflow-wrap: break-word;
+}

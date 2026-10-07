@@ -37,6 +37,8 @@ const ELEMENT: Record<PathId, { x: number; y: number; r: number; tilt: number }>
 const ROD = { x: 1336, yFloor: 1418, yTop: 760 };
 const AGE_Y = [1300, 1150, 990, 830];
 
+const AGE_SLUGS = ["0-2-jahre", "3-6-jahre", "7-12-jahre", "13-17-jahre"];
+
 const PATH_TEXT: Record<PathId, string> = {
   heute: "Sprechzeiten, Telefon und Anfahrt",
   "mein-kind": "Vorsorge und Orientierung nach Alter",
@@ -95,7 +97,12 @@ function useSway(target: number, pointer: boolean) {
   return ref;
 }
 
-export function HeroStage({ initial, children }: { initial: PathId | null; children: ReactNode }) {
+/**
+ * `routes` (public start page): path links point to real pages without JavaScript; with
+ * JavaScript a choice previews on the mobile first and offers an explicit "Zu …" link
+ * (docs/ux/navigation-model.md §12). Without `routes` the lab keeps `?pfad=` previews.
+ */
+export function HeroStage({ initial, children, routes }: { initial: PathId | null; children: ReactNode; routes?: Record<PathId, string> }) {
   const [selected, setSelected] = useState<PathId | null>(initial);
   const [age, setAge] = useState<number | null>(null);
   const inst = selected === "mein-kind";
@@ -232,7 +239,7 @@ export function HeroStage({ initial, children }: { initial: PathId | null; child
             {PATHS.map((p) => (
               <li key={p.id}>
                 <a
-                  href={`?pfad=${p.id}#pfade`}
+                  href={routes ? routes[p.id] : `?pfad=${p.id}#pfade`}
                   className={s.path}
                   aria-current={selected === p.id ? "true" : undefined}
                   onClick={(ev) => {
@@ -254,11 +261,20 @@ export function HeroStage({ initial, children }: { initial: PathId | null; child
         <p className={s.preview} aria-live="polite">
           {inst
             ? age !== null
-              ? `${AGE_RANGES[age]} Jahre gewählt. Inhalte folgen in einer späteren Phase.`
+              ? routes
+                ? `${AGE_RANGES[age]} Jahre gewählt. `
+                : `${AGE_RANGES[age]} Jahre gewählt. Inhalte folgen in einer späteren Phase.`
               : "Mein Kind: Der Messstab zeigt die Altersstufen. Wählen Sie ein Alter."
             : current
-              ? `${current.label}: Inhalte folgen in einer späteren Phase.`
+              ? routes
+                ? `${current.label}: ${PATH_TEXT[current.id]}. `
+                : `${current.label}: Inhalte folgen in einer späteren Phase.`
               : ""}
+          {current && routes ? (
+            <a className={s.previewLink} href={inst && age !== null ? `${routes["mein-kind"]}/${AGE_SLUGS[age]}` : routes[current.id]}>
+              {inst && age !== null ? `Zu ${AGE_RANGES[age]} Jahre` : `Zu ${current.label}`}
+            </a>
+          ) : null}
         </p>
       </div>
     </div>

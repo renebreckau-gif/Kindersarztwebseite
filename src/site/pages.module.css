@@ -1,0 +1,507 @@
+/* Page-specific compositions (Phase 07). Utility pages are dense and calm; growth pages
+   carry the measuring language; editorial pages breathe; discovery is night. */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-4);
+  margin-top: var(--space-6);
+}
+.noteWrap {
+  padding: 0 var(--space-gutter);
+}
+.lead {
+  margin: 0 0 var(--space-5);
+  max-width: 38rem;
+  font-size: var(--text-body-l);
+  line-height: 1.5;
+}
+.lead a,
+.fine a,
+.contact a,
+.notices a,
+.place a {
+  color: var(--call-bg);
+  text-underline-offset: 3px;
+}
+.fine {
+  margin: var(--space-5) 0 0;
+  max-width: 40rem;
+  font-size: var(--text-small);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+/* notices */
+.notices {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-4);
+  max-width: 44rem;
+}
+.notices li {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border-left: 3px solid var(--color-text);
+  background: rgb(255 255 255 / 0.55);
+}
+.notices strong {
+  font-size: var(--text-h3);
+}
+.empty {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+}
+.emptyTitle {
+  margin: 0 0 var(--space-4);
+  max-width: 34rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.25rem);
+  line-height: 1.15;
+}
+
+/* sprechzeiten legend */
+.legend {
+  display: grid;
+  gap: var(--space-5);
+  margin: var(--space-7) 0 0;
+  max-width: 44rem;
+}
+.legend dt {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-weight: 600;
+}
+.legend dd {
+  margin: var(--space-1) 0 0 calc(28px + var(--space-3));
+  color: var(--ink-2);
+}
+.swHealthy,
+.swAppointment {
+  width: 28px;
+  height: 14px;
+  border-radius: 4px;
+}
+.swHealthy {
+  background: repeating-linear-gradient(135deg, #f1cf68 0 6px, #f6dd92 6px 12px);
+  box-shadow: inset 0 0 0 1px rgb(150 112 20 / 0.5);
+}
+.swAppointment {
+  box-shadow: inset 0 0 0 2px var(--color-text);
+}
+
+/* ================= Notfall: fast, calm, unambiguous ================= */
+.emergencyHero {
+  display: grid;
+  gap: var(--space-6);
+  padding: var(--space-8) var(--space-gutter) var(--space-8);
+  background: linear-gradient(180deg, #f8ece6 0%, var(--paper) 100%);
+  border-bottom: 1px solid rgb(198 56 49 / 0.25);
+}
+.emergencyTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.25rem, 1.6rem + 3vw, 4.5rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.emergency112 {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+}
+.e112When {
+  margin: 0;
+  font-size: var(--text-body-l);
+  font-weight: 600;
+}
+.e112Call {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-5);
+  min-height: 72px;
+  padding: var(--space-3) var(--space-7) var(--space-3) var(--space-6);
+  border-radius: 999px;
+  background: #b42d27;
+  color: #fff;
+  font-size: var(--text-body-l);
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 16px 30px -18px rgb(180 45 39 / 0.8);
+}
+.e112Num {
+  font-size: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.e112Call:focus-visible {
+  outline: var(--border-focus) solid var(--color-focus);
+  outline-offset: 4px;
+}
+
+/* ================= growth pages ================= */
+.growStage {
+  padding: var(--space-7) var(--space-gutter) var(--space-9);
+  background: linear-gradient(180deg, #f1ecf3 0%, #f4efea 100%);
+}
+.ageName {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 1.3rem + 1.8vw, 3rem);
+  font-style: italic;
+  color: var(--ink-2);
+}
+
+.examStage {
+  padding: var(--space-7) var(--space-gutter) var(--space-9);
+  background: linear-gradient(180deg, #f1ecf3 0%, #f4efea 100%);
+}
+.examTitle {
+  margin: 0 0 var(--space-6);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--text-h2);
+}
+.examLine {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 var(--space-5);
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  border-bottom: 1px solid rgb(23 26 29 / 0.55);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  position: relative;
+}
+.examLine li {
+  flex: 1 0 auto;
+  display: grid;
+  justify-items: center;
+  align-content: end;
+  min-width: 2.75rem;
+  height: calc(2.5rem + var(--i) * 0.55rem);
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.85), rgb(255 255 255 / 0.3));
+  scroll-margin-top: var(--space-8);
+}
+.examLine li:last-child {
+  background: linear-gradient(180deg, rgb(74 92 255 / 0.22), rgb(74 92 255 / 0.06));
+}
+.examName {
+  padding-bottom: var(--space-2);
+  font-family: var(--font-display);
+  font-size: clamp(1.125rem, 1rem + 0.6vw, 1.625rem);
+}
+.sourcesWrap {
+  padding: var(--space-8) var(--space-gutter) var(--space-9);
+}
+
+.trio {
+  display: grid;
+  gap: var(--space-7);
+  padding: var(--space-8) var(--space-gutter);
+  background: var(--paper);
+}
+.trio > div {
+  padding-top: var(--space-5);
+  border-top: 1px solid rgb(23 26 29 / 0.3);
+  max-width: 26rem;
+}
+.trio p {
+  margin: 0;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+.trioTitle {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--text-h3);
+}
+
+/* ================= editorial ================= */
+.introMedia {
+  max-width: 22rem;
+  width: 100%;
+  justify-self: end;
+}
+.people {
+  display: grid;
+  gap: var(--space-8);
+  padding: var(--space-8) var(--space-gutter) var(--space-10);
+}
+.person {
+  display: grid;
+  gap: var(--space-5);
+  align-items: end;
+  grid-template-columns: minmax(0, 9rem) minmax(0, 1fr);
+}
+.personName {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.75rem, 1.4rem + 1.6vw, 3rem);
+  line-height: 1.05;
+}
+.personRole {
+  margin: var(--space-2) 0 0;
+  color: var(--ink-2);
+}
+.roster {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0 var(--space-7);
+  border-top: 1px solid rgb(23 26 29 / 0.3);
+}
+.roster li {
+  padding: var(--space-5) 0;
+  border-bottom: 1px solid rgb(23 26 29 / 0.14);
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 1.25rem + 1.2vw, 2.25rem);
+}
+
+.place {
+  font-family: var(--font-display);
+  font-size: clamp(1.375rem, 1.2rem + 0.8vw, 1.875rem);
+  line-height: 1.2;
+}
+
+.contact {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  border-top: 1px solid rgb(23 26 29 / 0.3);
+  max-width: 52rem;
+}
+.contact > div {
+  display: grid;
+  gap: var(--space-1) var(--space-6);
+  padding: var(--space-5) 0;
+  border-bottom: 1px solid rgb(23 26 29 / 0.14);
+}
+.contact dt {
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--ink-2);
+}
+.contact dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 1.25rem + 1.2vw, 2.25rem);
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+.contact dd a {
+  display: inline-flex;
+  min-height: var(--target-min);
+  align-items: center;
+}
+
+/* ================= discovery ================= */
+.nightOrbs {
+  position: relative;
+  height: clamp(160px, 26vw, 320px);
+}
+.nightOrbs span {
+  position: absolute;
+  border-radius: 50%;
+}
+.nightOrbs span:nth-child(1) {
+  left: 20%;
+  top: 10%;
+  width: 34%;
+  aspect-ratio: 1;
+  max-width: 180px;
+  background: radial-gradient(circle at 34% 30%, #b9c2ff 0%, #4a5cff 32%, #1a2499 72%, #0b1050 100%);
+}
+.nightOrbs span:nth-child(2) {
+  left: 58%;
+  top: 46%;
+  width: 26%;
+  max-width: 130px;
+  aspect-ratio: 2 / 1;
+  border-radius: 0 0 999px 999px;
+  background: radial-gradient(120% 140% at 30% 0%, #ffc9b4 0%, #f28b74 45%, #b9533b 100%);
+}
+.nightOrbs span:nth-child(3) {
+  left: 66%;
+  top: 4%;
+  width: 14%;
+  max-width: 80px;
+  aspect-ratio: 1;
+  background: radial-gradient(circle at 35% 30%, #fff1c4 0%, #f1cf68 45%, #b98f2e 100%);
+}
+.chapters {
+  padding: var(--space-8) var(--space-gutter) var(--space-10);
+  color: #e9e6f2;
+}
+.chaptersTitle {
+  margin: 0 0 var(--space-5);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--text-h3);
+  color: #8c9bff;
+}
+.chapters ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid rgb(233 230 242 / 0.2);
+}
+.chapters li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-2) var(--space-5);
+  padding: var(--space-6) 0;
+  border-bottom: 1px solid rgb(233 230 242 / 0.12);
+  scroll-margin-top: var(--space-8);
+}
+.chapterNo {
+  grid-row: span 3;
+  font-family: var(--font-display);
+  font-size: var(--text-h2);
+  color: #8c9bff;
+}
+.chapterName {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 1.4rem + 1.6vw, 3rem);
+  line-height: 1.05;
+}
+.chapterText {
+  color: #c9cbe0;
+}
+.chapterState {
+  justify-self: start;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid rgb(140 155 255 / 0.6);
+  font-size: 0.8125rem;
+  color: #c4ccff;
+}
+
+/* ================= desktop ================= */
+@media (min-width: 48em) {
+  .contact > div {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 9fr);
+    align-items: baseline;
+  }
+  .roster {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .legend {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 64em) {
+  .emergencyHero {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: end;
+    padding-top: var(--space-10);
+    padding-bottom: var(--space-10);
+  }
+  .trio {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding-top: var(--space-10);
+    padding-bottom: var(--space-10);
+  }
+  .people {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .person {
+    grid-template-columns: minmax(0, 12rem) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 63.99em) {
+  .introMedia {
+    max-width: 13rem;
+    justify-self: start;
+  }
+}
+
+/* shrinkable tracks + wrapping actions (200 % text) */
+.emergencyHero,
+.contact,
+.contact > div,
+.people,
+.trio,
+.empty {
+  grid-template-columns: minmax(0, 1fr);
+}
+.e112Call {
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+@media (min-width: 48em) {
+  .contact > div {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 9fr);
+  }
+}
+@media (min-width: 64em) {
+  .emergencyHero {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  }
+  .trio {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .people {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 47.99em) {
+  .person {
+    grid-template-columns: minmax(0, 7rem) minmax(0, 1fr);
+  }
+}
+
+.legend,
+.legend > div {
+  grid-template-columns: minmax(0, 1fr);
+}
+.legend dt,
+.legend dd {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.legend dd {
+  margin-left: 0;
+}
+.contact dd a {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding: 6px 0;
+}
+.place a {
+  overflow-wrap: anywhere;
+}
+@media (min-width: 48em) {
+  .legend {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 47.99em) {
+  .examLine {
+    overflow: visible;
+    gap: 3px;
+  }
+  .examLine li {
+    flex: 1 1 0;
+    min-width: 0;
+    height: calc(2.25rem + var(--i) * 0.45rem);
+  }
+  .examName {
+    font-size: 0.9375rem;
+  }
+}

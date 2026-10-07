@@ -1,0 +1,1990 @@
+{
+  "capturedAt": "2026-10-07T13:22:59.226Z",
+  "browser": "Chrome/155.0.8059.39",
+  "results": [
+    {
+      "url": "/",
+      "viewport": "1440x900",
+      "file": "home-full-1440x900.jpg",
+      "jsInitialKB": 141.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 135.3,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [
+        "room-1600.avif 61KB",
+        "mobile-830.avif 38KB",
+        "child-570.avif 36KB"
+      ],
+      "longTasksMs": 62,
+      "longTaskCount": 1,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 4
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/",
+      "viewport": "390x844",
+      "file": "home-full-390x844.jpg",
+      "jsInitialKB": 141.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 67.8,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [
+        "room-960.avif 30KB",
+        "mobile-420.avif 23KB",
+        "child-300.avif 14KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 4
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/",
+      "viewport": "1440x900",
+      "file": "home-1440x900.png",
+      "jsInitialKB": 141.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 135.3,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [
+        "room-1600.avif 61KB",
+        "mobile-830.avif 38KB",
+        "child-570.avif 36KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 4
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/",
+      "viewport": "1920x1080",
+      "file": "home-1920x1080.png",
+      "jsInitialKB": 141.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 176.9,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [
+        "room-2400.avif 102KB",
+        "mobile-830.avif 38KB",
+        "child-570.avif 36KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 4
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/",
+      "viewport": "390x844",
+      "file": "home-390x844.png",
+      "jsInitialKB": 141.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 67.8,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [
+        "room-960.avif 30KB",
+        "mobile-420.avif 23KB",
+        "child-300.avif 14KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 4
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/",
+      "viewport": "360x800",
+      "file": "home-360x800.png",
+      "jsInitialKB": 141.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 67.8,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [
+        "room-960.avif 30KB",
+        "mobile-420.avif 23KB",
+        "child-300.avif 14KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 4
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/",
+      "viewport": "430x932",
+      "file": "home-430x932.png",
+      "jsInitialKB": 141.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 67.8,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [
+        "room-960.avif 30KB",
+        "mobile-420.avif 23KB",
+        "child-300.avif 14KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 4
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/?vorschau=freigabe&zeit=2026-10-06T09:30",
+      "viewport": "1440x900",
+      "file": "home-open-1440x900.png",
+      "jsInitialKB": 141.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 135.3,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [
+        "room-1600.avif 61KB",
+        "mobile-830.avif 38KB",
+        "child-570.avif 36KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 4
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/?vorschau=freigabe&zeit=2026-10-06T19:30",
+      "viewport": "390x844",
+      "file": "home-closed-390x844.png",
+      "jsInitialKB": 141.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 67.8,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [
+        "room-960.avif 30KB",
+        "mobile-420.avif 23KB",
+        "child-300.avif 14KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 4
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/",
+      "viewport": "390x844",
+      "file": "home-reducedmotion-390x844.png",
+      "jsInitialKB": 141.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 67.8,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [
+        "room-960.avif 30KB",
+        "mobile-420.avif 23KB",
+        "child-300.avif 14KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 4
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/",
+      "viewport": "390x844",
+      "file": "home-text200-390x844.png",
+      "jsInitialKB": 141.6,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 67.8,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [
+        "room-960.avif 30KB",
+        "mobile-420.avif 23KB",
+        "child-300.avif 14KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 4
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": true,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/heute",
+      "viewport": "1440x900",
+      "file": "heute-1440x900.jpg",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 135.3,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [
+        "room-1600.avif 61KB",
+        "mobile-830.avif 38KB",
+        "child-570.avif 36KB"
+      ],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/heute",
+      "viewport": "390x844",
+      "file": "heute-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/heute/sprechzeiten",
+      "viewport": "1440x900",
+      "file": "heute_sprechzeiten-1440x900.jpg",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": false,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/heute/sprechzeiten",
+      "viewport": "390x844",
+      "file": "heute_sprechzeiten-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": false,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/notfall",
+      "viewport": "1440x900",
+      "file": "notfall-1440x900.jpg",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/notfall",
+      "viewport": "390x844",
+      "file": "notfall-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/mein-kind",
+      "viewport": "1440x900",
+      "file": "mein-kind-1440x900.jpg",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": null,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/mein-kind",
+      "viewport": "390x844",
+      "file": "mein-kind-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": null,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/mein-kind/3-6-jahre",
+      "viewport": "1440x900",
+      "file": "mein-kind_3-6-jahre-1440x900.jpg",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": false,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/mein-kind/3-6-jahre",
+      "viewport": "390x844",
+      "file": "mein-kind_3-6-jahre-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": false,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/mein-kind/vorsorge",
+      "viewport": "1440x900",
+      "file": "mein-kind_vorsorge-1440x900.jpg",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": false,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/mein-kind/vorsorge",
+      "viewport": "390x844",
+      "file": "mein-kind_vorsorge-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": false,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/mein-kind/impfungen",
+      "viewport": "1440x900",
+      "file": "mein-kind_impfungen-1440x900.jpg",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": false,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/mein-kind/impfungen",
+      "viewport": "390x844",
+      "file": "mein-kind_impfungen-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": false,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/praxis",
+      "viewport": "1440x900",
+      "file": "praxis-1440x900.jpg",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": false,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/praxis",
+      "viewport": "390x844",
+      "file": "praxis-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": false,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/praxis/aerztinnen",
+      "viewport": "1440x900",
+      "file": "praxis_aerztinnen-1440x900.jpg",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/praxis/aerztinnen",
+      "viewport": "390x844",
+      "file": "praxis_aerztinnen-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/praxis/neu-bei-uns",
+      "viewport": "1440x900",
+      "file": "praxis_neu-bei-uns-1440x900.jpg",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/praxis/neu-bei-uns",
+      "viewport": "390x844",
+      "file": "praxis_neu-bei-uns-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/praxis/kontakt",
+      "viewport": "1440x900",
+      "file": "praxis_kontakt-1440x900.jpg",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/praxis/kontakt",
+      "viewport": "390x844",
+      "file": "praxis_kontakt-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/praxis/leistungen",
+      "viewport": "1440x900",
+      "file": "praxis_leistungen-1440x900.jpg",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": false,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/praxis/leistungen",
+      "viewport": "390x844",
+      "file": "praxis_leistungen-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": false,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/entdecken",
+      "viewport": "1440x900",
+      "file": "entdecken-1440x900.jpg",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": null,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/entdecken",
+      "viewport": "390x844",
+      "file": "entdecken-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": null,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/heute/aktuelles",
+      "viewport": "1440x900",
+      "file": "heute_aktuelles-1440x900.jpg",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/heute/aktuelles",
+      "viewport": "390x844",
+      "file": "heute_aktuelles-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/heute",
+      "viewport": "360x800",
+      "file": "heute-360x800.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/heute",
+      "viewport": "430x932",
+      "file": "heute-430x932.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/heute",
+      "viewport": "390x844",
+      "file": "heute-text200-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": false,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/notfall",
+      "viewport": "360x800",
+      "file": "notfall-360x800.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/notfall",
+      "viewport": "430x932",
+      "file": "notfall-430x932.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/notfall",
+      "viewport": "390x844",
+      "file": "notfall-text200-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/praxis/kontakt",
+      "viewport": "360x800",
+      "file": "praxis_kontakt-360x800.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/praxis/kontakt",
+      "viewport": "430x932",
+      "file": "praxis_kontakt-430x932.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/praxis/kontakt",
+      "viewport": "390x844",
+      "file": "praxis_kontakt-text200-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/mein-kind",
+      "viewport": "360x800",
+      "file": "mein-kind-360x800.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": null,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/mein-kind",
+      "viewport": "430x932",
+      "file": "mein-kind-430x932.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": null,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/mein-kind",
+      "viewport": "390x844",
+      "file": "mein-kind-text200-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": null,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/heute?vorschau=freigabe&zeit=2026-10-06T09:30",
+      "viewport": "1440x900",
+      "file": "heute-open-1440x900.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/heute?vorschau=freigabe&zeit=2026-10-06T19:30",
+      "viewport": "390x844",
+      "file": "heute-closed-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/heute",
+      "viewport": "390x844",
+      "file": "heute-unknown-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": true,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/praxis/aerztinnen?vorschau=freigabe",
+      "viewport": "1440x900",
+      "file": "praxis_aerztinnen-vorschau-1440x900.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": null,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/mein-kind/0-2-jahre",
+      "viewport": "390x844",
+      "file": "mein-kind_0-2-jahre-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": false,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/mein-kind/13-17-jahre",
+      "viewport": "1440x900",
+      "file": "mein-kind_13-17-jahre-1440x900.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": false,
+        "action": null,
+        "dockOrUtil": true
+      }
+    },
+    {
+      "url": "/impressum",
+      "viewport": "390x844",
+      "file": "impressum-390x844.png",
+      "jsInitialKB": 138.4,
+      "jsLazyKB": 0,
+      "lazyChunks": [],
+      "assetKB": {
+        "Image": 0,
+        "Font": 150,
+        "Stylesheet": 24.9
+      },
+      "images": [],
+      "longTasksMs": 0,
+      "longTaskCount": 0,
+      "overflowX": false,
+      "clipped": [],
+      "smallTargets": [],
+      "h1": 1,
+      "lang": "de",
+      "landmarks": {
+        "main": true,
+        "nav": 3
+      },
+      "enhancement": [],
+      "canvases": 0,
+      "unnamed": 0,
+      "firstViewport": {
+        "status": null,
+        "action": null,
+        "dockOrUtil": true
+      }
+    }
+  ],
+  "smoothness": [
+    {
+      "url": "/",
+      "viewport": "1440x900",
+      "cpuThrottle": 1,
+      "frames": 212,
+      "medianFrameMs": 16.7,
+      "p95FrameMs": 16.8,
+      "maxFrameMs": 17,
+      "longTasksMs": 0
+    },
+    {
+      "url": "/heute",
+      "viewport": "390x844",
+      "cpuThrottle": 4,
+      "frames": 212,
+      "medianFrameMs": 16.7,
+      "p95FrameMs": 16.8,
+      "maxFrameMs": 34,
+      "longTasksMs": 0
+    }
+  ]
+}

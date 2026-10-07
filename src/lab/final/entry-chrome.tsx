@@ -7,23 +7,25 @@ import { StatusMark } from "@/design-system/components/primitives";
 import type { DemoPuls } from "@/design-system/demo-fixtures";
 import { PATHS, PHONE_DISPLAY, PHONE_HREF } from "../fixtures";
 
-export function EntryHeader() {
+/** `links` connects the hero nav to real routes on the public start page; the lab keeps its previews. */
+export function EntryHeader({ links, homeHref = "#inhalt", menuHref = "#menue" }: { links?: { id: string; label: string; href: string }[]; homeHref?: string; menuHref?: string } = {}) {
+  const items = links ?? PATHS.map((p) => ({ id: p.id, label: p.label, href: `?pfad=${p.id}#pfade` }));
   return (
     <header className={s.header}>
-      <a className={s.wordmark} href="#inhalt">
+      <a className={s.wordmark} href={homeHref}>
         <span>Kinderarztpraxis</span>
         <span>Probst &amp; Böhme</span>
       </a>
       <nav aria-label="Hauptnavigation" className={s.nav}>
         <ul>
-          {PATHS.map((p) => (
+          {items.map((p) => (
             <li key={p.id}>
-              <a href={`?pfad=${p.id}#pfade`}>{p.label}</a>
+              <a href={p.href}>{p.label}</a>
             </li>
           ))}
         </ul>
       </nav>
-      <a className={s.menuButton} href="#menue">
+      <a className={s.menuButton} href={menuHref}>
         <Icon name="menu" size={20} />
         <span className="visually-hidden">Menü</span>
       </a>
@@ -38,7 +40,7 @@ const FOLLOW_UP: Partial<Record<DemoPuls["action"]["kind"], string>> = {
 };
 
 /** PRAXIS PULS as typography on the sunlit wall: a statement, not a widget. */
-export function PulsStatement({ puls }: { puls: DemoPuls }) {
+export function PulsStatement({ puls, hoursHref, emergencyHref = "#notfall", tag = "Demo" }: { puls: DemoPuls; hoursHref?: string; emergencyHref?: string; tag?: string | null }) {
   const unknown = puls.indicator === "NONE";
   const follow = [puls.action, puls.secondary].find((a) => a && FOLLOW_UP[a.kind]);
   return (
@@ -54,7 +56,7 @@ export function PulsStatement({ puls }: { puls: DemoPuls }) {
           <span>{puls.detail}</span>
           {puls.reason ? <span className={s.statusReason}>{puls.reason}</span> : null}
         </span>
-        <span className={s.demo}>Demo</span>
+        {tag ? <span className={s.demo}>{tag}</span> : null}
       </p>
       <div className={s.actions}>
         <a className={s.call} href={PHONE_HREF}>
@@ -63,13 +65,13 @@ export function PulsStatement({ puls }: { puls: DemoPuls }) {
             Anrufen <span className={s.num}>{PHONE_DISPLAY}</span>
           </span>
         </a>
-        <a className={s.emergency} href="#notfall">
+        <a className={s.emergency} href={emergencyHref}>
           <Icon name="alert" size={20} />
           <span>Notfall</span>
         </a>
         {/* the state's follow-up sits beside Notfall when there is room */}
         {follow ? (
-          <a className={s.follow} href={FOLLOW_UP[follow.kind]}>
+          <a className={s.follow} href={hoursHref ?? FOLLOW_UP[follow.kind]}>
             {follow.label}
           </a>
         ) : null}

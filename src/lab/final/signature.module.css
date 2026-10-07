@@ -531,6 +531,18 @@
 .preview:empty {
   display: none;
 }
+.previewLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  font-weight: 600;
+  color: #2a39c8;
+  text-underline-offset: 4px;
+}
+.previewLink:focus-visible {
+  outline: var(--border-focus) solid var(--color-focus);
+  outline-offset: 3px;
+}
 
 /* ================= mobile dock ================= */
 .dock {
