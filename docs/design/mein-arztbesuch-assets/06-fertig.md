@@ -4,6 +4,9 @@ Brief for scene 06 of `/entdecken/mein-arztbesuch` · Phase 08 · 2026-10-07 · 
 Shared spec (master 2400 × 1800, 12 × 9 grid of 200 px cells C1–C12 / R1–R9, floor line y 1332, key light upper right, safe zone x 240–2160 / y 144–1656): [00-overview.md](00-overview.md) · World rules: [../mein-arztbesuch-art-direction.md](../mein-arztbesuch-art-direction.md)
 Content: `src/content/discovery.ts` → scene `fertig` · File names: `d1-06-fertig-<layer>@<width>.<ext>`
 
+> **APPROVED CHARACTER OVERRIDE (Phase 08.8, 2026-10-11)** — binding for production.
+> The child is the approved character from [Style Frame 03](../discovery-reference/d1-03-messen-wiegen-styleframe-v1.png): about 5 years old, warm premium animated-feature 3D style, chestnut-brown soft wavy hair, **coral sweater #F28B74**, **cream / warm beige trousers**, neutral socks and shoes. Earlier mentions of a yellow top / yellow T-shirt in this brief are **overridden**. Companion: cobalt sweater #4A5CFF, dark neutral trousers, optional coral bag, never a face (see approved Scenes 01/02). Reference hierarchy: [discovery-reference/README.md](../discovery-reference/README.md).
+
 ## 1. PURPOSE
 
 Closes the story. Job: *done; you know a bit more; every visit is a bit different.* It returns to the arch so the child sees the way out.

@@ -4,6 +4,9 @@ Brief for scene 05 of `/entdecken/mein-arztbesuch` · Phase 08 · 2026-10-07 · 
 Shared spec (master 2400 × 1800, 12 × 9 grid of 200 px cells C1–C12 / R1–R9, floor line y 1332, key light upper right, safe zone x 240–2160 / y 144–1656): [00-overview.md](00-overview.md) · World rules: [../mein-arztbesuch-art-direction.md](../mein-arztbesuch-art-direction.md)
 Content: `src/content/discovery.ts` → scene `ohren-hals` · File names: `d1-05-ohren-hals-<layer>@<width>.<ext>`
 
+> **APPROVED CHARACTER OVERRIDE (Phase 08.8, 2026-10-11)** — binding for production.
+> The child is the approved character from [Style Frame 03](../discovery-reference/d1-03-messen-wiegen-styleframe-v1.png): about 5 years old, warm premium animated-feature 3D style, chestnut-brown soft wavy hair, **coral sweater #F28B74**, **cream / warm beige trousers**, neutral socks and shoes. Earlier mentions of a yellow top / yellow T-shirt in this brief are **overridden**. Companion: cobalt sweater #4A5CFF, dark neutral trousers, optional coral bag, never a face (see approved Scenes 01/02). Reference hierarchy: [discovery-reference/README.md](../discovery-reference/README.md).
+
 ## 1. PURPOSE
 
 Explains looking into the ears with a small lamp (the copy also mentions the throat). Job: *a small light helps to see.*
@@ -22,7 +25,7 @@ Still and calm, eyes forward, relaxed mouth (closed).
 
 ## 5. SECONDARY OBJECTS
 
-- **Child**: head and shoulders, head ≈ 520 px (x 700–1220, top y 200), ¾ profile facing left so the right ear (x ~1180, y 680) faces the lamp; hair tucked or short so the ear is visible; yellow top.
+- **Child**: head and shoulders, head ≈ 520 px (x 700–1220, top y 200), ¾ profile facing left so the right ear (x ~1180, y 680) faces the lamp; approved wavy brown hair, softly tucked behind the ear so the ear is visible; coral sweater #F28B74 *(overridden 08.8: was yellow)*.
 - **Hand and sleeve**: from the right edge (C10–C12 × R4–R5), ceramic sleeve as in 04.
 - **Light cone** (fx): a soft warm cone from the tip toward the ear, fading out before the ear.
 
@@ -44,7 +47,7 @@ Child head height, 50 mm, ¾ profile, 0° tilt.
 
 ## 10. COLOR
 
-Night; lamp handle ceramic #EEE9DF, ring brass #C9A25E, glow #FFF1C4; child top #F1CF68; sleeve ceramic.
+Night; lamp handle ceramic #EEE9DF, ring brass #C9A25E, glow #FFF1C4; child sweater coral #F28B74 *(overridden 08.8: was yellow)*; sleeve ceramic.
 
 ## 11. MATERIAL
 

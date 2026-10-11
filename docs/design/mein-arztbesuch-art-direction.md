@@ -77,8 +77,9 @@ Exactly the 3D language: matte-satin ceramic, satin anodized metal, glossy cobal
 - **Style:** illustrative 2D/2.5D or sculptural: a figure like a carved wooden or felt toy, with clear proportions (head ≈ 1/5 of height), simplified face (eyes as calm dots or soft lines, a small neutral-friendly mouth), and no individual likeness. "Softly realistic but unmistakably conceptual": volume and soft light yes, skin pores and photographic hair no.
 - **Age read:** 4–7 years.
 - **Gender, skin and hair:** not specified by the brief. The figure stays open: medium warm skin tone, short or tied hair, neutral clothes (coral or yellow top, dark trousers). Never a stereotype.
+- **Approved character (Phase 08.8 override):** the figure is now fixed by the approved [Style Frame 03](discovery-reference/d1-03-messen-wiegen-styleframe-v1.png) — chestnut-brown soft wavy hair, light warm skin tone, **coral sweater #F28B74, cream / warm beige trousers**, neutral socks and shoes. Yellow clothing is no longer an option; yellow stays an object accent (marker, light). Hierarchy: [discovery-reference/README.md](discovery-reference/README.md).
 - **Emotion range:** curious, attentive, at ease, a little proud at the end. **Never** crying, scared, cheering, or exaggerated-happy.
-- **Always clothed** in day clothes in every scene. Scenes 03–05 show no undressing, no bare torso and no underwear. In scene 04 the chest piece rests on the T-shirt.
+- **Always clothed** in day clothes in every scene. Scenes 03–05 show no undressing, no bare torso and no underwear. In scene 04 the chest piece rests on the sweater.
 - **Never alone with an adult stranger in an enclosed room.** The companion adult is present in every scene except the close-ups (04, 05), where the companion's hand or knee may appear at the frame edge.
 
 ## 9. Object representation

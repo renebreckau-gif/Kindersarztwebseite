@@ -1,0 +1,3 @@
+Edit this image and keep everything else exactly unchanged (same child, same bench, cushion, book, light disc, colors, lighting, composition and framing). Only change: the adult on the far left must show NO face at all — remove the visible chin, mouth and lower face at the top-left corner; the adult's body must be cut off by the top edge of the image at the shoulder/neck line, showing only the cobalt sweater from the shoulders down. Also make the adult's hand slightly smaller, a natural adult hand size. No text, no new objects.
+
+(followed by a local top-left retouch, see README)

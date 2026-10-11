@@ -4,6 +4,9 @@ Brief for scene 02 of `/entdecken/mein-arztbesuch` · Phase 08 · 2026-10-07 · 
 Shared spec (master 2400 × 1800, 12 × 9 grid of 200 px cells C1–C12 / R1–R9, floor line y 1332, key light upper right, safe zone x 240–2160 / y 144–1656): [00-overview.md](00-overview.md) · World rules: [../mein-arztbesuch-art-direction.md](../mein-arztbesuch-art-direction.md)
 Content: `src/content/discovery.ts` → scene `warten` · File names: `d1-02-warten-<layer>@<width>.<ext>`
 
+> **APPROVED CHARACTER OVERRIDE (Phase 08.8, 2026-10-11)** — binding for production.
+> The child is the approved character from [Style Frame 03](../discovery-reference/d1-03-messen-wiegen-styleframe-v1.png): about 5 years old, warm premium animated-feature 3D style, chestnut-brown soft wavy hair, **coral sweater #F28B74**, **cream / warm beige trousers**, neutral socks and shoes. Earlier mentions of a yellow top / yellow T-shirt in this brief are **overridden**. Companion: cobalt sweater #4A5CFF, dark neutral trousers, optional coral bag, never a face (see approved Scenes 01/02). Reference hierarchy: [discovery-reference/README.md](../discovery-reference/README.md).
+
 ## 1. PURPOSE
 
 Normalises waiting. Job: *waiting is part of it and is calm.* There is no clock, no time pressure, and no claim about this practice's waiting room.
@@ -22,7 +25,7 @@ Settled, absorbed, unhurried. The child's legs dangle, not swinging.
 
 ## 5. SECONDARY OBJECTS
 
-- **Child**: seated, centred x 1100 (C5–C6), head top y 520 (head ≥ 180 px), ¾ front view looking down at the book; yellow top. The book has a closed blue-grey cover and shows **no text, no characters, no brand**.
+- **Child**: seated, centred x 1100 (C5–C6), head top y 520 (head ≥ 180 px), ¾ front view looking down at the book; coral sweater #F28B74 *(overridden 08.8: was yellow)*, cream trousers. The book has a closed blue-grey cover and shows **no text, no characters, no brand**.
 - **Companion**: seated at the left end of the bench, cut by the left frame edge at x ≤ 420 (C1–C2). Visible: knee, forearm resting near the child, cobalt sleeve, coral bag on the bench.
 - **Wall light**: one soft round warm light disc on the dark background at C9–C11 × R2–R4 (diameter ~460 px). It is a lamp, **not a clock** (no hands, no marks).
 
@@ -44,7 +47,7 @@ Key from the upper right falls on the book and the child's face; the wall light 
 
 ## 10. COLOR
 
-Night; bench ceramic #EEE9DF; cushion coral #F28B74; child top #F1CF68; companion sleeve #4A5CFF; book cover #8C95B8; wall light #FFE4C4 at low intensity.
+Night; bench ceramic #EEE9DF; cushion coral #F28B74; child sweater coral #F28B74 *(overridden 08.8: was yellow)*; companion sleeve #4A5CFF; book cover #8C95B8; wall light #FFE4C4 at low intensity.
 
 ## 11. MATERIAL
 

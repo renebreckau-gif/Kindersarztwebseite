@@ -6,6 +6,9 @@ Content source: `src/content/discovery.ts` (child copy, why-texts, alt texts, ap
 
 **No image in this folder is final, and none was generated in Phase 08.** These briefs are production decisions for step 3 (ASSET PRODUCTION). They may only be executed after step 2: one **approved visual reference** (style frame).
 
+> **APPROVED CHARACTER OVERRIDE (Phase 08.8, 2026-10-11)** — binding for production.
+> The child is the approved character from [Style Frame 03](../discovery-reference/d1-03-messen-wiegen-styleframe-v1.png): about 5 years old, warm premium animated-feature 3D style, chestnut-brown soft wavy hair, **coral sweater #F28B74**, **cream / warm beige trousers**, neutral socks and shoes. Earlier mentions of a yellow top / yellow T-shirt in the scene briefs are **overridden**. Companion: cobalt sweater #4A5CFF, dark neutral trousers, optional coral bag, never a face (see approved Scenes 01/02). Reference hierarchy: [discovery-reference/README.md](../discovery-reference/README.md).
+
 ## Sequence
 
 | # | Scene | Hero object | Figures | Story job | Medical approval |
