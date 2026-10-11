@@ -53,6 +53,9 @@ export function PulsStatement({ puls, hoursHref, emergencyHref = "#notfall", tag
   const follow = [puls.action, puls.secondary].find((a) => a && FOLLOW_UP[a.kind]);
   return (
     <section id="heute" className={s.puls} aria-label="Heute in der Praxis" data-indicator={puls.indicator}>
+      {/* the instrument's name — always visible, in every state incl. UNKNOWN (Phase 08.9);
+          real text, set in caps by CSS; never part of the status logic */}
+      <p className={s.pulsLabel}>Praxis Puls</p>
       <p className={s.status}>
         {unknown ? null : (
           <span className={s.statusMark}>

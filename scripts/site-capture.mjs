@@ -264,10 +264,11 @@ if (process.env.SITE_QUICK) {
     const menu = flag === "menu";
     const reducedMotion = flag === "reduced";
     const hoverHref = flag.startsWith("hover=") ? flag.slice(6) : "";
+    const textScale = flag === "text200" ? 2 : undefined;
     const scrollY = flag.startsWith("scroll") ? Number(flag.slice(6)) : 0;
     const q = path.includes("vorschau=") ? "vorschau" : (path.match(/alter=([a-z0-9-]+)/)?.[1] ?? "");
-    const suffix = full ? "-full" : menu ? "-menu" : reducedMotion ? "-reducedmotion" : hoverHref ? `-hover-${hoverHref.split("/").pop()}` : scrollY ? `-y${scrollY}` : "";
-    results.push(await capture(s, path, vp, `quick-${name(path.split("?")[0], q)}-${vp}${suffix}.${full ? "jpg" : "png"}`, { fullPage: full, openMenu: menu, scrollY, reducedMotion, hoverHref }));
+    const suffix = full ? "-full" : menu ? "-menu" : reducedMotion ? "-reducedmotion" : hoverHref ? `-hover-${hoverHref.split("/").pop()}` : textScale ? "-text200" : scrollY ? `-y${scrollY}` : "";
+    results.push(await capture(s, path, vp, `quick-${name(path.split("?")[0], q)}-${vp}${suffix}.${full ? "jpg" : "png"}`, { fullPage: full, openMenu: menu, scrollY, reducedMotion, hoverHref, textScale }));
   }
 } else {
   // home: full-page scroll + states

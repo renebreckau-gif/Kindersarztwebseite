@@ -233,6 +233,18 @@
   gap: var(--space-4);
   scroll-margin-top: var(--space-8);
 }
+/* the instrument's name, printed above its rule: quieter than the status headline,
+   no pill, no box — the rule of .status underlines it */
+.pulsLabel {
+  margin: 0 0 calc(var(--space-2) - var(--space-4));
+  font-family: var(--font-text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #33373b;
+}
 /* typography on the wall: a ruled status line, no panel */
 .status {
   margin: 0;
