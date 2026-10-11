@@ -8,6 +8,8 @@ import assert from "node:assert/strict";
 import { resolvePuls } from "../puls.ts";
 import { RELEASE } from "../release.ts";
 import { zonedToInstant } from "../../domain/time.ts";
+import { getPracticeStatus } from "../../domain/practice-status.ts";
+import { PULS_DATA } from "../schedule.ts";
 
 const at = (date: string, time: string) => zonedToInstant(date, time); // Europe/Berlin
 
@@ -40,11 +42,51 @@ test("Monday afternoon block is used (F35: 14:00–17:00)", () => {
   assert.equal(p.view.detail, "Heute bis 17:00 Uhr");
 });
 
-test("weekend stays UNKNOWN (F40 unconfirmed) — no inferred closed state", () => {
-  const p = resolvePuls({}, at("2026-10-10", "10:00")); // Saturday
-  assert.equal(p.result.status, "UNKNOWN");
-  assert.equal(p.result.indicator, "NONE");
-  assert.equal(p.view.chip, "");
+// F40 — regular weekend closure confirmed by the practice (2026-10-11): explicit
+// confirmedClosedWeekdays [6, 7], not inferred from missing rules.
+test("F40: weekend closure comes from explicit confirmed data", () => {
+  assert.deepEqual([...(PULS_DATA.schedule?.confirmedClosedWeekdays ?? [])].sort(), [6, 7]);
+});
+
+test("Saturday: CLOSED, neutral, next verified opening (Monday 08:00)", () => {
+  const p = resolvePuls({}, at("2026-10-10", "10:00"));
+  assert.equal(p.result.status, "CLOSED");
+  assert.equal(p.result.indicator, "NEUTRAL");
+  assert.equal(p.view.headline, "Praxis geschlossen");
+  assert.equal(p.view.detail, "Öffnet am Montag, 12. Oktober um 08:00 Uhr");
+});
+
+test("Sunday: CLOSED, neutral, next opening tomorrow 08:00", () => {
+  const p = resolvePuls({}, at("2026-10-11", "10:00"));
+  assert.equal(p.result.status, "CLOSED");
+  assert.equal(p.result.indicator, "NEUTRAL");
+  assert.equal(p.view.detail, "Öffnet morgen um 08:00 Uhr");
+});
+
+test("Friday after the last opening: next opening crosses the closed weekend", () => {
+  const p = resolvePuls({}, at("2026-10-09", "13:00"));
+  assert.equal(p.result.status, "CLOSED");
+  assert.equal(p.view.detail, "Öffnet am Montag, 12. Oktober um 08:00 Uhr");
+});
+
+test("a verified, announced weekend opening still overrides the regular closure", () => {
+  const r = getPracticeStatus(at("2026-10-10", "09:00"), {
+    ...PULS_DATA,
+    exceptions: [
+      {
+        id: "sa-sonder",
+        kind: "SPECIAL_HOURS",
+        startDate: "2026-10-10",
+        endDate: "2026-10-10",
+        intervals: [{ start: "08:00", end: "10:00", consultationType: "GENERAL" }],
+        publicMessage: "Sondersprechstunde",
+        priority: 1,
+        verification: { status: "VERIFIED_CURRENT", lastVerified: "2026-10-09", reviewDue: "2026-10-31", sourceIds: [] },
+      },
+    ],
+  });
+  assert.notEqual(r.status, "CLOSED");
+  assert.notEqual(r.status, "UNKNOWN");
 });
 
 test("public holiday stays UNKNOWN (F49 unconfirmed)", () => {

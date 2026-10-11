@@ -47,7 +47,7 @@ Owner abbreviations: **P** = practice · **L** = legal reviewer · **T** = proje
 | FB-02 | Acute consultation Tue–Fri — end time per day, afternoons included? | F45 | P |
 | FB-03 | Thursday afternoon consultation type | F46 | P |
 | FB-04 | Meaning of "nur gesunde Patienten" window | F42 | P |
-| FB-05 | Weekend closed confirmed | F40 | P |
+| ~~FB-05~~ | ~~Weekend closed confirmed~~ — **closed 2026-10-11** (practice: Nadine Probst) | F40 | P |
 | FB-06 | Public holidays / bridge days rule | F49 | P |
 | FB-07 | Upcoming closures 2026/2027 entered | F54 | P |
 | FB-08 | Telephone hours (for "telefonisch erreichbar" status) | F19 | P |

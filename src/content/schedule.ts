@@ -1,7 +1,10 @@
 // Weekly schedule and PRAXIS PULS data (F35–F49).
-// Hours: VERIFIED_CURRENT as working data (S01, 2026-05-18). Weekend (F40),
-// holidays (F49) and acute consultation (F44–F46) are TO_BE_CONFIRMED — they are
-// NOT encoded as facts, so the engine resolves those days to UNKNOWN.
+// Hours: VERIFIED_CURRENT as working data (S01, 2026-05-18; LB-00 sign-off 2026-10-07).
+// Weekend (F40): regularly closed Saturday and Sunday — confirmed by the practice
+// (Nadine Probst, 2026-10-11), encoded as confirmedClosedWeekdays [6, 7]. Announced
+// weekend openings still win via verified exceptions (precedence: closures → exceptions
+// → holidays → weekly rules). Holidays (F49) and acute consultation (F44–F46) remain
+// TO_BE_CONFIRMED — NOT encoded, so those resolve to UNKNOWN.
 
 import type { ConsultationType, ConsultationTypeCode, IsoWeekday, OpeningHoursRule } from "../domain/index.ts";
 import type { PulsData } from "../domain/practice-status.ts";
@@ -51,7 +54,8 @@ export const PUBLIC_HOLIDAYS_ST = [
 ];
 
 export const PULS_DATA: PulsData = {
-  schedule: { rules: RULES, confirmedClosedWeekdays: [], verification: WORKING },
+  // F40: Saturday (6) and Sunday (7) regularly closed — practice confirmation 2026-10-11
+  schedule: { rules: RULES, confirmedClosedWeekdays: [6, 7], verification: WORKING },
   consultationTypes: CONSULTATION_TYPES,
   exceptions: [],
   closures: [],

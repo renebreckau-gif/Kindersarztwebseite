@@ -69,7 +69,7 @@ Critical review of the five Phase 00 documents before assigning statuses:
 | F37 | Hours Wednesday | VERIFIED_CURRENT | HIGH |
 | F38 | Hours Thursday | VERIFIED_CURRENT | HIGH |
 | F39 | Hours Friday | VERIFIED_CURRENT | HIGH |
-| F40 | Weekend closed | TO_BE_CONFIRMED | HIGH |
+| F40 | Weekend closed (Sat + Sun, regular) | VERIFIED_CURRENT (practice, 2026-10-11) | HIGH |
 | F41 | Tue–Fri 08–10 "nur gesunde Patienten" window | VERIFIED_CURRENT | HIGH |
 | F42 | Meaning of "gesunde Patienten" | TO_BE_CONFIRMED | HIGH |
 | F43 | Tue 14–16 "nur Terminsprechstunde" | VERIFIED_CURRENT | HIGH |
@@ -450,14 +450,14 @@ Shared fields for F35–F39:
 | F39 | Freitag | 08:00–12:00 |
 
 ### F40 — Weekend closed
-- **CURRENT VALUE / CLAIM:** Saturday/Sunday not mentioned
-- **SOURCE:** S01 (absence)
-- **SOURCE DATE:** 2026-05-18
-- **STATUS:** TO_BE_CONFIRMED
+- **CURRENT VALUE / CLAIM:** „Die Kinderarztpraxis Probst & Böhme ist regulär samstags und sonntags geschlossen. Abweichende Öffnungen oder Sondersprechstunden am Wochenende werden nur angezeigt, wenn sie ausdrücklich angekündigt und bestätigt wurden.“
+- **SOURCE:** Practice confirmation (internal evidence) — confirmed by **Nadine Probst** on **2026-10-11**. Earlier: S01 only by absence (2026-05-18), which was never used as proof.
+- **SOURCE DATE:** 2026-10-11
+- **STATUS:** VERIFIED_CURRENT (re-check with the regular hours review, together with `schedule.verification`)
 - **RISK IF INCORRECT:** HIGH
-- **REQUIRED CONFIRMATION:** Practice: confirm closed on weekends (any exceptions, e.g. infection season)
-- **FEATURES AFFECTED:** PRAXIS PULS, Sprechzeiten
-- **NOTES:** Absence is not a statement; not inferred.
+- **REQUIRED CONFIRMATION:** Done (FB-05 closed). Weekend openings / special sessions must be entered as verified exceptions; they override the regular closure.
+- **FEATURES AFFECTED:** PRAXIS PULS (Saturday/Sunday → CLOSED with next opening), Sprechzeiten
+- **NOTES:** Encoded as `confirmedClosedWeekdays: [6, 7]` in `src/content/schedule.ts`. Does **not** imply holiday closure — F49 remains a separate, unconfirmed trust path.
 
 ### F41 — "Nur gesunde Patienten" window
 - **CURRENT VALUE / CLAIM:** Tue, Wed, Thu, Fri 08:00–10:00 "bitte nur gesunde Patienten"

@@ -6,8 +6,9 @@ export const RELEASE = {
    * LB-00 — the practice has signed off the opening hours for PRAXIS PULS.
    * Approved for this project on 2026-10-07 (human decision after Phase 07 review).
    * PRAXIS PULS now derives the live state from the verified weekly hours via the
-   * domain engine. All other gates are unchanged: weekend (F40), holidays (F49),
-   * acute hours (F44–F46) stay unconfirmed and still resolve to UNKNOWN.
+   * domain engine. Weekend closure (F40) was confirmed by the practice on 2026-10-11
+   * (Nadine Probst), so Saturdays/Sundays resolve to CLOSED with the next opening.
+   * Still unconfirmed and resolving to UNKNOWN: holidays (F49), acute hours (F44–F46).
    */
   pulsPracticeSignOff: true,
   /**

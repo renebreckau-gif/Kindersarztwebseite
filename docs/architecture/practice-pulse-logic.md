@@ -116,7 +116,7 @@ Contiguous intervals (e.g. "nur gesunde Kinder" 08–10 + general 10–12) form 
 | TEMPORARILY_CLOSED | Verified closure (short notice / training / other) | FB-09 |
 | UNKNOWN | — (default) | — |
 
-**Current reality (2026-10-07):** acute rules, weekend and holiday rules are unconfirmed → in production today the engine would return OPEN/CLOSED only where the week is verified, never ACUTE_CONSULTATION, and UNKNOWN on weekends/holidays until F40/F49 are confirmed.
+**Current reality (2026-10-11):** the weekly hours (LB-00) and the regular weekend closure (F40, practice confirmation 2026-10-11 → `confirmedClosedWeekdays: [6, 7]`) are verified → OPEN/CLOSED on weekdays, CLOSED with the next opening on Saturdays and Sundays. Acute rules (F44–F46) and holidays (F49) remain unconfirmed → never ACUTE_CONSULTATION, and UNKNOWN on public holidays that fall on a weekday. A holiday on a Saturday/Sunday resolves to CLOSED because the weekday itself is confirmed closed (not because of a holiday rule).
 
 ## 4. Timezone and date handling
 
