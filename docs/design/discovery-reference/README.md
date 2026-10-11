@@ -1,6 +1,6 @@
 # Discovery Reference — Mein Arztbesuch (D1)
 
-Checkpoint: Phase 08.8 · 2026-10-11 · Status: **visual production in progress (3 of 6 scenes visually approved)**
+Checkpoint: Phase 08.8 · updated 2026-10-11 (Scene 04 added) · Status: **visual production in progress (4 of 6 scenes visually approved)**
 Process: ART DIRECTION → APPROVED VISUAL REFERENCE → ASSET PRODUCTION → CODE INTEGRATION ([art direction](../mein-arztbesuch-art-direction.md), [scene briefs](../mein-arztbesuch-assets/00-overview.md), [production status](../../reviews/phase-08-discovery-production-status.md))
 
 Precedent: [hero-reference/README.md](../hero-reference/README.md).
@@ -18,10 +18,11 @@ Precedent: [hero-reference/README.md](../hero-reference/README.md).
 | `d1-character-consistency-reference-v1.png` | Character sheet: three full-body views, two portraits, companion sleeve | 2400 × 1792 | Higgsfield · Nano Banana Pro · 2K · 2026-10-07 · references: style frame 03 (primary), master | APPROVED WITH RESTRICTIONS (see below) |
 | `d1-01-ankommen-v1.png` | Scene 01 — Ankommen | 2400 × 1792 | Higgsfield · Nano Banana Pro · 2K · 2026-10-11 · references: style frame 03, character sheet, master; one targeted edit pass | VISUALLY APPROVED |
 | `d1-02-warten-v1.png` | Scene 02 — Warten | 2400 × 1792 | Higgsfield · Nano Banana Pro · 2K · 2026-10-11 · references: style frame 03, scene 01; one edit pass; final **local** retouch (see below) | VISUALLY APPROVED (corrected version) |
+| `d1-04-abhoeren-v1.png` | Scene 04 — Abhören; **anchor for the doctor hand / ivory sleeve** | 1448 × 1086 | **ChatGPT image generation** (outside Higgsfield; not Nano Banana Pro) · supplied by the project owner 2026-10-11 · file taken over byte-identical | VISUALLY APPROVED |
 
 **Classification:** all generated files are `AI_CONCEPTUAL` (`src/domain/content-types.ts` media classes). They are never `REAL`. They do not show real patients, real staff, the real practice building or its rooms. The child and the companion are invented characters on a conceptual stage.
 
-Nano Banana Pro's 4:3 output at 2K is 2400 × 1792 rather than the briefed 2400 × 1800 master (8 px less height). This is accepted. 4K was not available on the account's plan.
+Nano Banana Pro's 4:3 output at 2K is 2400 × 1792 rather than the briefed 2400 × 1800 master (8 px less height). This is accepted. 4K was not available on the account's plan. Scene 04 comes from a different generator at 1448 × 1086 (also 4:3); at integration it is exported from its own size (no upscaling beyond what the 1600/960 exports need).
 
 **SHA-256 at checkpoint** (pixels unchanged since approval; moved, not re-encoded):
 
@@ -31,9 +32,10 @@ Nano Banana Pro's 4:3 output at 2K is 2400 × 1792 rather than the briefed 2400 
 100913f9c0f5dd1a043ee2ea459372c0d4b4c4021e9a47317fda62a5d5a6fa77  d1-character-consistency-reference-v1.png
 048c1714b569bbac36f6c49cb2acc365b9880cc22401c3328d0df9a2da5ff01f  d1-01-ankommen-v1.png
 864699161c0bd2dfb79e7ef8c4724c3b885feb3f6fffdc29e3f7a85b0543faa6  d1-02-warten-v1.png
+09fc720e170ae8b02b736a7874152deb605e965cfc248d44393882838f4c29ae  d1-04-abhoeren-v1.png
 ```
 
-Prompts used (and the ready scene 04 prompt): [prompts/](prompts/). Reference image order in each request: Style Frame 03 first.
+Prompts used and prepared: [prompts/](prompts/). Reference image order in each request: Style Frame 03 first. `d1-04-abhoeren-prompt-READY.txt` was prepared for Higgsfield but **not** used; the approved Scene 04 was produced with ChatGPT image generation. The ready Scene 05 prompt is `d1-05-ohren-hals-prompt.txt`.
 
 ## Binding reference hierarchy
 
@@ -42,6 +44,7 @@ Prompts used (and the ready scene 04 prompt): [prompts/](prompts/). Reference im
 | **Child identity** | Style Frame 03 | Character sheet — **middle ¾ full-body view only** | Scenes 01 / 02 (continuity only) |
 | **World / lighting** | Discovery master | Style Frame 03 | Approved scenes |
 | **Companion** | Scene 01 | Scene 02 | — |
+| **Doctor hand / sleeve, medical interaction** | Scene 04 | Discovery master (hand style) | — |
 
 - Never average conflicting faces into a new child; Style Frame 03 wins.
 - The master defines world, palette, light, materials and tone. It does **not** override Style Frame 03 for the exact child identity.
@@ -89,6 +92,16 @@ Use the **middle ¾ full-body view** only, and only for proportions, geometry an
 - It makes no claim about the real waiting room.
 - **Local retouch, top-left corner only (x 0–204, y 0–244):** the adult's chin, neck and a hair strand were removed by continuing the measured shoulder line to the frame edge, with knit texture from the same sweater and neighbouring background. A pixel diff confirms that nothing outside that rectangle changed.
 - Known: the child's head reads slightly larger and more toy-like than in Style Frame 03, and the wall disc can read as a moon.
+
+**04 Abhören**
+- Provenance: ChatGPT image generation (not Higgsfield / Nano Banana Pro), 1448 × 1086, `AI_CONCEPTUAL`.
+- Shows the approved child (coral sweater, cream trousers), one adult hand with a warm ivory knit sleeve, and the stethoscope chest piece **on top of the sweater**. No exposed chest, no doctor face or body, no sound arcs, no medical symbols.
+- Deviations from the brief, visually accepted by the project owner:
+  - wider framing (full figure instead of the head-to-mid-torso close-up);
+  - the hand enters from the left rather than the upper right;
+  - the child looks forward and upward rather than down at the chest piece.
+- Additional observation (not in the acceptance list; noted for the physician and integration review): the chest piece is rendered **silver / metallic**, not cobalt enamel with a brass rim as briefed.
+- **Still requires medical review, practice review and editorial approval.**
 
 **03 Messen & Wiegen (style frame)**
 - A brass rod with engraved ticks only (no numbers), a yellow marker, a ceramic platform, and the child in socks with the companion holding the shoes.
