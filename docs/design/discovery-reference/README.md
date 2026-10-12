@@ -1,6 +1,6 @@
 # Discovery Reference — Mein Arztbesuch (D1)
 
-Checkpoint: Phase 08.8 · updated 2026-10-11 (Scene 04 added) · Status: **visual production in progress (4 of 6 scenes visually approved)**
+Checkpoint: Phase 08.8 · updated 2026-10-12 (Scenes 05 and 06 added) · Status: **visual production complete — all 6 scenes visually approved** (not publication: content, practice and physician approvals are still open)
 Process: ART DIRECTION → APPROVED VISUAL REFERENCE → ASSET PRODUCTION → CODE INTEGRATION ([art direction](../mein-arztbesuch-art-direction.md), [scene briefs](../mein-arztbesuch-assets/00-overview.md), [production status](../../reviews/phase-08-discovery-production-status.md))
 
 Precedent: [hero-reference/README.md](../hero-reference/README.md).
@@ -19,6 +19,8 @@ Precedent: [hero-reference/README.md](../hero-reference/README.md).
 | `d1-01-ankommen-v1.png` | Scene 01 — Ankommen | 2400 × 1792 | Higgsfield · Nano Banana Pro · 2K · 2026-10-11 · references: style frame 03, character sheet, master; one targeted edit pass | VISUALLY APPROVED |
 | `d1-02-warten-v1.png` | Scene 02 — Warten | 2400 × 1792 | Higgsfield · Nano Banana Pro · 2K · 2026-10-11 · references: style frame 03, scene 01; one edit pass; final **local** retouch (see below) | VISUALLY APPROVED (corrected version) |
 | `d1-04-abhoeren-v1.png` | Scene 04 — Abhören; **anchor for the doctor hand / ivory sleeve** | 1448 × 1086 | **ChatGPT image generation** (outside Higgsfield; not Nano Banana Pro) · supplied by the project owner 2026-10-11 · file taken over byte-identical | VISUALLY APPROVED |
+| `d1-05-ohren-hals-v1.png` | Scene 05 — Ohren & Hals | 2400 × 1792 | Higgsfield · requested `nano_banana_pro`, reported Nano Banana Pro / `nano_banana_pro` · 2K · 2026-10-12. Candidate job `75805e97-1aaa-43ec-a27f-c7a546b3871b` (references: Style Frame 03, Scene 04, master; 2 credits), then one targeted edit job `ff3baaf7-9c5d-4e5d-a11c-49289ef7f783` (input: the candidate only; 2 credits) that moved otoscope + hand right. The approved file is the edit job's output, unchanged | VISUALLY APPROVED (corrected version) |
+| `d1-06-fertig-v1.png` | Scene 06 — Fertig | 2400 × 1792 | Higgsfield · requested `nano_banana_pro`, reported Nano Banana Pro / `nano_banana_pro` · 2K · 2026-10-12 · job `1114f8c0-8696-4f4d-9740-a92fe53ac603` (references: Style Frame 03, Scene 01, master; 2 credits); then a **local** retouch at the top edge (no generation, no credits; see below) | VISUALLY APPROVED (corrected version) |
 
 **Classification:** all generated files are `AI_CONCEPTUAL` (`src/domain/content-types.ts` media classes). They are never `REAL`. They do not show real patients, real staff, the real practice building or its rooms. The child and the companion are invented characters on a conceptual stage.
 
@@ -33,9 +35,11 @@ Nano Banana Pro's 4:3 output at 2K is 2400 × 1792 rather than the briefed 2400 
 048c1714b569bbac36f6c49cb2acc365b9880cc22401c3328d0df9a2da5ff01f  d1-01-ankommen-v1.png
 864699161c0bd2dfb79e7ef8c4724c3b885feb3f6fffdc29e3f7a85b0543faa6  d1-02-warten-v1.png
 09fc720e170ae8b02b736a7874152deb605e965cfc248d44393882838f4c29ae  d1-04-abhoeren-v1.png
+64eeee90156d7ac7449835c644c4df8f0cf2baaafa90ee883fc48ef8de23c430  d1-05-ohren-hals-v1.png
+fdca95025cc9fc9263afd7bf10afb3ea29a2368f29f251eaacd66282ee722b33  d1-06-fertig-v1.png
 ```
 
-Prompts used and prepared: [prompts/](prompts/). Reference image order in each request: Style Frame 03 first. `d1-04-abhoeren-prompt-READY.txt` was prepared for Higgsfield but **not** used; the approved Scene 04 was produced with ChatGPT image generation. The ready Scene 05 prompt is `d1-05-ohren-hals-prompt.txt`.
+Prompts used and prepared: [prompts/](prompts/). Reference image order in each request: Style Frame 03 first. `d1-04-abhoeren-prompt-READY.txt` was prepared for Higgsfield but **not** used; the approved Scene 04 was produced with ChatGPT image generation. Scene 05: `d1-05-ohren-hals-prompt.txt` (candidate) and `d1-05-ohren-hals-edit.txt` (targeted correction). Scene 06: `d1-06-fertig-prompt.txt`.
 
 ## Binding reference hierarchy
 
@@ -92,6 +96,34 @@ Use the **middle ¾ full-body view** only, and only for proportions, geometry an
 - It makes no claim about the real waiting room.
 - **Local retouch, top-left corner only (x 0–204, y 0–244):** the adult's chin, neck and a hair strand were removed by continuing the measured shoulder line to the frame edge, with knit texture from the same sweater and neighbouring background. A pixel diff confirms that nothing outside that rectangle changed.
 - Known: the child's head reads slightly larger and more toy-like than in Style Frame 03, and the wall disc can read as a moon.
+
+**05 Ohren & Hals**
+- A close head-and-shoulders view in three-quarter profile with the right ear visible. One adult hand in the warm-ivory knit sleeve (from the right) holds an ivory-handled otoscope with brass rings and a dark cone tip.
+- The child is fully clothed; there is no throat or mouth view, no inner-ear view and no doctor face or body.
+- **Correction (Higgsfield edit job):** in the first candidate the tip appeared to touch the ear. The edit moved the otoscope and hand to the right and slightly reduced the hand.
+  - Now the tip is clearly **outside** the ear, with a visible gap of about 95 px (about 4 % of the width) to the hair edge.
+  - The child is practically unchanged (face region: mean difference 3.5 of 255).
+- Known: no visible warm light at the otoscope tip (the brief asked for a small practical glow); the right-edge background was re-rendered with the hand.
+- **Still requires medical review, practice review and editorial approval.**
+
+**06 Fertig**
+- The closing mirror of Scene 01:
+  - the same ivory ceramic arch, now on the left, with a warm daylight glow;
+  - child and companion walk hand in hand toward it, right → left;
+  - the child glances back slightly off-camera.
+- Companion: **dark-ink** sweater (#202327, a scene-specific override so that the cobalt floor sphere is the only strong cobalt), dark trousers, no bag, never a face.
+- Three resting ENTDECKEN forms on the right floor: cobalt sphere, coral half-disc, yellow sphere.
+- No reward objects, no treatment signs, no text.
+- **Local retouch, top edge only (x 629–835, y 0–62):** the companion's visible neck and hair edge were removed.
+  - Method: the measured shoulder lines were continued out of frame, with knit texture from the same sweater (62 px lower, tone-matched) and neighbouring background from the same row.
+  - This was done locally, not AI-generated. A pixel diff confirms that nothing outside that rectangle changed.
+- Accepted deviations (project owner, 2026-10-12):
+  - the companion is somewhat dominant in the composition;
+  - the cobalt sphere is larger than briefed;
+  - the child reads calmer than a strong mid-step;
+  - the light is slightly cooler than Scene 01;
+  - the child's hair is slightly fuller than in Style Frame 03.
+- Medical approval: not required by the scene model (no medical content); content and practice approval are open.
 
 **04 Abhören**
 - Provenance: ChatGPT image generation (not Higgsfield / Nano Banana Pro), 1448 × 1086, `AI_CONCEPTUAL`.
