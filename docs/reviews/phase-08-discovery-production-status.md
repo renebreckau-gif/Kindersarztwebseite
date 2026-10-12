@@ -17,6 +17,8 @@ Checkpoint: Phase 08.8 · updated 2026-10-12 · References and provenance: [docs
 
 **Visual production is complete: all six scenes have an approved reference file in `docs/design/discovery-reference/`. Publication is not complete** (approvals below; images not yet integrated).
 
+**Approval package (2026-10-12):** [discovery-approval-package.md](discovery-approval-package.md), with the review sheets for [physician (03–05)](discovery-physician-review.md), [practice + content (01–06)](discovery-practice-content-review.md) and the [AI-child publication decision](discovery-ai-child-publication-decision.md).
+
 ## Higgsfield blocker (resolved)
 
 Until 2026-10-11 Higgsfield returned `grace_daily_limit_reached` (`unlock_full_access_notice`) for every generation request, even though credits remain on the account (482.73 on 2026-10-11). Generation was blocked despite remaining credits. The block no longer applied on 2026-10-12: Scenes 05 and 06 were generated then. Scene 04 had been produced outside Higgsfield (ChatGPT image generation).
