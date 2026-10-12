@@ -17,17 +17,20 @@ Checkpoint: Phase 08.8 · updated 2026-10-12 · References and provenance: [docs
 
 **Visual production is complete: all six scenes have an approved reference file in `docs/design/discovery-reference/`. Publication is not complete** (approvals below; images not yet integrated).
 
+**Approvals recorded (2026-10-12):** practice + content for all six scenes and the introduction, physician review for 03–05, and the AI-child publication decision, all by Nadine Probst (Ärztin / Praxis), without conditions. Production images are in `public/discovery/` and integrated; the chapter was released the same day.
+
 **Approval package (2026-10-12):** [discovery-approval-package.md](discovery-approval-package.md), with the review sheets for [physician (03–05)](discovery-physician-review.md), [practice + content (01–06)](discovery-practice-content-review.md) and the [AI-child publication decision](discovery-ai-child-publication-decision.md).
 
 ## Higgsfield blocker (resolved)
 
 Until 2026-10-11 Higgsfield returned `grace_daily_limit_reached` (`unlock_full_access_notice`) for every generation request, even though credits remain on the account (482.73 on 2026-10-11). Generation was blocked despite remaining credits. The block no longer applied on 2026-10-12: Scenes 05 and 06 were generated then. Scene 04 had been produced outside Higgsfield (ChatGPT image generation).
 
-## Unchanged by this checkpoint (verified)
+## State after approval and integration (2026-10-12)
 
-- `RELEASE.meinArztbesuchApproved = false`. `/entdecken/mein-arztbesuch` is still gated publicly, and the preview (`?vorschau=freigabe`) is unchanged.
-- In `src/content/discovery.ts`: every `contentApproval`, `practiceApproval` and `medicalApproval` remains `TO_BE_CONFIRMED`, and every `visual.class` remains `PLACEHOLDER`. Visual approval is tracked here and in the reference README, not as a second approval model in code.
-- No image is in `public/`, used in React, or exported to AVIF/WebP.
+- `src/content/discovery.ts`: `practiceApproval` and `contentApproval` are `VERIFIED_CURRENT` for all six scenes, `medicalApproval` for 03–05 (Nadine Probst, 2026-10-12). `visual.class` is `AI_CONCEPTUAL` with production images.
+- Production images in `public/discovery/d1-<slug>-<w>.{avif,webp}`: 960/1600/2400 px; scene 04 at 960/1448 px (native, not upscaled).
+- Alt texts of scenes 04 and 05 were corrected to match the final images. The previous texts described the briefs ("T-Shirt", "Lampe leuchtet").
+- **Released 2026-10-12:** `RELEASE.meinArztbesuchApproved = true` after the visual review of the integrated chapter. `/entdecken/mein-arztbesuch` is public; the site as a whole stays `noindex` (`RELEASE.indexable = false`, a separate launch decision).
 
 ## Open items
 

@@ -15,6 +15,44 @@ import type { Scene } from "@/content/discovery";
 
 const two = (n: number) => String(n).padStart(2, "0");
 
+const ok = (v?: { status: string }) => v?.status === "VERIFIED_CURRENT";
+
+/** Preview-only review line: what is still open for this scene (from the content model). */
+function reviewState(scene: Scene): string {
+  const open = [
+    !ok(scene.contentApproval) && "Inhalt",
+    !ok(scene.practiceApproval) && "Praxis",
+    scene.medicalApproval && !ok(scene.medicalApproval) && "ärztliche Prüfung",
+  ].filter(Boolean);
+  const img = scene.visual.class === "PLACEHOLDER" ? `Bild: Platzhalter (${scene.visual.briefId})` : "Bild: final";
+  return `${open.length ? `offen: ${open.join(", ")}` : "freigegeben"} · ${img}`;
+}
+
+/** The approved scene image (4:3 frame, same box as the placeholder). Informative: has alt. */
+function SceneImage({ scene, eager }: { scene: Scene; eager: boolean }) {
+  const img = scene.visual.image!;
+  const set = (ext: string) => img.widths.map((w) => `/discovery/d1-${img.slug}-${w}.${ext} ${w}w`).join(", ");
+  const sizes = "(min-width: 64em) 56vw, calc(100vw - 2.5rem)";
+  return (
+    <figure className={s.frame}>
+      <picture>
+        <source type="image/avif" srcSet={set("avif")} sizes={sizes} />
+        <img
+          className={s.image}
+          src={`/discovery/d1-${img.slug}-960.webp`}
+          srcSet={set("webp")}
+          sizes={sizes}
+          width={img.width}
+          height={img.height}
+          alt={scene.visual.alt}
+          loading={eager ? "eager" : "lazy"}
+          decoding="async"
+        />
+      </picture>
+    </figure>
+  );
+}
+
 export function Story({ scenes, preview }: { scenes: Scene[]; preview: boolean }) {
   const [enhanced, setEnhanced] = useState(false);
   const [index, setIndex] = useState(0);
@@ -46,7 +84,11 @@ export function Story({ scenes, preview }: { scenes: Scene[]; preview: boolean }
           <li key={scene.id} hidden={enhanced && i !== index} className={s.sceneItem}>
             <section className={s.scene} aria-labelledby={`szene-${scene.id}`}>
               <div className={s.visual}>
-                <ScenePlaceholder motif={scene.visual.motif} />
+                {scene.visual.image && scene.visual.class !== "PLACEHOLDER" ? (
+                  <SceneImage scene={scene} eager={i === 0} />
+                ) : (
+                  <ScenePlaceholder motif={scene.visual.motif} />
+                )}
               </div>
 
               <div className={s.text}>
@@ -104,7 +146,7 @@ export function Story({ scenes, preview }: { scenes: Scene[]; preview: boolean }
 
                 {preview ? (
                   <p className={s.reviewTag}>
-                    Vorschau · Inhalt {scene.medicalApproval ? "und ärztliche Prüfung " : ""}ausstehend · Bild: Platzhalter ({scene.visual.briefId})
+                    Vorschau · {reviewState(scene)}
                   </p>
                 ) : null}
 

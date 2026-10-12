@@ -18,11 +18,11 @@ Für Eltern: „Erzählen Sie Ihrem Kind ruhig vorher, wer mitkommt und wie Sie 
 - Wirkt der Einstieg ruhig und einladend?
 - Ist klar, dass der Bogen symbolisch ist und nicht unser Eingang?
 
-PRAXISPRÜFUNG: [ ] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
-INHALTSPRÜFUNG: [ ] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
-Prüfende Person:
-Datum:
-Hinweise:
+PRAXISPRÜFUNG: [x] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
+INHALTSPRÜFUNG: [x] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
+Prüfende Person: Nadine Probst, Ärztin / Praxis
+Datum: 12.10.2026
+Hinweise: keine Bedingungen
 
 ---
 
@@ -36,11 +36,11 @@ Für Eltern: „Ein Buch oder ein Lieblingsspielzeug von zu Hause kann beim Wart
 - Passt der Tipp „Buch oder Spielzeug von zu Hause“ zu unserer Praxis?
 - Das Bild zeigt nicht unser Wartezimmer. Ist das für uns in Ordnung?
 
-PRAXISPRÜFUNG: [ ] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
-INHALTSPRÜFUNG: [ ] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
-Prüfende Person:
-Datum:
-Hinweise:
+PRAXISPRÜFUNG: [x] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
+INHALTSPRÜFUNG: [x] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
+Prüfende Person: Nadine Probst, Ärztin / Praxis
+Datum: 12.10.2026
+Hinweise: keine Bedingungen
 
 ---
 
@@ -54,11 +54,11 @@ Text: „Manchmal wird geschaut, wie groß du gerade bist. / Und wie schwer. / D
 
 *(Zusätzlich ärztliche Prüfung → [eigenes Blatt](discovery-physician-review.md))*
 
-PRAXISPRÜFUNG: [ ] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
-INHALTSPRÜFUNG: [ ] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
-Prüfende Person:
-Datum:
-Hinweise:
+PRAXISPRÜFUNG: [x] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
+INHALTSPRÜFUNG: [x] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
+Prüfende Person: Nadine Probst, Ärztin / Praxis
+Datum: 12.10.2026
+Hinweise: keine Bedingungen
 
 ---
 
@@ -72,11 +72,11 @@ Text: „Die Ärztin hat ein Stethoskop. / Damit kann sie hören, wie dein Herz 
 
 *(Zusätzlich ärztliche Prüfung → [eigenes Blatt](discovery-physician-review.md))*
 
-PRAXISPRÜFUNG: [ ] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
-INHALTSPRÜFUNG: [ ] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
-Prüfende Person:
-Datum:
-Hinweise:
+PRAXISPRÜFUNG: [x] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
+INHALTSPRÜFUNG: [x] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
+Prüfende Person: Nadine Probst, Ärztin / Praxis
+Datum: 12.10.2026
+Hinweise: keine Bedingungen
 
 ---
 
@@ -90,11 +90,11 @@ Text: „Mit einer kleinen Lampe kann die Ärztin in deine Ohren schauen. / Manc
 
 *(Zusätzlich ärztliche Prüfung → [eigenes Blatt](discovery-physician-review.md))*
 
-PRAXISPRÜFUNG: [ ] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
-INHALTSPRÜFUNG: [ ] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
-Prüfende Person:
-Datum:
-Hinweise:
+PRAXISPRÜFUNG: [x] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
+INHALTSPRÜFUNG: [x] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
+Prüfende Person: Nadine Probst, Ärztin / Praxis
+Datum: 12.10.2026
+Hinweise: keine Bedingungen
 
 ---
 
@@ -107,15 +107,16 @@ Für Eltern: „Wenn Ihr Kind Fragen hat, nehmen Sie sie mit in die Praxis – d
 - Ist der Abschluss ruhig und beruhigend, ohne Belohnung oder Feier?
 - Passt „Jeder Besuch ist ein bisschen anders“ als letzter Satz?
 
-PRAXISPRÜFUNG: [ ] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
-INHALTSPRÜFUNG: [ ] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
-Prüfende Person:
-Datum:
-Hinweise:
+PRAXISPRÜFUNG: [x] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
+INHALTSPRÜFUNG: [x] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
+Prüfende Person: Nadine Probst, Ärztin / Praxis
+Datum: 12.10.2026
+Hinweise: keine Bedingungen
 
 ---
 
 **Kapitel-Einleitung (für alle Szenen):** „So kann ein Arztbesuch aussehen. Nicht jeder Besuch läuft genau so ab – manches entfällt, manches kommt dazu. Lesen Sie die kurzen Sätze gern vor; die Bilder erzählen mit.“
 
-INHALTSPRÜFUNG EINLEITUNG: [ ] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
-Hinweise:
+INHALTSPRÜFUNG EINLEITUNG: [x] FREIGEGEBEN [ ] FREIGEGEBEN MIT HINWEIS [ ] ÄNDERUNG NÖTIG
+Prüfende Person: Nadine Probst, Ärztin / Praxis · Datum: 12.10.2026
+Hinweise: keine Bedingungen

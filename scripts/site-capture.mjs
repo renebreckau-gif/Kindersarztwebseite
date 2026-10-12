@@ -170,6 +170,15 @@ async function capture(tabSession, url, vpName, file, opts = {}) {
     await s.send("Runtime.evaluate", { expression: `window.scrollTo({ top: ${opts.scrollY}, behavior: "instant" })` });
     await sleep(400);
   }
+  if (opts.nextClicks) {
+    // story player: advance N scenes with the real Weiter button
+    for (let i = 0; i < opts.nextClicks; i++) {
+      await s.send("Runtime.evaluate", { expression: `[...document.querySelectorAll("li:not([hidden]) button")].find((b) => /Weiter/.test(b.textContent))?.click()` });
+      await sleep(450);
+    }
+    await s.send("Runtime.evaluate", { expression: `window.scrollTo({ top: 0, behavior: "instant" }); document.querySelector("li:not([hidden]) section")?.scrollIntoView({ block: "start", behavior: "instant" })` });
+    await sleep(700);
+  }
   if (opts.hoverHref) {
     // real pointer hover (CDP mouse), e.g. to check hover states without geometry changes
     const c = (await s.send("Runtime.evaluate", { expression: `(() => { const r = document.querySelector('a[href="${opts.hoverHref}"]').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`, returnByValue: true })).result.value;
@@ -274,10 +283,11 @@ if (process.env.SITE_QUICK) {
     const reducedMotion = flag === "reduced";
     const hoverHref = flag.startsWith("hover=") ? flag.slice(6) : "";
     const textScale = flag === "text200" ? 2 : undefined;
+    const nextClicks = flag.startsWith("scene") ? Number(flag.slice(5)) - 1 : 0;
     const scrollY = flag.startsWith("scroll") ? Number(flag.slice(6)) : 0;
     const q = path.includes("vorschau=") ? "vorschau" : (path.match(/alter=([a-z0-9-]+)/)?.[1] ?? "");
-    const suffix = full ? "-full" : menu ? "-menu" : reducedMotion ? "-reducedmotion" : hoverHref ? `-hover-${hoverHref.split("/").pop()}` : textScale ? "-text200" : scrollY ? `-y${scrollY}` : "";
-    results.push(await capture(s, path, vp, `quick-${name(path.split("?")[0], q)}-${vp}${suffix}.${full ? "jpg" : "png"}`, { fullPage: full, openMenu: menu, scrollY, reducedMotion, hoverHref, textScale }));
+    const suffix = full ? "-full" : menu ? "-menu" : reducedMotion ? "-reducedmotion" : hoverHref ? `-hover-${hoverHref.split("/").pop()}` : textScale ? "-text200" : flag.startsWith("scene") ? `-${flag}` : scrollY ? `-y${scrollY}` : "";
+    results.push(await capture(s, path, vp, `quick-${name(path.split("?")[0], q)}-${vp}${suffix}.${full ? "jpg" : "png"}`, { fullPage: full, openMenu: menu, scrollY, reducedMotion, hoverHref, textScale, nextClicks }));
   }
 } else {
   // home: full-page scroll + states

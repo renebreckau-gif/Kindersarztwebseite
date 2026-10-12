@@ -37,7 +37,7 @@ export default async function MeinArztbesuch({ searchParams }: { searchParams: S
           {view.mode === "GATED" ? null : <p className={d.intro}>{c.parentIntro}</p>}
           {view.mode === "PREVIEW" ? (
             <p className={d.previewFlag} role="note">
-              <strong>Vorschau</strong> – noch nicht freigegeben. Ablauf, Texte und ärztliche Erklärungen werden von der Praxis geprüft. Die Bilder sind Platzhalter.
+              <strong>Vorschau</strong> – noch nicht öffentlich. {RELEASE.meinArztbesuchApproved ? "" : "Das Kapitel ist für die Veröffentlichung noch nicht freigeschaltet."}
             </p>
           ) : null}
         </header>

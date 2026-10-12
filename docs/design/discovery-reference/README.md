@@ -5,9 +5,9 @@ Process: ART DIRECTION → APPROVED VISUAL REFERENCE → ASSET PRODUCTION → CO
 
 Precedent: [hero-reference/README.md](../hero-reference/README.md).
 
-> **Visual approval is not medical, practice or content approval.** These files are approved as artwork only. Every scene still needs the editorial (content), practice and — for scenes 03, 04 and 05 — physician approval recorded in `src/content/discovery.ts`. None of those approvals is set by this checkpoint, and `RELEASE.meinArztbesuchApproved` stays `false`.
+> **Visual approval is separate from medical, practice and content approval.** Those approvals were granted on 2026-10-12 (Nadine Probst, without conditions) and are recorded in `src/content/discovery.ts` and [docs/reviews/discovery-approval-package.md](../../reviews/discovery-approval-package.md).
 
-> **Not public production assets.** These are source references under `docs/`, deliberately not in `public/`. The chapter stays gated; the website still shows the labelled placeholders (`visual.class: "PLACEHOLDER"`). Integration (AVIF/WebP exports, layout, alt texts) happens only after all six scenes are approved.
+> **Source references.** These files are the approved masters under `docs/`. Production exports derived from them (no other changes, no upscaling) live in `public/discovery/` (2026-10-12, after practice, content, physician and AI-child approvals). Publication is controlled by `RELEASE.meinArztbesuchApproved`.
 
 ## Files
 
