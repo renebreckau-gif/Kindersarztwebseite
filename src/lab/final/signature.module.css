@@ -173,7 +173,9 @@
 .art {
   display: none;
   position: absolute;
+  left: var(--art-left);
   top: var(--art-top);
+  width: var(--art-size);
   aspect-ratio: 1;
   padding: 0.16%;
   background: linear-gradient(135deg, #dcc09a, #c6a47a 55%, #b08c63);
@@ -833,8 +835,11 @@
   }
 }
 
-/* artwork slot: only where the wall between text column and arch is free (verified
-   1280×720 … 2560×1440; narrower or squarer screens would overlap the text) */
+/* artwork slot on desktop, wherever the wall between text column and arch is free.
+   16:10-like (≥ 1.55): approved position · 16:9 and wider (≥ 1.7): same, hung lower so it
+   clears the navigation · taller/squarer (< 1.55, from 85em): the "tall" position.
+   Hidden below 80em (tablet/phone crop has no wall) and on 80–85em squarer screens such
+   as 1280×1024, where the wall strip beside the headline is too narrow. */
 @media (min-width: 80em) and (min-aspect-ratio: 31 / 20) {
   .art {
     display: block;
@@ -843,6 +848,14 @@
 @media (min-width: 80em) and (min-aspect-ratio: 17 / 10) {
   .art {
     top: var(--art-top-wide);
+  }
+}
+@media (min-width: 85em) and (max-aspect-ratio: 31 / 20) {
+  .art {
+    display: block;
+    left: var(--art-left-tall);
+    top: var(--art-top-tall);
+    width: var(--art-size-tall);
   }
 }
 

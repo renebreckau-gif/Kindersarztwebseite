@@ -43,6 +43,13 @@ const ELEMENT: Record<PathId, { x: number; y: number; r: number; tilt: number }>
  * crop shows the right half of the room, where this wall does not exist).
  */
 const ART_SLOT = { x: 905, top: 290, topWide: 400, size: 300 };
+/**
+ * Taller / squarer desktops (aspect < 1.55, e.g. 1440×1080): the plate is scaled by height
+ * and shifts left, so the default position would slide under the headline. Same wall,
+ * centred in the free plaster strip between headline and arch, a little smaller (right
+ * edge at x 1234, ~43 plate px before the wall edge). Same frame for all four paintings.
+ */
+const ART_SLOT_TALL = { x: 1022, top: 282, size: 212 };
 
 /** Mein Kind measuring rod beside the child (master pixels): floor → above the head. */
 const ROD = { x: 1336, yFloor: 1418, yTop: 760 };
@@ -174,10 +181,13 @@ export function HeroStage({
               <span
                 className={s.art}
                 style={{
-                  left: pct(ART_SLOT.x, W),
-                  width: pct(ART_SLOT.size, W),
+                  ["--art-left" as string]: pct(ART_SLOT.x, W),
+                  ["--art-size" as string]: pct(ART_SLOT.size, W),
                   ["--art-top" as string]: pct(ART_SLOT.top, H),
                   ["--art-top-wide" as string]: pct(ART_SLOT.topWide, H),
+                  ["--art-left-tall" as string]: pct(ART_SLOT_TALL.x, W),
+                  ["--art-size-tall" as string]: pct(ART_SLOT_TALL.size, W),
+                  ["--art-top-tall" as string]: pct(ART_SLOT_TALL.top, H),
                 }}
               >
                 <picture>

@@ -93,6 +93,8 @@ async function openTab() {
 const VIEWPORTS = {
   "1920x1080": { width: 1920, height: 1080, mobile: false },
   "1440x900": { width: 1440, height: 900, mobile: false },
+  "1440x1080": { width: 1440, height: 1080, mobile: false },
+  "1920x1200": { width: 1920, height: 1200, mobile: false },
   "1280x800": { width: 1280, height: 800, mobile: false },
   "768x1024": { width: 768, height: 1024, mobile: true },
   "1366x768": { width: 1366, height: 768, mobile: false },
