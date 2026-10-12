@@ -32,6 +32,15 @@ All REAL assets: warm natural daylight (light from one side, soft falloff, match
 - Phase 08.8 checkpoint: the approved master, Style Frame 03, character sheet and Scenes 01/02 are in [discovery-reference/](discovery-reference/README.md), with the binding reference hierarchy and the coral-sweater character override. Status: [phase-08-discovery-production-status.md](../reviews/phase-08-discovery-production-status.md).
 - Real practice photography is a separate track: [real-practice-photo-brief.md](real-practice-photo-brief.md) (B1, B2, C1, then C2, C3). Real photos never appear inside the story scenes.
 
+## Practice artworks in the homepage hero (2026-10-12)
+
+- Four real paintings from the practice (signature „Rübsam '23“), shown one per Europe/Berlin day in a single framed wall slot of the hero (desktop only): `src/content/artworks.ts`, files `public/hero/art-{junge,kind-fell,maedchen,maedchen-gelaender}-{360,720}.{avif,webp}`.
+- Processing: the photographed canvases were only perspective-straightened to their square format. They were not redrawn, recoloured or cropped, and the signatures remain visible.
+- **Open publication gates (not cleared):**
+  1. web-use permission from the artist / rights holder;
+  2. consent if an identifiable real child is depicted (e.g. the portrait of the blond boy with a baby sketch).
+  Both must be resolved before public launch; until then the slot is development content.
+
 ## Placeholders currently in use (Phase 07)
 
 | Where | Placeholder | Replaced by |

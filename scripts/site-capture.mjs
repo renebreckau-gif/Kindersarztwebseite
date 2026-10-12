@@ -93,6 +93,13 @@ async function openTab() {
 const VIEWPORTS = {
   "1920x1080": { width: 1920, height: 1080, mobile: false },
   "1440x900": { width: 1440, height: 900, mobile: false },
+  "1280x800": { width: 1280, height: 800, mobile: false },
+  "768x1024": { width: 768, height: 1024, mobile: true },
+  "1366x768": { width: 1366, height: 768, mobile: false },
+  "1280x1024": { width: 1280, height: 1024, mobile: false },
+  "1680x1050": { width: 1680, height: 1050, mobile: false },
+  "2560x1080": { width: 2560, height: 1080, mobile: false },
+  "1024x768": { width: 1024, height: 768, mobile: false },
   "430x932": { width: 430, height: 932, mobile: true },
   "390x844": { width: 390, height: 844, mobile: true },
   "360x800": { width: 360, height: 800, mobile: true },

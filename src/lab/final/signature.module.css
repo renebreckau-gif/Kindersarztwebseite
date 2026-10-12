@@ -166,6 +166,40 @@
   }
 }
 
+/* The practice-artwork slot on the plaster wall (public homepage, desktop only): one
+   square canvas in a slim light-oak frame, a soft shadow thrown away from the window light
+   (right → left/down) and a faint daylight glaze so it sits in the same light as the wall.
+   Static all day — no transition, nothing to reduce. */
+.art {
+  display: none;
+  position: absolute;
+  top: var(--art-top);
+  aspect-ratio: 1;
+  padding: 0.16%;
+  background: linear-gradient(135deg, #dcc09a, #c6a47a 55%, #b08c63);
+  /* the wall recedes very slightly toward the arch: a barely perceptible turn */
+  transform: perspective(90vw) rotateY(-2.5deg);
+  transform-origin: 0 50%;
+  box-shadow:
+    -0.32vw 0.5vw 1vw -0.2vw rgb(96 62 36 / 0.3),
+    -0.08vw 0.12vw 0.22vw rgb(96 62 36 / 0.2),
+    inset 0 0 0 1px rgb(255 240 220 / 0.35);
+}
+.art picture,
+.art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.art::after {
+  content: "";
+  position: absolute;
+  inset: 0.16%;
+  background: linear-gradient(115deg, rgb(255 238 214 / 0) 30%, rgb(255 238 214 / 0.16) 70%, rgb(255 244 228 / 0.24));
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
 /* Mein Kind: brass measuring rod beside the child */
 .rod {
   position: absolute;
@@ -227,11 +261,43 @@
 }
 
 /* ================= PRAXIS PULS ================= */
+/* A softly framed, milky, lightly frosted ivory panel on the wall: calm, warm, readable.
+   No hard border, no heavy shadow; fully opaque fallback where blur is unavailable or
+   reduced transparency is requested. */
 .puls {
   display: grid;
   justify-items: start;
   gap: var(--space-4);
   scroll-margin-top: var(--space-8);
+  box-sizing: border-box; /* padding inside the width — no overflow at 200 % text */
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  min-width: 0;
+  max-width: 30rem;
+  /* phones: a little tighter so Notfall and the follow-up link share a row */
+  padding: var(--space-5) var(--space-5) var(--space-6);
+  border-radius: 22px;
+  background:
+    linear-gradient(160deg, rgb(255 252 247 / 0.56), rgb(253 246 237 / 0.4));
+  border: 1px solid rgb(255 255 255 / 0.55);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.6),
+    inset 0 0 0 1px rgb(255 248 238 / 0.18),
+    0 18px 40px -30px rgb(120 84 56 / 0.3);
+  -webkit-backdrop-filter: blur(20px) saturate(1.12) brightness(1.03);
+  backdrop-filter: blur(20px) saturate(1.12) brightness(1.03);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .puls {
+    background: linear-gradient(160deg, rgb(255 252 247 / 0.94), rgb(251 243 232 / 0.92));
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .puls {
+    background: #fbf4ea;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
 /* the instrument's name, printed above its rule: quieter than the status headline,
    no pill, no box — the rule of .status underlines it */
@@ -709,6 +775,9 @@
     -webkit-mask-image: linear-gradient(180deg, #000 90%, transparent 100%);
     mask-image: linear-gradient(180deg, #000 90%, transparent 100%);
   }
+  .puls {
+    padding: var(--space-5) var(--space-6) var(--space-6);
+  }
   /* calm daylight scrims: wall side for the text, ceiling for the header */
   .scene::after {
     content: "";
@@ -764,6 +833,19 @@
   }
 }
 
+/* artwork slot: only where the wall between text column and arch is free (verified
+   1280×720 … 2560×1440; narrower or squarer screens would overlap the text) */
+@media (min-width: 80em) and (min-aspect-ratio: 31 / 20) {
+  .art {
+    display: block;
+  }
+}
+@media (min-width: 80em) and (min-aspect-ratio: 17 / 10) {
+  .art {
+    top: var(--art-top-wide);
+  }
+}
+
 /* very wide screens: keep the whole mobile in view, extend the wall to the left */
 @media (min-width: 64em) and (min-aspect-ratio: 21 / 10) {
   .scene {
@@ -797,7 +879,8 @@
 @media (forced-colors: active) {
   .call,
   .emergency,
-  .dock {
+  .dock,
+  .puls {
     border: 1px solid CanvasText;
   }
   .status {

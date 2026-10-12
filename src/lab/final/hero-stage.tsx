@@ -33,6 +33,17 @@ const ELEMENT: Record<PathId, { x: number; y: number; r: number; tilt: number }>
   entdecken: { x: 390, y: 340, r: 118, tilt: 0.15 }, // pale translucent disc
 };
 
+/**
+ * The single practice-artwork slot: one framed square canvas hung on the sunlit plaster
+ * wall, clear of the headline and left of the opening arch (master pixels; the wall's edge
+ * is at x ≈ 1277). The painting inside changes once per day (src/content/artworks.ts); the
+ * frame footprint never changes. `top` is the hanging height on 16:10-like screens,
+ * `topWide` on 16:9 and wider, where the plate sits higher in the viewport and the same
+ * height would run into the header navigation. Public homepage only; never on phones (their
+ * crop shows the right half of the room, where this wall does not exist).
+ */
+const ART_SLOT = { x: 905, top: 290, topWide: 400, size: 300 };
+
 /** Mein Kind measuring rod beside the child (master pixels): floor → above the head. */
 const ROD = { x: 1336, yFloor: 1418, yTop: 760 };
 const AGE_Y = [1300, 1150, 990, 830];
@@ -101,7 +112,18 @@ function useSway(target: number, pointer: boolean) {
  * enhancement; touch never previews. Without `routes` the lab keeps its in-place previews
  * (`?pfad=`, age rail) for internal demonstration.
  */
-export function HeroStage({ initial, children, routes }: { initial: PathId | null; children: ReactNode; routes?: Record<PathId, string> }) {
+export function HeroStage({
+  initial,
+  children,
+  routes,
+  artwork,
+}: {
+  initial: PathId | null;
+  children: ReactNode;
+  routes?: Record<PathId, string>;
+  /** Today's practice artwork for the wall slot (public homepage); chosen on the server. */
+  artwork?: { id: string };
+}) {
   const [selected, setSelected] = useState<PathId | null>(initial);
   const [age, setAge] = useState<number | null>(null);
   const inst = selected === "mein-kind";
@@ -147,6 +169,32 @@ export function HeroStage({ initial, children, routes }: { initial: PathId | nul
                 decoding="async"
               />
             </picture>
+
+            {artwork ? (
+              <span
+                className={s.art}
+                style={{
+                  left: pct(ART_SLOT.x, W),
+                  width: pct(ART_SLOT.size, W),
+                  ["--art-top" as string]: pct(ART_SLOT.top, H),
+                  ["--art-top-wide" as string]: pct(ART_SLOT.topWide, H),
+                }}
+              >
+                <picture>
+                  <source type="image/avif" srcSet={`/hero/art-${artwork.id}-360.avif 360w, /hero/art-${artwork.id}-720.avif 720w`} sizes="14vw" />
+                  <img
+                    src={`/hero/art-${artwork.id}-360.webp`}
+                    srcSet={`/hero/art-${artwork.id}-360.webp 360w, /hero/art-${artwork.id}-720.webp 720w`}
+                    sizes="14vw"
+                    width={720}
+                    height={720}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+              </span>
+            ) : null}
 
             {/* soft contact shadow where the child sits (removed with the plate) */}
             <span className={s.contact} style={{ left: pct(1500, W), top: pct(1365, H), width: pct(470, W), height: pct(90, H) }} />

@@ -8,6 +8,7 @@ import { Icon } from "@/design-system/icons";
 import { HomeChapters } from "@/site/home";
 import { resolvePuls } from "@/content/puls";
 import { PRIMARY } from "@/content/site";
+import { artworkForDate } from "@/content/artworks";
 
 export const metadata: Metadata = {
   title: { absolute: "Kinderarztpraxis Probst & Böhme – Kinderarzt in Hettstedt" },
@@ -37,7 +38,8 @@ export default async function Start({ searchParams }: { searchParams: Search }) 
       />
       <SiteDock puls={puls} />
       <main id="inhalt">
-        <HeroStage initial={null} routes={ROUTES}>
+        {/* one practice painting per Europe/Berlin day — the engine's date, so server and client agree */}
+        <HeroStage initial={null} routes={ROUTES} artwork={artworkForDate(puls.result.evaluatedAt.localDate)}>
           <div className={s.headline}>
             <h1>Gesund groß werden.</h1>
             <p>Alles für heute auf einen Blick. Und Begleitung, die mit Ihrem Kind mitwächst.</p>
