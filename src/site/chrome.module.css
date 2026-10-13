@@ -192,6 +192,16 @@
 .footer112 a {
   color: #ff9a90 !important;
   font-weight: 600;
+  /* 48 × 48 target around the digits; negative margins keep the line and its visual
+     position unchanged (the number stays an inline part of the sentence) */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
+  margin: -14px -12px;
+  padding: 0 12px;
+  border-radius: 8px;
 }
 .footerHeading {
   margin: 0 0 var(--space-5);
@@ -302,6 +312,17 @@
 .night .chip {
   background: rgb(255 255 255 / 0.06);
   border-color: rgb(233 230 242 / 0.25);
+}
+/* Notfall on night pages: the 70 % cream would mix with the navy to 3.4 : 1 — an opaque
+   cream keeps the same look and gives the red label 6.7 : 1. Focus ring in luminous
+   cobalt so it stays visible against the navy. */
+.night .emergency {
+  background: #fffaf6;
+}
+.night .emergency:focus-visible,
+.night .call:focus-visible,
+.night .chip:focus-visible {
+  outline-color: var(--cobalt-luminous);
 }
 
 @media (min-width: 64em) {
