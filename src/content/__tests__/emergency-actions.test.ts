@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 const chrome = read("src/site/chrome.tsx");
-const notfall = read("app/(site)/notfall/page.tsx");
+const notfall = read("app/(frontend)/(site)/notfall/page.tsx");
 
 test("112 is a plain tel: link in the footer and on the Notfall page", () => {
   assert.match(chrome, /<a href="tel:112">112<\/a>/);

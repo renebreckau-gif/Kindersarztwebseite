@@ -33,20 +33,20 @@ export class PayloadPracticeRepository implements PracticeRepository {
     this.req = req;
   }
 
-  private async all<T>(collection: string, sort?: string): Promise<T[]> {
+  /** Deterministic order: insertion order (ascending id) unless a sort is given. */
+  private async all<T>(collection: string, sort = "id"): Promise<T[]> {
     const res = await this.payload.find({ collection, pagination: false, depth: 0, sort, overrideAccess: true, req: this.req });
     return res.docs as T[];
   }
 
   async getPulsData(): Promise<PulsData> {
-    const [schedules, consultationTypes, exceptions, closures, replacementPractices, holidayCalendar] = await Promise.all([
-      this.all<WeeklyScheduleDoc>("weeklySchedules", "-updatedAt"),
-      this.all<ConsultationTypeDoc>("consultationTypes"),
-      this.all<ExceptionDoc>("openingHourExceptions"),
-      this.all<ClosureDoc>("closures"),
-      this.all<ReplacementPracticeDoc>("replacementPractices"),
-      this.payload.findGlobal({ slug: "holidayCalendar", depth: 0, overrideAccess: true, req: this.req }) as Promise<HolidayCalendarDoc | null>,
-    ]);
+    // Sequential on purpose: inside a hook all reads share one transaction connection.
+    const schedules = await this.all<WeeklyScheduleDoc>("weeklySchedules", "-updatedAt");
+    const consultationTypes = await this.all<ConsultationTypeDoc>("consultationTypes");
+    const exceptions = await this.all<ExceptionDoc>("openingHourExceptions");
+    const closures = await this.all<ClosureDoc>("closures");
+    const replacementPractices = await this.all<ReplacementPracticeDoc>("replacementPractices");
+    const holidayCalendar = (await this.payload.findGlobal({ slug: "holidayCalendar", depth: 0, overrideAccess: true, req: this.req })) as HolidayCalendarDoc | null;
     // One weekly schedule is authoritative: the most recently updated document.
     return pulsDataFromDocs({ schedule: schedules[0] ?? null, consultationTypes, exceptions, closures, replacementPractices, holidayCalendar });
   }

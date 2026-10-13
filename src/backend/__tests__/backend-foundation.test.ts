@@ -11,6 +11,7 @@ import { auditHook, holidayPolicyHook, provenanceHook, publishGuardHook } from "
 import { assertNoPatientFields, patientLikeFields } from "../privacy.ts";
 import { actorFromUser, ProvenanceRejected, reviewDueFor, verificationForWrite } from "../provenance.ts";
 import { docsFromPulsData } from "../../data/payload-mapping.ts";
+import { RejectedError } from "../server-context.ts";
 import { PULS_DATA } from "../../content/schedule.ts";
 
 const STAFF = { id: 1, name: "Test Team", role: "STAFF", active: true };
@@ -76,7 +77,7 @@ describe("authentication settings (Payload built-in auth, no custom crypto)", ()
 
   test("disabled accounts cannot log in", () => {
     const [beforeLogin] = Staff.hooks!.beforeLogin!;
-    assert.throws(() => call(beforeLogin, { user: { ...DOCTOR, active: false } }), /deaktiviert/);
+    assert.throws(() => call(beforeLogin, { user: { ...DOCTOR, active: false } }), /^Error: Anmeldung nicht möglich\.$|Anmeldung nicht möglich/);
     assert.deepEqual(call(beforeLogin, { user: DOCTOR }), DOCTOR);
   });
 });
@@ -101,8 +102,8 @@ describe("provenance: generated from the account, never typed in", () => {
   });
 
   test("STAFF cannot confirm the weekly schedule; ADMIN directory entry stays unconfirmed; signed-out rejected", () => {
-    assert.throws(() => call(provenanceHook("WEEKLY_SCHEDULE"), { ...req(STAFF), data: {} }), ProvenanceRejected);
-    assert.throws(() => call(provenanceHook("CONSULTATION_TYPE"), { ...req(ADMIN), data: {} }), ProvenanceRejected);
+    assert.throws(() => call(provenanceHook("WEEKLY_SCHEDULE"), { ...req(STAFF), data: {} }), (e: Error & { status?: number }) => e instanceof RejectedError && e.status === 403 && /Ärztin oder ein Arzt/.test(e.message));
+    assert.throws(() => call(provenanceHook("CONSULTATION_TYPE"), { ...req(ADMIN), data: {} }), RejectedError);
     const admin = actorFromUser(ADMIN);
     assert.deepEqual(verificationForWrite(admin, "REPLACEMENT_PRACTICE", "2027-01-01", "2026-10-13"), { status: "TO_BE_CONFIRMED", sourceIds: [] });
     assert.throws(() => verificationForWrite(null, "CLOSURE", "2026-10-13", "2026-10-13"), ProvenanceRejected);
@@ -191,7 +192,7 @@ const ROOT = join(import.meta.dirname, "..", "..", "..");
 function files(dir: string): string[] {
   return readdirSync(dir).flatMap((n) => {
     const p = join(dir, n);
-    if (n === "node_modules" || n === ".next" || n === "__tests__") return [];
+    if (n === "node_modules" || n === ".next" || n === "__tests__" || n === "__integration__") return [];
     return statSync(p).isDirectory() ? files(p) : /\.(ts|tsx)$/.test(n) ? [p] : [];
   });
 }
@@ -208,7 +209,8 @@ describe("dependency direction", () => {
   });
 
   test("the public app and content never import the backend or Payload (static data stays authoritative)", () => {
-    for (const f of all.filter((p) => !rel(p).startsWith("src/backend/"))) {
+    // Only the backend route groups (Payload admin/REST, /intern shell) may use the backend.
+    for (const f of all.filter((p) => !/^(src\/backend\/|app\/\(payload\)\/|app\/\(intern\)\/)/.test(rel(p)))) {
       for (const i of imports(f)) {
         assert.doesNotMatch(i, /^payload$|^@payloadcms\//, `${rel(f)} → ${i}`);
         assert.doesNotMatch(i, /(^|\/)backend\//, `${rel(f)} → ${i}`);
@@ -217,7 +219,8 @@ describe("dependency direction", () => {
   });
 
   test("backend modules import Payload as types only (no runtime coupling outside payload.config.ts)", () => {
-    for (const f of all.filter((p) => rel(p).startsWith("src/backend/"))) {
+    // Generated migration files are executed by the Payload CLI and may import the adapter.
+    for (const f of all.filter((p) => rel(p).startsWith("src/backend/") && !rel(p).startsWith("src/backend/migrations/"))) {
       for (const line of readFileSync(f, "utf8").split("\n").filter((l) => /from ["'](payload|@payloadcms\/[^"']+)["']/.test(l))) {
         assert.match(line, /^import type /, `${rel(f)}: ${line}`);
       }
@@ -225,11 +228,20 @@ describe("dependency direction", () => {
   });
 
   test("production code does not depend on lab mocks", () => {
-    const prod = all.filter((p) => /^src\/(domain|data|backend|content)\//.test(rel(p)) || (rel(p).startsWith("app/") && !rel(p).startsWith("app/lab/")));
+    const prod = all.filter((p) => /^src\/(domain|data|backend|content)\//.test(rel(p)) || (rel(p).startsWith("app/") && !rel(p).startsWith("app/(frontend)/lab/")));
     for (const f of prod) for (const i of imports(f)) assert.doesNotMatch(i, /lab\/cockpit/, `${rel(f)} → ${i}`);
   });
 
-  test("no Payload admin/API route is mounted in 09.2", () => {
-    for (const f of all.filter((p) => rel(p).startsWith("app/"))) assert.doesNotMatch(rel(f), /\(payload\)|^app\/admin\/|^app\/api\//, rel(f));
+  test("Payload is mounted only at /intern/admin (admin) and /api (REST) — no GraphQL, no /admin", () => {
+    const backendRoutes = all.map(rel).filter((p) => /^app\/\(payload\)\//.test(p) && /\/(page|route|layout|not-found)\.tsx?$/.test(p));
+    assert.deepEqual(backendRoutes.sort(), [
+      "app/(payload)/api/[...slug]/route.ts",
+      "app/(payload)/intern/admin/[[...segments]]/not-found.tsx",
+      "app/(payload)/intern/admin/[[...segments]]/page.tsx",
+      "app/(payload)/layout.tsx",
+    ]);
+    for (const f of all.map(rel)) assert.doesNotMatch(f, /graphql|^app\/(\([^)]+\)\/)?admin\//i, f);
+    assert.match(readFileSync(join(ROOT, "payload.config.ts"), "utf8"), /graphQL: \{ disable: true \}/);
+    assert.match(readFileSync(join(ROOT, "payload.config.ts"), "utf8"), /routes: \{ admin: "\/intern\/admin", api: "\/api" \}/);
   });
 });

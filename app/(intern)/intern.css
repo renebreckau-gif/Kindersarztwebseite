@@ -1,0 +1,195 @@
+/* Internal staff area — same calm visual direction as the Praxis Cockpit prototype
+   (Warm Editorial + Cobalt), built on the design-system tokens. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body.intern {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--color-canvas);
+  color: var(--color-text);
+  font-family: var(--font-text);
+  font-size: var(--text-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.intern-page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: clamp(1.5rem, 1rem + 3vw, 4rem) 16px;
+}
+
+.intern-main {
+  width: 100%;
+  max-width: 28rem;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.intern-card {
+  display: grid;
+  gap: 0.75rem;
+  padding: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+  background: #fbf9f5;
+  border: 1px solid var(--color-rule);
+  border-radius: 18px;
+  box-shadow: 0 1px 2px rgb(23 26 29 / 0.05), 0 18px 40px -24px rgb(23 26 29 / 0.35);
+}
+
+.intern-brand {
+  display: grid;
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  line-height: 1.25;
+  color: var(--color-text-secondary);
+}
+.intern-brand span:last-child {
+  color: var(--color-text);
+  font-size: 1.25rem;
+}
+
+.intern-h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(2rem, 1.6rem + 1.6vw, 2.75rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+.intern-intro {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.intern-form {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.intern-field {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.intern-label {
+  font-weight: 600;
+  font-size: var(--text-small);
+}
+
+.intern-input {
+  font: inherit;
+  min-height: 48px;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid color-mix(in srgb, var(--palette-ink) 38%, transparent);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--color-text);
+}
+
+.intern-input:focus-visible,
+.intern-btn:focus-visible,
+.intern-link:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.intern-error {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--palette-coral) 14%, #fbf9f5);
+  border: 1px solid color-mix(in srgb, var(--palette-coral) 55%, transparent);
+  font-weight: 600;
+}
+
+.intern-btn {
+  font: inherit;
+  font-weight: 600;
+  min-height: 48px;
+  padding: 0.625rem 1.25rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.intern-btn-primary {
+  background: var(--color-text);
+  color: var(--color-text-inverse);
+}
+.intern-btn-primary[disabled] {
+  opacity: 0.6;
+  cursor: progress;
+}
+.intern-btn-secondary {
+  background: transparent;
+  color: var(--color-text);
+  border-color: color-mix(in srgb, var(--palette-ink) 38%, transparent);
+}
+.intern-btn-block {
+  width: 100%;
+}
+
+.intern-foot {
+  margin: 0.75rem 0 0;
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.intern-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-self: start;
+  padding: 0.375rem 0.75rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--palette-cobalt) 10%, #fbf9f5);
+  color: var(--color-brand-text);
+  font-size: var(--text-small);
+  font-weight: 600;
+}
+.intern-status::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--color-brand);
+}
+
+.intern-who {
+  margin: 0.5rem 0 0;
+  display: grid;
+  gap: 0.125rem;
+}
+.intern-who dt {
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+}
+.intern-who dd {
+  margin: 0 0 0.5rem;
+  font-size: var(--text-body-l);
+}
+
+.intern-actions {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.intern-note {
+  margin: 0;
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+}

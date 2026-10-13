@@ -25,7 +25,7 @@ const files = (dir: string, out: string[] = []) => {
   }
   return out;
 };
-const PUBLIC_CODE = [...files("app/(site)"), ...files("src/site"), ...files("src/content")];
+const PUBLIC_CODE = [...files("app/(frontend)/(site)"), ...files("src/site"), ...files("src/content")];
 const ALL_CODE = [...files("app"), ...files("src"), "next.config.ts"];
 const approvalsSnapshot = () => JSON.stringify(MEIN_ARZTBESUCH.scenes.map((s) => [s.contentApproval, s.practiceApproval, s.medicalApproval, s.approvedBy, s.lastReviewedAt]));
 
@@ -106,7 +106,7 @@ describe("Mein Arztbesuch on staging", () => {
 describe("review tooling on staging", () => {
   test("5: /review is available on staging (convenience overview, unlocks nothing)", () => {
     assert.equal(isReviewHubEnabled(), true);
-    const page = read("app/review/page.tsx");
+    const page = read("app/(frontend)/review/page.tsx");
     assert.match(page, /if \(!isReviewHubEnabled\(\)\) notFound\(\);/);
     assert.match(page, /robots: \{ index: false, follow: false \}/);
     const by = Object.fromEntries(REVIEW_CARDS.map((c) => [c.id, c]));
@@ -118,8 +118,8 @@ describe("review tooling on staging", () => {
 
   test("6: Praxis Cockpit prototype is reachable on staging (blocked only in PRODUCTION)", () => {
     assert.equal(stageAllowsReview(), true);
-    assert.match(read("app/lab/praxis-cockpit/layout.tsx"), /if \(!stageAllowsReview\(\)\) notFound\(\);/);
-    assert.ok(existsSync(join(ROOT, "app/lab/praxis-cockpit/anmelden/page.tsx")));
+    assert.match(read("app/(frontend)/lab/praxis-cockpit/layout.tsx"), /if \(!stageAllowsReview\(\)\) notFound\(\);/);
+    assert.ok(existsSync(join(ROOT, "app/(frontend)/lab/praxis-cockpit/anmelden/page.tsx")));
   });
 
   test("7: Praxis Cockpit and review hub are not in the patient navigation", () => {
@@ -135,6 +135,6 @@ describe("indexing", () => {
   test("9 + 10: RELEASE.indexable stays false and staging stays noindex / nofollow", () => {
     assert.equal(RELEASE.indexable, false);
     assert.match(read("next.config.ts"), /source: "\/:path\*", headers: \[\{ key: "X-Robots-Tag", value: "noindex, nofollow" \}\]/);
-    assert.match(read("app/(site)/layout.tsx"), /RELEASE\.indexable \? \{ index: true, follow: true \} : \{ index: false, follow: false \}/);
+    assert.match(read("app/(frontend)/(site)/layout.tsx"), /RELEASE\.indexable \? \{ index: true, follow: true \} : \{ index: false, follow: false \}/);
   });
 });

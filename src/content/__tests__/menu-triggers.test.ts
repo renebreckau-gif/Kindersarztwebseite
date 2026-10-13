@@ -20,7 +20,7 @@ function files(dir: string, out: string[] = []): string[] {
 }
 
 // Everything the public site renders: its routes, site components and content.
-const PUBLIC = [...files("app/(site)"), ...files("src/site"), ...files("src/content").filter((f) => !f.includes("__tests__"))];
+const PUBLIC = [...files("app/(frontend)/(site)"), ...files("src/site"), ...files("src/content").filter((f) => !f.includes("__tests__"))];
 const read = (f: string) => readFileSync(join(ROOT, f), "utf8");
 
 test("no public file links or scrolls to #menue", () => {
@@ -40,7 +40,7 @@ test("dock Menü is the shared button, placed first", () => {
 });
 
 test("start page hero header uses the same menu button and mounts the overlay", () => {
-  const start = read("app/(site)/page.tsx");
+  const start = read("app/(frontend)/(site)/page.tsx");
   assert.match(start, /menu=\{\(className\) => \(\s*<MenuButton/);
   assert.match(start, /<SiteMenu \/>/);
   assert.match(read("src/site/chrome.tsx"), /<SiteMenu \/>/); // every other public page (PageFrame)

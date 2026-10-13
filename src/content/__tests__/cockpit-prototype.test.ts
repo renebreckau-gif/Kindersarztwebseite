@@ -155,7 +155,7 @@ test("prototype model uses mock data only (no import from src/content)", () => {
 
 test("prototype is labelled and not indexed", () => {
   assert.match(read("src/lab/cockpit/ui.tsx"), /PROTOTYP · keine echten Daten/);
-  assert.match(read("app/lab/praxis-cockpit/layout.tsx"), /robots: \{ index: false, follow: false \}/);
+  assert.match(read("app/(frontend)/lab/praxis-cockpit/layout.tsx"), /robots: \{ index: false, follow: false \}/);
 });
 
 test("public site never links to the cockpit prototype", () => {
@@ -167,7 +167,7 @@ test("public site never links to the cockpit prototype", () => {
       else if (/\.(tsx?|css)$/.test(f)) files.push(rel);
     }
   };
-  walk("app/(site)");
+  walk("app/(frontend)/(site)");
   walk("src/site");
   walk("src/content");
   for (const f of files.filter((x) => !x.includes("__tests__"))) assert.doesNotMatch(read(f), /praxis-cockpit/, f);
@@ -401,7 +401,7 @@ describe("Website-Vorschau", () => {
       }
     };
     walk("src/lab/cockpit");
-    walk("app/lab/praxis-cockpit");
+    walk("app/(frontend)/lab/praxis-cockpit");
     for (const f of files) {
       const src = read(f);
       assert.doesNotMatch(src, /Was sieht die Website\?/, f);
@@ -543,7 +543,7 @@ describe("existing changes are edited, true conflicts stay blocked", () => {
         else if (/\.tsx?$/.test(f)) files.push(rel);
       }
     };
-    walk("app/(site)");
+    walk("app/(frontend)/(site)");
     walk("src/site");
     walk("src/domain");
     for (const f of files.filter((x) => !x.includes("__tests__"))) assert.doesNotMatch(read(f), /lab\/cockpit/, f);

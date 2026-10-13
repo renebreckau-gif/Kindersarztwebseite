@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withPayload } from "@payloadcms/next/withPayload";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -9,4 +10,5 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Payload's official Next.js integration (admin at /intern/admin, REST at /api — app/(payload)).
+export default withPayload(nextConfig);

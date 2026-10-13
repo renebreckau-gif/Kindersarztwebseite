@@ -4,9 +4,10 @@
 
 import type { CollectionConfig, Field, GlobalConfig } from "payload";
 import type { ConfirmableKind } from "../domain/governance.ts";
-import { ACCESS, adminOnly, signedIn } from "./access.ts";
+import { ACCESS, activeRole, adminOnly, signedIn } from "./access.ts";
 import { CONSULTATION_TYPE_OPTIONS, localDate, localTime, recordId, verification } from "./fields.ts";
-import { auditHook, holidayPolicyHook, provenanceHook, publishGuardHook } from "./hooks.ts";
+import { auditHook, holidayPolicyHook, provenanceHook, publishGuardHook, staffCreateGuard, staffOperationGuard } from "./hooks.ts";
+import { RejectedError } from "./server-context.ts";
 
 const opts = (values: string[]) => values.map((v) => ({ label: v, value: v }));
 const WEEKDAYS = [
@@ -47,18 +48,21 @@ export const Staff: CollectionConfig = {
   slug: "staff",
   labels: { singular: "Praxis-Konto", plural: "Praxis-Konten" },
   // Payload's built-in auth: hashed passwords (no custom crypto), HttpOnly session cookie,
-  // lockout after repeated failures, password reset via the configured email adapter (none yet).
+  // server-side sessions (logout revokes), lockout after repeated failures. Password reset needs
+  // an email adapter (none yet) and is closed by staffOperationGuard until then.
   auth: {
     maxLoginAttempts: 5,
     lockTime: 15 * 60 * 1000,
     tokenExpiration: 8 * 60 * 60,
     useAPIKey: false,
+    // Secure stays on everywhere: browsers treat http://localhost as a secure context.
     cookies: { secure: true, sameSite: "Lax" },
   },
   access: {
     ...ACCESS.staff,
-    // Disabled accounts cannot sign in, even with a correct password.
     unlock: adminOnly,
+    // The generic Payload admin (/intern/admin) is structural administration: ADMIN only.
+    admin: ({ req }) => activeRole(req.user) === "ADMIN",
   },
   admin: { useAsTitle: "name", group: "Verwaltung" },
   fields: [
@@ -69,10 +73,13 @@ export const Staff: CollectionConfig = {
   hooks: {
     beforeLogin: [
       ({ user }) => {
-        if ((user as { active?: boolean }).active === false) throw new Error("Dieses Konto ist deaktiviert.");
+        // Disabled accounts cannot sign in, even with a correct password (generic message, no hint).
+        if ((user as { active?: boolean }).active === false) throw new RejectedError("Anmeldung nicht möglich.", 401);
         return user;
       },
     ],
+    beforeOperation: [staffOperationGuard],
+    beforeChange: [staffCreateGuard],
     afterChange: [auditHook("staff")],
   },
 };

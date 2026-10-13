@@ -51,7 +51,7 @@ test("stable for the whole Berlin day, changes at Berlin midnight (not UTC)", ()
 
 test("deterministic: no randomness; the page passes the engine's Berlin date to one slot", () => {
   assert.equal(/Math\.random|Date\.now|new Date\(/.test(read("src/content/artworks.ts")), false);
-  const page = read("app/(site)/page.tsx");
+  const page = read("app/(frontend)/(site)/page.tsx");
   assert.match(page, /artwork=\{artworkForDate\(puls\.result\.evaluatedAt\.localDate\)\}/);
   const stage = read("src/lab/final/hero-stage.tsx");
   assert.equal((stage.match(/className=\{s\.art\}/g) ?? []).length, 1, "exactly one artwork slot");

@@ -189,7 +189,8 @@ export const closureFromDoc = (d: ClosureDoc): Closure =>
     announceFrom: d.announceFrom,
     publicMessage: d.publicMessage,
     replacements: (d.replacements ?? []).map((r) => compact({ replacementPracticeId: r.replacementPracticeId, from: r.from, until: r.until, note: opt(r.note) })),
-    emergencyInformationIds: d.emergencyInformationIds ? d.emergencyInformationIds.map((e) => e.emergencyId) : undefined,
+    // Stored arrays come back as [] when empty; the domain leaves the optional list absent.
+    emergencyInformationIds: d.emergencyInformationIds?.length ? d.emergencyInformationIds.map((e) => e.emergencyId) : undefined,
     verification: verificationFromDoc(d.verification),
   });
 
@@ -282,7 +283,8 @@ export function docsFromPulsData(data: PulsData, holidayNames: Record<string, st
       announceFrom: c.announceFrom ?? null,
       publicMessage: c.publicMessage ?? null,
       replacements: c.replacements.map((r) => ({ replacementPracticeId: r.replacementPracticeId, from: r.from, until: r.until, note: r.note ?? null })),
-      emergencyInformationIds: c.emergencyInformationIds ? c.emergencyInformationIds.map((emergencyId) => ({ emergencyId })) : null,
+      // Payload writes optional lists as [] (null is not a valid array value); [] maps back to absent.
+      emergencyInformationIds: (c.emergencyInformationIds ?? []).map((emergencyId) => ({ emergencyId })),
       verification: verificationToDoc(c.verification),
     })),
     replacementPractices: data.replacementPractices.map((p) => ({
@@ -301,7 +303,8 @@ export function docsFromPulsData(data: PulsData, holidayNames: Record<string, st
     holidayCalendar: {
       holidays: data.publicHolidays.map((date) => ({ date, name: holidayNames[date] ?? null })),
       policy: data.holidayPolicy.mode,
-      policyVerification: data.holidayPolicy.mode === "CLOSED_ON_PUBLIC_HOLIDAYS" ? verificationToDoc(data.holidayPolicy.verification) : null,
+      // An optional group is omitted, never null (Payload validates groups as objects).
+      ...(data.holidayPolicy.mode === "CLOSED_ON_PUBLIC_HOLIDAYS" ? { policyVerification: verificationToDoc(data.holidayPolicy.verification) } : {}),
     },
   };
 }

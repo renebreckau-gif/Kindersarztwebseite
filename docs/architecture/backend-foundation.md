@@ -1,6 +1,10 @@
-# Praxis Cockpit: Backend Foundation (Phase 09.2)
+# Praxis Cockpit: Backend Foundation (Phases 09.2–09.3)
 
-> **Status (2026-10-13):** this is the technical foundation only (Phase 09.2, `8edc9cf`; Phase 09.3 blocked, §17). The public website still reads **static data**: `resolvePuls` consumes the static snapshot directly (`staticPulsData()`), not through the repository (§4). No database is connected, and no Payload route (admin, REST, GraphQL) is mounted. No real accounts exist, and the cockpit at `/lab/praxis-cockpit` still uses its mock login. `SITE_STAGE = "STAGING"` and `RELEASE.indexable = false` are unchanged.
+> **Status (2026-10-13, after Phase 09.3):**
+> - The Payload runtime runs **locally** against an isolated PostgreSQL development cluster (127.0.0.1:5433), with migrations, real Payload authentication, the ADMIN-only admin at `/intern/admin` and the authenticated `/intern` shell. All of it is proven by integration tests from an empty database (§17).
+> - The public website still reads **static data**: `resolvePuls` consumes the static snapshot directly (`staticPulsData()`), not through the repository (§4). `DATA_SOURCE = "STATIC"` is a reserved selector, and there is no cutover.
+> - Public pages never depend on the database. They work with the database stopped and on deployments without any backend configuration (Vercel staging today), where `/intern` and `/api` answer 404.
+> - No real accounts exist; all accounts and data are artificial. The cockpit prototype at `/lab/praxis-cockpit` keeps its mock login. `SITE_STAGE = "STAGING"` and `RELEASE.indexable = false` are unchanged.
 >
 > Related: [praxis-cockpit.md](praxis-cockpit.md) (product architecture, roles, workflows), [deployment-model.md](deployment-model.md) (STAGING vs. PRODUCTION).
 
@@ -26,25 +30,23 @@ Checked **before** installing (npm registry metadata and the official Payload do
 ## 2. Payload version
 
 - **Payload 3.90.2**, the latest stable release on 2026-10-13. Payload v4 exists only as beta/canary and was not considered.
-- Versions are pinned exactly: `payload@3.90.2`, `@payloadcms/db-postgres@3.90.2`, `graphql@16.14.2`.
-- **Not yet installed:** `@payloadcms/next` and `@payloadcms/ui` (admin UI and route handlers). They arrive with the routes in 09.3 (see §8 and §16).
+- Versions are pinned exactly:
+  - `payload@3.90.2`, `@payloadcms/db-postgres@3.90.2`, `graphql@16.14.2`
+  - since 09.3: `@payloadcms/next@3.90.2`, `@payloadcms/ui@3.90.2`
+  - `pg@8.20.0`, the same version the adapter already uses, now direct for the `/intern` reachability probe
+  - devDependency `@types/pg@8.15.6`
+- All installed without `--force` or `--legacy-peer-deps`; dry run first. Next.js and React are unchanged.
 
 ## 3. Database adapter
 
 - **Official PostgreSQL adapter:** `@payloadcms/db-postgres`, built on Drizzle and `pg`. It is configured in [`payload.config.ts`](../../payload.config.ts):
   - `postgresAdapter({ pool: { connectionString: process.env.DATABASE_URI } })`
-  - `push: false`: no automatic schema push against shared databases. Schema changes go through migrations in `src/backend/migrations/` (created in 09.3 against a local database).
+  - `push: false`: no automatic schema push. **Every** database, including the local one, is built from migrations in `src/backend/migrations/` (§17.2).
+  - `disableCreateDatabase: true`: the adapter never creates databases on its own.
 - **Vercel Postgres / Neon variant:** `@payloadcms/db-vercel-postgres` exists. It is chosen only once the provider decision is made (§16).
 - **Environment:** see [`.env.example`](../../.env.example). It holds placeholders only (`DATABASE_URI=`, `PAYLOAD_SECRET=`). `.env*` stays git-ignored.
-- **Local setup (developer machine):**
-  - Docker is not installed on the current machine, so no compose file was added.
-  - A local PostgreSQL 16 service exists, but no credentials are available to this project. No database was created and none was connected.
-  - Planned local procedure (09.3):
-    1. Create the database `praxis_cockpit_dev` with its own role.
-    2. Copy `.env.example` to `.env`.
-    3. Generate the first migration with `payload migrate:create`.
-    4. Run `payload migrate`.
-  - Only synthetic test data is used, never practice data.
+- **Local setup (developer machine):** an isolated development cluster, see §17.1. The system PostgreSQL service on port 5432 is never touched.
+  - Only artificial test data is used, never practice data.
 - **Production provider:** still open (§16).
 
 ## 4. Repository architecture
@@ -68,12 +70,12 @@ payload.config.ts      only place with Payload runtime imports (not imported by 
 | `src/data/static-repository.ts` | `StaticPracticeRepository`: wraps `src/content/schedule.ts` and `notices.ts`. **Authoritative in 09.2.** |
 | `src/data/source.ts` | `DATA_SOURCE = "STATIC"`: a **migration-target selector / reserved switch** (in code, independent of `SITE_STAGE`, never derived from Vercel). It is not yet active: `getPracticeRepository()` always returns the static repository, because Payload is not authoritative. Also `FAIL_SAFE_PULS_DATA` and `readPulsDataSafely()`. |
 | `src/data/payload-mapping.ts` | Pure, lossless mapping between documents and domain types, both ways (null ↔ absent, `recordId` ↔ `id`, `openEnded` ↔ `"OPEN_ENDED"`) |
-| `src/backend/payload-repository.ts` | `PayloadPracticeRepository`: reads through a minimal `PayloadReader` interface that Payload's Local API satisfies. **Not authoritative; not wired to the site.** |
+| `src/backend/payload-repository.ts` | `PayloadPracticeRepository`: reads through a minimal `PayloadReader` interface that Payload's Local API satisfies. Order is deterministic (insertion order, ascending `id`); reads are sequential, so inside hooks they share the transaction connection. **Parity-proven against PostgreSQL (§17.6). Not authoritative; not wired to the site.** |
 
 **Coverage of the contract:**
 - `getPulsData()` returns the weekly schedule, consultation types, opening-hour exceptions, closures, replacement practices, holiday calendar and holiday policy in one `PulsData`.
 - `getAnnouncements()` returns the announcements.
-- Audit entries and staff accounts have their own contracts (`AuditRepository`, `StaffDirectory`). Their Payload implementations follow in 09.3, together with the routes.
+- Audit entries and staff accounts have their own contracts (`AuditRepository`, `StaffDirectory`). Today they are covered by the Payload collections and their access rules; dedicated repository implementations follow when the cockpit workflows are connected.
 
 **Public site (current reality):**
 - Repository contracts exist, and `StaticPracticeRepository` exists and is parity-tested.
@@ -86,8 +88,9 @@ payload.config.ts      only place with Payload runtime imports (not imported by 
 Enforced by tests in `src/backend/__tests__/backend-foundation.test.ts`:
 
 - `src/domain/` imports nothing from Payload, React, Next, `src/lab`, `src/backend`, `src/data` or `src/content`.
-- No file outside `src/backend/` (public app, content, data, lab) imports `payload`, `@payloadcms/*` or `src/backend`. The public site cannot accidentally read from the database.
-- Inside `src/backend/`, Payload is imported **as types only**. Runtime coupling exists only in `payload.config.ts`.
+- No file outside the backend imports `payload`, `@payloadcms/*` or `src/backend`. That covers `app/(frontend)` (public site, review hub, lab), content, data and lab. The public site cannot accidentally read from the database.
+- Backend users are only `app/(payload)` (Payload admin/REST) and `app/(intern)` (staff shell).
+- Inside `src/backend/`, Payload is imported **as types only** (generated migrations excepted). Runtime coupling lives in `payload.config.ts`, the two backend route groups and the scripts.
 - Production code (`src/domain`, `src/data`, `src/backend`, `src/content`, and `app/` outside `app/lab`) does not import the lab cockpit (`src/lab/cockpit`: mock accounts, test clock, scenarios).
 - The lab now **uses** the domain operations (`src/lab/cockpit/model.ts` delegates to `src/domain/operations.ts`), so the prototype and the future publish flow share one implementation.
 
@@ -129,19 +132,19 @@ Defined in `src/backend/collections.ts`. **Website operations only.**
 
 ## 7. Authentication
 
-| Requirement | Status in 09.2 |
+| Requirement | Status after 09.3 |
 |---|---|
 | Payload built-in auth on `staff` (hashed passwords, no custom crypto, no home-grown auth) | **Configured** |
-| HttpOnly session cookie, `Secure`, `SameSite=Lax` | **Configured** (`auth.cookies`) |
-| Lockout: 5 failed attempts → 15 min | **Configured** (`maxLoginAttempts`, `lockTime`) |
+| HttpOnly session cookie, `Secure`, `SameSite=Lax` | **Configured and verified over HTTP** (§17.4) |
+| Lockout: 5 failed attempts → 15 min | **Verified** (correct password refused while locked) |
 | Session lifetime 8 h | **Configured** (`tokenExpiration`) |
 | No API keys | **Configured** (`useAPIKey: false`) |
-| Disabled accounts cannot sign in | **Configured** (`beforeLogin` hook) and every access rule treats `active: false` as signed out |
-| Revocation | Disabling the account blocks login and access on the next request. Payload's session handling is reviewed in 09.3. |
-| Password reset | Payload flow exists, but **no email adapter** is configured, so no emails can be sent. Provider decision in §16. |
-| MFA (TOTP / passkeys) | **Documented only.** Required for ADMIN before go-live (praxis-cockpit.md §4). Uses an established library or plugin; nothing built from scratch without approval. |
-| Login UI / production cockpit | **Not built.** The mock login at `/lab/praxis-cockpit/anmelden` is unchanged. |
-| Real accounts | **None created.** The first ADMIN is created in 09.3 via a one-off CLI/Local API script, not via an open registration page. |
+| Disabled accounts cannot sign in | **Verified** (`beforeLogin` hook, generic message); every access rule treats `active: false` as signed out |
+| Revocation | **Verified:** Payload's server-side sessions (`useSessions` default). Logout deletes the session; a replayed cookie is refused afterwards. Disabling blocks the next request. |
+| Password reset | **Closed** until an email adapter exists (`staffOperationGuard`); ADMIN sets a new password in `/intern/admin` (§17.10). |
+| MFA (TOTP / passkeys) | **Not implemented.** Required for ADMIN before production; recommendation in §17.9. Nothing built from scratch. |
+| Login UI | **Built:** `/intern/anmelden` (real Payload auth, generic error, no self-registration). The mock login at `/lab/praxis-cockpit/anmelden` is unchanged. |
+| Real accounts | **None created.** The first ADMIN is created only by `scripts/bootstrap-admin.ts` (§17.3); all current accounts are artificial (`.invalid`). |
 
 ## 8. Role enforcement
 
@@ -149,7 +152,7 @@ Server-side rules live in `src/backend/access.ts` (pure functions, tested). Hidi
 
 | Collection | read | create / update | delete |
 |---|---|---|---|
-| staff | ADMIN, or own record | create: ADMIN · update: ADMIN or self (role/active: ADMIN only) | never |
+| staff | ADMIN; others only their own record (`/api/staff/me`, by id; listing → 403) | create: ADMIN (or the bootstrap script once) · update: ADMIN or self (role/active: ADMIN only) | never |
 | weeklySchedules, consultationTypes | signed in | **DOCTOR** | never |
 | openingHourExceptions, closures, announcements | signed in | any active role | never |
 | replacementPractices | signed in | DOCTOR, ADMIN (ADMIN entries stay unconfirmed) | never |
@@ -165,11 +168,10 @@ Server-side rules live in `src/backend/access.ts` (pure functions, tested). Hidi
 - **ADMIN** has no medical bypass.
 - Legal texts are outside the cockpit for every role.
 
-**Admin UI:**
-- Not mounted in 09.2.
-- In 09.3 it goes into its own route group `app/(payload)/` under a path that does not collide with `/praxis`, `/entdecken`, `/heute`, `/review` or `/lab`. Proposal: `/verwaltung-intern`.
-- Access is **ADMIN only** (`admin` access on `staff`). It is not the tool for daily work; that is the cockpit.
-- Mounting it requires moving the current root layout into a route group, which is a structural change of its own. That is why it is deferred.
+**Admin UI (since 09.3):**
+- Payload admin at **`/intern/admin`** (route group `app/(payload)/`); REST at `/api`. No GraphQL route, no `/admin`.
+- **ADMIN only:** `access.admin` on `staff`. STAFF and DOCTOR are redirected to Payload's "Unauthorized" view and see no data.
+- Structural administration only, not the daily tool. The future cockpit lives at `/intern`.
 
 ## 9. Audit
 
@@ -198,7 +200,7 @@ Server-side rules live in `src/backend/access.ts` (pure functions, tested). Hidi
   - standing data: today + 182 days
 - Client-supplied `verifiedBy`, `lastVerified` and `status` are **overwritten**, including nested rule verifications in the weekly schedule. The fields are read-only in every UI.
 - Writes outside the role's confirmation boundary are **rejected** ("Diese Angabe kann nur eine Ärztin oder ein Arzt bestätigen."). The one exception: an ADMIN entering replacement-practice data stores it as `TO_BE_CONFIRMED`, and it never becomes public until a doctor confirms it.
-- The **holiday policy** saved by ADMIN always stays `TO_BE_CONFIRMED`. The mapping then treats it as `REQUIRE_EXPLICIT_ENTRY` (fail-safe). A physician confirmation flow follows in 09.3.
+- The **holiday policy** saved by ADMIN always stays `TO_BE_CONFIRMED`. The mapping then treats it as `REQUIRE_EXPLICIT_ENTRY` (fail-safe). A physician confirmation flow follows when the cockpit workflows are connected.
 - No fake provenance for test data. Existing static content keeps its documented provenance. Mein Arztbesuch approval records and Discovery provenance are untouched (`TO_BE_CONFIRMED`).
 
 ## 11. Expiry
@@ -209,7 +211,7 @@ Server-side rules live in `src/backend/access.ts` (pure functions, tested). Hidi
 - Expired records stay in the database and the audit trail as history. The engine simply no longer matches them on later days.
 - Because dates are stored as Berlin `LocalDate` text, DST changes cannot shift an end date.
 
-## 12. Cache and revalidation (design for 09.4)
+## 12. Cache and revalidation (design for the cutover phase)
 
 - Public pages render Praxis Puls per request (`ƒ` routes) from a repository snapshot. With the database source:
   1. Read once per request through a cached loader (Next `unstable_cache` / `"use cache"` with tag `practice-data`, short TTL of ≤ 60 s as a safety net).
@@ -229,11 +231,11 @@ Server-side rules live in `src/backend/access.ts` (pure functions, tested). Hidi
 ## 14. Migration plan
 
 1. **09.2 (this phase):** foundation, mapping and parity tests. `DATA_SOURCE = "STATIC"`. **No cutover.**
-2. **09.3:**
-   - local database, first migration, mount Payload routes (admin route group, ADMIN only)
-   - production-grade auth (first ADMIN by script, MFA decision)
-   - Payload implementations of `AuditRepository` and `StaffDirectory`
-   - DB integration tests against an isolated database
+2. **09.3 (done):**
+   - isolated local database and initial migration
+   - Payload runtime with the admin at `/intern/admin` (ADMIN only) and REST at `/api`
+   - bootstrap script for the first ADMIN; `/intern` auth shell
+   - integration tests from an empty database, incl. DB parity (§17)
 3. **Seed:** `docsFromPulsData(PULS_DATA)` creates the documents from the current static content, one-off, reviewed, with provenance carried over **as documented** (not regenerated).
 4. **Parity gate:** for the seeded database, `PayloadPracticeRepository.getPulsData()` must deep-equal `staticPulsData()`, and `getPracticeStatus` must be identical over a long sampled window (§15).
 5. **Cutover (later phase, separate reviewed change):** `getPracticeRepository()` starts honouring `DATA_SOURCE` and returns the Payload repository for `"PAYLOAD"`. Pages switch to the async read through `readPulsDataSafely`.
@@ -253,7 +255,7 @@ Server-side rules live in `src/backend/access.ts` (pure functions, tested). Hidi
 - **Payload repository** with a fake Local API returns the same `PulsData` and announcements as the static source.
 - **Fail-safe:** a failing repository and a missing schedule resolve to UNKNOWN; an unverified holiday policy never closes holidays.
 
-**With a database (09.3):** the same parity assertions run against a seeded, **isolated** test database. They are skipped unless an explicit test-database variable is set, and they refuse URIs that do not name a test database. They never connect to production.
+**With a database (09.3, done):** `src/backend/__integration__/03-parity.test.ts` persists the data in an **isolated** test database and reads it back through `PayloadPracticeRepository` (§17.6). The tests refuse any URI that is not a loopback `*_test` database.
 
 ## 16. Open infrastructure decisions
 
@@ -265,38 +267,221 @@ These need an owner and a decision before any real data or account exists. This 
 | Region | EU region required; exact location to be named |
 | DPA / AVV | Data processing agreement with the DB, hosting and email providers, signed by the practice |
 | Object storage | Not needed in V1 (no uploads); decide if images ever move into the backend |
-| Email | Provider for password reset and invites; until then no email features |
+| Email | Transactional provider for password reset and invites (EU, DPA); until then reset is closed (§17.10) |
 | Backups | Frequency and retention; **restore test** before go-live (09.8) |
 | PITR | Point-in-time recovery available or not, and the window |
 | Maintenance owner | Named person or agency responsible for updates and incidents |
 | Patching | Update cadence for Payload, Next.js and Node; security advisories |
 | Monitoring | Uptime, error tracking, revalidation failures, `/api/puls-version` |
-| MFA | TOTP or passkeys for ADMIN (library or plugin choice) |
-| Admin route path | Final path for the ADMIN-only Payload admin (proposal `/verwaltung-intern`) |
+| MFA | Recommendation in §17.9 (TOTP plugin first, passkeys later); needs an explicit decision and security review |
+| Admin route path | **Decided:** `/intern/admin` |
+| Live host / domain / DNS | Access to the existing webhost is unavailable (`LIVE_HOST_ACCESS = OPEN`); registrar and DNS access unknown. See project-blockers LB-13/LB-14. Blocks only the production cutover. |
 
-## 17. Phase 09.3 readiness gate (2026-10-13): blocked
+## 17. Phase 09.3: Payload runtime, isolated database, real auth (results)
 
-Phase 09.3 (Payload runtime, local database, real auth) stopped at the PostgreSQL readiness gate, **before** any database was created. Only safe discovery was done:
+The readiness gate first stopped 09.3: the system PostgreSQL service requires unknown SCRAM credentials (`3d2c316`). On the user's instruction, an isolated development cluster was then built from the installed PostgreSQL 16 binaries, without touching the system service.
+
+### 17.1 Isolated PostgreSQL development cluster
+
+| | |
+|---|---|
+| Binaries | PostgreSQL **16.2** (`C:\Program Files\PostgreSQL\16\bin`: `initdb`, `pg_ctl`, `psql`) |
+| Data directory | `%LOCALAPPDATA%\kinderarzt-postgres-dev` (outside the repository and outside OneDrive) |
+| Port / binding | **5433**, `listen_addresses = '127.0.0.1'` (not reachable from the network) |
+| Authentication | `scram-sha-256` only; `pg_hba.conf` allows exactly `host all all 127.0.0.1/32 scram-sha-256` |
+| Roles | Cluster superuser `kinderarzt_dev_super`, maintenance only. Application role **`kinderarzt_app`**: `LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE` |
+| Databases | `kinderarzt_staging_dev` (manual development) and `kinderarzt_staging_test` (recreated empty on every test run), both owned by `kinderarzt_app` |
+| Secrets | Generated by the init script and written **only** to the git-ignored `.env.local` (`DATABASE_URI`, `TEST_DATABASE_URI`, `PAYLOAD_SECRET`, `DEV_DB_SUPERUSER_URI`). Never printed, never committed. |
+| Isolation proof | Port 5433 is a separate server; the app role is not a superuser and owns both project databases. The system service on 5432 keeps running; its `pg_hba.conf` is unchanged (last modified 2024). |
+
+Helper: `npm run db:dev -- <init|start|stop|status>` (`scripts/db-dev.ps1`).
+- The script operates only on this data directory and this port.
+- It contains no passwords and never kills processes.
+- It starts the server detached, so the calling shell is not blocked.
+
+`scripts/db-dev-verify.mjs` prints the non-secret isolation facts.
+
+### 17.2 Migrations
+
+- **Workflow** (official Payload CLI, [docs](https://payloadcms.com/docs/database/migrations)):
+  - `payload migrate:create initial` generated `src/backend/migrations/20261013_122224_initial.ts`.
+  - It covers all eight collections plus the `holidayCalendar` global, including array and `select hasMany` tables, `staff_sessions` and the Payload system tables.
+- **Commands:** `npm run db:migrate` (`payload migrate`) and `npx payload migrate:status`. `push: false` stays on; there is no automatic schema push anywhere.
+- **One documented adjustment** after generation: the generated file imported the TypeScript types `MigrateUpArgs` / `MigrateDownArgs` as values. They are now `type` imports, so the file also runs under Node's type stripping (integration tests); `index.ts` uses the `.ts` extension. **The generated SQL is unchanged.** No hand-written SQL.
+- **Clean rebuild:** every `npm run test:db:clean` run drops and recreates `kinderarzt_staging_test` and applies the migrations from zero with the CLI (§17.11).
+
+### 17.3 Payload runtime and routes
+
+| Route | Purpose | Notes |
+|---|---|---|
+| `/intern/admin` | Payload admin (official `@payloadcms/next` integration, `app/(payload)/intern/admin/[[...segments]]`) | ADMIN only (`access.admin`) |
+| `/api/*` | Payload REST (`app/(payload)/api/[...slug]`) | Every operation passes access rules and hooks; no unauthenticated write |
+| `/intern`, `/intern/anmelden` | Custom staff shell and login (`app/(intern)`) | §17.5 |
+| GraphQL | **Disabled** (`graphQL.disable`) and **no route** | — |
+
+- **Route groups:**
+  - The public site's root layout moved into `app/(frontend)/`. URLs are unchanged, and the tests follow the new paths.
+  - `app/(payload)` and `app/(intern)` each have their own root layout, as required by the [installation docs](https://payloadcms.com/docs/getting-started/installation).
+- **Gate (`proxy.ts`, runs before any route module):** `/intern*` and `/api*` exist only while `SITE_STAGE` allows staging tools **and** `DATABASE_URI` + `PAYLOAD_SECRET` are configured. Otherwise they answer **404**.
+  - **PRODUCTION stage:** the internal tools stay blocked until a production security review enables them.
+  - **Deployment without a database** (Vercel staging today): there are no broken backend pages. Verified with a build and start without any backend environment: public routes 200, all backend routes 404.
+- **Build without a database:** `next build` evaluates route modules without initialising Payload. Only during the build phase (`NEXT_PHASE`) does `payload.config.ts` accept inert placeholders (an unresolvable `.invalid` host). Everywhere else, a missing `PAYLOAD_SECRET` or `DATABASE_URI` fails loudly.
+- **CSRF:** when `PAYLOAD_SERVER_URL` is set, Payload accepts cookie-authenticated requests only from that origin. Server actions additionally use Next's own origin check. Set it per environment once a hosted backend exists.
+
+**First-user registration is closed (tested over HTTP and the Local API):**
+- **Why a guard is needed:** Payload's `registerFirstUser` operation writes with `overrideAccess`, so collection access rules alone do not stop it.
+- **Three layers:**
+  1. `proxy.ts` answers 404 for `/intern/admin/create-first-user` and `/api/staff/first-register`.
+  2. `staffCreateGuard` rejects every `staff` create unless the actor is an active ADMIN or the request carries the server-only bootstrap context. `req.context` cannot be set over HTTP.
+  3. On an empty database, the admin entry point leads only to the closed view; no form is reachable.
+- **Bootstrap:** `npm run db:bootstrap-admin` (`scripts/bootstrap-admin.ts`) is the only way to create the first ADMIN.
+  - It is server-side only and reads `BOOTSTRAP_ADMIN_EMAIL`, `BOOTSTRAP_ADMIN_NAME` and `BOOTSTRAP_ADMIN_PASSWORD` from the environment, or asks interactively; the password prompt is hidden, which keeps it out of shell history.
+  - There are no defaults. It refuses weak passwords (< 16 characters, < 3 character classes unless ≥ 24, a single repeated character, or containing the email name).
+  - It refuses as soon as **any** account exists and never prints the password.
+  - The audit records it as actor `system:bootstrap`.
+  - Remove `BOOTSTRAP_ADMIN_*` from the environment right after use.
+
+### 17.4 Authentication and cookies (verified)
+
+Integration tests against PostgreSQL and the running server (`02-runtime.test.ts`), plus a manual browser check of `/intern/anmelden` with artificial accounts:
 
 | Check | Result |
 |---|---|
-| Service | `postgresql-x64-16` running (automatic start), listening on port 5432 |
-| Client | `psql` 16.2 at `C:\Program Files\PostgreSQL\16\bin` (not on `PATH`) |
-| Authentication | `pg_hba.conf`: `scram-sha-256` for all local and loopback connections (password required) |
-| Credentials | No `PG*` environment variables, no `%APPDATA%\postgresql\pgpass.conf`, no `.env` / `.env.local` in the project |
-| Connection test | `psql -w` (never prompts) as `postgres` and as the Windows user: `no password supplied` |
-| Docker | Not installed |
+| Correct credentials (ADMIN, DOCTOR, STAFF) | Login succeeds; the role is read server-side from the database |
+| Wrong password vs. unknown email | Identical generic failure (HTTP 401, same body); `/intern/anmelden` shows "Anmeldung nicht möglich. Bitte prüfen Sie Ihre Angaben." |
+| Disabled account | Refused with the correct password; no cookie |
+| Lockout | After 5 failures, the correct password is refused; `lockUntil` ≈ 15 min |
+| Session | Survives normal navigation; logout deletes the server-side session; a replayed old cookie is refused (`/api/staff/me` → `null`, `/intern` → login) |
+| Unauthenticated | `/intern` → `/intern/anmelden`; `/intern/admin` shows only Payload's login, no admin content; `/api/staff` and `/api/auditEvents` → 403 |
+| `/intern/admin` | ADMIN: dashboard. DOCTOR / STAFF: redirected to "Unauthorized", no data (only their own email in the page payload) |
 
-What was deliberately **not** done: guessing passwords, changing `pg_hba.conf` to `trust`, resetting the installation, reusing credentials from other projects, installing Docker, or signing up for a cloud database.
+**Cookie** `payload-token`, set by Payload's own generator (REST login and the `@payloadcms/next/auth` server function use the same code):
+- Flags: `HttpOnly; SameSite=Lax; Secure; Path=/`. It is not readable from JavaScript (checked in the browser).
+- **Localhost vs. HTTPS:**
+  - `Secure` stays on in every environment.
+  - Chromium and Firefox treat `http://localhost` as a secure context and accept `Secure` cookies there, so local HTTP development works without weakening anything.
+  - Every hosted environment must be HTTPS.
+  - Exception: browsers that do not treat `localhost` as secure (older Safari) cannot sign in locally. That is accepted; security is not lowered for it.
 
-**Needed to continue (one of):**
+### 17.5 `/intern` shell (real)
 
-1. The password of a local PostgreSQL role that may create databases and roles (for example `postgres`). Enter it yourself in a local terminal, never in chat or in a tracked file. With it, a one-time setup creates:
-   - the dedicated role `kinderarzt_app` (no superuser)
-   - the database `kinderarzt_staging_dev`, owned by that role
-   - `DATABASE_URI` for the role in the git-ignored `.env.local`
-2. Or a ready-made `DATABASE_URI` for an isolated, empty development database, placed in `.env.local` by you.
+- **`/intern/anmelden`:**
+  - Calm login (E-Mail, Passwort, "Anmelden") built on Payload's official `login` server function.
+  - No self-registration, no test credentials, one generic error message.
+- **`/intern`:** requires authentication and shows:
+  - "Praxis Cockpit", the name, the role label and "Backend verbunden · Testumgebung"
+  - actions "Praxis-Cockpit-Prototyp öffnen" (`/lab/praxis-cockpit`) and "Abmelden" (Payload `logout`, revokes the session)
+  - for ADMIN only, "Verwaltung öffnen" (`/intern/admin`)
+- **Not connected yet:** operational editing workflows. The prototype remains the UX reference and does not depend on PostgreSQL.
+- **Database outage:**
+  - `/intern` shows "Der interne Bereich ist gerade nicht erreichbar" and never crashes.
+  - Until Payload has started in a process, a 2-second connection probe runs first, so a failed first initialisation can never stay cached in the adapter.
+  - Verified: a cold start with the database stopped, a warm stop/start, and recovery without restarting the server.
+  - Not covered by the probe: `/intern/admin` and `/api` call Payload directly. If one of them is the first backend request after a cold start without a database, it fails, and the process must be restarted before the backend is usable again. Public pages are unaffected in every case.
 
-Once a usable connection exists, 09.3 continues at step 2 (re-verify the Payload runtime documentation) and step 5 (initial migration).
+### 17.6 Static → PostgreSQL → repository parity
 
-Preparatory hardening already in place: `payload.config.ts` now refuses to initialise when `PAYLOAD_SECRET` **or** `DATABASE_URI` is missing or empty. That check runs only when Payload initialises, never in the public build.
+`03-parity.test.ts`:
+1. The current static `PULS_DATA` is persisted through `docsFromPulsData` via the trusted seed path, which keeps the documented provenance.
+2. It is read back through `PayloadPracticeRepository`.
+3. The result is compared with the static domain data (**deep-equal**).
+4. Both datasets go through `getPracticeStatus()`.
+5. The same steps run for an artificial dataset with special hours, a vacation with replacement, and expiry.
+
+- **Status results are identical** for these cases:
+  - weekday before opening; morning, lunch gap and afternoon
+  - after closing; Saturday; Sunday
+  - unresolved weekday holiday, which stays UNKNOWN
+  - special hours, including a dropped afternoon
+  - explicit closure / vacation; replacement case
+  - expiry boundary (last day 23:59 / first day after)
+  - Europe/Berlin DST end (2026-10-25 02:30) and the Mondays after both DST changes
+- **Additionally:** every full hour over four weeks.
+- **Findings fixed on the way:**
+  - The repository had no defined list order (Payload's default sort is newest first); it now uses insertion order.
+  - Optional groups and lists are written as "absent" / `[]` instead of `null`.
+
+### 17.7 Provenance, access and audit (verified against PostgreSQL)
+
+- **Provenance over HTTP:**
+  - STAFF posted a closure with a fake `verifiedBy`, `lastVerified` and `status`, then patched it with fake values again.
+  - The database contains `VERIFIED_CURRENT`, `"Test STAFF (künstlich), Praxisteam (Praxis Cockpit)"`, `lastVerified` = Berlin today, `reviewDue` = end date and `sourceIds = ["PRACTICE_COCKPIT"]`.
+- **Access over HTTP:**
+  - STAFF is refused weekly schedules, consultation types and accounts.
+  - ADMIN is refused weekly schedules and consultation types, so it has no physician bypass.
+  - ADMIN-entered replacement practices stay `TO_BE_CONFIRMED`, and ADMIN cannot confirm the holiday policy.
+  - DOCTOR confirms the schedule, including nested rules.
+  - Nothing is deletable, not even by ADMIN.
+  - Unauthenticated Local API writes are refused in every collection.
+- **Audit:**
+  - Each write creates one event with `actorId`, name and role snapshot, timestamp, `entityType`, `entityId`, operation, `previous`, `next` and `publishState`.
+  - A recursive key scan of **all** persisted events (including an account password change) finds no key matching password, hash, salt, token, secret, session, refresh, apiKey, `_sid`, loginAttempts or lockUntil, and no secret value appears in the payload.
+  - Found and fixed: `resetPasswordRequestedAt` (auth metadata) is now stripped as well.
+  - Audit events cannot be updated or deleted through the API.
+
+### 17.8 Transactions (verified against PostgreSQL)
+
+- **Success:** a normal operational write commits the business record **and** its audit event.
+- **Rejected write after the transaction began:**
+  1. A transaction is opened on one `req`.
+  2. A first closure is written; inside the transaction, its audit event is visible through the same `req`.
+  3. A second, contradicting closure on the same `req` is rejected by the publish guard.
+  4. Result: **neither** record nor **any** audit event persists, so no orphans remain.
+- **Rejected write without an explicit transaction:** record and audit counts are unchanged.
+- **Explicit commit:** keeps record and audit event together.
+- The audit hook writes with the same `req`, and it is proven, not assumed, that this runs in the same transaction.
+
+### 17.9 MFA: current options (2026-10-13)
+
+- **Native Payload:** no built-in TOTP or passkeys in Payload 3.90.2.
+- **Maintained community plugins** (not built by Payload):
+  - [`payload-totp`](https://gittrend.io/repo/GeorgeHulpoi/payload-totp) 3.0.6: TOTP via authenticator app, wrapping existing access control. Peer `payload ^3.88.0`, compatible with 3.90.2. Last release 2026-10-04.
+  - [`payload-passkey`](https://github.com/Robot-Inventor/payload-passkey) 2.1.2: passkeys/WebAuthn via Better Auth. Peer `payload >=3.69 <4` and Next 16. Last release 2026-10-03. It can be combined with TOTP.
+  - Comparison: [buildwithmatija.com](https://www.buildwithmatija.com/blog/md/which-payload-cms-auth-plugin-to-use).
+- **Recommendation:** ADMIN MFA is **required before production**; password-only auth does not meet the final security model.
+  - Preferred first step: `payload-totp`. It is the smallest change on top of Payload's own auth, and authenticator apps are common in practices.
+  - Passkeys can follow later as a convenience factor.
+  - Both are community-maintained, so adopting one needs an explicit decision, a code review of the plugin, pinned versions and an owner for updates.
+- **Not implemented in 09.3.**
+
+### 17.10 Password reset
+
+- Payload supports `forgotPassword` / `resetPassword` with a token: `auth.forgotPassword.expiration`, `generateEmailHTML`, `generateEmailSubject`, `minRequestInterval` ([docs](https://payloadcms.com/docs/authentication/email)).
+- Without an email adapter, Payload **writes emails to the server console**, which was observed: "No email adapter provided. Email will be written to console". That would put reset tokens into logs.
+- **Therefore:**
+  - `staffOperationGuard` closes `forgotPassword` and `resetPassword` until a transactional email provider is configured (EU region, DPA, decision in §16).
+  - Until then, ADMIN sets a new password in `/intern/admin`.
+  - Test reset emails must only ever go to a local catcher, never to real people.
+
+### 17.11 Test architecture and clean-database proof
+
+| Suite | Content | Count |
+|---|---|---|
+| `npm test` (unit, no database) | Domain, content, data, backend incl. the gate, bootstrap rules and staff guards | **257** |
+| `npm run test:db:clean` | The from-zero proof below | **24** (3 + 19 + 2) |
+
+`npm run test:db:clean` (`scripts/test-db-clean.ps1`), local only:
+1. Drop and create an **empty** `kinderarzt_staging_test`.
+2. `payload migrate` from zero, plus `migrate:status`.
+3. `next start` on port 3200 against that database.
+4. `01-empty-database`: no first-user registration through any route.
+5. The **real** bootstrap script with a generated password (never printed).
+6. `02-runtime`: accounts, HTTP auth, roles, provenance, audit, transactions.
+7. `03-parity`.
+
+Safety and seeding:
+- All tests refuse any database that is not a loopback `*_test` database.
+- Accounts use `@integration-test.invalid`, and passwords are generated per run.
+- `npm run db:seed-dev` fills the **dev** database with artificial accounts (`@praxis-test.invalid`; generated passwords only in `.env.local`) and invented operational data, written *through* those accounts so that provenance and audit are real.
+
+### 17.12 npm audit (2026-10-13): 16 findings, none fixed by force
+
+| Package (path) | Severity | Reachable here? | Fix |
+|---|---|---|---|
+| `undici` 7.29.0 (exact pin in `payload`) | high/moderate (DoS, cookie disclosure in shared caches, TLS bypass in `BalancedPool`) | Server-side HTTP client inside Payload; this app makes no outbound requests through it (no uploads, no URL fetching, no email) — low | Patched **7.29.1** exists. A safe option is an npm `overrides` pin to 7.29.1 (patch level); proposed, not applied. Otherwise wait for a Payload release |
+| `braces` 3.0.3 ← `chokidar` 3.6 ← `sass` 1.77.4 (exact pin in `@payloadcms/next`) | high (DoS via nested patterns) | Build/dev file watching only, no user input — not reachable at runtime | No patched `braces` version exists; it depends on a Payload update |
+| `esbuild` 0.18 ← `@esbuild-kit/*` ← `drizzle-kit` | moderate (esbuild dev server) | Migration tooling only, the esbuild dev server is never started — not reachable | Depends on a Payload/drizzle update |
+| `dompurify` 3.4.15 ← `monaco-editor` (admin code editor) | low (IN_PLACE sanitising edge cases) | Admin UI only (ADMIN), no code/JSON editor fields in use — very low | Patched 3.4.17 exists; `overrides` possible; proposed |
+| `payload`, `@payloadcms/*`, `drizzle-kit`, `@esbuild-kit/*`, `chokidar`, `sass`, `monaco-editor` | (inherited) | — | npm suggests `3.85.1`, a **downgrade** of the framework. Rejected |
+
+`npm audit fix --force` was **not** run. Before production: re-check on every Payload update and decide on the two patch-level overrides (`undici`, `dompurify`) together with a full test run.

@@ -103,7 +103,7 @@ export interface AuditEventRecord {
 }
 
 /** Keys never stored in an audit snapshot (defence in depth; staff secrets live in auth only). */
-const SECRET_KEYS = /^(password|hash|salt|token|resetPasswordToken|resetPasswordExpiration|apiKey|enableAPIKey|loginAttempts|lockUntil|sessions)$/i;
+const SECRET_KEYS = /^(password|hash|salt|token|resetPasswordToken|resetPasswordExpiration|resetPasswordRequestedAt|apiKey|enableAPIKey|loginAttempts|lockUntil|sessions)$/i;
 
 export function stripSecrets(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(stripSecrets);

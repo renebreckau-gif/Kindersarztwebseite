@@ -1,29 +1,42 @@
 // Payload hooks — thin wrappers around the tested pure logic (provenance.ts, domain/operations.ts).
 // Type-only Payload import: this module carries no Payload runtime code.
 
-import type { CollectionAfterChangeHook, CollectionBeforeChangeHook, GlobalBeforeChangeHook } from "payload";
+import type { CollectionAfterChangeHook, CollectionBeforeChangeHook, CollectionBeforeOperationHook, GlobalBeforeChangeHook } from "payload";
 import type { ConfirmableKind } from "../domain/governance.ts";
 import type { Closure, OpeningHourException } from "../domain/content-types.ts";
 import { applyChangeSet, introducedUnknown } from "../domain/operations.ts";
 import { closureFromDoc, exceptionFromDoc, verificationToDoc, type ClosureDoc, type ExceptionDoc } from "../data/payload-mapping.ts";
-import { actorFromUser, auditForWrite, berlinToday, reviewDueFor, verificationForWrite, type StaffUserDoc } from "./provenance.ts";
+import { activeRole } from "./access.ts";
+import { actorFromUser, auditForWrite, berlinToday, ProvenanceRejected, reviewDueFor, verificationForWrite, type StaffUserDoc } from "./provenance.ts";
 import { PayloadPracticeRepository, type PayloadReader } from "./payload-repository.ts";
+import { isBootstrap, isTrustedSeed, RejectedError, systemActor } from "./server-context.ts";
 
-/** Generate verification from the logged-in account; reject writes the role may not confirm. */
+/**
+ * Generate verification from the logged-in account; reject writes the role may not confirm.
+ * Only the trusted server-side seed (Local API context, never HTTP) keeps the documented
+ * provenance of imported documents unchanged.
+ */
 export const provenanceHook =
   (kind: ConfirmableKind): CollectionBeforeChangeHook =>
   ({ data, req, originalDoc }) => {
+    if (!req.user && isTrustedSeed(req.context)) return data;
     const today = berlinToday();
     const actor = actorFromUser(req.user as StaffUserDoc | null);
     const merged = { ...(originalDoc ?? {}), ...data };
-    const generated = verificationForWrite(actor, kind, reviewDueFor(kind, merged, today), today);
+    let generated;
+    try {
+      generated = verificationForWrite(actor, kind, reviewDueFor(kind, merged, today), today);
+    } catch (e) {
+      if (e instanceof ProvenanceRejected) throw new RejectedError(e.message, actor ? 403 : 401);
+      throw e;
+    }
     const out: Record<string, unknown> = { ...data, verification: verificationToDoc(generated) };
     // Nested rule verifications (weekly schedule) are generated too — never taken from the client.
     if (Array.isArray(data.rules)) out.rules = data.rules.map((r: Record<string, unknown>) => ({ ...r, verification: verificationToDoc(generated) }));
     return out;
   };
 
-/** Holiday policy: ADMIN maintains the calendar, but the policy stays unconfirmed until a physician flow exists (09.3). */
+/** Holiday policy: ADMIN maintains the calendar, but the policy stays unconfirmed until a physician flow exists. */
 export const holidayPolicyHook: GlobalBeforeChangeHook = ({ data }) => ({ ...data, policyVerification: { status: "TO_BE_CONFIRMED", sourceIds: [] } });
 
 /** Publish guard: a change must not introduce a contradiction (new UNKNOWN day) — same engine as the preview. */
@@ -37,16 +50,34 @@ export const publishGuardHook =
         ? { upsertExceptions: [exceptionFromDoc(merged as ExceptionDoc) as OpeningHourException] }
         : { upsertClosures: [closureFromDoc(merged as ClosureDoc) as Closure] };
     const conflict = introducedUnknown(base, applyChangeSet(base, change), merged.startDate, merged.endDate);
-    if (conflict) throw new Error(`Widersprüchliche Angaben am ${conflict.date}: Diese Änderung würde einer bestehenden Änderung widersprechen.`);
+    if (conflict) throw new RejectedError(`Widersprüchliche Angaben am ${conflict.date}: Diese Änderung würde einer bestehenden Änderung widersprechen.`, 409);
     return data;
   };
+
+/**
+ * Staff accounts are created only by an active ADMIN — or once, by the bootstrap script.
+ * This also closes Payload's built-in first-user registration (which writes with
+ * overrideAccess): an anonymous HTTP request never carries the bootstrap context.
+ */
+export const staffCreateGuard: CollectionBeforeChangeHook = ({ data, operation, req }) => {
+  if (operation !== "create") return data;
+  if (activeRole(req.user) === "ADMIN" || isBootstrap(req.context)) return data;
+  throw new RejectedError("Konten werden nur von der Verwaltung angelegt.");
+};
+
+/** No email adapter is configured yet: self-service password reset is closed (ADMIN sets a new password). */
+export const staffOperationGuard: CollectionBeforeOperationHook = ({ args, operation }) => {
+  if (operation === "forgotPassword" || operation === "resetPassword") throw new RejectedError("Passwort-Zurücksetzen ist noch nicht eingerichtet. Bitte wenden Sie sich an die Verwaltung.");
+  return args;
+};
 
 /** Append-only audit trail (same transaction via `req`). */
 export const auditHook =
   (entityType: string): CollectionAfterChangeHook =>
   async ({ doc, previousDoc, operation, req }) => {
-    const actor = actorFromUser(req.user as StaffUserDoc | null);
-    if (!actor) return doc;
+    // Operational writes without an account are already rejected by the provenance hook; any
+    // remaining account-less write (Payload-internal) is still recorded, clearly as "System".
+    const actor = actorFromUser(req.user as StaffUserDoc | null) ?? systemActor(req.context) ?? { id: "system:internal", name: "Systemvorgang (ohne Konto)", role: "ADMIN" as const };
     const event = auditForWrite({
       id: crypto.randomUUID(),
       now: new Date(),

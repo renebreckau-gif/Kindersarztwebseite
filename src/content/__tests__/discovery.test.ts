@@ -109,7 +109,7 @@ test("copy: no fear, pain or bravery phrases anywhere in the chapter", () => {
   ];
   for (const t of texts) for (const re of FORBIDDEN_CHILD_PHRASES) assert.equal(re.test(t), false, `"${t}" matches ${re}`);
   // the ENTDECKEN overview lede too
-  assert.equal(/angst/i.test(read("app/(site)/entdecken/page.tsx")), false);
+  assert.equal(/angst/i.test(read("app/(frontend)/(site)/entdecken/page.tsx")), false);
 });
 
 test("copy: child sentences stay short (≤ 12 words)", () => {
@@ -141,7 +141,7 @@ test("116117: published, verified, after 112", () => {
 });
 
 test("116117: Notfall page renders a real tel: link and keeps 112 first", () => {
-  const src = read("app/(site)/notfall/page.tsx");
+  const src = read("app/(frontend)/(site)/notfall/page.tsx");
   assert.match(src, /href="tel:112"/);
   assert.match(src, /href=\{`tel:\$\{onCall\.phone\}`\}/);
   assert.ok(src.indexOf('tel:112') < src.indexOf("tel:${onCall.phone}"));

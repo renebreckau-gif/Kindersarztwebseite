@@ -1,40 +1,62 @@
-// Payload configuration — Praxis Cockpit backend FOUNDATION (Phase 09.2).
+// Payload configuration — Praxis Cockpit backend (Phase 09.3: runtime + isolated local database).
 //
-// Not imported by the public app and no Payload routes are mounted: the admin UI and REST/GraphQL
-// endpoints (app/(payload)/…) arrive with the production auth phase (09.3). Until then Payload is
-// used only through the Local API (scripts, integration tests against a local/isolated database).
+// Imported only by the backend: app/(payload) (admin at /intern/admin, REST at /api), app/(intern),
+// the Payload CLI (migrations) and server-side scripts/tests. The public website never imports it
+// and never reads from the database (DATA_SOURCE = "STATIC").
+// Reachability of /intern and /api is gated in proxy.ts (SITE_STAGE + configured database).
 // See docs/architecture/backend-foundation.md.
 
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { buildConfig } from "payload";
 import { COLLECTIONS, GLOBALS } from "./src/backend/collections.ts";
 import { assertNoPatientFields } from "./src/backend/privacy.ts";
 
+const dirname = path.dirname(fileURLToPath(import.meta.url));
+
 // Structural guard: the practice backend never stores patient data.
 assertNoPatientFields(COLLECTIONS as unknown as Parameters<typeof assertNoPatientFields>[0]);
 
-// Evaluated only when Payload itself is initialised (CLI, Local API scripts, future Payload
-// routes) — the public site never imports this file. Fail loudly instead of signing sessions
-// with an empty secret or silently connecting with an empty connection string.
+// `next build` evaluates route modules without initialising Payload. Only then are inert,
+// unusable placeholders accepted (".invalid" can never resolve) so a deployment without a
+// database still builds; proxy.ts keeps those routes unreachable at runtime. Everywhere else
+// (CLI, scripts, tests, requests) a missing value fails loudly — no silent empty connection.
+const BUILD_PHASE = process.env.NEXT_PHASE === "phase-production-build";
+const BUILD_PLACEHOLDER = { PAYLOAD_SECRET: "build-placeholder-not-a-secret", DATABASE_URI: "postgresql://build-placeholder.invalid:5432/none" };
 const requireEnv = (name: "PAYLOAD_SECRET" | "DATABASE_URI"): string => {
   const value = process.env[name]?.trim();
-  if (!value) throw new Error(`${name} is not set (see .env.example).`);
-  return value;
+  if (value) return value;
+  if (BUILD_PHASE) return BUILD_PLACEHOLDER[name];
+  throw new Error(`${name} is not set (see .env.example).`);
 };
+
+// Optional public origin of this deployment (e.g. http://localhost:3100). When set, cookie-based
+// requests from any other origin are rejected (Payload CSRF allowlist).
+const serverURL = process.env.PAYLOAD_SERVER_URL?.trim() || undefined;
 
 export default buildConfig({
   secret: requireEnv("PAYLOAD_SECRET"),
+  serverURL,
+  csrf: serverURL ? [serverURL] : [],
   db: postgresAdapter({
     pool: { connectionString: requireEnv("DATABASE_URI") },
-    // Schema push only for a local development database; every shared database uses migrations.
+    // Never push schema automatically: every database (also local) is built from migrations.
     push: false,
-    migrationDir: "./src/backend/migrations",
+    // Never create databases implicitly (the app role cannot, and must not, do so).
+    disableCreateDatabase: true,
+    migrationDir: path.resolve(dirname, "src/backend/migrations"),
   }),
-  admin: { user: "staff" },
+  routes: { admin: "/intern/admin", api: "/api" },
+  admin: {
+    user: "staff",
+    importMap: { baseDir: path.resolve(dirname) },
+    meta: { titleSuffix: " · Verwaltung (Testumgebung)" },
+  },
   collections: COLLECTIONS,
   globals: GLOBALS,
-  // No public GraphQL surface. REST is not mounted in 09.2 either.
+  // No GraphQL surface (no route is mounted for it either).
   graphQL: { disable: true },
   telemetry: false,
-  typescript: { autoGenerate: false, outputFile: "./src/backend/payload-types.ts" },
+  typescript: { autoGenerate: false, outputFile: path.resolve(dirname, "src/backend/payload-types.ts") },
 });

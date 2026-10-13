@@ -29,7 +29,7 @@ test("the label is a paragraph, not a heading, and no status is computed in the 
 });
 
 test("the public homepage uses this PulsStatement with the live engine view", () => {
-  const home = read("app/(site)/page.tsx");
+  const home = read("app/(frontend)/(site)/page.tsx");
   assert.match(home, /import \{[^}]*PulsStatement[^}]*\} from "@\/lab\/final\/entry-chrome"/);
   assert.match(home, /<PulsStatement puls=\{puls\.view\}/);
 });
