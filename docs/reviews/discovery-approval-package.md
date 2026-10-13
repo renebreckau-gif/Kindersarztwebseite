@@ -6,17 +6,17 @@ Stand: 2026-10-12 · Bildstand: Commit `0f46783` · Bildquellen: [docs/design/di
 
 „Mein Arztbesuch“ ist das erste Kapitel im Kinderbereich ENTDECKEN. Sechs kurze Szenen zeigen einem Kind (ca. 3–7 Jahre), wie ein Arztbesuch ablaufen **kann**: von der Ankunft bis zum Nachhausegehen. Eltern lesen die kurzen Sätze vor; die Bilder erzählen mit. Einleitung für Eltern auf der Seite: „So kann ein Arztbesuch aussehen. Nicht jeder Besuch läuft genau so ab – manches entfällt, manches kommt dazu.“
 
-**Stand (12.10.2026):** Die Bilder sind visuell freigegeben, alle Prüfungen sind erteilt und das Kapitel ist **veröffentlicht**. Dieses Dokument bleibt als Nachweis der Freigaben bestehen.
+**Stand:** Die **Bilder sind fertig, visuell freigegeben und in die Website eingebaut**. Die formalen Freigaben sind **offen**, das Kapitel ist **nicht veröffentlicht**. Ohne Vorschau-Parameter steht dort „In Vorbereitung“. Das fertige Kapitel lässt sich in der Staging-Vorschau prüfen: `/entdecken/mein-arztbesuch?vorschau=freigabe`, oder über `/entdecken?vorschau=freigabe` → „Mein Arztbesuch“.
 
 Bevor das Kapitel erscheinen darf, braucht es vier **getrennte** Entscheidungen:
 
 | Freigabe | Wer | Umfang | Formular |
 |---|---|---|---|
 | Visuell | Projekt / Art Direction | alle 6 Szenen | ✅ erledigt (2026-10-07 bis 2026-10-12) |
-| Praxis | Praxisteam | alle 6 Szenen: passt das zu Besuchen bei uns? | ✅ Nadine Probst, 12.10.2026 · [Blatt](discovery-practice-content-review.md) |
-| Inhalt / Redaktion | Praxis bzw. Redaktion | alle 6 Szenen + Einleitung: Text und Bild verständlich, ruhig, ohne falsche Versprechen | ✅ Nadine Probst, 12.10.2026 · [Blatt](discovery-practice-content-review.md) |
-| Ärztlich | Ärztin | nur Szenen **03, 04, 05** (medizinische Inhalte) | ✅ Nadine Probst, 12.10.2026 · [Blatt](discovery-physician-review.md) |
-| Veröffentlichung KI-Kind | Praxisleitung | eine Entscheidung für alle Szenen | ✅ freigegeben, keine Bedingungen, Nadine Probst, 12.10.2026 · [Blatt](discovery-ai-child-publication-decision.md) |
+| Praxis | Praxisteam | alle 6 Szenen: passt das zu Besuchen bei uns? | [Praxis- & Inhaltsprüfung](discovery-practice-content-review.md) |
+| Inhalt / Redaktion | Praxis bzw. Redaktion | alle 6 Szenen: Text und Bild verständlich, ruhig, ohne falsche Versprechen | [Praxis- & Inhaltsprüfung](discovery-practice-content-review.md) |
+| Ärztlich | Ärztin | nur Szenen **03, 04, 05** (medizinische Inhalte) | [Ärztliche Prüfung](discovery-physician-review.md) |
+| Veröffentlichung KI-Kind | Praxisleitung | eine Entscheidung für alle Szenen | [Entscheidung KI-Kind](discovery-ai-child-publication-decision.md) |
 
 **Wichtig für alle Prüfenden:** Die Bilder zeigen eine **erfundene, symbolische Bühne**. Sie zeigen **nicht** die Praxisräume, den Eingang, das Wartezimmer, das Team oder echte Patientinnen und Patienten. Das Kind ist eine KI-generierte Figur. Die Begleitperson ist ein Elternteil, und es ist nie ein Gesicht zu sehen. Von der Ärztin sind nur Hand und Ärmel zu sehen.
 
@@ -24,14 +24,14 @@ Bevor das Kapitel erscheinen darf, braucht es vier **getrennte** Entscheidungen:
 
 | # | Szene | Visuell | Praxis | Inhalt | Ärztlich |
 |---|---|---|---|---|---|
-| 01 | Ankommen | ✅ freigegeben | ✅ | ✅ | nicht nötig |
-| 02 | Warten | ✅ freigegeben | ✅ | ✅ | nicht nötig |
-| 03 | Messen & Wiegen | ✅ freigegeben (Stilreferenz) | ✅ | ✅ | ✅ freigegeben |
-| 04 | Abhören | ✅ freigegeben | ✅ | ✅ | ✅ freigegeben |
-| 05 | Ohren & Hals | ✅ freigegeben (korrigierte Fassung) | ✅ | ✅ | ✅ freigegeben |
-| 06 | Fertig | ✅ freigegeben (korrigierte Fassung) | ✅ | ✅ | nicht nötig |
+| 01 | Ankommen | ✅ freigegeben | offen | offen | nicht nötig |
+| 02 | Warten | ✅ freigegeben | offen | offen | nicht nötig |
+| 03 | Messen & Wiegen | ✅ freigegeben (Stilreferenz) | offen | offen | **erforderlich** |
+| 04 | Abhören | ✅ freigegeben | offen | offen | **erforderlich** |
+| 05 | Ohren & Hals | ✅ freigegeben (korrigierte Fassung) | offen | offen | **erforderlich** |
+| 06 | Fertig | ✅ freigegeben (korrigierte Fassung) | offen | offen | nicht nötig |
 
-Diese Zuordnung entspricht dem Datenmodell (`src/content/discovery.ts`): Nur die Szenen 03–05 haben ein Feld für die ärztliche Freigabe. **Stand 12.10.2026:** Alle Freigaben sind erteilt (Nadine Probst, Ärztin / Praxis, ohne Bedingungen; Szene 04 „Abhören über dem Pullover“ ausdrücklich akzeptiert) und in `discovery.ts` als `VERIFIED_CURRENT` eingetragen. Das Kapitel wurde nach der Sichtprüfung des eingebauten Stands am 12.10.2026 veröffentlicht (`RELEASE.meinArztbesuchApproved = true`).
+Diese Zuordnung entspricht dem Datenmodell (`src/content/discovery.ts`): Nur die Szenen 03–05 haben ein Feld für die ärztliche Freigabe. Alle Freigaben stehen dort auf `TO_BE_CONFIRMED`.
 
 ---
 
@@ -109,6 +109,6 @@ Details, Job-IDs und SHA-256-Prüfsummen stehen in [discovery-reference/README.m
 
 Hinweis: Die **echten Gemälde** im Startseiten-Hero sind ein **anderes Thema** mit eigenen offenen Fragen (Rechte des Malers, Einwilligung). Sie gehören nicht zu diesem Paket.
 
-## Nach den Freigaben (erledigt 12.10.2026)
+## Was nach den Freigaben passiert
 
-Die Bilder wurden für die Website aufbereitet (`public/discovery/`, ohne Hochskalierung) und eingebaut. Das Kapitel ist über `RELEASE.meinArztbesuchApproved` geöffnet. Wird eine Freigabe zurückgezogen oder ein Bild durch einen Platzhalter ersetzt, schließt `chapterPublishable()` das Kapitel automatisch wieder.
+Die Bilder sind bereits für die Website aufbereitet (`public/discovery/`, ohne Hochskalierung) und eingebaut. Sobald die Freigaben mit Namen und Datum vorliegen, werden sie in `src/content/discovery.ts` eingetragen und das Kapitel durch eine bewusste Änderung an `RELEASE.meinArztbesuchApproved` geöffnet. Bis dahin bleibt es gesperrt.

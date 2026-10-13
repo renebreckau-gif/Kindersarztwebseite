@@ -37,12 +37,12 @@ Offene Punkte, die zur Entscheidung gehören können:
 
 VERÖFFENTLICHUNG:
 
-[x] FÜR DIE ÖFFENTLICHE WEBSITE FREIGEGEBEN
+[ ] FÜR DIE ÖFFENTLICHE WEBSITE FREIGEGEBEN
 
 [ ] FREIGEGEBEN MIT BEDINGUNGEN
 
 [ ] NICHT FREIGEGEBEN
 
-Entschieden von: Nadine Probst, Ärztin / Praxis
-Datum: 12.10.2026
-Bedingungen / Hinweise: keine Bedingungen (damit auch keine Kennzeichnungspflicht als Bedingung der Praxis; eine rechtliche Prüfung der Kennzeichnung bleibt laut Medienrichtlinie möglich). Die Bilder bleiben `AI_CONCEPTUAL`.
+Entschieden von:
+Datum:
+Bedingungen / Hinweise:

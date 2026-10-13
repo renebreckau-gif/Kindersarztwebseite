@@ -13,21 +13,11 @@ import type { LocalDate } from "../domain/time.ts";
 import { RELEASE } from "./release.ts";
 
 /**
- * Recorded approvals (docs/reviews/discovery-*-review.md). Nadine Probst approved practice,
- * content and — for scenes 03–05 — the medical review on 2026-10-12, without conditions.
- * Re-review together with the yearly content review.
+ * Formal approvals are still open (docs/reviews/discovery-approval-package.md). The final
+ * images are integrated and reviewable in the preview (?vorschau=freigabe); an AI_CONCEPTUAL
+ * image is visual production, not a practice, content or medical approval.
  */
-const APPROVED = (scope: string): FactVerification => ({
-  status: "VERIFIED_CURRENT",
-  lastVerified: "2026-10-12",
-  verifiedBy: "Nadine Probst, Ärztin / Praxis",
-  reviewDue: "2027-10-12",
-  sourceIds: [],
-  internalNotes: `${scope} freigegeben am 12.10.2026, keine Bedingungen (docs/reviews/discovery-approval-package.md)`,
-});
-const PRACTICE_OK = APPROVED("Praxisprüfung");
-const CONTENT_OK = APPROVED("Inhaltsprüfung");
-const MEDICAL_OK = APPROVED("Ärztliche Prüfung");
+const DRAFT: FactVerification = { status: "TO_BE_CONFIRMED", sourceIds: [], internalNotes: "Formale Freigabe ausstehend (Praxis, Inhalt, ggf. ärztlich)" };
 
 export interface SceneVisual {
   /** Current asset class. PLACEHOLDER = concept composition, never published as final. */
@@ -97,10 +87,9 @@ export const MEIN_ARZTBESUCH: Chapter = {
       childCopy: ["Wir sind da.", "Wir gehen hinein und sagen Hallo.", "Jetzt beginnt der Besuch."],
       parentContext: "Erzählen Sie Ihrem Kind ruhig vorher, wer mitkommt und wie Sie zur Praxis kommen.",
       visual: { class: "AI_CONCEPTUAL", briefId: "01-ankommen", motif: "arrive", alt: "Ein Kind steht an der Hand einer erwachsenen Person vor einem hellen, offenen Durchgang.", image: { slug: "ankommen", widths: [960, 1600, 2400], width: 2400, height: 1792 } },
-      contentApproval: CONTENT_OK,
-      practiceApproval: PRACTICE_OK,
-      lastReviewedAt: "2026-10-12",
-      approvedBy: "Nadine Probst, Ärztin / Praxis",
+      contentApproval: DRAFT,
+      practiceApproval: DRAFT,
+      lastReviewedAt: "2026-10-07",
     },
     {
       id: "warten",
@@ -110,10 +99,9 @@ export const MEIN_ARZTBESUCH: Chapter = {
       childCopy: ["Manchmal wartet man ein bisschen, bis man dran ist.", "Warten gehört dazu."],
       parentContext: "Ein Buch oder ein Lieblingsspielzeug von zu Hause kann beim Warten helfen.",
       visual: { class: "AI_CONCEPTUAL", briefId: "02-warten", motif: "wait", alt: "Ein Kind sitzt auf einer langen Bank und schaut in ein Buch. Neben ihm sitzt eine erwachsene Person.", image: { slug: "warten", widths: [960, 1600, 2400], width: 2400, height: 1792 } },
-      contentApproval: CONTENT_OK,
-      practiceApproval: PRACTICE_OK,
-      lastReviewedAt: "2026-10-12",
-      approvedBy: "Nadine Probst, Ärztin / Praxis",
+      contentApproval: DRAFT,
+      practiceApproval: DRAFT,
+      lastReviewedAt: "2026-10-07",
     },
     {
       id: "messen-wiegen",
@@ -123,11 +111,10 @@ export const MEIN_ARZTBESUCH: Chapter = {
       childCopy: ["Manchmal wird geschaut, wie groß du gerade bist.", "Und wie schwer.", "Dafür gibt es einen Messstab und eine Waage."],
       why: { title: "Warum wird gemessen?", copy: "So sieht man, wie ein Kind wächst." },
       visual: { class: "AI_CONCEPTUAL", briefId: "03-messen-wiegen", motif: "measure", alt: "Ein Kind steht gerade vor einem Messstab. Eine gelbe Markierung zeigt, wie groß es ist.", image: { slug: "messen-wiegen", widths: [960, 1600, 2400], width: 2400, height: 1792 } },
-      contentApproval: CONTENT_OK,
-      medicalApproval: MEDICAL_OK,
-      practiceApproval: PRACTICE_OK,
-      lastReviewedAt: "2026-10-12",
-      approvedBy: "Nadine Probst, Ärztin / Praxis",
+      contentApproval: DRAFT,
+      medicalApproval: DRAFT,
+      practiceApproval: DRAFT,
+      lastReviewedAt: "2026-10-07",
     },
     {
       id: "abhoeren",
@@ -137,11 +124,10 @@ export const MEIN_ARZTBESUCH: Chapter = {
       childCopy: ["Die Ärztin hat ein Stethoskop.", "Damit kann sie hören, wie dein Herz und deine Atmung klingen.", "Das Stethoskop kann sich etwas kühl anfühlen."],
       why: { title: "Warum wird abgehört?", copy: "Herz und Lunge machen Geräusche. Mit dem Stethoskop kann man sie gut hören." },
       visual: { class: "AI_CONCEPTUAL", briefId: "04-abhoeren", motif: "listen", alt: "Eine Hand hält ein Stethoskop an den Pullover eines Kindes. Das Kind steht ruhig da und lächelt.", image: { slug: "abhoeren", widths: [960, 1448], width: 1448, height: 1086 } },
-      contentApproval: CONTENT_OK,
-      medicalApproval: MEDICAL_OK,
-      practiceApproval: PRACTICE_OK,
-      lastReviewedAt: "2026-10-12",
-      approvedBy: "Nadine Probst, Ärztin / Praxis",
+      contentApproval: DRAFT,
+      medicalApproval: DRAFT,
+      practiceApproval: DRAFT,
+      lastReviewedAt: "2026-10-07",
     },
     {
       id: "ohren-hals",
@@ -151,11 +137,10 @@ export const MEIN_ARZTBESUCH: Chapter = {
       childCopy: ["Mit einer kleinen Lampe kann die Ärztin in deine Ohren schauen.", "Manchmal schaut sie auch in deinen Hals.", "Dafür machst du den Mund weit auf."],
       why: { title: "Warum schaut man in die Ohren?", copy: "Mit dem Licht kann man sehen, wie es im Ohr aussieht." },
       visual: { class: "AI_CONCEPTUAL", briefId: "05-ohren-hals", motif: "look", alt: "Eine Hand hält eine kleine Untersuchungslampe neben das Ohr eines Kindes. Das Kind schaut ruhig nach vorn.", image: { slug: "ohren-hals", widths: [960, 1600, 2400], width: 2400, height: 1792 } },
-      contentApproval: CONTENT_OK,
-      medicalApproval: MEDICAL_OK,
-      practiceApproval: PRACTICE_OK,
-      lastReviewedAt: "2026-10-12",
-      approvedBy: "Nadine Probst, Ärztin / Praxis",
+      contentApproval: DRAFT,
+      medicalApproval: DRAFT,
+      practiceApproval: DRAFT,
+      lastReviewedAt: "2026-10-07",
     },
     {
       id: "fertig",
@@ -165,10 +150,9 @@ export const MEIN_ARZTBESUCH: Chapter = {
       childCopy: ["Geschafft.", "Jetzt weißt du ein bisschen besser, wie ein Arztbesuch aussehen kann.", "Jeder Besuch ist ein bisschen anders."],
       parentContext: "Wenn Ihr Kind Fragen hat, nehmen Sie sie mit in die Praxis – dort kann man sie in Ruhe beantworten.",
       visual: { class: "AI_CONCEPTUAL", briefId: "06-fertig", motif: "done", alt: "Ein Kind geht an der Hand einer erwachsenen Person zurück durch den hellen Durchgang.", image: { slug: "fertig", widths: [960, 1600, 2400], width: 2400, height: 1792 } },
-      contentApproval: CONTENT_OK,
-      practiceApproval: PRACTICE_OK,
-      lastReviewedAt: "2026-10-12",
-      approvedBy: "Nadine Probst, Ärztin / Praxis",
+      contentApproval: DRAFT,
+      practiceApproval: DRAFT,
+      lastReviewedAt: "2026-10-07",
     },
   ],
 };

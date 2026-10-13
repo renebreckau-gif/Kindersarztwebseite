@@ -19,13 +19,13 @@ Die Bilder sind **symbolische Illustrationen** für Kinder ab ca. 3 Jahren: KI-g
 **Medizinisch relevante Abweichung:** keine bekannt.
 
 ÄRZTLICHE PRÜFUNG:
-[x] FREIGEGEBEN
+[ ] FREIGEGEBEN
 [ ] FREIGEGEBEN MIT HINWEIS
 [ ] ÄNDERUNG NÖTIG
 
-Prüfende Ärztin: Nadine Probst, Ärztin
-Datum: 12.10.2026
-Hinweise: –
+Prüfende Ärztin:
+Datum:
+Hinweise:
 
 ---
 
@@ -42,13 +42,13 @@ Hinweise: –
 **Medizinisch relevante Abweichung:** Das Bruststück ist silbern (im Konzept kobaltblau mit Messingrand). Gestalterisch akzeptiert; medizinisch vermutlich ohne Bedeutung.
 
 ÄRZTLICHE PRÜFUNG:
-[x] FREIGEGEBEN
+[ ] FREIGEGEBEN
 [ ] FREIGEGEBEN MIT HINWEIS
 [ ] ÄNDERUNG NÖTIG
 
-Prüfende Ärztin: Nadine Probst, Ärztin
-Datum: 12.10.2026
-Hinweise: Abhören über dem Pullover: akzeptiert.
+Prüfende Ärztin:
+Datum:
+Hinweise:
 
 ---
 
@@ -66,10 +66,10 @@ Hinweise: Abhören über dem Pullover: akzeptiert.
 **Medizinisch relevante Abweichung:** An der Otoskop-Spitze ist kein Licht zu sehen, obwohl der Text von einer Lampe spricht.
 
 ÄRZTLICHE PRÜFUNG:
-[x] FREIGEGEBEN
+[ ] FREIGEGEBEN
 [ ] FREIGEGEBEN MIT HINWEIS
 [ ] ÄNDERUNG NÖTIG
 
-Prüfende Ärztin: Nadine Probst, Ärztin
-Datum: 12.10.2026
-Hinweise: –
+Prüfende Ärztin:
+Datum:
+Hinweise:

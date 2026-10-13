@@ -14,32 +14,26 @@ import { U10, publicDecisionStatement, practiceOffers } from "../examinations.ts
 const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 
-test("release: PULS sign-off stays true; Mein Arztbesuch is released (2026-10-12)", () => {
+test("release: PULS sign-off stays true; Mein Arztbesuch is NOT released (approvals open)", () => {
   assert.equal(RELEASE.pulsPracticeSignOff, true);
-  assert.equal(RELEASE.meinArztbesuchApproved, true);
+  assert.equal(RELEASE.meinArztbesuchApproved, false);
+  assert.equal(RELEASE.indexable, false);
 });
 
-test("released: public visitors get the full chapter", () => {
-  assert.equal(chapterPublishable(MEIN_ARZTBESUCH), true);
+test("A: final images integrated + approvals open + gate false → not publishable", () => {
+  assert.ok(MEIN_ARZTBESUCH.scenes.every((s) => s.visual.class === "AI_CONCEPTUAL" && s.visual.image));
+  assert.equal(chapterPublishable(MEIN_ARZTBESUCH), false);
+});
+
+test("B + E: normal route (no preview) → GATED meta only, no scenes", () => {
   const v = chapterView(MEIN_ARZTBESUCH, false);
-  assert.equal(v.mode, "PUBLIC");
-  assert.ok("scenes" in v.chapter);
-});
-
-test("gate still bites: a revoked approval gives GATED meta only — no scenes", () => {
-  const revoked = {
-    ...MEIN_ARZTBESUCH,
-    scenes: MEIN_ARZTBESUCH.scenes.map((s, i) => (i === 3 ? { ...s, medicalApproval: { status: "TO_BE_CONFIRMED" as const, sourceIds: [] } } : s)),
-  };
-  const v = chapterView(revoked, false);
   assert.equal(v.mode, "GATED");
   assert.equal("scenes" in v.chapter, false);
 });
 
-test("all six scenes in order (public, and preview behaves the same once released)", () => {
+test("C + D + F: preview → PREVIEW with all six scenes and their final AI_CONCEPTUAL images", () => {
   const v = chapterView(MEIN_ARZTBESUCH, true);
-  assert.equal(v.mode, "PUBLIC");
-  assert.ok("scenes" in v.chapter);
+  assert.equal(v.mode, "PREVIEW");
   const scenes = "scenes" in v.chapter ? v.chapter.scenes : [];
   assert.deepEqual(
     scenes.map((s) => s.id),
@@ -49,6 +43,35 @@ test("all six scenes in order (public, and preview behaves the same once release
     scenes.map((s) => s.order),
     [1, 2, 3, 4, 5, 6],
   );
+  for (const s of scenes) {
+    assert.equal(s.visual.class, "AI_CONCEPTUAL", s.id);
+    assert.ok(s.visual.image, s.id);
+  }
+});
+
+test("G: an AI_CONCEPTUAL image is not an approval — formal approvals stay open", () => {
+  for (const s of MEIN_ARZTBESUCH.scenes) {
+    assert.equal(s.practiceApproval.status, "TO_BE_CONFIRMED", s.id);
+    assert.equal(s.contentApproval.status, "TO_BE_CONFIRMED", s.id);
+    assert.equal(s.practiceApproval.verifiedBy, undefined, s.id);
+    assert.equal(s.contentApproval.lastVerified, undefined, s.id);
+    assert.equal(s.approvedBy, undefined, s.id);
+  }
+  const medical = MEIN_ARZTBESUCH.scenes.filter((s) => s.medicalApproval);
+  assert.deepEqual(
+    medical.map((s) => s.id),
+    ["messen-wiegen", "abhoeren", "ohren-hals"],
+  );
+  for (const s of medical) assert.equal(s.medicalApproval!.status, "TO_BE_CONFIRMED", s.id);
+});
+
+test("with all approvals verified the gate opens only through the release flag", () => {
+  const ok = { status: "VERIFIED_CURRENT" as const, sourceIds: [] };
+  const approved = {
+    ...MEIN_ARZTBESUCH,
+    scenes: MEIN_ARZTBESUCH.scenes.map((s) => ({ ...s, contentApproval: ok, practiceApproval: ok, medicalApproval: s.medicalApproval ? ok : undefined })),
+  };
+  assert.equal(chapterPublishable(approved), RELEASE.meinArztbesuchApproved);
 });
 
 test("gate: placeholder visuals alone block release, even with all approvals", () => {
@@ -136,18 +159,6 @@ test("U10: even a verified entry into force needs physician approval", () => {
 
 // ---------------------------------------------------------------- approvals + production images
 
-test("recorded approvals: practice + content for all six, medical for 03–05 only", () => {
-  for (const s of MEIN_ARZTBESUCH.scenes) {
-    assert.equal(s.practiceApproval.status, "VERIFIED_CURRENT", s.id);
-    assert.equal(s.contentApproval.status, "VERIFIED_CURRENT", s.id);
-    assert.equal(s.practiceApproval.verifiedBy, "Nadine Probst, Ärztin / Praxis");
-    assert.equal(s.practiceApproval.lastVerified, "2026-10-12");
-  }
-  const medical = MEIN_ARZTBESUCH.scenes.filter((s) => s.medicalApproval).map((s) => s.id);
-  assert.deepEqual(medical, ["messen-wiegen", "abhoeren", "ohren-hals"]);
-  for (const s of MEIN_ARZTBESUCH.scenes) if (s.medicalApproval) assert.equal(s.medicalApproval.status, "VERIFIED_CURRENT", s.id);
-});
-
 test("production images: AI_CONCEPTUAL, all exports present, never upscaled", () => {
   for (const s of MEIN_ARZTBESUCH.scenes) {
     const v = s.visual;
@@ -159,8 +170,4 @@ test("production images: AI_CONCEPTUAL, all exports present, never upscaled", ()
   }
   const abhoeren = MEIN_ARZTBESUCH.scenes.find((s) => s.id === "abhoeren")!;
   assert.deepEqual(abhoeren.visual.image!.widths, [960, 1448]);
-});
-
-test("with approvals and final images, only the release flag decides publication", () => {
-  assert.equal(chapterPublishable(MEIN_ARZTBESUCH), RELEASE.meinArztbesuchApproved);
 });

@@ -12,13 +12,13 @@ export const RELEASE = {
    */
   pulsPracticeSignOff: true,
   /**
-   * ENTDECKEN · Mein Arztbesuch (V1, S04). Released 2026-10-12: practice, content,
-   * physician (scenes 03–05) and AI-child publication approved by Nadine Probst
-   * (docs/reviews/discovery-approval-package.md); all six final images integrated.
-   * The chapter is public only while chapterPublishable() also holds — a revoked
-   * approval or a placeholder image closes it again automatically.
+   * ENTDECKEN · Mein Arztbesuch (V1, S04). Visual production is complete and the six final
+   * images are integrated (AI_CONCEPTUAL). Formal practice, content, medical (scenes 03–05)
+   * and AI-child publication approvals are still OPEN (docs/reviews/discovery-approval-
+   * package.md). The finished chapter is reviewable on the staging build via
+   * /entdecken/mein-arztbesuch?vorschau=freigabe; the normal route stays "In Vorbereitung".
    */
-  meinArztbesuchApproved: true,
+  meinArztbesuchApproved: false,
   /** Indexing stays off until launch blockers are resolved. Pages are built indexable. */
   indexable: false,
   /** Internal "Freigabe ausstehend" notes are visible in this pre-launch build. */

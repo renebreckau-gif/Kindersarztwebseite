@@ -5,9 +5,9 @@ Process: ART DIRECTION → APPROVED VISUAL REFERENCE → ASSET PRODUCTION → CO
 
 Precedent: [hero-reference/README.md](../hero-reference/README.md).
 
-> **Visual approval is separate from medical, practice and content approval.** Those approvals were granted on 2026-10-12 (Nadine Probst, without conditions) and are recorded in `src/content/discovery.ts` and [docs/reviews/discovery-approval-package.md](../../reviews/discovery-approval-package.md).
+> **Visual approval is not medical, practice or content approval.** These files are approved as artwork only. The editorial (content), practice, physician (scenes 03, 04, 05) and AI-child publication approvals are **still open**; the forms are in [docs/reviews/discovery-approval-package.md](../../reviews/discovery-approval-package.md). `RELEASE.meinArztbesuchApproved` stays `false`.
 
-> **Source references.** These files are the approved masters under `docs/`. Production exports derived from them (no other changes, no upscaling) live in `public/discovery/` (2026-10-12, after practice, content, physician and AI-child approvals). Publication is controlled by `RELEASE.meinArztbesuchApproved`.
+> **Source references.** These files are the approved masters under `docs/`. Production exports derived from them (no other changes, no upscaling) live in `public/discovery/` (2026-10-12). They are reviewable in the staging preview (`?vorschau=freigabe`); publication is controlled by `RELEASE.meinArztbesuchApproved` and the open approvals.
 
 ## Files
 
