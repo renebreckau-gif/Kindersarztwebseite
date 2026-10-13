@@ -13,8 +13,8 @@ import type { LocalDate } from "../domain/time.ts";
 import { RELEASE, SITE_STAGE, type SiteStage } from "./release.ts";
 
 /**
- * Formal approvals are still open (docs/reviews/discovery-approval-package.md). The chapter
- * is published by explicit decision (RELEASE.meinArztbesuchPublished, 2026-10-13); these records
+ * Formal approvals are still open (docs/reviews/discovery-approval-package.md). The chapter is
+ * visible on STAGING for review (SITE_STAGE); it is not released for production. These records
  * stay truthful. An AI_CONCEPTUAL image is visual production, not a practice, content or medical
  * approval.
  */
@@ -173,7 +173,9 @@ const ok = (v?: FactVerification) => v?.status === "VERIFIED_CURRENT";
 /**
  * Visibility on the website.
  * STAGING    — implemented chapters (final images present) are shown for review.
- * PRODUCTION — the explicit publication decision is required (RELEASE.meinArztbesuchPublished).
+ * PRODUCTION — explicit production publication decision (RELEASE.meinArztbesuchPublished)
+ *              AND complete formal approvals (approvalsComplete) AND final images.
+ * Staging visibility therefore never becomes a production approval by itself.
  * Never decided by approval records (see approvalsComplete) and never by faking them. Final
  * (non-placeholder) production images are a hard technical requirement in both stages.
  */
@@ -181,7 +183,7 @@ export function chapterPublishable(c: Chapter, stage: SiteStage = SITE_STAGE, re
   const implemented = c.scenes.length > 0 && c.scenes.every((s) => s.visual.class !== "PLACEHOLDER" && Boolean(s.visual.image));
   if (!implemented) return false;
   if (stage === "STAGING") return true;
-  return c.id === "mein-arztbesuch" && release.meinArztbesuchPublished;
+  return c.id === "mein-arztbesuch" && release.meinArztbesuchPublished && approvalsComplete(c);
 }
 
 /** Formal approval status (provenance) — independent of publication. */

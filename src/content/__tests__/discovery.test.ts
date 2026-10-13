@@ -14,14 +14,14 @@ import { U10, publicDecisionStatement, practiceOffers } from "../examinations.ts
 const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 
-test("release: PULS sign-off true; Mein Arztbesuch published by decision, formal approval still open", () => {
+test("release: PULS sign-off true; Mein Arztbesuch not released for production, formal approval open", () => {
   assert.equal(RELEASE.pulsPracticeSignOff, true);
-  assert.equal(RELEASE.meinArztbesuchPublished, true);
+  assert.equal(RELEASE.meinArztbesuchPublished, false, "staging visibility is no production decision");
   assert.equal(RELEASE.meinArztbesuchApproved, false, "publication is not an approval record");
   assert.equal(RELEASE.indexable, false);
 });
 
-test("A: published chapter with final images is publishable — without complete approvals", () => {
+test("A: on STAGING the implemented chapter with final images is visible — without complete approvals", () => {
   assert.ok(MEIN_ARZTBESUCH.scenes.every((s) => s.visual.class === "AI_CONCEPTUAL" && s.visual.image));
   assert.equal(chapterPublishable(MEIN_ARZTBESUCH), true);
   assert.equal(approvalsComplete(MEIN_ARZTBESUCH), false, "approvals stay truthfully open");
@@ -67,14 +67,15 @@ test("G: an AI_CONCEPTUAL image is not an approval — formal approvals stay ope
   for (const s of medical) assert.equal(s.medicalApproval!.status, "TO_BE_CONFIRMED", s.id);
 });
 
-test("approval records alone never publish; the publication decision does", () => {
+test("PRODUCTION: approval records alone never publish; decision AND approvals are both required", () => {
   const ok = { status: "VERIFIED_CURRENT" as const, sourceIds: [] };
   const approved = {
     ...MEIN_ARZTBESUCH,
     scenes: MEIN_ARZTBESUCH.scenes.map((s) => ({ ...s, contentApproval: ok, practiceApproval: ok, medicalApproval: s.medicalApproval ? ok : undefined })),
   };
   assert.equal(approvalsComplete(approved), true);
-  assert.equal(chapterPublishable(approved), RELEASE.meinArztbesuchPublished);
+  assert.equal(chapterPublishable(approved, "PRODUCTION", { meinArztbesuchPublished: false }), false);
+  assert.equal(chapterPublishable(approved, "PRODUCTION", { meinArztbesuchPublished: true }), true);
 });
 
 test("gate: placeholder visuals alone block release, even with all approvals", () => {

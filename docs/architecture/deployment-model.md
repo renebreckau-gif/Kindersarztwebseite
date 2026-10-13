@@ -28,8 +28,8 @@ This rule applies to all work in this repository.
 
 | Area | STAGING | PRODUCTION |
 |---|---|---|
-| ENTDECKEN chapters (`chapterPublishable`) | Visible when implemented (final, non-placeholder production images) | Visible only with the explicit publication decision (e.g. `RELEASE.meinArztbesuchPublished`) |
-| Mein Arztbesuch | Chapter 1 on `/entdecken`, all six scenes on `/entdecken/mein-arztbesuch` | Same, because `meinArztbesuchPublished = true` (decision of 2026-10-13) |
+| ENTDECKEN chapters (`chapterPublishable`) | Visible when implemented (final, non-placeholder production images), regardless of pending approvals | Visible only with the explicit production publication decision (`RELEASE.meinArztbesuchPublished`) **and** complete formal approvals (`approvalsComplete`) **and** final images |
+| Mein Arztbesuch | Currently visible for review: chapter 1 on `/entdecken`, all six scenes on `/entdecken/mein-arztbesuch` | Gated: requires the explicit production publication decision (`meinArztbesuchPublished`, currently `false`) plus complete formal practice, content and medical (03–05) approvals, checked in code by `approvalsComplete` (all still open). The AI-child publication decision is also open; it is documented but not yet modelled in code and must be part of the launch review. |
 | `/review` | Convenience overview (normal website, Praxis Cockpit, Mein Arztbesuch); unlocks nothing | 404 |
 | `/lab/praxis-cockpit` (mock login, prototype labelling) | Reachable for testing; never in the patient navigation | 404 (layout guard) |
 | `?vorschau=freigabe` | Still accepted for old links and for the PRAXIS PULS time preview; not needed for any content | Same |
@@ -47,3 +47,11 @@ This rule applies to all work in this repository.
 - analytics and privacy decisions
 - production authentication
 - final medical and practice review
+
+## Correction (2026-10-13)
+
+An earlier version of this page stated that Mein Arztbesuch would also be visible in PRODUCTION because of `meinArztbesuchPublished = true`. That was wrong: the user decision was to show implemented work on STAGING, not to pre-approve it for the live website.
+
+- `meinArztbesuchPublished` is now `false`.
+- PRODUCTION requires the publication decision **and** complete formal approvals.
+- STAGING is unchanged.

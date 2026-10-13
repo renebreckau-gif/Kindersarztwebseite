@@ -23,7 +23,7 @@ Checkpoint: Phase 08.8 · updated 2026-10-12 · References and provenance: [docs
 | Production integrated | **yes** (`public/discovery/`, `visual.class` = `AI_CONCEPTUAL`) |
 | Available in staging preview | **yes**: `/entdecken/mein-arztbesuch?vorschau=freigabe` (staging / pre-launch build, not the official practice website) |
 | Formally approved (practice, content, medical 03–05, AI child) | **no**, all open |
-| Publicly released | **yes, since 2026-10-13** by explicit decision (`RELEASE.meinArztbesuchPublished = true`); formal approvals still open (`RELEASE.meinArztbesuchApproved = false`); the whole site stays `noindex` (`RELEASE.indexable = false`) |
+| Released for production | **no**: visible on STAGING only; production requires `RELEASE.meinArztbesuchPublished` (currently `false`) **and** complete formal approvals (still open, `RELEASE.meinArztbesuchApproved = false`); the whole site stays `noindex` (`RELEASE.indexable = false`) |
 
 **Correction (2026-10-13):** Approval entries for practice, content, medical review and the AI-child decision (named reviewer, dated 2026-10-12) had been recorded on 2026-10-12 and the chapter was briefly released (commit `4a35e08`). That provenance was not confirmed approval evidence. It was removed and the release gate was reset. The image integration from that commit remains.
 
@@ -76,3 +76,12 @@ The complete chapter (six scenes, final images in `public/discovery/`, all track
 ## Deployment model (2026-10-13)
 
 The current Vercel deployment is **STAGING** (`SITE_STAGE` in `src/content/release.ts`, [deployment-model.md](../architecture/deployment-model.md)). Mein Arztbesuch is visible there on the normal routes. No `?vorschau=freigabe` and no environment variable are needed; `REVIEW_HUB_ENABLED` was removed. In a future PRODUCTION stage the chapter stays visible because of the explicit publication decision (`RELEASE.meinArztbesuchPublished = true`). Approval records are unchanged and open.
+
+## Correction: staging visibility ≠ production release (2026-10-13)
+
+The "Publication" section above is superseded. The user decision was to show implemented work on the current Vercel **STAGING** site, not to pre-approve it for the future live website. Current state:
+
+- `RELEASE.meinArztbesuchPublished = false` (production decision not taken).
+- **STAGING:** Mein Arztbesuch is visible (chapter 1 on `/entdecken`, six scenes on `/entdecken/mein-arztbesuch`). Nothing changed for reviewers.
+- **PRODUCTION:** `chapterPublishable()` requires the production publication decision, complete formal approvals (`approvalsComplete`) and final images.
+- Approval records are unchanged (`TO_BE_CONFIRMED`, no names, no dates).

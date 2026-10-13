@@ -6,7 +6,7 @@ Stand: 2026-10-12 · Bildstand: Commit `0f46783` · Bildquellen: [docs/design/di
 
 „Mein Arztbesuch“ ist das erste Kapitel im Kinderbereich ENTDECKEN. Sechs kurze Szenen zeigen einem Kind (ca. 3–7 Jahre), wie ein Arztbesuch ablaufen **kann**: von der Ankunft bis zum Nachhausegehen. Eltern lesen die kurzen Sätze vor; die Bilder erzählen mit. Einleitung für Eltern auf der Seite: „So kann ein Arztbesuch aussehen. Nicht jeder Besuch läuft genau so ab – manches entfällt, manches kommt dazu.“
 
-**Stand (13.10.2026):** **Mein Arztbesuch ist als normaler Inhalt der Website veröffentlicht** (bewusste Projektentscheidung, `RELEASE.meinArztbesuchPublished = true`). Die Bilder sind fertig, visuell freigegeben und eingebaut. **Die formalen Freigaben auf diesem Blatt sind weiterhin offen** – es wurden keine Namen oder Daten eingetragen, und die Veröffentlichung ist keine Freigabe. Die Texte bleiben nach der Veröffentlichung änderbar. Die Website als Ganzes ist weiterhin nicht für Suchmaschinen freigegeben.
+**Stand (13.10.2026):** **Mein Arztbesuch ist auf der Staging-Website (Vercel) normal sichtbar** (`SITE_STAGE = "STAGING"`). **Für die spätere Live-Website ist das Kapitel nicht freigegeben:** Dafür sind eine ausdrückliche Produktions-Entscheidung (`RELEASE.meinArztbesuchPublished`, derzeit `false`) **und** die formalen Freigaben auf diesem Blatt nötig. Die Bilder sind fertig, visuell freigegeben und eingebaut. **Die formalen Freigaben auf diesem Blatt sind weiterhin offen** – es wurden keine Namen oder Daten eingetragen, und die Veröffentlichung ist keine Freigabe. Die Texte bleiben nach der Veröffentlichung änderbar. Die Website als Ganzes ist weiterhin nicht für Suchmaschinen freigegeben.
 
 Bevor das Kapitel erscheinen darf, braucht es vier **getrennte** Entscheidungen:
 
@@ -111,4 +111,4 @@ Hinweis: Die **echten Gemälde** im Startseiten-Hero sind ein **anderes Thema** 
 
 ## Was nach den Freigaben passiert
 
-Die Bilder sind für die Website aufbereitet (`public/discovery/`, ohne Hochskalierung) und eingebaut, das Kapitel ist veröffentlicht. Sobald Freigaben mit Namen und Datum vorliegen, werden sie in `src/content/discovery.ts` eingetragen und `RELEASE.meinArztbesuchApproved` auf `true` gesetzt. Bis dahin bleibt dieser Freigabestand ehrlich auf „offen“.
+Die Bilder sind für die Website aufbereitet (`public/discovery/`, ohne Hochskalierung) und eingebaut; auf Staging ist das Kapitel sichtbar. Sobald Freigaben mit Namen und Datum vorliegen, werden sie in `src/content/discovery.ts` eingetragen und `RELEASE.meinArztbesuchApproved` auf `true` gesetzt. Bis dahin bleibt dieser Freigabestand ehrlich auf „offen“.

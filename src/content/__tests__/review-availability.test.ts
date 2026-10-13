@@ -82,11 +82,20 @@ describe("Mein Arztbesuch on staging", () => {
     assert.equal(RELEASE.meinArztbesuchApproved, false);
   });
 
-  test("11: PRODUCTION mode still respects the release gates", () => {
-    assert.equal(chapterPublishable(MEIN_ARZTBESUCH, "STAGING", { meinArztbesuchPublished: false }), true, "staging shows implemented work");
-    assert.equal(chapterPublishable(MEIN_ARZTBESUCH, "PRODUCTION", { meinArztbesuchPublished: false }), false, "production needs the decision");
-    assert.equal(chapterPublishable(MEIN_ARZTBESUCH, "PRODUCTION", { meinArztbesuchPublished: true }), true);
-    assert.equal(chapterView(MEIN_ARZTBESUCH, false, "PRODUCTION").mode, RELEASE.meinArztbesuchPublished ? "PUBLIC" : "GATED");
+  test("11: PRODUCTION mode respects the release gates; STAGING visibility is not a production approval", () => {
+    const ok = { status: "VERIFIED_CURRENT" as const, sourceIds: [] };
+    const fullyApproved = { ...MEIN_ARZTBESUCH, scenes: MEIN_ARZTBESUCH.scenes.map((s) => ({ ...s, contentApproval: ok, practiceApproval: ok, medicalApproval: s.medicalApproval ? ok : undefined })) };
+    // 1: STAGING + published=false → visible
+    assert.equal(chapterPublishable(MEIN_ARZTBESUCH, "STAGING", { meinArztbesuchPublished: false }), true);
+    assert.equal(chapterView(MEIN_ARZTBESUCH, false, "STAGING").mode, "PUBLIC");
+    // 2: PRODUCTION + published=false → gated
+    assert.equal(chapterPublishable(fullyApproved, "PRODUCTION", { meinArztbesuchPublished: false }), false);
+    assert.equal(chapterView(MEIN_ARZTBESUCH, false, "PRODUCTION").mode, "GATED", "the real current state is gated for production");
+    // 3: PRODUCTION + published=true + incomplete approvals (the real records) → gated
+    assert.equal(chapterPublishable(MEIN_ARZTBESUCH, "PRODUCTION", { meinArztbesuchPublished: true }), false);
+    // 4: PRODUCTION + published=true + approvals complete + final assets → visible
+    assert.equal(chapterPublishable(fullyApproved, "PRODUCTION", { meinArztbesuchPublished: true }), true);
+    assert.equal(RELEASE.meinArztbesuchPublished, false);
     const placeholder = { ...MEIN_ARZTBESUCH, scenes: MEIN_ARZTBESUCH.scenes.map((s, i) => (i === 0 ? { ...s, visual: { ...s.visual, class: "PLACEHOLDER" as const } } : s)) };
     assert.equal(chapterPublishable(placeholder, "STAGING"), false, "placeholders never count as implemented");
     assert.equal(stageAllowsReview("PRODUCTION"), false);

@@ -30,12 +30,12 @@ export const RELEASE = {
    */
   pulsPracticeSignOff: true,
   /**
-   * ENTDECKEN · Mein Arztbesuch — PUBLICATION DECISION (visibility).
-   * Explicitly enabled on 2026-10-13 by project decision: the chapter is shown on the normal
-   * website in its current form (V1 text; wording may still be refined). This is a publication
-   * decision, NOT a verification record: it does not claim that any approval was given.
+   * ENTDECKEN · Mein Arztbesuch — PRODUCTION publication decision (future live website).
+   * NOT set: showing the chapter on the current STAGING deployment (SITE_STAGE) is not a
+   * pre-approval for production. In PRODUCTION the chapter additionally needs complete formal
+   * approvals (approvalsComplete). On STAGING this flag makes no visible difference.
    */
-  meinArztbesuchPublished: true,
+  meinArztbesuchPublished: false,
   /**
    * ENTDECKEN · Mein Arztbesuch — FORMAL APPROVAL status (provenance, kept truthful).
    * Practice, content, medical (scenes 03–05) and AI-child publication approvals are still
