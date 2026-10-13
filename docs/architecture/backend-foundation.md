@@ -1,6 +1,6 @@
 # Praxis Cockpit: Backend Foundation (Phase 09.2)
 
-> **Status (2026-10-13):** this is the technical foundation only. The public website still reads **static data** (`DATA_SOURCE = "STATIC"`, `src/data/source.ts`). No database is connected, and no Payload route (admin, REST, GraphQL) is mounted. No real accounts exist, and the cockpit at `/lab/praxis-cockpit` still uses its mock login. `SITE_STAGE = "STAGING"` and `RELEASE.indexable = false` are unchanged.
+> **Status (2026-10-13):** this is the technical foundation only (Phase 09.2, `8edc9cf`; Phase 09.3 blocked, §17). The public website still reads **static data**: `resolvePuls` consumes the static snapshot directly (`staticPulsData()`), not through the repository (§4). No database is connected, and no Payload route (admin, REST, GraphQL) is mounted. No real accounts exist, and the cockpit at `/lab/praxis-cockpit` still uses its mock login. `SITE_STAGE = "STAGING"` and `RELEASE.indexable = false` are unchanged.
 >
 > Related: [praxis-cockpit.md](praxis-cockpit.md) (product architecture, roles, workflows), [deployment-model.md](deployment-model.md) (STAGING vs. PRODUCTION).
 
@@ -66,7 +66,7 @@ payload.config.ts      only place with Payload runtime imports (not imported by 
 |---|---|
 | `src/data/contracts.ts` | `PracticeRepository` (`getPulsData`, `getAnnouncements`), `AuditRepository`, `StaffDirectory`, `StaffAccount`, `DataSource` |
 | `src/data/static-repository.ts` | `StaticPracticeRepository`: wraps `src/content/schedule.ts` and `notices.ts`. **Authoritative in 09.2.** |
-| `src/data/source.ts` | `DATA_SOURCE = "STATIC"` (in code, independent of `SITE_STAGE`, never derived from Vercel), `getPracticeRepository()`, `FAIL_SAFE_PULS_DATA`, `readPulsDataSafely()` |
+| `src/data/source.ts` | `DATA_SOURCE = "STATIC"`: a **migration-target selector / reserved switch** (in code, independent of `SITE_STAGE`, never derived from Vercel). It is not yet active: `getPracticeRepository()` always returns the static repository, because Payload is not authoritative. Also `FAIL_SAFE_PULS_DATA` and `readPulsDataSafely()`. |
 | `src/data/payload-mapping.ts` | Pure, lossless mapping between documents and domain types, both ways (null ↔ absent, `recordId` ↔ `id`, `openEnded` ↔ `"OPEN_ENDED"`) |
 | `src/backend/payload-repository.ts` | `PayloadPracticeRepository`: reads through a minimal `PayloadReader` interface that Payload's Local API satisfies. **Not authoritative; not wired to the site.** |
 
@@ -75,7 +75,11 @@ payload.config.ts      only place with Payload runtime imports (not imported by 
 - `getAnnouncements()` returns the announcements.
 - Audit entries and staff accounts have their own contracts (`AuditRepository`, `StaffDirectory`). Their Payload implementations follow in 09.3, together with the routes.
 
-**Public site:** `resolvePuls(params, now, source = staticPulsData())` reads the repository snapshot. Behaviour is unchanged; this is covered by a test over 21 days at 90-minute steps.
+**Public site (current reality):**
+- Repository contracts exist, and `StaticPracticeRepository` exists and is parity-tested.
+- The public Praxis Puls does **not** load through `PracticeRepository.getPulsData()`. `resolvePuls(params, now, source = staticPulsData())` consumes the static snapshot directly and synchronously, through 09.2 and 09.3.
+- Repository-based (async) public loading arrives with the cutover (§14).
+- Behaviour is unchanged; a test covers 21 days at 90-minute steps.
 
 ## 5. Dependency direction
 
@@ -216,7 +220,7 @@ Server-side rules live in `src/backend/access.ts` (pure functions, tested). Hidi
 ## 13. Fail-safe
 
 - `readPulsDataSafely(repo)`: any read error returns `FAIL_SAFE_PULS_DATA` (no schedule). The engine then resolves to **UNKNOWN** ("Aktuelle Sprechzeiten" plus phone), **never a guessed OPEN**. Tested.
-- No silent fallback to stale static data after cutover. Static data could contradict a published closure, so a contradiction is worse than UNKNOWN. The static source stays available only as the **explicit rollback** of `DATA_SOURCE` (§14).
+- No silent fallback to stale static data after cutover. Static data could contradict a published closure, so a contradiction is worse than UNKNOWN. After cutover, the static source stays available only as an **explicit, reviewed rollback** (§14).
 - More mapping fail-safes:
   - missing weekly schedule → UNKNOWN
   - unverified holiday policy → `REQUIRE_EXPLICIT_ENTRY`
@@ -232,8 +236,8 @@ Server-side rules live in `src/backend/access.ts` (pure functions, tested). Hidi
    - DB integration tests against an isolated database
 3. **Seed:** `docsFromPulsData(PULS_DATA)` creates the documents from the current static content, one-off, reviewed, with provenance carried over **as documented** (not regenerated).
 4. **Parity gate:** for the seeded database, `PayloadPracticeRepository.getPulsData()` must deep-equal `staticPulsData()`, and `getPracticeStatus` must be identical over a long sampled window (§15).
-5. **Cutover (09.4 or later, separate reviewed change):** `getPracticeRepository()` returns the Payload repository when `DATA_SOURCE = "PAYLOAD"`. Pages switch to the async read through `readPulsDataSafely`.
-6. **Rollback:** set `DATA_SOURCE` back to `"STATIC"`. This is one line and is tested before go-live.
+5. **Cutover (later phase, separate reviewed change):** `getPracticeRepository()` starts honouring `DATA_SOURCE` and returns the Payload repository for `"PAYLOAD"`. Pages switch to the async read through `readPulsDataSafely`.
+6. **Rollback:** only once step 5 has wired the selector does setting `DATA_SOURCE` back to `"STATIC"` become a real rollback. That path is tested before go-live. **Today `DATA_SOURCE` switches nothing**; it is a reserved selector.
 
 `SITE_STAGE` and `DATA_SOURCE` stay independent: staging can run on either source, and production does not imply the database.
 
@@ -269,3 +273,30 @@ These need an owner and a decision before any real data or account exists. This 
 | Monitoring | Uptime, error tracking, revalidation failures, `/api/puls-version` |
 | MFA | TOTP or passkeys for ADMIN (library or plugin choice) |
 | Admin route path | Final path for the ADMIN-only Payload admin (proposal `/verwaltung-intern`) |
+
+## 17. Phase 09.3 readiness gate (2026-10-13): blocked
+
+Phase 09.3 (Payload runtime, local database, real auth) stopped at the PostgreSQL readiness gate, **before** any database was created. Only safe discovery was done:
+
+| Check | Result |
+|---|---|
+| Service | `postgresql-x64-16` running (automatic start), listening on port 5432 |
+| Client | `psql` 16.2 at `C:\Program Files\PostgreSQL\16\bin` (not on `PATH`) |
+| Authentication | `pg_hba.conf`: `scram-sha-256` for all local and loopback connections (password required) |
+| Credentials | No `PG*` environment variables, no `%APPDATA%\postgresql\pgpass.conf`, no `.env` / `.env.local` in the project |
+| Connection test | `psql -w` (never prompts) as `postgres` and as the Windows user: `no password supplied` |
+| Docker | Not installed |
+
+What was deliberately **not** done: guessing passwords, changing `pg_hba.conf` to `trust`, resetting the installation, reusing credentials from other projects, installing Docker, or signing up for a cloud database.
+
+**Needed to continue (one of):**
+
+1. The password of a local PostgreSQL role that may create databases and roles (for example `postgres`). Enter it yourself in a local terminal, never in chat or in a tracked file. With it, a one-time setup creates:
+   - the dedicated role `kinderarzt_app` (no superuser)
+   - the database `kinderarzt_staging_dev`, owned by that role
+   - `DATABASE_URI` for the role in the git-ignored `.env.local`
+2. Or a ready-made `DATABASE_URI` for an isolated, empty development database, placed in `.env.local` by you.
+
+Once a usable connection exists, 09.3 continues at step 2 (re-verify the Payload runtime documentation) and step 5 (initial migration).
+
+Preparatory hardening already in place: `payload.config.ts` now refuses to initialise when `PAYLOAD_SECRET` **or** `DATABASE_URI` is missing or empty. That check runs only when Payload initialises, never in the public build.

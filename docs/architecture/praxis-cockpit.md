@@ -1,8 +1,8 @@
 # Praxis Cockpit: Staff Portal Architecture
 
-Phase: 09.0 (architecture and product design only; nothing is implemented)
-Date: 2026-10-13
-Baseline: `e589478`
+Current status: Phase 09.2 done (backend foundation, commit `8edc9cf`); Phase 09.3 (Payload runtime, database, real auth) **blocked**: no local PostgreSQL credentials (see [backend-foundation.md](backend-foundation.md) §17). Details in the status table below.
+Last updated: 2026-10-13
+Historical baseline of the Phase 09.0 architecture decision (§0–§14): `e589478`
 Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms-comparison.md) · [content-model.md](content-model.md) · [content-governance.md](content-governance.md) · [practice-pulse-logic.md](practice-pulse-logic.md) · [privacy-model.md](privacy-model.md) · [phase-04-decisions.md](phase-04-decisions.md)
 
 > **GLOBAL PROJECT RULE — deployment model:** the current Vercel deployment is the project's **STAGING** environment, not the live practice website. Implemented functionality is normally visible there for review; formal publication gates are kept for the future production launch and do not hide staging content. Single switch: `SITE_STAGE` in `src/content/release.ts`. See [deployment-model.md](deployment-model.md).
@@ -16,10 +16,10 @@ Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms
 | **Payload** | `payload@3.90.2` + `@payloadcms/db-postgres@3.90.2` installed (compatibility verified, no force flags). Local API only: no admin UI, REST or GraphQL route mounted. |
 | **Database / persistence** | None connected. PostgreSQL adapter configured via `DATABASE_URI` (placeholder in `.env.example`); provider open. The prototype state lives in memory; a reload resets it. |
 | **Real authentication** | Configured in Payload (`staff` auth: lockout, secure cookies, disabled accounts), but not exposed and no accounts exist. The prototype keeps its mock login: test accounts, and `sessionStorage` keeps only the mock role. |
-| **Public website** | Uses the same Praxis Puls engine and reads **static data** through `StaticPracticeRepository` (`DATA_SOURCE = "STATIC"`). Output unchanged (tested). Release gates are unchanged. |
+| **Public website** | Uses the same Praxis Puls engine. `resolvePuls` still consumes the **static snapshot directly** (`staticPulsData()`, synchronous). It does not load through `PracticeRepository.getPulsData()`; repository-based public loading arrives with the cutover. `DATA_SOURCE = "STATIC"` is a reserved migration-target selector, not yet an active switch. Output unchanged (tested). Release gates are unchanged. |
 | **Review hub** | `/review`: a convenience overview with links to the website, the cockpit prototype and Mein Arztbesuch. Available automatically while `SITE_STAGE = "STAGING"`; 404 in PRODUCTION. It unlocks nothing. |
 | **Mein Arztbesuch** | Visible on STAGING for review (`SITE_STAGE`). Not released for production: `meinArztbesuchPublished = false`, formal approvals open (`meinArztbesuchApproved = false`, records truthful); site stays `noindex` (`indexable = false`). |
-| **Next phase** | 09.3: local database + migrations, ADMIN-only Payload admin route, first account by script, MFA decision, DB integration tests. Not started. |
+| **Next phase** | 09.3 (local database + migrations, Payload runtime with ADMIN-only admin at `/intern/admin`, bootstrap script for the first ADMIN, `/intern` auth shell, DB integration tests). **Blocked** before database creation: no PostgreSQL credentials. |
 
 ### Phase history
 
@@ -31,7 +31,7 @@ Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms
 | 09.1.2 | Mock login, vacation and replacement end to end, website view for parents | `35dc9d2` |
 | 09.1.3 | Live Website-Vorschau (edit left / preview right), automatic expiry, history retention, lab test clock | `ecdd432` |
 | 09.1.4 | Editing existing changes (edit vs. supersede vs. conflict), prototype lock, documentation cleanup; staging review hub and Discovery review availability | `b5466f5` + review hub commit |
-| 09.2 | Backend foundation: repository layer (static authoritative), domain operations extracted, Payload + PostgreSQL adapter, collections, access/provenance/audit, parity tests | this phase's commit |
+| 09.2 | Backend foundation: repository layer (static authoritative), domain operations extracted, Payload + PostgreSQL adapter, collections, access/provenance/audit, parity tests | `8edc9cf` |
 
 **How to read this document:** §0–§14 are the Phase 09.0 architecture decision and remain valid unless a later phase note says otherwise. The phase notes at the end record what the prototype changed or proved. Statements that became outdated are marked inline ("since 09.1.x").
 

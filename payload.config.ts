@@ -13,14 +13,19 @@ import { assertNoPatientFields } from "./src/backend/privacy.ts";
 // Structural guard: the practice backend never stores patient data.
 assertNoPatientFields(COLLECTIONS as unknown as Parameters<typeof assertNoPatientFields>[0]);
 
-// Fail loudly instead of signing sessions with an empty secret.
-const secret = process.env.PAYLOAD_SECRET;
-if (!secret) throw new Error("PAYLOAD_SECRET is not set (see .env.example).");
+// Evaluated only when Payload itself is initialised (CLI, Local API scripts, future Payload
+// routes) — the public site never imports this file. Fail loudly instead of signing sessions
+// with an empty secret or silently connecting with an empty connection string.
+const requireEnv = (name: "PAYLOAD_SECRET" | "DATABASE_URI"): string => {
+  const value = process.env[name]?.trim();
+  if (!value) throw new Error(`${name} is not set (see .env.example).`);
+  return value;
+};
 
 export default buildConfig({
-  secret,
+  secret: requireEnv("PAYLOAD_SECRET"),
   db: postgresAdapter({
-    pool: { connectionString: process.env.DATABASE_URI ?? "" },
+    pool: { connectionString: requireEnv("DATABASE_URI") },
     // Schema push only for a local development database; every shared database uses migrations.
     push: false,
     migrationDir: "./src/backend/migrations",

@@ -1,6 +1,7 @@
-// Active data source — an implementation migration control, defined in code.
+// Data source — a migration-target selector, RESERVED: it does not switch anything yet.
+// getPracticeRepository() always returns the static repository because Payload is not
+// authoritative; the selector is wired only at cutover (backend-foundation.md §14–15).
 // Deliberately separate from SITE_STAGE (deployment stage) and never derived from Vercel.
-// "PAYLOAD" is switched on only in Phase 09.4 after the parity tests pass (backend-foundation.md §14–15).
 
 import type { PulsData } from "../domain/practice-status.ts";
 import type { DataSource, PracticeRepository } from "./contracts.ts";
