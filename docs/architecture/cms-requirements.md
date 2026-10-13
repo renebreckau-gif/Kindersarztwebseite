@@ -20,6 +20,8 @@ Staff edit **content**, never layout, design, animation or component structure.
 
 ## 2. Admin navigation (German)
 
+> **Update Phase 09.0 (2026-10-13):** Daily staff work moves to the task-based **Praxis Cockpit** at `/intern` (home, Schnellaktionen, Prüfen; see [praxis-cockpit.md](praxis-cockpit.md) §6). The tree below remains the full content inventory. The Payload admin is used only by ADMIN for structural tasks.
+
 ```
 Heute
   Praxisstatus (Vorschau)          ← read-only PULS preview for any date/time
@@ -72,6 +74,8 @@ Rechtliches                        ← legal role
 Defined in [content-governance.md](content-governance.md) §6 (e.g. "Diese Meldung endet automatisch am 18.10.2026.", "Diese Notfallinformation wurde seit 180 Tagen nicht geprüft.", "Diese Vertretungspraxis muss erneut bestätigt werden.", "Akutsprechstunden können nicht veröffentlicht werden, weil die Zeiten noch nicht bestätigt sind.").
 
 ## 5. Roles and permissions
+
+> **Update Phase 09.0 (2026-10-13):** For V1 the five roles below are reduced to three: **Praxisteam (STAFF)**, **Ärztin/Arzt (DOCTOR)** and **Verwaltung (ADMIN)**. The mapping is Redaktion → STAFF; Ärztliche Freigabe and Notfallpflege → DOCTOR; Administration → ADMIN. Legal texts stay outside the cockpit in V1. Details: [praxis-cockpit.md](praxis-cockpit.md) §5. The table is kept as the Phase 04 record.
 
 | Role (German) | Can edit | Cannot |
 |---|---|---|

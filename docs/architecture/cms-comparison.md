@@ -65,3 +65,18 @@ Conditions for this recommendation (to confirm before Phase 05):
 **Fallback:** Sanity Growth if no one can own operations — accepting per-seat cost, vendor-cloud data (DPA), and client-side-centric validation (mitigated by re-validating with `src/domain/` at render time, which the site does anyway).
 
 Neither CMS is integrated in this phase.
+
+## 4. Update Phase 09.0 (2026-10-13)
+
+The Praxis Cockpit evaluation ([praxis-cockpit.md](praxis-cockpit.md) §3) compared three options:
+
+- **A:** Payload backend + custom cockpit.
+- **B:** custom Next.js + PostgreSQL + auth.
+- **C:** Sanity Growth.
+
+**The recommendation stays Payload**, refined in one point. Staff use a purpose-built, task-based cockpit (`/intern`) on top of the Payload Local API, not the generic Payload admin UI, which is reserved for ADMIN.
+
+- Option B was rejected because we would own authentication security ourselves.
+- Sanity Growth remains the fallback if no one can own operations.
+
+The conditions above (maintenance agreement, EU providers with DPA, monitoring Payload's direction) are still open.
