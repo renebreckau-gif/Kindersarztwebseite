@@ -1,4 +1,4 @@
-# Praxis Cockpit – Prototyp-Test (Phase 09.1)
+# Praxis Cockpit – Prototyp-Test (Phase 09.1, Stand 09.1.4)
 
 **Prototyp:** `/lab/praxis-cockpit` (nur Labor, nicht verlinkt, „PROTOTYP · keine echten Daten“)
 **Stand:** 13.10.2026. Alle Namen, Praxen und Zeiten sind erfunden. Testzeit im Prototyp: Dienstag, 13. Oktober, 09:20 Uhr.
@@ -7,6 +7,43 @@
 Dieses Blatt ist leer. Bitte erst während eines echten Tests ausfüllen. Keine Namen von Testpersonen eintragen, nur Rolle und Nummer.
 
 ---
+
+## Testaufbau
+
+Die Testperson bekommt **nur**:
+
+- die Adresse des Prototyps: Vercel-URL des Prototyps, Pfad `/lab/praxis-cockpit/anmelden` (wird vor dem Test hier eingetragen: ……)
+- die Testzugangsdaten: `team@beispiel.test` / `test1234`
+- die Aufgaben A–L, einzeln vorgelesen
+
+Navigation und Bedienung werden **nicht** erklärt. Während einer Aufgabe wird nicht geholfen und nicht gelenkt.
+
+Die beobachtende Person notiert je Aufgabe:
+
+- Zeit bis zum Abschluss
+- falsche Klicks
+- Zurückgehen
+- Fragen der Testperson
+- Kommentare beim lauten Denken
+- ob Hilfe nötig war (und welche)
+
+Vorbereitung je Aufgabe (beobachtende Person, unten auf der Seite „Testmodus (nur Labor)“):
+
+- vor A–H: „Prototyp zurücksetzen“
+- vor I: Szenario A
+- vor J und K: Szenario B
+- vor L: Szenario D
+
+### Bewertung der Befunde
+
+| Stufe | Bedeutung |
+|---|---|
+| **Kritisch** | Die Testperson kann eine betriebliche Aufgabe ohne Erklärung nicht abschließen. |
+| **Erheblich** | Die Aufgabe wird abgeschlossen, aber die Wirkung auf der Website wird falsch verstanden. |
+| **Gering** | Zögern bei Beschriftung oder Navigation. |
+| **Kosmetisch** | Reine Geschmacksfrage (z. B. Farbe oder Größe eines Knopfes). |
+
+Es werden keine perfekten Ergebnisse verlangt. Kritische und erhebliche Befunde werden vor Phase 09.2 bewertet; geringe und kosmetische Befunde werden gesammelt.
 
 ## Was getestet wird
 
@@ -32,6 +69,10 @@ Ablauf je Testperson (ca. 20 Minuten):
 | **F** | „Trag Urlaub von Montag, 19., bis Freitag, 23. Oktober ein und wähle Praxis Beispiel A als Vertretung.“ | ≤ 3 Minuten |
 | **G** | „Zeig mir, was Eltern während des Urlaubs auf der Website sehen.“ | ohne Hilfe |
 | **H** | „Teile die Vertretung auf: Praxis Beispiel A bis Mittwoch, Praxis Beispiel B Donnerstag und Freitag.“ | ≤ 3 Minuten |
+| **I** | „Für heute ist bereits eine Schließzeit bis 15 Uhr eingetragen. Ändere sie so, dass die Nachmittagssprechstunde entfällt.“ (vorher Szenario A) | ≤ 1 Minute |
+| **J** | „Der Urlaub geht doch einen Tag länger. Passe ihn an.“ (vorher Szenario B) | ≤ 2 Minuten |
+| **K** | „Prüfe, ob für den zusätzlichen Urlaubstag eine Vertretung hinterlegt ist.“ (direkt nach J) | ohne Hilfe |
+| **L** | „Öffne einen echten Widerspruch und erkläre, warum die Änderung nicht veröffentlicht werden kann.“ (vorher Szenario D; Aufgabe: Urlaub 19.–23. Oktober eintragen) | ohne Hilfe |
 
 Hinweis zu F und H: Im Auftrag stand „20.–24. Oktober“ als Montag bis Freitag. 2026 ist der 20. Oktober aber ein Dienstag. Getestet wird deshalb die Woche Montag, 19., bis Freitag, 23. Oktober 2026.
 
@@ -47,6 +88,10 @@ Hinweis zu F und H: Im Auftrag stand „20.–24. Oktober“ als Montag bis Frei
 - **G:** Die Person öffnet „Ansicht auf der Website öffnen“ (oder „Ansehen“ → „Website-Vorschau“), tippt auf „Vertretung anzeigen“ und kann sagen, welche Praxis zuständig ist und wann die Praxis wieder öffnet.
 - **H:** „Zeitraum aufteilen“: 19.–21. Praxis Beispiel A, 22.–23. Praxis Beispiel B. In der Elternansicht ist sofort klar, wer wann zuständig ist.
 - Beobachten: Versucht die Person, Praxis Beispiel C zu wählen, und versteht sie die Erklärung?
+- **I:** Die Person findet „Bestehende Änderung anpassen“ (über „Heute früher schließen“ oder den Eintrag unter „Nächste Termine“). Sie wählt eine Uhrzeit in der Mittagspause oder 12:00 Uhr und veröffentlicht mit „Nachmittagssprechzeit heute entfallen lassen“. Es entsteht kein zweiter Eintrag.
+- **J:** Die Person bearbeitet den bestehenden Urlaub („Ändern“ auf der Startseite, „Bestehenden Urlaub bearbeiten“ oder Detailseite), statt einen zweiten anzulegen. Sie setzt das Ende auf den nächsten Praxistag und veröffentlicht mit „Urlaub aktualisieren: …“.
+- **K:** Die Person sieht den Hinweis „Für den verlängerten Zeitraum ist noch keine Vertretung hinterlegt.“ und kann ihn erklären. Sie verlängert die Vertretung bewusst oder lässt die Lücke bewusst offen.
+- **L:** Die Person sieht „Widersprüchliche Angaben“ in der Website-Vorschau. Sie erklärt, dass Urlaub und Sondersprechstunde am 21. Oktober gleichzeitig gelten würden, und dass nichts veröffentlicht wird, solange das so ist.
 
 ## Fragen zur Website-Vorschau und zum automatischen Ende (Phase 09.1.3)
 
@@ -107,6 +152,15 @@ Allgemeine Notizen:
 | D | | | | |
 
 Allgemeine Notizen:
+
+### Aufgaben I–L
+
+| Testperson | Aufgabe | Zeit | Ohne Hilfe? | Falsche Klicks / Zurück | Fragen / Zitate | Stufe |
+|---|---|---|---|---|---|---|
+| | I | | | | | |
+| | J | | | | | |
+| | K | | | | | |
+| | L | | | | | |
 
 ### Aufgaben E–H
 

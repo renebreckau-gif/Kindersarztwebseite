@@ -254,9 +254,7 @@ await sleep(700);
 await shot("15-frueher-schliessen-veroeffentlicht-390x844.png");
 await click("Startseite", "a");
 await click("Heute früher schließen", "a");
-await fill("Bis wann ist heute geöffnet?", "10:30");
-await sleep(1100);
-await shot("16-fehler-widerspruch-live-390x844.png");
+await shot("16-bestehende-aenderung-erkannt-390x844.png");
 // Undo from home
 await click("Startseite", "a");
 await click("Änderung zurücknehmen", "a");
@@ -270,6 +268,66 @@ await go("/lab/praxis-cockpit");
 await click("Abmelden", "button");
 await shot("19-anmelden-390x844.png");
 await login();
+
+// ---------------------------------------------------------------- Phase 09.1.4: existing-change editing
+async function scenario(key) {
+  await evalJs(`(() => { const d = document.querySelector('footer details'); if (d) d.open = true; })()`);
+  await click(`Szenario ${key}`, "button");
+}
+for (const vp of ALL) {
+  await viewport(vp);
+  // A: existing special hours → notice → edit 15:00 → 13:00
+  await go("/lab/praxis-cockpit");
+  await scenario("A");
+  await click("Heute früher schließen", "a");
+  await shot(`20-bestehende-aenderung-hinweis-${vp}.png`);
+  await click("Bestehende Änderung anpassen", "button");
+  await fill("Bis wann ist heute geöffnet?", "13:00");
+  await sleep(1100);
+  await shot(`21-bestehende-aenderung-anpassen-${vp}.png`);
+  // F: publish the edit, then undo the latest edit (restores version 1)
+  await click("Nachmittagssprechzeit heute entfallen lassen", "button");
+  await sleep(700);
+  await click("Änderung zurücknehmen", "a");
+  await shot(`22-ruecknahme-version-${vp}.png`);
+  await click("Rücknahme bestätigen", "button");
+  await sleep(700);
+  await shot(`23-ruecknahme-erfolg-${vp}.png`);
+
+  // B + C: existing vacation → edit → extend to 26.10. → replacement warning
+  await go("/lab/praxis-cockpit");
+  await scenario("B");
+  await click("Urlaub eintragen", "a");
+  await fill("Von", "2026-10-22");
+  await fill("Bis", "2026-10-26");
+  await sleep(500);
+  await shot(`24-urlaub-ueberschneidung-hinweis-${vp}.png`);
+  await click("Bestehenden Urlaub bearbeiten", "a");
+  await fill("Bis", "2026-10-26");
+  await sleep(1100);
+  await shot(`25-urlaub-bearbeiten-verlaengert-${vp}.png`);
+  await click("Neu im Urlaub", "button");
+  await sleep(600);
+  await shot(`26-urlaub-vertretungswarnung-${vp}.png`);
+
+  // D: existing announcement → edit → extend to Monday
+  await go("/lab/praxis-cockpit");
+  await scenario("C");
+  await click("Hinweis bearbeiten", "a[href*='szenario-c']");
+  await fill("Gültig bis", "2026-10-19");
+  await sleep(1100);
+  await shot(`27-hinweis-bearbeiten-${vp}.png`);
+
+  // E: true conflict — vacation over an independent special opening
+  await go("/lab/praxis-cockpit");
+  await scenario("D");
+  await click("Urlaub eintragen", "a");
+  await fill("Von", "2026-10-19");
+  await fill("Bis", "2026-10-23");
+  await click("Keine Vertretung eintragen", "label");
+  await sleep(1100);
+  await shot(`28-echter-widerspruch-${vp}.png`);
+}
 
 writeFileSync(join(OUT, "audit.json"), JSON.stringify(audit, null, 2));
 const issues = Object.entries(audit).filter(([, a]) => a.overflowX || a.smallTargets.length || a.unlabeled.length || a.unnamed || a.h1 !== 1);

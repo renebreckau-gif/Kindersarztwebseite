@@ -8,10 +8,19 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { getPracticeStatus } from "../../domain/practice-status.ts";
 import { zonedToInstant } from "../../domain/time.ts";
+import { reducer, versionOf } from "../../lab/cockpit/state.ts";
+import { SCENARIOS } from "../../lab/cockpit/scenarios.ts";
 import {
   MOCK_ACCOUNTS,
   MOCK_TODAY,
   afterEnd,
+  checkReplacementPeriods,
+  earlyCloseDraft,
+  editableAnnouncements,
+  existingTodayChange,
+  overlappingVacation,
+  withAnnouncement,
+  withClosure,
   pastRecords,
   previewPair,
   pulsDataOf,
@@ -70,7 +79,7 @@ test("early close passes the check; a second, different special time for today i
   assert.equal(checkChange(base, first, MOCK_TODAY), null);
   const second = earlyClose(first, "b", "10:00");
   const problem = checkChange(first, second, MOCK_TODAY);
-  assert.equal(problem?.title, "Widersprüchliche Sonderzeiten");
+  assert.equal(problem?.title, "Widersprüchliche Angaben");
   assert.deepEqual(problem?.relatedIds, ["a"]);
 });
 
@@ -401,5 +410,142 @@ describe("Website-Vorschau", () => {
     }
     assert.match(read("src/lab/cockpit/screens/live.tsx"), /Website-Vorschau/);
     assert.match(read("src/lab/cockpit/screens/live.tsx"), /So sieht es auf der Website aus\./);
+  });
+});
+
+// ---------------------------------------------------------------- Phase 09.1.4: edit vs. supersede vs. conflict
+
+describe("existing changes are edited, true conflicts stay blocked", () => {
+  const scenario = (key: "A" | "B" | "C" | "D", d = initialState().data, today = MOCK_TODAY) => SCENARIOS.find((x) => x.key === key)!.build(d, today).next;
+  const todaySpecial = (d: CockpitData) => d.exceptions.filter((x) => x.kind === "SPECIAL_HOURS" && x.startDate === MOCK_TODAY);
+  const blocksOf = (d: CockpitData) => todaySpecial(d).flatMap((x) => blocks(x.intervals.map((i) => ({ start: i.start, end: i.end, type: i.consultationType }))).map((b) => `${b.start}–${b.end}`));
+
+  test("1: an existing special-hours change for today is offered for editing", () => {
+    const d = scenario("A");
+    assert.equal(existingTodayChange(d, MOCK_TODAY)?.id, "szenario-a-heute");
+    assert.equal(existingTodayChange(initialState().data, MOCK_TODAY), undefined);
+  });
+
+  test("2: editing 15:00 → 13:00 replaces the record (no second active record, no conflict)", () => {
+    const d = scenario("A");
+    const { effect, draft } = earlyCloseDraft(d, MOCK_TODAY, "13:00", { existing: existingTodayChange(d, MOCK_TODAY), person: "Anna Beispiel", role: "STAFF" });
+    assert.equal(effect.kind, "GAP");
+    assert.equal(todaySpecial(draft!).length, 1);
+    assert.deepEqual(blocksOf(draft!), ["08:00–12:00"]);
+    assert.equal(checkChange(d, draft!, MOCK_TODAY), null);
+    // the same kind of input as a NEW, independent record would contradict the existing one
+    const { draft: second } = earlyCloseDraft(d, MOCK_TODAY, "11:00", { person: "Anna Beispiel", role: "STAFF" });
+    assert.equal(checkChange(d, second!, MOCK_TODAY)?.title, "Widersprüchliche Angaben");
+  });
+
+  test("3 + 10: undo of the latest edit restores version 1; history keeps every version", () => {
+    let st = initialState();
+    const a = SCENARIOS[0].build(st.data, MOCK_TODAY);
+    st = reducer(st, { type: "seed", next: a.next, entry: a.entry, id: "v1", actorRole: a.actorRole, time: a.time });
+    const { draft } = earlyCloseDraft(st.data, MOCK_TODAY, "13:00", { existing: existingTodayChange(st.data, MOCK_TODAY), person: "Anna Beispiel", role: "STAFF" });
+    st = reducer(st, { type: "apply", next: draft!, entry: { title: "Sonderzeit geändert", entityIds: ["szenario-a-heute"] }, id: "v2" });
+    assert.deepEqual(blocksOf(st.data), ["08:00–12:00"]);
+    assert.equal(versionOf(st.audit, st.audit.find((e) => e.id === "v2")!), 2);
+    st = reducer(st, { type: "revert", id: "v2", revertId: "r1" });
+    assert.deepEqual(blocksOf(st.data), ["08:00–12:00", "14:00–15:00"], "back to version 1, record not deleted");
+    assert.deepEqual(
+      st.audit.slice(0, 3).map((e) => e.id),
+      ["r1", "v2", "v1"],
+      "every version stays in the history",
+    );
+    assert.equal(st.audit.find((e) => e.id === "v1")?.actor, "Dr. Lena Beispiel");
+  });
+
+  test("4: an overlapping existing vacation is detected (edit offered instead of conflict)", () => {
+    const d = scenario("B");
+    assert.equal(overlappingVacation(d, "2026-10-22", "2026-10-26", MOCK_TODAY)?.id, "szenario-b-urlaub");
+    assert.equal(overlappingVacation(d, "2026-10-24", "2026-10-30", MOCK_TODAY), undefined);
+    assert.equal(overlappingVacation(d, "2026-10-22", "2026-10-26", MOCK_TODAY, "szenario-b-urlaub"), undefined, "the edited vacation itself is no overlap");
+  });
+
+  test("5: extending the vacation revalidates replacement coverage (never stretched silently)", () => {
+    const c = checkReplacementPeriods("2026-10-19", "2026-10-26", [{ from: "2026-10-19", to: "2026-10-23", practice: "vb-a" }], { from: "2026-10-19", to: "2026-10-23" });
+    assert.deepEqual(c.issues, []);
+    assert.deepEqual(c.newGaps, [{ from: "2026-10-24", to: "2026-10-26" }]);
+    const b = scenario("B");
+    // the edit re-confirms the record with the new end date (as the cockpit does)
+    const d = withClosure(b, { ...b.closures[0], endDate: "2026-10-26", verification: entryVerification("Anna Beispiel", "STAFF", "2026-10-26") });
+    assert.equal(statusAt(d, "2026-10-26", "09:00").replacementFallback, true, "no replacement shown for the new day");
+    assert.equal(statusAt(d, "2026-10-26", "09:00").nextOpening?.label, "morgen um 08:00 Uhr");
+  });
+
+  test("6: shortening the vacation requires correcting periods beyond the new end", () => {
+    const c = checkReplacementPeriods(
+      "2026-10-19",
+      "2026-10-22",
+      [
+        { from: "2026-10-19", to: "2026-10-23", practice: "vb-a" },
+        { from: "2026-10-23", to: "2026-10-23", practice: "vb-b" },
+      ],
+      { from: "2026-10-19", to: "2026-10-23" },
+    );
+    assert.deepEqual(
+      c.issues.map((i) => [i.index, i.kind]),
+      [
+        [0, "beyond"],
+        [1, "outside"],
+      ],
+    );
+    assert.deepEqual(c.issues[0].fix, { from: "2026-10-19", to: "2026-10-22" });
+    const overlap = checkReplacementPeriods("2026-10-19", "2026-10-23", [
+      { from: "2026-10-19", to: "2026-10-21", practice: "vb-a" },
+      { from: "2026-10-21", to: "2026-10-23", practice: "vb-b" },
+    ]);
+    assert.equal(overlap.issues[0].text, "Dieser Zeitraum überschneidet sich mit einer anderen Vertretung.");
+  });
+
+  test("7: an existing announcement is editable; extension shows on the new last day", () => {
+    const d = scenario("C");
+    const a = editableAnnouncements(d, MOCK_TODAY).find((x) => x.id === "szenario-c-hinweis")!;
+    assert.equal(a.validUntil, "2026-10-16");
+    const edited = withAnnouncement(d, { ...a, validUntil: "2026-10-19" });
+    assert.equal(edited.announcements.filter((x) => x.id === a.id).length, 1);
+    assert.ok(visibleAnnouncements(edited, "2026-10-19").some((x) => x.id === a.id));
+    assert.equal(visibleAnnouncements(edited, "2026-10-20").some((x) => x.id === a.id), false);
+  });
+
+  test("8: vacation over an independent special opening stays blocked", () => {
+    const d = scenario("D");
+    const draft = withClosure(d, { id: "neu", kind: "VACATION", startDate: "2026-10-19", endDate: "2026-10-23", replacements: [], verification: entryVerification("Anna Beispiel", "STAFF", "2026-10-23") });
+    const problem = checkChange(d, draft, "2026-10-19", "2026-10-23");
+    assert.equal(problem?.title, "Widersprüchliche Angaben");
+    assert.match(problem!.text, /zwei unterschiedliche Änderungen, die gleichzeitig gelten würden/);
+    assert.deepEqual(problem?.relatedIds, ["szenario-d-sonder"]);
+  });
+
+  test("9: expired records are not offered as current editable records", () => {
+    const d = scenario("B", scenario("C", scenario("A")));
+    assert.notEqual(existingTodayChange(d, "2026-10-14")?.id, "szenario-a-heute", "yesterday's change is history on the next day");
+    assert.equal(overlappingVacation(d, "2026-10-19", "2026-10-23", "2026-10-24"), undefined);
+    assert.equal(editableAnnouncements(d, "2026-10-17").some((a) => a.id === "szenario-c-hinweis"), false);
+  });
+
+  test("11: Website-Vorschau reflects the edited state", () => {
+    const d = scenario("A");
+    const { draft } = earlyCloseDraft(d, MOCK_TODAY, "13:00", { existing: existingTodayChange(d, MOCK_TODAY), person: "Anna Beispiel", role: "STAFF" });
+    const at1430 = previewPair(d, draft, MOCK_TODAY, "14:30");
+    assert.equal(at1430.current.headline, "Praxis geöffnet");
+    assert.equal(at1430.current.detail, "Heute bis 15:00 Uhr");
+    assert.equal(at1430.changed?.headline, "Heute geschlossen");
+  });
+
+  test("12: public website and domain code never import the cockpit prototype", () => {
+    const files: string[] = [];
+    const walk = (dir: string) => {
+      for (const f of readdirSync(join(ROOT, dir))) {
+        const rel = `${dir}/${f}`;
+        if (statSync(join(ROOT, rel)).isDirectory()) walk(rel);
+        else if (/\.tsx?$/.test(f)) files.push(rel);
+      }
+    };
+    walk("app/(site)");
+    walk("src/site");
+    walk("src/domain");
+    for (const f of files.filter((x) => !x.includes("__tests__"))) assert.doesNotMatch(read(f), /lab\/cockpit/, f);
   });
 });

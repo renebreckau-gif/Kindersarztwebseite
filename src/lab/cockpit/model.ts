@@ -16,7 +16,7 @@ import type {
 } from "../../domain/content-types.ts";
 import { evaluateFreshness, type FactVerification } from "../../domain/verification.ts";
 import { decideAnnouncement } from "../../domain/publication.ts";
-import { addDays, compareDates, formatMinutes, parseTime, weekdayOf, zonedToInstant, type IsoWeekday, type LocalDate, type LocalTime } from "../../domain/time.ts";
+import { addDays, compareDates, formatMinutes, isLocalDate, parseTime, weekdayOf, zonedToInstant, type IsoWeekday, type LocalDate, type LocalTime } from "../../domain/time.ts";
 
 // ------------------------------------------------------------------ clock & people
 
@@ -364,11 +364,16 @@ function problemFor(reason: ReasonCode, date: LocalDate, relatedIds: string[], t
   const day = date === today ? "heute" : `den ${dayMonth(date)}`;
   switch (reason) {
     case "EXCEPTION_CONFLICT":
-      return { title: "Widersprüchliche Sonderzeiten", text: `Für ${day} gibt es bereits eine andere Sonderzeit. Bitte prüfen Sie die bestehende Änderung.`, date, relatedIds };
+      return {
+        title: "Widersprüchliche Angaben",
+        text: `Für ${day} gibt es zwei unterschiedliche Änderungen, die gleichzeitig gelten würden: zwei verschiedene Sonderzeiten. Bitte prüfen Sie die bestehenden Änderungen.`,
+        date,
+        relatedIds,
+      };
     case "CLOSURE_EXCEPTION_CONFLICT":
       return {
-        title: "Widerspruch zu einer bestehenden Änderung",
-        text: `Für ${day} ist bereits eine andere Änderung eingetragen. Schließung und geänderte Sprechzeit am selben Tag widersprechen sich. Bitte prüfen Sie die bestehende Änderung.`,
+        title: "Widersprüchliche Angaben",
+        text: `Für ${day} gibt es zwei unterschiedliche Änderungen, die gleichzeitig gelten würden: eine Schließung und eine geänderte Sprechzeit. Bitte prüfen Sie die bestehenden Änderungen.`,
         date,
         relatedIds,
       };
@@ -437,6 +442,142 @@ export function replacementSummary(d: CockpitData, c: Closure): string {
   const name = (id: string) => d.directory.find((p) => p.id === id)?.practiceName ?? "unbekannt";
   if (c.replacements.length === 1 && c.replacements[0].from === c.startDate && c.replacements[0].until === c.endDate) return name(c.replacements[0].replacementPracticeId);
   return c.replacements.map((r) => `${name(r.replacementPracticeId)} (${dateRange(r.from, r.until)})`).join(", ");
+}
+
+// ------------------------------------------------------------------ edit vs. supersede vs. conflict (Phase 09.1.4)
+//
+// EXISTING RECORD                       → EDIT (same id, new version; never a second active record)
+// NEW INTENT THAT REPLACES AN OLD ONE   → SUPERSEDE with preview + explicit confirmation
+// INDEPENDENT CONTRADICTORY RECORDS     → CONFLICT, blocked (checkChange, engine-based)
+// Only current records are offered for editing; expired ones belong to the history.
+
+/** Today's published special hours (single day) — the record "Bestehende Änderung anpassen" edits. */
+export function existingTodayChange(d: CockpitData, today: LocalDate): OpeningHourException | undefined {
+  return d.exceptions.find((x) => x.kind === "SPECIAL_HOURS" && x.startDate === today && x.endDate === today);
+}
+
+/** Today's published short-notice closure ("Heute geschlossen"). */
+export function existingTodayClosure(d: CockpitData, today: LocalDate): Closure | undefined {
+  return d.closures.find((c) => c.kind === "SHORT_NOTICE" && covers(c, today));
+}
+
+/** A current or upcoming vacation overlapping [from, to] — likely the one the user wants to edit. */
+export function overlappingVacation(d: CockpitData, from: LocalDate, to: LocalDate, today: LocalDate, excludeId?: string): Closure | undefined {
+  return d.closures.find((c) => c.kind === "VACATION" && c.id !== excludeId && compareDates(c.endDate, today) >= 0 && compareDates(c.startDate, to) <= 0 && compareDates(from, c.endDate) <= 0);
+}
+
+/** Published announcements that are current or upcoming (editable); expired ones are history. */
+export function editableAnnouncements(d: CockpitData, today: LocalDate): Announcement[] {
+  return d.announcements.filter((a) => a.published && a.verification.status === "VERIFIED_CURRENT" && (a.validUntil === "OPEN_ENDED" || compareDates(a.validUntil, today) >= 0));
+}
+
+/** Edit = replace the record with the same id (new version). */
+export const withException = (d: CockpitData, x: OpeningHourException): CockpitData => ({ ...d, exceptions: [...d.exceptions.filter((e) => e.id !== x.id), x] });
+export const withClosure = (d: CockpitData, c: Closure): CockpitData => ({ ...d, closures: [...d.closures.filter((e) => e.id !== c.id), c] });
+export const withAnnouncement = (d: CockpitData, a: Announcement): CockpitData => ({ ...d, announcements: [...d.announcements.filter((e) => e.id !== a.id), a] });
+
+/**
+ * Change set for "Heute früher schließen". With an existing change for today, the new time is
+ * applied to the REGULAR plan and replaces that record (edit), so 15:00 → 13:00 never creates a
+ * second, contradicting special-hours record.
+ */
+export function earlyCloseDraft(
+  base: CockpitData,
+  today: LocalDate,
+  time: LocalTime,
+  opts: { existing?: OpeningHourException; message?: string; person: string; role: Role },
+): { effect: EarlyCloseEffect; draft: CockpitData | null } {
+  const source = opts.existing ? rulesSegments(today) : plannedSegments(base, today);
+  const effect = earlyCloseEffect(source, time);
+  if (effect.kind === "TOO_LATE" || effect.kind === "TOO_EARLY") return { effect, draft: null };
+  const record: OpeningHourException = {
+    id: opts.existing?.id ?? `heute-frueher-${today}-${time}`,
+    kind: "SPECIAL_HOURS",
+    startDate: today,
+    endDate: today,
+    intervals: effect.segments.map((x) => ({ start: x.start, end: x.end, consultationType: x.type })),
+    publicMessage: opts.message !== undefined ? opts.message || undefined : opts.existing?.publicMessage,
+    priority: 1,
+    verification: entryVerification(opts.person, opts.role, today, today),
+  };
+  return { effect, draft: withException(base, record) };
+}
+
+export interface PeriodInput {
+  from: string;
+  to: string;
+  practice: string;
+}
+export interface PeriodIssue {
+  index: number;
+  kind: "invalid" | "outside" | "beyond" | "overlap";
+  text: string;
+  /** Suggested correction for "beyond" (clamp to the vacation). */
+  fix?: { from: LocalDate; to: LocalDate };
+}
+export interface CoverageCheck {
+  issues: PeriodIssue[];
+  /** Vacation days without a replacement. */
+  gaps: { from: LocalDate; to: LocalDate }[];
+  /** Gaps on days that were NOT part of the previous vacation (extension). */
+  newGaps: { from: LocalDate; to: LocalDate }[];
+}
+
+/** Uncovered days of [from, to] given replacement periods (only valid periods count). */
+export function uncoveredDays(from: LocalDate, to: LocalDate, periods: { from: string; to: string }[]): { from: LocalDate; to: LocalDate }[] {
+  if (!isLocalDate(from) || !isLocalDate(to) || compareDates(to, from) < 0) return [];
+  const out: { from: LocalDate; to: LocalDate }[] = [];
+  let start: LocalDate | null = null;
+  for (let d = from; compareDates(d, to) <= 0; d = addDays(d, 1)) {
+    const covered = periods.some((p) => isLocalDate(p.from) && isLocalDate(p.to) && compareDates(p.from, d) <= 0 && compareDates(d, p.to) <= 0);
+    if (!covered && start === null) start = d;
+    if (covered && start !== null) {
+      out.push({ from: start, to: addDays(d, -1) });
+      start = null;
+    }
+  }
+  if (start !== null) out.push({ from: start, to });
+  return out;
+}
+
+/**
+ * Revalidates replacement periods against a (possibly edited) vacation:
+ * inside → keep · beyond the new range → correction required · overlap → blocked ·
+ * new vacation days without replacement → warning (never stretched silently).
+ */
+export function checkReplacementPeriods(from: LocalDate, to: LocalDate, periods: PeriodInput[], previous?: { from: LocalDate; to: LocalDate }): CoverageCheck {
+  const issues: PeriodIssue[] = [];
+  const range = dateRange(from, to);
+  periods.forEach((p, i) => {
+    if (!p.from && !p.to) return;
+    if (!isLocalDate(p.from) || !isLocalDate(p.to) || compareDates(p.to, p.from) < 0) {
+      issues.push({ index: i, kind: "invalid", text: "Bitte einen gültigen Zeitraum wählen." });
+      return;
+    }
+    if (compareDates(p.from, to) > 0 || compareDates(p.to, from) < 0) {
+      issues.push({ index: i, kind: "outside", text: `Dieser Zeitraum liegt außerhalb des Urlaubs (${range}). Bitte entfernen oder anpassen.` });
+      return;
+    }
+    if (compareDates(p.to, to) > 0 || compareDates(p.from, from) < 0) {
+      const fix = { from: compareDates(p.from, from) < 0 ? from : p.from, to: compareDates(p.to, to) > 0 ? to : p.to };
+      issues.push({
+        index: i,
+        kind: "beyond",
+        text: compareDates(p.to, to) > 0 ? `Diese Vertretung reicht über das Urlaubsende (${dayMonth(to)}) hinaus. Bitte das Ende anpassen.` : `Diese Vertretung beginnt vor dem Urlaub (${dayMonth(from)}). Bitte den Beginn anpassen.`,
+        fix,
+      });
+      return;
+    }
+    if (periods.some((q, j) => j !== i && isLocalDate(q.from) && isLocalDate(q.to) && compareDates(p.from, q.to) <= 0 && compareDates(q.from, p.to) <= 0)) {
+      issues.push({ index: i, kind: "overlap", text: "Dieser Zeitraum überschneidet sich mit einer anderen Vertretung." });
+    }
+  });
+  const valid = periods.filter((_, i) => !issues.some((x) => x.index === i && x.kind !== "overlap"));
+  const gaps = uncoveredDays(from, to, valid);
+  const newGaps = previous
+    ? gaps.flatMap((g) => uncoveredDays(g.from, g.to, [{ from: previous.from, to: previous.to }]))
+    : [];
+  return { issues, gaps, newGaps };
 }
 
 // ------------------------------------------------------------------ live website preview + automatic end
@@ -512,6 +653,9 @@ export interface Upcoming {
   closure?: { id: string; replacement: string };
   /** Temporary entries end by themselves on this (inclusive) Berlin date. */
   endsOn?: LocalDate;
+  /** Edit link for an existing record (special hours today, announcement). */
+  editHref?: string;
+  editLabel?: string;
 }
 
 const holidayOf = (date: LocalDate) => MOCK_HOLIDAYS.find((h) => h.date === date);
@@ -532,7 +676,27 @@ export function upcoming(d: CockpitData, today: LocalDate = MOCK_TODAY, horizonD
     if (compareDates(x.endDate, today) < 0) continue;
     const segs = x.intervals.map((i) => ({ start: i.start, end: i.end, type: i.consultationType }));
     const note = x.kind === "CLOSED" ? (holidayOf(x.startDate) ? `${holidayOf(x.startDate)!.name} · geschlossen` : "Geschlossen") : `Geänderte Sprechzeit · ${blocks(segs).map((b) => `${b.start}–${b.end}`).join(", ")}`;
-    items.push({ date: x.startDate, label: x.startDate === x.endDate ? dayMonth(x.startDate, true) : dateRange(x.startDate, x.endDate), note, attention: false, endsOn: x.kind === "SPECIAL_HOURS" ? x.endDate : undefined });
+    const todayEdit = x.kind === "SPECIAL_HOURS" && x.startDate === today && x.endDate === today;
+    items.push({
+      date: x.startDate,
+      label: x.startDate === x.endDate ? dayMonth(x.startDate, true) : dateRange(x.startDate, x.endDate),
+      note,
+      attention: false,
+      endsOn: x.kind === "SPECIAL_HOURS" ? x.endDate : undefined,
+      editHref: todayEdit ? "/lab/praxis-cockpit/frueher-schliessen?anpassen=1" : undefined,
+      editLabel: todayEdit ? "Anpassen" : undefined,
+    });
+  }
+  for (const a of editableAnnouncements(d, today)) {
+    items.push({
+      date: compareDates(a.validFrom, today) > 0 ? a.validFrom : today,
+      label: a.validUntil === "OPEN_ENDED" ? `ab ${dayMonth(a.validFrom)}` : compareDates(a.validFrom, today) > 0 ? dateRange(a.validFrom, a.validUntil) : `bis ${dayMonth(a.validUntil)}`,
+      note: `Hinweis „${a.title}“`,
+      attention: false,
+      endsOn: a.validUntil === "OPEN_ENDED" ? undefined : a.validUntil,
+      editHref: `/lab/praxis-cockpit/hinweis?bearbeiten=${encodeURIComponent(a.id)}`,
+      editLabel: "Hinweis bearbeiten",
+    });
   }
   for (const h of MOCK_HOLIDAYS) {
     if (compareDates(h.date, today) < 0 || compareDates(h.date, end) > 0) continue;

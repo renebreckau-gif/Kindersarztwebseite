@@ -12,7 +12,8 @@ import type { PracticeStatusResult } from "@/domain/practice-status";
 import type { PulsView } from "@/content/puls";
 import type { Announcement } from "@/domain/content-types";
 import { useCockpit } from "./store";
-import { MOCK_NOW, MOCK_TODAY, ROLES, cutAt, dayMonth, entryVerification, longDate, plannedSegments, typeLabel, unknownExplanation, type Problem, type Role } from "./model";
+import { SCENARIOS } from "./scenarios";
+import { MOCK_NOW, MOCK_TODAY, ROLES, dayMonth, longDate, typeLabel, unknownExplanation, type Problem, type Role } from "./model";
 
 // ------------------------------------------------------------------ icons (one stroke family)
 
@@ -141,31 +142,8 @@ export function Shell({ children }: { children: ReactNode }) {
 
 /** Lab-only test controls. Not a production feature. */
 function TestPanel() {
-  const { state, setRole, reset, apply, setClock } = useCockpit();
+  const { state, setRole, reset, setClock, seed } = useCockpit();
   const [done, setDone] = useState("");
-  const today = state.clock.date;
-  const seedConflict = () => {
-    const segs = cutAt(plannedSegments(state.data, today), "15:00");
-    apply(
-      {
-        ...state.data,
-        exceptions: [
-          ...state.data.exceptions,
-          {
-            id: "szenario-sonderzeit",
-            kind: "SPECIAL_HOURS",
-            startDate: today,
-            endDate: today,
-            intervals: segs.map((x) => ({ start: x.start, end: x.end, consultationType: x.type })),
-            priority: 1,
-            verification: entryVerification(ROLES[state.role].person, state.role, today, today),
-          },
-        ],
-      },
-      { title: "Heute um 15:00 schließen", detail: "Testszenario: bestehende Sonderzeit", before: "bis 16:00", after: "bis 15:00", undoSentence: "Die Praxis wäre heute wieder bis 16:00 geöffnet.", entityIds: ["szenario-sonderzeit"] },
-    );
-    setDone("Sonderzeit für heute angelegt. „Heute früher schließen“ zeigt jetzt den Widerspruch.");
-  };
   return (
     <footer className={s.footer}>
       <details className={s.test}>
@@ -224,10 +202,27 @@ function TestPanel() {
             >
               Prototyp zurücksetzen
             </button>
-            <button type="button" className={s.btnQuiet} onClick={seedConflict}>
-              Szenario: Sonderzeit für heute existiert bereits
-            </button>
           </p>
+          <fieldset className={s.testRoles}>
+            <legend>Testszenarien (nur Labor)</legend>
+            <p className={s.muted}>Legt eine „früher veröffentlichte“ Änderung einer Test-Person an.</p>
+            <div className={s.chips}>
+              {SCENARIOS.map((sc) => (
+                <button
+                  key={sc.key}
+                  type="button"
+                  className={s.chipBtn}
+                  onClick={() => {
+                    const b = sc.build(state.data, state.clock.date);
+                    seed(b.next, b.entry, b.actorRole, b.time);
+                    setDone(sc.hint);
+                  }}
+                >
+                  {sc.label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
           <p role="status" className={s.muted}>
             {done}
           </p>

@@ -5,7 +5,30 @@ Date: 2026-10-13
 Baseline: `e589478`
 Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms-comparison.md) · [content-model.md](content-model.md) · [content-governance.md](content-governance.md) · [practice-pulse-logic.md](practice-pulse-logic.md) · [privacy-model.md](privacy-model.md) · [phase-04-decisions.md](phase-04-decisions.md)
 
-> **Status:** This is a proposal for review. Nothing in this document is installed, configured or connected. Payload, the database, accounts, secrets and the public website are unchanged. The release gates (`src/content/release.ts`) are unchanged. Implementation starts only after this architecture is reviewed.
+## Current status (2026-10-13, after Phase 09.1.4)
+
+| | |
+|---|---|
+| **Prototype** | Implemented through Phase 09.1.4 and locked for staff usability testing: `/lab/praxis-cockpit`. Lab only, `noindex`, not linked, mock data only. |
+| **Production backend** | Not implemented. |
+| **Payload** | Not installed. |
+| **Database / persistence** | None. The prototype state lives in memory; a reload resets it. |
+| **Real authentication** | Not implemented. The prototype has a mock login: test accounts, and `sessionStorage` keeps only the mock role. |
+| **Public website** | Uses the same Praxis Puls engine. Changed only through the engine alignment of 09.1.1. Release gates are unchanged. |
+| **Next phase** | 09.2 (data layer) starts only after the prototype test results are reviewed. |
+
+### Phase history
+
+| Phase | Content | Commit |
+|---|---|---|
+| 09.0 | Architecture: Payload backend + custom cockpit, roles, auth, hosting, privacy (this document, §0–§14; historical baseline) | `80aa5f6` |
+| 09.1 | Clickable cockpit prototype with the real engine and mock data | `30e2fc3` |
+| 09.1.1 | Praxis Puls alignment: weekend holidays, time-aware special hours, grouped intervals, lunch-gap wording | `93878b6` |
+| 09.1.2 | Mock login, vacation and replacement end to end, website view for parents | `35dc9d2` |
+| 09.1.3 | Live Website-Vorschau (edit left / preview right), automatic expiry, history retention, lab test clock | `ecdd432` |
+| 09.1.4 | Editing existing changes (edit vs. supersede vs. conflict), prototype lock, documentation cleanup | this phase |
+
+**How to read this document:** §0–§14 are the Phase 09.0 architecture decision and remain valid unless a later phase note says otherwise. The phase notes at the end record what the prototype changed or proved. Statements that became outdated are marked inline ("since 09.1.x").
 
 ---
 
@@ -13,12 +36,12 @@ Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms
 
 | Area | Current state (verified in code) | Consequence for the cockpit |
 |---|---|---|
-| **PRAXIS PULS engine** | `getPracticeStatus(now, data, options)` in `src/domain/practice-status.ts` is pure, deterministic and fixed to Europe/Berlin. Day resolution: closures, then exceptions, then holiday policy, then weekly rules. Contradictions resolve to UNKNOWN with a `ReasonCode` (`EXCEPTION_CONFLICT`, `CLOSURE_EXCEPTION_CONFLICT`, `RULE_CONFLICT`, `ACUTE_CONFLICT`, `HOLIDAY_WITHOUT_RULE`, …). | The cockpit preview and the server-side publish check **call this function**. There is no second implementation. |
+| **PRAXIS PULS engine** | `getPracticeStatus(now, data, options)` in `src/domain/practice-status.ts` is pure, deterministic and fixed to Europe/Berlin. Day resolution (since 09.1.1): closures, then exceptions, then a confirmed regular closed weekday, then holiday policy, then weekly rules. Contradictions resolve to UNKNOWN with a `ReasonCode` (`EXCEPTION_CONFLICT`, `CLOSURE_EXCEPTION_CONFLICT`, `RULE_CONFLICT`, `ACUTE_CONFLICT`, `HOLIDAY_WITHOUT_RULE`, …). | The cockpit preview and the server-side publish check **call this function**. There is no second implementation. |
 | **Public binding** | `resolvePuls()` in `src/content/puls.ts` maps the engine result to the hero view model. Its input is the static `PULS_DATA` from `src/content/schedule.ts`. | One refactor is needed: `resolvePuls` must accept `PulsData` as a parameter, so that the public site and the preview use the same mapping. This does not change behaviour and is covered by the existing `puls-live` tests. |
 | **Verification** | `FactVerification` and `evaluateFreshness()` in `src/domain/verification.ts`. Exceptions, closures, replacement practices and emergency entries have grace 0 and require `lastVerified`, `verifiedBy` and `reviewDue`. | Every cockpit entry must carry complete verification metadata. The named account that publishes the entry **is** the practice confirmation (see §7.0). |
 | **Closures / exceptions** | Types exist (`Closure`, `OpeningHourException`). Today `PULS_DATA` has `exceptions: []`, `closures: []` and `replacementPractices: []`. | These three lists are what staff edit day to day. The weekly schedule changes rarely. |
 | **Replacement practices** | Directory type exists. No entries yet (F53: no legacy import). | A closure can reference only directory entries. Directory entries are verified separately. |
-| **Holidays** | `PUBLIC_HOLIDAYS_ST` with policy `REQUIRE_EXPLICIT_ENTRY`. F49 is unconfirmed, so a weekday holiday resolves to UNKNOWN. | The cockpit lists upcoming unresolved weekday holidays under "Prüfen". It never infers "closed". |
+| **Holidays** | `PUBLIC_HOLIDAYS_ST` with policy `REQUIRE_EXPLICIT_ENTRY`. F49 is unconfirmed, so a weekday holiday resolves to UNKNOWN. Since 09.1.1, a holiday on an explicitly confirmed closed weekday resolves to CLOSED. | The cockpit lists upcoming unresolved weekday holidays under "Prüfen". It never infers "closed". |
 | **Announcements** | `decideAnnouncement()` requires verification, `published`, and today inside `validFrom … validUntil`, or an explicit `OPEN_ENDED`. | Workflow 7 maps onto this directly. |
 | **Release gates** | `RELEASE.pulsPracticeSignOff = true`, `meinArztbesuchApproved = false`, `indexable = false`. | The cockpit does **not** control release gates in V1; they stay deliberate code changes. |
 | **Rendering** | Pages read `searchParams` and compute PULS per request. No CMS, no database. `next.config.ts` sends `X-Robots-Tag: noindex` everywhere. | Data loading moves behind a repository adapter (§10.4). Time is still evaluated per request. |
@@ -185,7 +208,7 @@ Rules:
 | `/intern/schliesszeiten` (+ `/neu`, `/[id]`) | Urlaub & Schließzeiten (7.5) incl. Vertretung (7.6) | all |
 | `/intern/hinweise` (+ `/neu`, `/[id]`) | Aktuelle Hinweise (7.7) | all |
 | `/intern/vertretungen` | Replacement directory: read for all; verify for DOCTOR; edit data for ADMIN | all / DOCTOR / ADMIN |
-| `/intern/vorschau` | "Was sieht die Website?" for any date and time | all |
+| `/intern/vorschau` | Website-Vorschau for any date and time (renamed in 09.1.3) | all |
 | `/intern/verlauf` | Audit log + Undo (9) | all (read); export ADMIN |
 | `/intern/sprechzeiten` | Weekly schedule (rare) | DOCTOR, ADMIN |
 | `/intern/admin` | Payload admin | ADMIN |
@@ -253,7 +276,7 @@ Phone (390)                                   Desktop (1440)
 ### 7.0 Shared pattern: Entwurf → Vorschau → Veröffentlichen
 
 1. The staff member chooses a quick action and answers 1–3 questions, with pre-filled defaults.
-2. The cockpit builds a **change set**: a draft that is not yet visible. It runs the **real engine** on the published data plus the change set (§8) and shows "Was sieht die Website?".
+2. The cockpit builds a **change set**: a draft that is not yet visible. It runs the **real engine** on the published data plus the change set (§8) and shows the Website-Vorschau. Since 09.1.3 this happens live while editing ("Aktuell auf der Website" / "Mit dieser Änderung"), with no separate preview step.
 3. A **publish button with the exact effect** as its label: "Heute um 11:00 Uhr schließen". There is no generic "Speichern".
 4. The server re-validates (UI checks are never trusted), writes the change in one transaction, writes the audit entry and revalidates the public cache. It then confirms with the version the website reports (§12): "Auf der Website ✓ seit 09:41".
 
@@ -374,6 +397,8 @@ An append-only collection `audit_events`. There is no update or delete access fo
 `/intern/verlauf` lists events newest first, filterable by date and person, in plain German. ADMIN can export a date range as CSV. Retention period: to define in privacy review ⚖. The proposal is 24 months for content events and 12 months for login events.
 
 ### 9.2 "Änderung zurücknehmen"
+
+> Since 09.1.4 (prototype-proven): editing an existing record publishes a **new version of the same record**. Version 1 stays in the audit history and version 2 becomes active. "Änderung zurücknehmen" on an edit restores the previous version; it does not delete the record. Only the latest change can be undone.
 
 - Every published change set has **"Änderung zurücknehmen"** in the confirmation screen, on the home screen ("Letzte Änderung: … · Zurücknehmen", for 24 h) and in the audit log.
 - Undo **never deletes**. It creates a new change set that restores the `before` snapshots. That change set runs through the same preview and validation, gets its own audit entry (`REVERT`, linked to the original) and marks the original `REVERTED`.
@@ -509,7 +534,7 @@ Each phase ends as usual: tests, commit, report, stop.
   - Urlaub eintragen (4 steps, one or several replacement periods)
   - Akutsprechstunde (overview, "Heute ändern", "Heute entfällt")
   - Hinweis veröffentlichen (explicit "Unbefristet veröffentlichen")
-- Was sieht die Website? (any date and time)
+- Was sieht die Website? (any date and time; renamed "Website-Vorschau" in 09.1.3)
 - Verlauf with detail and "Änderung zurücknehmen"
 - Feiertag prüfen and Vertretung prüfen (DOCTOR)
 - Lab-only test mode: role switch STAFF / DOCTOR / ADMIN, reset, conflict scenario.
@@ -544,9 +569,9 @@ Each phase ends as usual: tests, commit, report, stop.
 
 **Engine findings from the prototype** (not changed in 09.1; the public Praxis Puls is untouched):
 
-1. **Weekend holidays resolve to UNKNOWN.** The engine checks the holiday policy before `confirmedClosedWeekdays`. With `REQUIRE_EXPLICIT_ENTRY`, Saturday 31.10.2026 and 26.12.2026 show "Aktuelle Sprechzeiten" on the **live** site as well (verified with `PULS_DATA`). This contradicts [practice-pulse-logic.md](practice-pulse-logic.md) §3. It is safe (never falsely open) but needs a deliberate decision: either confirmed closed weekdays win over unresolved holidays, or staff resolve weekend holidays explicitly.
-2. **Special hours read as "Geänderte Sprechzeit heute" all day.** This holds even after the last interval ended, and adjacent intervals are listed separately ("08:00–10:00 Uhr, 10:00–11:00 Uhr, 11:00–12:00 Uhr"). The brief expected "geöffnet bis 13:00", then "geschlossen". Wording and merging should be decided before 09.5.
-3. **Early close inside the lunch break** (13:00 between 12:00 and 14:00) has the same effect as closing at 12:00. The prototype explains this; usability testing should show whether staff understand it.
+1. **Weekend holidays resolve to UNKNOWN** (resolved in 09.1.1). The engine checks the holiday policy before `confirmedClosedWeekdays`. With `REQUIRE_EXPLICIT_ENTRY`, Saturday 31.10.2026 and 26.12.2026 show "Aktuelle Sprechzeiten" on the **live** site as well (verified with `PULS_DATA`). This contradicts [practice-pulse-logic.md](practice-pulse-logic.md) §3. It is safe (never falsely open) but needs a deliberate decision: either confirmed closed weekdays win over unresolved holidays, or staff resolve weekend holidays explicitly.
+2. **Special hours read as "Geänderte Sprechzeit heute" all day** (resolved in 09.1.1). This holds even after the last interval ended, and adjacent intervals are listed separately ("08:00–10:00 Uhr, 10:00–11:00 Uhr, 11:00–12:00 Uhr"). The brief expected "geöffnet bis 13:00", then "geschlossen". Wording and merging should be decided before 09.5.
+3. **Early close inside the lunch break** (resolved in 09.1.1 with exact wording) (13:00 between 12:00 and 14:00) has the same effect as closing at 12:00. The prototype explains this; usability testing should show whether staff understand it.
 
 ---
 
@@ -654,3 +679,69 @@ Verified with vacation 19.–23.10.2026:
 - 24.10. (Saturday): normal weekend rule, CLOSED, opens Monday 26.10. at 08:00.
 - 26.10. at 09:00: normal Monday, OPEN.
 - After the end the vacation no longer appears on the home screen and is listed under "Vergangene Einträge".
+
+---
+
+## Phase 09.1.4 decision: editing existing changes and prototype lock (2026-10-13)
+
+### Edit vs. supersede vs. conflict
+
+A conflict is not the same thing as editing an existing record. The cockpit distinguishes three cases:
+
+| Situation | Cockpit behaviour | Example |
+|---|---|---|
+| **Existing record → EDIT** | "Bereits geändert / Bereits veröffentlicht" notice above the form with the current value. Then "Bestehende Änderung anpassen", "Bestehende Schließung bearbeiten", "Bestehenden Urlaub bearbeiten" or "Hinweis bearbeiten". The form is pre-filled. Publishing replaces the record **with the same id** (new version), so there is never a second active record. | "Heute bis 15:00 Uhr" → 13:00 → button "Nachmittagssprechzeit heute entfallen lassen" |
+| **New intent that replaces an old decision → SUPERSEDE** | Allowed only after a clear preview and an explicit confirmation checkbox. The old record is replaced in the same change and remains in the history. | Changed hours today → "Heute geschlossen": "Geänderte Sprechzeit durch diese Schließung ersetzen" |
+| **Independent contradictory records → CONFLICT** | Blocked by the engine-based `checkChange` ("no new UNKNOWN day"), shown in the Website-Vorschau as "Widersprüchliche Angaben – Für … gibt es zwei unterschiedliche Änderungen, die gleichzeitig gelten würden." with "Bestehende Änderungen prüfen". Publishing stays disabled. | A vacation over an independent special opening on 21.10. |
+
+### Detection rules
+
+- **Special hours today:** single-day SPECIAL_HOURS record for today (`existingTodayChange`). The new closing time is applied to the **regular** plan and replaces the record.
+- **Closed today:** SHORT_NOTICE closure covering today (`existingTodayClosure`).
+- **Vacation:** a current or upcoming vacation overlapping the entered dates (`overlappingVacation`). The cockpit asks: "Bestehenden Urlaub bearbeiten" or "Neuen Zeitraum anlegen". A new period must not overlap.
+- **Announcements:** current or upcoming published announcements (`editableAnnouncements`).
+- **Expired records are never offered for editing.** They belong to the history.
+
+### Vacation editing
+
+- Start, end, text and replacements are editable.
+- In edit mode replacement periods are always **explicit dates**, never stretched silently.
+- `checkReplacementPeriods` revalidates on every change:
+  - A replacement fully inside the new vacation is kept.
+  - A replacement beyond the new vacation ("reicht über das Urlaubsende hinaus") must be corrected. The cockpit offers a one-click fix ("Auf … anpassen").
+  - New vacation days without a replacement show the warning "Für den verlängerten Zeitraum ist noch keine Vertretung hinterlegt." with an explicit "… bis … verlängern" action. Otherwise the gap must be confirmed.
+  - Overlapping replacement periods are blocked.
+- The Website-Vorschau offers the days that leave or join the vacation ("Nicht mehr im Urlaub", "Neu im Urlaub"). It shows the real engine result for those days, not a description.
+
+### Lab scenarios (Testmodus, lab only)
+
+| Scenario | Seeded record | Task |
+|---|---|---|
+| A | "Heute bis 15:00 Uhr" (Dr. Lena Beispiel, 08:05) | Change it so the afternoon session is cancelled |
+| B | Vacation 19.–23.10. with Praxis Beispiel A | Extend it to 26.10.; replacement warning |
+| C | Announcement until Friday | Extend it to Monday |
+| D | Special opening on 21.10. | Enter vacation 19.–23.10.; this is blocked as a true conflict |
+
+### Domain extraction candidates for 09.2 / 09.4
+
+The prototype logic lives in `src/lab/cockpit/`. Nothing is moved now. Mock login, the test clock, mock practices and scenarios stay lab-only.
+
+| Candidate (prototype location) | Class | Target |
+|---|---|---|
+| Shorten opening intervals / closing at a time incl. lunch gap (`earlyCloseEffect`, `cutAt`, `rulesSegments`) | **DOMAIN** | `src/domain` (schedule derivation next to the engine) |
+| Merge contiguous blocks (`blocks`) | **DOMAIN** | Already in the engine internally; export once |
+| Apply a change set / replace a record by id (`withException`, `withClosure`, `withAnnouncement`) | **DOMAIN** | Repository-independent pure helpers, used by the publish hook |
+| "No new UNKNOWN day" check (`checkChange`) | **DOMAIN** | Server-side publish validation (Payload hook) |
+| Replacement-period validation (`checkReplacementPeriods`, `uncoveredDays`) | **DOMAIN** | Server-side validation of closures |
+| What applies after an end date (`afterEnd`) | **DOMAIN** | Preview + publish summary |
+| Expiry filtering / history (`upcoming`, `pastRecords`, `editableAnnouncements`) | **DOMAIN** (filtering) / **WORKFLOW** (presentation) | Queries in the repository layer |
+| Edit vs. new vs. conflict decision (`existingTodayChange`, `overlappingVacation`, `earlyCloseDraft` with `existing`) | **WORKFLOW / DOMAIN boundary** | Detection = domain queries; the choice (edit / supersede / new) = cockpit workflow |
+| Versioning and undo of the latest version (`state.ts` reducer, `versionOf`, `canUndo`) | **WORKFLOW** | Payload versions + own audit collection (§9) |
+| Preview pair (`previewPair`) | **WORKFLOW** | Cockpit server action calling the engine twice |
+| Plain-German messages (`problemFor`, `unknownExplanation`, coverage texts) | **UI ONLY** (wording) on top of domain reason codes | Cockpit |
+| Button wording (`earlyCloseLabel`, "Bestehende Änderung aktualisieren", …) | **UI ONLY** | Cockpit |
+| Mock login, `sessionStorage` role, test clock, scenarios, mock directory | **LAB ONLY** | Never moved to production |
+
+### Prototype lock
+
+The prototype is complete for the staff usability test (tasks A–L in [praxis-cockpit-prototype-review.md](../reviews/praxis-cockpit-prototype-review.md)). No further prototype features are planned. Findings from the test feed into 09.2–09.5.

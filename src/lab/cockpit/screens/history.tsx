@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import s from "../cockpit.module.css";
 import { canUndo, useClock, useCockpit } from "../store";
+import { versionOf } from "../state";
 import { Button, Glyph, LinkButton, PageHead, WebsitePreview, useBusy, useFocusOnChange } from "../ui";
 import { ROLES, dayMonth, pastRecords, statusAt, type AuditEntry } from "../model";
 import { addDays } from "@/domain/time";
@@ -34,6 +35,7 @@ export function History() {
               </p>
             ) : null}
             {e.revertedBy ? <p className={s.tag}>Zurückgenommen</p> : null}
+            {!e.revertOf && !e.revertedBy && versionOf(state.audit, e) > 1 ? <p className={s.tag}>Version {versionOf(state.audit, e)} · ersetzt die vorherige Version (bleibt im Verlauf)</p> : null}
             <Link href={`/lab/praxis-cockpit/verlauf/${e.id}`} className={s.textLink}>
               Änderung ansehen<span className="visually-hidden">: {e.title}</span>
             </Link>
@@ -94,6 +96,7 @@ export function HistoryDetail({ id, entity, startUndo }: { id: string; entity?: 
           {dayLabel(entry.date, today)} · {entry.time} Uhr · {entry.actor} ({ROLES[entry.role].label})
         </p>
         {entry.detail ? <p>{entry.detail}</p> : null}
+        {!entry.revertOf && versionOf(state.audit, entry) > 1 ? <p className={s.tag}>Version {versionOf(state.audit, entry)} – die vorherige Version bleibt im Verlauf erhalten</p> : null}
         <dl className={s.compare}>
           <div>
             <dt>Vorher</dt>

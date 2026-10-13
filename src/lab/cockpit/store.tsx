@@ -4,71 +4,10 @@
 // returns to the same starting situation for the next usability session.
 
 import { createContext, useContext, useEffect, useMemo, useReducer, useState, type ReactNode } from "react";
-import { initialState, readSession, writeSession, ROLES, type AuditEntry, type CockpitData, type CockpitState, type Role } from "./model";
+import { initialState, readSession, writeSession, type CockpitData, type CockpitState, type Role } from "./model";
+import { reducer, type ChangeInput } from "./state";
 
-type ChangeInput = Omit<AuditEntry, "id" | "date" | "time" | "actor" | "role" | "snapshot">;
-
-type Action =
-  | { type: "role"; role: Role }
-  | { type: "clock"; date: string; time: string }
-  | { type: "reset" }
-  | { type: "apply"; next: CockpitData; entry: ChangeInput; id: string }
-  | { type: "revert"; id: string; revertId: string };
-
-function reducer(state: CockpitState, a: Action): CockpitState {
-  switch (a.type) {
-    case "role":
-      return { ...state, role: a.role };
-    case "clock":
-      return { ...state, clock: { date: a.date, time: a.time } };
-    case "reset":
-      return { ...initialState(), role: state.role };
-    case "apply": {
-      const who = ROLES[state.role];
-      const entry: AuditEntry = { ...a.entry, id: a.id, date: state.clock.date, time: state.clock.time, actor: who.person, role: state.role, snapshot: state.data };
-      return { ...state, seq: state.seq + 1, data: a.next, audit: [entry, ...state.audit] };
-    }
-    case "revert": {
-      const target = state.audit.find((e) => e.id === a.id);
-      if (!target?.snapshot || target.revertedBy) return state;
-      const who = ROLES[state.role];
-      const entry: AuditEntry = {
-        id: a.revertId,
-        date: state.clock.date,
-        time: state.clock.time,
-        actor: who.person,
-        role: state.role,
-        title: "Änderung zurückgenommen",
-        detail: target.title,
-        before: target.after,
-        after: target.before,
-        revertOf: target.id,
-        entityIds: target.entityIds,
-      };
-      return {
-        ...state,
-        seq: state.seq + 1,
-        data: target.snapshot,
-        audit: [entry, ...state.audit.map((e) => (e.id === target.id ? { ...e, revertedBy: entry.id } : e))],
-      };
-    }
-  }
-}
-
-export type UndoCheck = { ok: true } | { ok: false; reason: string };
-
-/** Undo only the newest still-active session change (no silent merge; praxis-cockpit.md §9.2). */
-export function canUndo(state: CockpitState, id: string): UndoCheck {
-  const e = state.audit.find((x) => x.id === id);
-  if (!e) return { ok: false, reason: "Diese Änderung gibt es nicht." };
-  if (e.revertedBy) return { ok: false, reason: "Diese Änderung wurde bereits zurückgenommen." };
-  if (e.revertOf) return { ok: false, reason: "Eine Rücknahme kann im Prototyp nicht erneut zurückgenommen werden." };
-  if (!e.snapshot) return { ok: false, reason: "Im Prototyp lassen sich nur Änderungen aus dieser Testsitzung zurücknehmen." };
-  const idx = state.audit.indexOf(e);
-  const newer = state.audit.slice(0, idx).filter((x) => !x.revertedBy && !x.revertOf);
-  if (newer.length) return { ok: false, reason: "Danach wurde noch etwas geändert. Bitte zuerst die neuere Änderung zurücknehmen." };
-  return { ok: true };
-}
+export { canUndo, type UndoCheck } from "./state";
 
 interface Store {
   state: CockpitState;
@@ -83,6 +22,8 @@ interface Store {
   /** Returns the id of the new audit entry. */
   apply: (next: CockpitData, entry: ChangeInput) => string;
   revert: (id: string) => string;
+  /** Lab scenario: publish "earlier" as another mock person. */
+  seed: (next: CockpitData, entry: ChangeInput, actorRole: Role, time: string) => string;
 }
 
 const Ctx = createContext<Store | null>(null);
@@ -121,6 +62,11 @@ export function CockpitProvider({ children }: { children: ReactNode }) {
       apply: (next, entry) => {
         const id = newId("c");
         dispatch({ type: "apply", next, entry, id });
+        return id;
+      },
+      seed: (next, entry, actorRole, time) => {
+        const id = newId("s");
+        dispatch({ type: "seed", next, entry, id, actorRole, time });
         return id;
       },
       revert: (id) => {

@@ -17,11 +17,11 @@ import { afterEnd, dateRange, longDate, previewPair, type CockpitData, type Prob
 import type { LocalDate, LocalTime } from "@/domain/time";
 
 /** Grid: edit | preview, actions below the edit column; stacked as edit → preview → actions. */
-export function EditLayout({ edit, preview, actions }: { edit: ReactNode; preview: ReactNode; actions: ReactNode }) {
+export function EditLayout({ edit, preview, actions, title = "Änderung" }: { edit: ReactNode; preview: ReactNode; actions: ReactNode; title?: string }) {
   return (
     <div className={s.editLayout}>
-      <section className={s.editPane} aria-label="Änderung">
-        <h2 className={s.paneTitle}>Änderung</h2>
+      <section className={s.editPane} aria-label={title}>
+        <h2 className={s.paneTitle}>{title}</h2>
         {edit}
       </section>
       <div className={s.previewPane}>{preview}</div>
@@ -89,7 +89,7 @@ export function LivePreview({ base, draft, moments, problem, footer }: { base: C
           <p className={s.muted}>So wird die Änderung nicht veröffentlicht. Die Website zeigt weiter den bisherigen Stand.</p>
           {problem.relatedIds[0] ? (
             <Link className={s.textLink} href={`/lab/praxis-cockpit/verlauf/eintrag?objekt=${encodeURIComponent(problem.relatedIds[0])}`}>
-              Bestehende Änderung ansehen
+              Bestehende Änderungen prüfen
             </Link>
           ) : null}
         </div>
@@ -151,5 +151,23 @@ export function Validity({ data, from, to, noun }: { data: CockpitData | null; f
       </p>
       {after ? <p className={after.clear ? s.muted : s.unclear}>{after.text}</p> : null}
     </div>
+  );
+}
+
+/**
+ * "Bereits geändert" notice for an existing published record. Sits above the form (not instead of
+ * the preview); announced politely, no focus jump. Actions: edit the record, or look at it.
+ */
+export function ExistingNotice({ title, children, actions, tag = "Bereits geändert" }: { title: string; children: ReactNode; actions?: ReactNode; tag?: string }) {
+  return (
+    <section className={s.existing} role="status" aria-live="polite" aria-label={title}>
+      <p className={s.existingTag}>
+        <Glyph name="check" size={16} />
+        {tag}
+      </p>
+      <h2 className={s.existingTitle}>{title}</h2>
+      {children}
+      {actions ? <div className={s.actions}>{actions}</div> : null}
+    </section>
   );
 }

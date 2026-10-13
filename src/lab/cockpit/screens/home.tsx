@@ -165,6 +165,14 @@ export function Home() {
                         {i.note}
                       </span>
                       {i.endsOn ? <span className={s.dateNote}>Endet automatisch: {longDate(i.endsOn)}</span> : null}
+                      {i.editHref ? (
+                        <span className={s.dateActions}>
+                          <Link href={i.editHref} className={s.textLink}>
+                            {i.editLabel}
+                            <span className="visually-hidden">: {i.note}</span>
+                          </Link>
+                        </span>
+                      ) : null}
                     </span>
                   )}
                 </li>
