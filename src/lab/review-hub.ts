@@ -2,10 +2,10 @@
 // never relies on robots.txt or obscurity. Default OFF; the final production deployment
 // simply does not set the flag, and /review answers 404.
 
+import { isReviewEnvironment } from "../content/environment.ts";
+
 /** `REVIEW_HUB_ENABLED=true` (exact, server-side env) enables the hub; anything else disables it. */
-export function isReviewHubEnabled(env: Record<string, string | undefined> = process.env): boolean {
-  return env.REVIEW_HUB_ENABLED === "true";
-}
+export const isReviewHubEnabled = isReviewEnvironment;
 
 /** Mock test account shown on the hub (lab prototype only, no real account). */
 export const REVIEW_TEST_ACCESS = { email: "team@beispiel.test", password: "test1234" } as const;

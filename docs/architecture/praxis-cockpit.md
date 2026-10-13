@@ -759,5 +759,6 @@ The prototype is complete for the staff usability test (tasks A–L in [praxis-c
   - When off, `/review` answers `notFound()` (404).
   - The page is rendered per request (`force-dynamic`), so the switch applies at runtime without a rebuild.
 - **Enable on staging:** set `REVIEW_HUB_ENABLED=true` for the staging/preview environment in the Vercel project settings (not done from this repo). For the final production deployment the variable must not be set.
+- **Same switch for ENTDECKEN:** on a review deployment, unreleased chapters (Mein Arztbesuch) appear in `/entdecken` as normal cards with the note "Vorschau · Inhalte werden noch final geprüft". This is not a release; the release gate stays authoritative in production (`src/content/environment.ts`, `chapterCard()`).
 - **Exposure:** no public navigation link, no sitemap entry, `noindex, nofollow` as both meta tag and header. It does not rely on robots.txt or obscurity.
 - **Go-live note:** the hub can be switched off, but the lab routes themselves (`/lab/*`, including the cockpit prototype) are still reachable by URL. Before the final production launch they must be excluded or gated as well (separate decision; not changed in this phase).

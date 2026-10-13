@@ -4,7 +4,8 @@ import { PageFrame } from "@/site/chrome";
 import { PageIntro } from "@/site/blocks";
 import u from "@/site/pages.module.css";
 import { resolvePuls } from "@/content/puls";
-import { CHAPTERS, chapterView } from "@/content/discovery";
+import { CHAPTERS, chapterCard, discoveryReviewMode } from "@/content/discovery";
+import { isReviewEnvironment } from "@/content/environment";
 
 export const metadata: Metadata = {
   title: "Entdecken",
@@ -16,7 +17,8 @@ type Search = Promise<Record<string, string | string[] | undefined>>;
 export default async function Entdecken({ searchParams }: { searchParams: Search }) {
   const q = await searchParams;
   const puls = resolvePuls(q);
-  const preview = q.vorschau === "freigabe";
+  const mode = discoveryReviewMode(q.vorschau, isReviewEnvironment());
+  const preview = mode === "QUERY";
   return (
     <PageFrame current="entdecken" puls={puls} tone="night">
       <PageIntro
@@ -37,9 +39,7 @@ export default async function Entdecken({ searchParams }: { searchParams: Search
         </h2>
         <ol>
           {CHAPTERS.map((c, i) => {
-            const view = c.slug ? chapterView(c, preview) : null;
-            const href = view && view.mode !== "GATED" ? `/entdecken/${c.slug}${view.mode === "PREVIEW" ? "?vorschau=freigabe" : ""}` : null;
-            const state = view?.mode === "PUBLIC" ? null : view?.mode === "PREVIEW" ? "Vorschau" : c.state === "COMING_LATER" ? "Bald entdecken" : "In Vorbereitung";
+            const { href, state, note } = chapterCard(c, mode);
             return (
               <li key={c.id} id={c.id} data-later={c.state === "COMING_LATER" ? "" : undefined}>
                 <span className={u.chapterNo}>{i + 1}</span>
@@ -52,6 +52,7 @@ export default async function Entdecken({ searchParams }: { searchParams: Search
                 )}
                 <span className={u.chapterText}>{c.teaser}</span>
                 {state ? <span className={u.chapterState}>{state}</span> : null}
+                {note ? <span className={u.chapterNote}>{note}</span> : null}
               </li>
             );
           })}

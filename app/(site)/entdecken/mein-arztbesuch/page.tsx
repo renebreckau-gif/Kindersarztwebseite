@@ -6,13 +6,14 @@ import { PageBackNav } from "@/site/blocks";
 import u from "@/site/pages.module.css";
 import d from "@/site/discovery/chapter.module.css";
 import { resolvePuls } from "@/content/puls";
-import { MEIN_ARZTBESUCH, chapterView } from "@/content/discovery";
+import { MEIN_ARZTBESUCH, STAGING_REVIEW_NOTE, chapterView, discoveryReviewMode } from "@/content/discovery";
+import { isReviewEnvironment } from "@/content/environment";
 import { RELEASE } from "@/content/release";
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
 export async function generateMetadata({ searchParams }: { searchParams: Search }): Promise<Metadata> {
-  const v = chapterView(MEIN_ARZTBESUCH, (await searchParams).vorschau === "freigabe");
+  const v = chapterView(MEIN_ARZTBESUCH, discoveryReviewMode((await searchParams).vorschau, isReviewEnvironment()) !== null);
   return {
     title: "Mein Arztbesuch",
     description: "Für Kinder erklärt: was bei einem Arztbesuch passieren kann.",
@@ -24,18 +25,23 @@ export async function generateMetadata({ searchParams }: { searchParams: Search 
 export default async function MeinArztbesuch({ searchParams }: { searchParams: Search }) {
   const q = await searchParams;
   const puls = resolvePuls(q);
-  const view = chapterView(MEIN_ARZTBESUCH, q.vorschau === "freigabe");
+  const mode = discoveryReviewMode(q.vorschau, isReviewEnvironment());
+  const view = chapterView(MEIN_ARZTBESUCH, mode !== null);
   const c = view.chapter;
 
   return (
     <PageFrame current="entdecken" puls={puls} tone="night">
       <div className={d.chapter}>
         {/* page hierarchy back — separate from the story's own "Schließen – zur Übersicht" */}
-        <PageBackNav href={view.mode === "PREVIEW" ? "/entdecken?vorschau=freigabe" : "/entdecken"} label="Entdecken" tone="night" />
+        <PageBackNav href={mode === "QUERY" && view.mode === "PREVIEW" ? "/entdecken?vorschau=freigabe" : "/entdecken"} label="Entdecken" tone="night" />
         <header className={d.head}>
           <h1 className={d.title}>{c.title}</h1>
           {view.mode === "GATED" ? null : <p className={d.intro}>{c.parentIntro}</p>}
-          {view.mode === "PREVIEW" ? (
+          {view.mode === "PREVIEW" && mode === "STAGING" ? (
+            <p className={d.previewFlag} role="note">
+              {STAGING_REVIEW_NOTE}
+            </p>
+          ) : view.mode === "PREVIEW" ? (
             <p className={d.previewFlag} role="note">
               <strong>Vorschau</strong> – noch nicht öffentlich. {RELEASE.meinArztbesuchApproved ? "" : "Das Kapitel ist für die Veröffentlichung noch nicht freigeschaltet."}
             </p>
@@ -59,7 +65,7 @@ export default async function MeinArztbesuch({ searchParams }: { searchParams: S
             </InternalNote>
           </section>
         ) : (
-          <Story scenes={view.chapter.scenes} preview={view.mode === "PREVIEW"} />
+          <Story scenes={view.chapter.scenes} preview={view.mode === "PREVIEW" && mode === "QUERY"} />
         )}
       </div>
     </PageFrame>

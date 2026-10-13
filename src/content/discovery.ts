@@ -191,5 +191,29 @@ export function chapterView(c: Chapter, preview: boolean): ChapterView {
   return { mode: "GATED", chapter: meta };
 }
 
+/**
+ * How a request may see unreleased chapters:
+ * STAGING — review deployment (REVIEW_HUB_ENABLED=true): chapters appear normally, with a quiet note.
+ * QUERY   — explicit ?vorschau=freigabe review link (any deployment).
+ * null    — the formal release gate alone decides.
+ * Review modes never change approvals and never make a chapter PUBLIC (noindex stays).
+ */
+export type ReviewMode = "STAGING" | "QUERY" | null;
+
+export function discoveryReviewMode(vorschau: unknown, reviewEnvironment: boolean): ReviewMode {
+  if (reviewEnvironment) return "STAGING";
+  return vorschau === "freigabe" ? "QUERY" : null;
+}
+
+export const STAGING_REVIEW_NOTE = "Vorschau · Inhalte werden noch final geprüft";
+
+/** Chapter card on /entdecken: link, state chip and optional quiet note. */
+export function chapterCard(c: Chapter, mode: ReviewMode): { href: string | null; state: string | null; note?: string } {
+  const view = c.slug ? chapterView(c, mode !== null) : null;
+  if (!view || view.mode === "GATED") return { href: null, state: c.state === "COMING_LATER" ? "Bald entdecken" : "In Vorbereitung" };
+  if (view.mode === "PUBLIC") return { href: `/entdecken/${c.slug}`, state: null };
+  return mode === "STAGING" ? { href: `/entdecken/${c.slug}`, state: null, note: STAGING_REVIEW_NOTE } : { href: `/entdecken/${c.slug}?vorschau=freigabe`, state: "Vorschau" };
+}
+
 /** Phrases the child copy must never use (fear/pain/bravery mechanics). */
 export const FORBIDDEN_CHILD_PHRASES = [/angst/i, /tut (gar |überhaupt )?nicht weh/i, /\bweh\b/i, /mutig/i, /tapfer/i, /keine sorge/i, /schmerz/i];

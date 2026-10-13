@@ -55,3 +55,5 @@ The complete chapter (six scenes, final images in `public/discovery/`, all track
 - via the review hub `/review`, if `REVIEW_HUB_ENABLED=true` is set
 
 The normal route still shows "In Vorbereitung". This is review availability only, **not** a publication approval: `RELEASE.meinArztbesuchApproved = false` and `RELEASE.indexable = false` are unchanged, and all formal approvals (practice, content, physician 03–05, AI-child decision) remain open without names or dates.
+
+**Update (2026-10-13, staging visibility):** On a review deployment (`REVIEW_HUB_ENABLED=true`) `/entdecken` lists "Mein Arztbesuch" as a normal chapter card with a direct link and a quiet note "Vorschau · Inhalte werden noch final geprüft". The chapter shows all six scenes without `?vorschau=freigabe`, still `noindex`. Without the switch (final production) the release gate alone decides, so the chapter stays "In Vorbereitung" while `RELEASE.meinArztbesuchApproved = false`. No approval data was changed.

@@ -7,7 +7,8 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { RELEASE } from "../release.ts";
-import { CHAPTERS, MEIN_ARZTBESUCH, chapterView } from "../discovery.ts";
+import { CHAPTERS, MEIN_ARZTBESUCH, chapterCard, chapterView, discoveryReviewMode, type ReviewMode } from "../discovery.ts";
+import { isReviewEnvironment } from "../environment.ts";
 import { LEGAL, NEEDS, PRIMARY, SITEMAP } from "../site.ts";
 
 /** All navigation / sitemap models of the public site. */
@@ -121,5 +122,54 @@ describe("/review hub (staging only)", () => {
   test("8: the hub sends noindex / nofollow", () => {
     assert.match(read("app/review/page.tsx"), /robots: \{ index: false, follow: false \}/);
     assert.match(read("next.config.ts"), /source: "\/:path\*", headers: \[\{ key: "X-Robots-Tag", value: "noindex, nofollow" \}\]/);
+  });
+});
+
+describe("Mein Arztbesuch on the staging / review deployment", () => {
+  const card = (mode: ReviewMode) => chapterCard(CHAPTERS.find((c) => c.id === "mein-arztbesuch")!, mode);
+
+  test("1 + 3: with REVIEW_HUB_ENABLED=true /entdecken lists the chapter normally, without „In Vorbereitung“", () => {
+    const mode = discoveryReviewMode(undefined, isReviewEnvironment({ REVIEW_HUB_ENABLED: "true" }));
+    assert.equal(mode, "STAGING");
+    const c = card(mode);
+    assert.equal(c.href, "/entdecken/mein-arztbesuch", "direct link, no manual ?vorschau needed");
+    assert.equal(c.state, null);
+    assert.notEqual(c.state, "In Vorbereitung");
+    assert.equal(c.note, "Vorschau · Inhalte werden noch final geprüft");
+    const page = read("app/(site)/entdecken/page.tsx");
+    assert.match(page, /discoveryReviewMode\(q\.vorschau, isReviewEnvironment\(\)\)/);
+    assert.match(page, /chapterCard\(c, mode\)/);
+  });
+
+  test("2: the chapter route in staging renders the complete six-scene version", () => {
+    const mode = discoveryReviewMode(undefined, true);
+    const v = chapterView(MEIN_ARZTBESUCH, mode !== null);
+    assert.equal(v.mode, "PREVIEW");
+    assert.equal("scenes" in v.chapter ? v.chapter.scenes.length : 0, 6);
+    const page = read("app/(site)/entdecken/mein-arztbesuch/page.tsx");
+    assert.match(page, /const view = chapterView\(MEIN_ARZTBESUCH, mode !== null\)/);
+    assert.match(page, /STAGING_REVIEW_NOTE/);
+    assert.match(page, /v\.mode === "PUBLIC" \? \{\} : \{ robots: \{ index: false, follow: false \} \}/, "still noindex");
+  });
+
+  test("4: REVIEW_HUB_ENABLED off + gate closed → production stays gated", () => {
+    for (const env of [{}, { REVIEW_HUB_ENABLED: "false" }, { REVIEW_HUB_ENABLED: "1" }]) {
+      const mode = discoveryReviewMode(undefined, isReviewEnvironment(env));
+      assert.equal(mode, null);
+      assert.deepEqual(card(mode), { href: null, state: "In Vorbereitung" });
+      assert.equal(chapterView(MEIN_ARZTBESUCH, mode !== null).mode, "GATED");
+    }
+    // the explicit review link keeps working as before
+    assert.equal(card(discoveryReviewMode("freigabe", false)).href, "/entdecken/mein-arztbesuch?vorschau=freigabe");
+  });
+
+  test("5 + 6: staging visibility is not a release and changes no approval", () => {
+    const before = JSON.stringify(MEIN_ARZTBESUCH.scenes.map((s) => [s.contentApproval, s.practiceApproval, s.medicalApproval, s.approvedBy]));
+    card("STAGING");
+    chapterView(MEIN_ARZTBESUCH, true);
+    assert.equal(JSON.stringify(MEIN_ARZTBESUCH.scenes.map((s) => [s.contentApproval, s.practiceApproval, s.medicalApproval, s.approvedBy])), before);
+    assert.equal(RELEASE.meinArztbesuchApproved, false);
+    assert.equal(RELEASE.indexable, false);
+    assert.equal(chapterView(MEIN_ARZTBESUCH, true).mode, "PREVIEW", "never PUBLIC while the gate is closed");
   });
 });
