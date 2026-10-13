@@ -15,6 +15,8 @@ Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms
 | **Database / persistence** | None. The prototype state lives in memory; a reload resets it. |
 | **Real authentication** | Not implemented. The prototype has a mock login: test accounts, and `sessionStorage` keeps only the mock role. |
 | **Public website** | Uses the same Praxis Puls engine. Changed only through the engine alignment of 09.1.1. Release gates are unchanged. |
+| **Staging review hub** | `/review` with links to the cockpit prototype, the Mein Arztbesuch review and the staging website. Only active with the server-side flag `REVIEW_HUB_ENABLED=true`; otherwise 404. |
+| **Mein Arztbesuch** | Reviewable on staging via `/entdecken/mein-arztbesuch?vorschau=freigabe`. Not released (`RELEASE.meinArztbesuchApproved = false`, `indexable = false`); formal approvals open. |
 | **Next phase** | 09.2 (data layer) starts only after the prototype test results are reviewed. |
 
 ### Phase history
@@ -26,7 +28,7 @@ Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms
 | 09.1.1 | Praxis Puls alignment: weekend holidays, time-aware special hours, grouped intervals, lunch-gap wording | `93878b6` |
 | 09.1.2 | Mock login, vacation and replacement end to end, website view for parents | `35dc9d2` |
 | 09.1.3 | Live Website-Vorschau (edit left / preview right), automatic expiry, history retention, lab test clock | `ecdd432` |
-| 09.1.4 | Editing existing changes (edit vs. supersede vs. conflict), prototype lock, documentation cleanup | this phase |
+| 09.1.4 | Editing existing changes (edit vs. supersede vs. conflict), prototype lock, documentation cleanup; staging review hub and Discovery review availability | `b5466f5` + review hub commit |
 
 **How to read this document:** §0–§14 are the Phase 09.0 architecture decision and remain valid unless a later phase note says otherwise. The phase notes at the end record what the prototype changed or proved. Statements that became outdated are marked inline ("since 09.1.x").
 
@@ -745,3 +747,17 @@ The prototype logic lives in `src/lab/cockpit/`. Nothing is moved now. Mock logi
 ### Prototype lock
 
 The prototype is complete for the staff usability test (tasks A–L in [praxis-cockpit-prototype-review.md](../reviews/praxis-cockpit-prototype-review.md)). No further prototype features are planned. Findings from the test feed into 09.2–09.5.
+
+### Staging review hub (`/review`)
+
+- **Purpose:** one URL for reviewers. It has three cards:
+  - Praxis Cockpit: mock login, with the test account shown as "nur Testdaten"
+  - Mein Arztbesuch: `?vorschau=freigabe`, status "Freigabe ausstehend"
+  - the normal staging website
+- **Switch:** server-side environment variable `REVIEW_HUB_ENABLED`.
+  - Only the exact value `true` enables the hub; the default is off.
+  - When off, `/review` answers `notFound()` (404).
+  - The page is rendered per request (`force-dynamic`), so the switch applies at runtime without a rebuild.
+- **Enable on staging:** set `REVIEW_HUB_ENABLED=true` for the staging/preview environment in the Vercel project settings (not done from this repo). For the final production deployment the variable must not be set.
+- **Exposure:** no public navigation link, no sitemap entry, `noindex, nofollow` as both meta tag and header. It does not rely on robots.txt or obscurity.
+- **Go-live note:** the hub can be switched off, but the lab routes themselves (`/lab/*`, including the cockpit prototype) are still reachable by URL. Before the final production launch they must be excluded or gated as well (separate decision; not changed in this phase).

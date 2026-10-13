@@ -45,3 +45,13 @@ Until 2026-10-11 Higgsfield returned `grace_daily_limit_reached` (`unlock_full_a
 2. **Practice and editorial approval** of all six scenes, their texts and the chapter introduction.
 3. **Decision on publishing an AI-generated child** (as for the hero). Legal and practice decision.
 4. **Release:** record the approvals (name, role, date) in `discovery.ts`, then set `RELEASE.meinArztbesuchApproved = true`.
+
+## Staging review (2026-10-13)
+
+The complete chapter (six scenes, final images in `public/discovery/`, all tracked in git) is reviewable on staging:
+
+- `/entdecken/mein-arztbesuch?vorschau=freigabe`
+- `/entdecken?vorschau=freigabe` → "Mein Arztbesuch"
+- via the review hub `/review`, if `REVIEW_HUB_ENABLED=true` is set
+
+The normal route still shows "In Vorbereitung". This is review availability only, **not** a publication approval: `RELEASE.meinArztbesuchApproved = false` and `RELEASE.indexable = false` are unchanged, and all formal approvals (practice, content, physician 03–05, AI-child decision) remain open without names or dates.

@@ -1,0 +1,132 @@
+/* Staging review hub — quiet Paper / Ink / Cobalt, no hero, no motion. */
+
+.page {
+  min-height: 100dvh;
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: clamp(2rem, 1.2rem + 4vw, 5rem) var(--space-gutter) var(--space-9);
+  display: grid;
+  gap: var(--space-8);
+  align-content: start;
+}
+.head {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 40rem;
+}
+.status {
+  justify-self: start;
+  font-size: var(--text-label);
+  color: var(--color-text-secondary);
+  border: 1px dashed color-mix(in srgb, var(--palette-ink) 38%, transparent);
+  border-radius: var(--radius-round);
+  padding: 2px 10px;
+}
+.title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(2.25rem, 1.8rem + 2vw, 3.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+.lead {
+  font-size: var(--text-body-l);
+  color: var(--color-text-secondary);
+}
+.cards {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--space-5);
+}
+@media (min-width: 60em) {
+  .cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+  }
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: clamp(1.25rem, 1rem + 1vw, 1.75rem);
+  border-radius: 16px;
+  background: #fbf9f5;
+  border: 1px solid color-mix(in srgb, var(--palette-ink) 14%, transparent);
+  box-shadow: 0 1px 2px rgb(23 26 29 / 0.05), 0 10px 28px -18px rgb(23 26 29 / 0.28);
+}
+.cardHead {
+  align-self: stretch;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.cardTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.badge {
+  font-size: var(--text-label);
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: var(--radius-round);
+  background: var(--color-surface-sunken);
+}
+.text {
+  color: var(--color-text-secondary);
+}
+.access {
+  align-self: stretch;
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: 12px;
+  border: 1px dashed color-mix(in srgb, var(--palette-ink) 38%, transparent);
+  font-size: var(--text-small);
+}
+.access dl {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+}
+.access dl div {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+}
+.access dt {
+  color: var(--color-text-secondary);
+}
+.access dd {
+  margin: 0;
+  font-weight: 600;
+}
+.accessTitle {
+  font-weight: 700;
+}
+.fine {
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+}
+.action {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: 12px;
+  background: var(--palette-cobalt-text);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+.action:hover {
+  background: #2433c4;
+}
+.action:focus-visible {
+  outline: 3px solid var(--palette-cobalt);
+  outline-offset: 3px;
+}
