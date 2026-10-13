@@ -142,10 +142,11 @@ describe("exceptions", () => {
   test("special hours today: inside the changed interval", () => {
     const r = getPracticeStatus(MON_0900, baseData({ exceptions: [exception("ex1", "2026-10-05", "2026-10-05")] }));
     assert.equal(r.status, "SPECIAL_HOURS");
-    assert.equal(r.indicator, "ATTENTION");
-    assert.equal(r.headline, "Geänderte Sprechzeit heute");
-    assert.equal(r.detail, "08:00–10:00 Uhr");
+    assert.equal(r.indicator, "OPEN");
+    assert.equal(r.headline, "Praxis geöffnet");
+    assert.equal(r.detail, "Heute bis 10:00 Uhr");
     assert.equal(r.currentInterval?.end, "10:00");
+    assert.deepEqual(r.activeException?.intervals, ["08:00–10:00 Uhr"]);
   });
 
   test("special hours today: after the changed interval → next opening from regular week", () => {
@@ -182,7 +183,8 @@ describe("exceptions", () => {
     const r = getPracticeStatus(MON_0900, d);
     assert.equal(r.status, "SPECIAL_HOURS");
     assert.equal(r.activeException?.id, "high");
-    assert.equal(r.detail, "08:00–09:30 Uhr");
+    assert.deepEqual(r.activeException?.intervals, ["08:00–09:30 Uhr"]);
+    assert.equal(r.detail, "Heute bis 09:30 Uhr");
   });
 
   test("unverified exception covering today → UNKNOWN", () => {
@@ -417,6 +419,133 @@ describe("public holidays", () => {
   test("holiday with explicit special-hours exception → SPECIAL_HOURS", () => {
     const d = baseData({ publicHolidays: ["2026-10-05"], exceptions: [exception("h", "2026-10-05", "2026-10-05")] });
     assert.equal(getPracticeStatus(MON_0900, d).status, "SPECIAL_HOURS");
+  });
+});
+
+describe("public holidays on confirmed closed weekdays (Phase 09.1.1)", () => {
+  // Sat 10 / Sun 11 October 2026 are confirmed closed in baseData (confirmedClosedWeekdays [6, 7]).
+  test("A: Saturday holiday + Saturday confirmed closed + verified schedule → CLOSED", () => {
+    const r = getPracticeStatus(at("2026-10-10T08:00:00Z"), baseData({ publicHolidays: ["2026-10-10"] })); // Sat 10:00
+    assert.equal(r.status, "CLOSED");
+    assert.equal(r.indicator, "NEUTRAL");
+    assert.equal(r.nextOpening?.label, "am Montag, 12. Oktober um 08:00 Uhr");
+  });
+
+  test("B: Sunday holiday + Sunday confirmed closed + verified schedule → CLOSED", () => {
+    const r = getPracticeStatus(at("2026-10-11T08:00:00Z"), baseData({ publicHolidays: ["2026-10-11"] })); // Sun 10:00
+    assert.equal(r.status, "CLOSED");
+    assert.equal(r.nextOpening?.label, "morgen um 08:00 Uhr");
+  });
+
+  test("a weekend holiday no longer blocks the next-opening search from Friday", () => {
+    const r = getPracticeStatus(at("2026-10-09T11:00:00Z"), baseData({ publicHolidays: ["2026-10-10"] })); // Fri 13:00
+    assert.equal(r.nextOpening?.label, "am Montag, 12. Oktober um 08:00 Uhr");
+  });
+
+  test("C: weekday holiday + REQUIRE_EXPLICIT_ENTRY + no entry → still UNKNOWN", () => {
+    assertSafeUnknown(getPracticeStatus(at("2026-10-06T07:00:00Z"), baseData({ publicHolidays: ["2026-10-06"] })), "HOLIDAY_WITHOUT_RULE");
+  });
+
+  test("a weekday without rules is not treated as closed on a holiday (absence ≠ closed)", () => {
+    const d = baseData({ publicHolidays: ["2026-10-06"] });
+    d.schedule = { ...d.schedule!, rules: d.schedule!.rules.filter((r) => r.weekday !== 2) };
+    assertSafeUnknown(getPracticeStatus(at("2026-10-06T07:00:00Z"), d), "HOLIDAY_WITHOUT_RULE");
+  });
+
+  test("D: confirmed closed Saturday holiday + verified special opening → special hours win", () => {
+    const d = baseData({ publicHolidays: ["2026-10-10"], exceptions: [exception("sa", "2026-10-10", "2026-10-10")] });
+    const r = getPracticeStatus(at("2026-10-10T07:00:00Z"), d); // Sat 09:00
+    assert.equal(r.status, "SPECIAL_HOURS");
+    assert.equal(r.indicator, "OPEN");
+    assert.equal(r.detail, "Heute bis 10:00 Uhr");
+  });
+
+  test("E: confirmed closed weekday with an opening rule on a holiday → RULE_CONFLICT", () => {
+    const d = withRules(baseData({ publicHolidays: ["2026-10-10"] }), [rule("sat-am", 6, "09:00", "11:00")]);
+    assertSafeUnknown(getPracticeStatus(at("2026-10-10T08:00:00Z"), d), "RULE_CONFLICT");
+  });
+
+  test("confirmed closed weekday holiday with an unverified schedule → UNKNOWN", () => {
+    const d = baseData({ publicHolidays: ["2026-10-10"] });
+    d.schedule = { ...d.schedule!, verification: UNCONFIRMED };
+    assertSafeUnknown(getPracticeStatus(at("2026-10-10T08:00:00Z"), d), "SCHEDULE_UNVERIFIED");
+  });
+});
+
+describe("special hours are time-aware (Phase 09.1.1)", () => {
+  // Mon 5 Oct: special 08:00–12:00 and 14:00–15:00 (CEST, UTC+2)
+  const split = () =>
+    baseData({
+      exceptions: [
+        exception("sp", "2026-10-05", "2026-10-05", {
+          intervals: [
+            { start: "08:00", end: "12:00", consultationType: "GENERAL" },
+            { start: "14:00", end: "15:00", consultationType: "GENERAL" },
+          ],
+        }),
+      ],
+    });
+
+  test("before the first interval → closed, opens today", () => {
+    const r = getPracticeStatus(at("2026-10-05T05:00:00Z"), split()); // 07:00
+    assert.equal(r.status, "SPECIAL_HOURS");
+    assert.equal(r.indicator, "NEUTRAL");
+    assert.equal(r.headline, "Praxis geschlossen");
+    assert.equal(r.detail, "Öffnet heute um 08:00 Uhr");
+    assert.ok(r.activeException);
+  });
+
+  test("inside an interval → open semantics, special metadata kept", () => {
+    const r = getPracticeStatus(at("2026-10-05T07:00:00Z"), split()); // 09:00
+    assert.equal(r.status, "SPECIAL_HOURS");
+    assert.equal(r.indicator, "OPEN");
+    assert.equal(r.headline, "Praxis geöffnet");
+    assert.equal(r.detail, "Heute bis 12:00 Uhr");
+    assert.equal(r.primaryAction.id, "CALL");
+    assert.ok(r.currentInterval);
+    assert.equal(r.activeException?.id, "sp");
+  });
+
+  test("between intervals → closed, opens later today", () => {
+    const r = getPracticeStatus(at("2026-10-05T11:00:00Z"), split()); // 13:00
+    assert.equal(r.status, "SPECIAL_HOURS");
+    assert.equal(r.indicator, "NEUTRAL");
+    assert.equal(r.headline, "Praxis geschlossen");
+    assert.equal(r.detail, "Öffnet heute um 14:00 Uhr");
+    assert.equal(r.nextOpening?.label, "heute um 14:00 Uhr");
+  });
+
+  test("after the last interval → 'Heute geschlossen' + next opening", () => {
+    const r = getPracticeStatus(at("2026-10-05T14:00:00Z"), split()); // 16:00
+    assert.equal(r.status, "SPECIAL_HOURS");
+    assert.equal(r.indicator, "NEUTRAL");
+    assert.equal(r.headline, "Heute geschlossen");
+    assert.equal(r.detail, "Öffnet morgen um 08:00 Uhr");
+  });
+
+  test("contiguous intervals are grouped into one block (types stay internal)", () => {
+    const d = baseData({
+      consultationTypes: [ACUTE_TYPE],
+      exceptions: [
+        exception("c", "2026-10-05", "2026-10-05", {
+          intervals: [
+            { start: "08:00", end: "10:00", consultationType: "GENERAL" },
+            { start: "10:00", end: "11:00", consultationType: "ACUTE" },
+            { start: "11:00", end: "12:00", consultationType: "GENERAL" },
+          ],
+        }),
+      ],
+    });
+    const r = getPracticeStatus(at("2026-10-05T07:00:00Z"), d); // 09:00
+    assert.deepEqual(r.activeException?.intervals, ["08:00–12:00 Uhr"]);
+    assert.equal(r.detail, "Heute bis 12:00 Uhr");
+    assert.equal(r.currentInterval?.end, "10:00");
+    assert.equal(r.currentInterval?.consultationType, "GENERAL");
+  });
+
+  test("intervals separated by a gap are not grouped", () => {
+    const r = getPracticeStatus(at("2026-10-05T07:00:00Z"), split());
+    assert.deepEqual(r.activeException?.intervals, ["08:00–12:00 Uhr", "14:00–15:00 Uhr"]);
   });
 });
 

@@ -210,7 +210,7 @@ function sameException(a: OpeningHourException, b: OpeningHourException) {
 
 /**
  * Resolves the plan for one local date. `today` is the evaluation date (for freshness).
- * Precedence: closures → exceptions → public-holiday policy → weekly rules.
+ * Precedence: closures → exceptions → confirmed closed weekday → public-holiday policy → weekly rules.
  * Contradictions between layers (closed vs. open) → UNKNOWN.
  */
 function resolveDay(date: LocalDate, today: LocalDate, data: PulsData): DayPlan {
@@ -247,8 +247,12 @@ function resolveDay(date: LocalDate, today: LocalDate, data: PulsData): DayPlan 
     return { kind: "SPECIAL", exception, intervals: iv, records: [exception.id], worst: w };
   }
 
-  // 3. Public holidays: never assume closed without an explicit, verified rule
-  if (data.publicHolidays.includes(date)) {
+  // 3. Public holidays: never assume closed without an explicit, verified rule.
+  //    Exception: the weekday is explicitly confirmed as regularly closed. That stronger fact
+  //    is checked with the weekly schedule below (schedule must be usable; opening rules on
+  //    the same weekday still → RULE_CONFLICT). Absence of rules alone never counts.
+  const confirmedClosedWeekday = data.schedule?.confirmedClosedWeekdays.includes(weekdayOf(date)) ?? false;
+  if (data.publicHolidays.includes(date) && !confirmedClosedWeekday) {
     if (data.holidayPolicy.mode === "REQUIRE_EXPLICIT_ENTRY") return { kind: "UNKNOWN", reason: "HOLIDAY_WITHOUT_RULE", records: [] };
     const hf = fresh(data.holidayPolicy.verification, today, "openingHours");
     if (!isUsable(hf)) return { kind: "UNKNOWN", reason: "HOLIDAY_POLICY_UNVERIFIED", records: [] };
@@ -444,23 +448,39 @@ export function getPracticeStatus(now: Date, data: PulsData, options: PulsOption
   const current = intervals.find((iv) => iv.start <= nowMin && nowMin < iv.end);
   const block = current ? blocks(intervals).find((b) => b.start <= nowMin && nowMin < b.end)! : undefined;
 
-  // ---- special hours (the whole day is governed by the exception)
+  // ---- special hours: the exception governs the day, but the headline answers
+  // "open right now?" exactly like a regular day. SPECIAL_HOURS + activeException keep
+  // the information that today's hours differ (subordinate, for details/UI).
   if (plan.kind === "SPECIAL") {
     const ex = plan.exception;
-    const list = intervals.map((iv) => `${formatMinutes(iv.start)}–${formatMinutes(iv.end)} Uhr`);
-    const next = current ? undefined : findNextOpening(today, nowMin, data, searchDays, plan);
-    return {
+    const list = blocks(intervals).map((b) => `${formatMinutes(b.start)}–${formatMinutes(b.end)} Uhr`);
+    const special = {
       ...base,
-      status: "SPECIAL_HOURS",
-      indicator: "ATTENTION",
-      headline: "Geänderte Sprechzeit heute",
-      detail: list.join(", "),
-      primaryAction: current ? A.call : A.details,
-      secondaryActions: current ? [A.details] : [A.hours],
-      currentInterval: current ? { start: formatMinutes(current.start), end: formatMinutes(current.end), consultationType: current.type } : undefined,
-      consultationType: current?.type,
-      nextOpening: next,
+      status: "SPECIAL_HOURS" as const,
       activeException: { id: ex.id, kind: ex.kind, message: ex.publicMessage, intervals: list },
+    };
+    if (current && block) {
+      return {
+        ...special,
+        indicator: "OPEN",
+        headline: "Praxis geöffnet",
+        detail: `Heute bis ${formatMinutes(block.end)} Uhr`,
+        primaryAction: A.call,
+        secondaryActions: [A.hours],
+        currentInterval: { start: formatMinutes(current.start), end: formatMinutes(current.end), consultationType: current.type },
+        consultationType: current.type,
+      };
+    }
+    const next = findNextOpening(today, nowMin, data, searchDays, plan);
+    const laterToday = intervals.some((iv) => iv.start > nowMin);
+    return {
+      ...special,
+      indicator: "NEUTRAL",
+      headline: laterToday ? "Praxis geschlossen" : "Heute geschlossen",
+      detail: next ? `Öffnet ${next.label}` : "Nächste Sprechzeit ansehen",
+      primaryAction: A.hours,
+      secondaryActions: [A.emergency],
+      nextOpening: next,
     };
   }
 

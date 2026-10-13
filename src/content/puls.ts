@@ -52,7 +52,8 @@ export function resolvePuls(params: { vorschau?: string | string[]; zeit?: strin
     chip: result.indicator === "NONE" ? "" : result.headline,
     headline: result.headline,
     detail: result.detail,
-    reason: typeLabel && iv ? `Jetzt bis ${iv.end} Uhr: ${typeLabel}` : undefined,
+    // Special hours stay visible, but subordinate to the open/closed headline.
+    reason: [result.status === "SPECIAL_HOURS" ? "Geänderte Sprechzeit heute" : "", typeLabel && iv ? `Jetzt bis ${iv.end} Uhr: ${typeLabel}` : ""].filter(Boolean).join(" · ") || undefined,
     action: { label: result.primaryAction.label, kind: ACTION_KIND[result.primaryAction.id] ?? "hours" },
     secondary: secondary ? { label: secondary.label, kind: (ACTION_KIND[secondary.id] ?? "hours") as "call" | "hours" | "emergency" } : undefined,
   };

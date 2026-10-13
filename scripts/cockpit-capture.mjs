@@ -143,7 +143,7 @@ await shot("02-frueher-schliessen-form-390x844.png");
 await click("Vorschau ansehen", "button");
 await sleep(600);
 await shot("03-frueher-schliessen-vorschau-390x844.png");
-await click("Heute um 13:00 schließen", "button");
+await click("Nachmittagssprechzeit heute entfallen lassen", "button");
 await sleep(600);
 await shot("04-frueher-schliessen-erfolg-390x844.png");
 
@@ -210,6 +210,54 @@ await shot("16-hinweis-ohne-enddatum-390x844.png");
 await viewport("1440x900");
 await go("/lab/praxis-cockpit/verlauf");
 await shot("17-verlauf-1440x900.png");
+
+// ---------------------------------------------------------------- Phase 09.1.1 alignment QA (390 + 1440)
+async function websiteAt(date, time) {
+  await click("Website-Vorschau", "nav a");
+  await fill("Tag", date);
+  await fill("Uhrzeit", time);
+  await sleep(400);
+}
+for (const vp of ["390x844", "1440x900"]) {
+  await viewport(vp);
+  // 1 + 2: weekend holiday vs. weekday holiday (fresh state)
+  await go("/lab/praxis-cockpit");
+  await websiteAt("2026-10-31", "10:00");
+  await shot(`20-wochenend-feiertag-31-oktober-${vp}.png`);
+  await fill("Tag", "2026-12-25");
+  await sleep(400);
+  await shot(`21-werktag-feiertag-25-dezember-${vp}.png`);
+  // 5: lunch-gap case (13:00) — form explanation and preview with exact button
+  await click("Start", "nav a");
+  await click("Heute früher schließen", "a");
+  await fill("Bis wann ist heute geöffnet?", "13:00");
+  await shot(`22-frueher-schliessen-13-uhr-hinweis-${vp}.png`);
+  await click("Vorschau ansehen", "button");
+  await sleep(600);
+  await shot(`23-frueher-schliessen-13-uhr-vorschau-${vp}.png`);
+  // 3 + 4: special-hours day (close at 15:00) — preview while open and while closed
+  await click("Zurück", "button");
+  await fill("Bis wann ist heute geöffnet?", "15:00");
+  await click("Vorschau ansehen", "button");
+  await sleep(600);
+  await click("Heute um 15:00 Uhr schließen", "button");
+  await sleep(600);
+  await websiteAt("2026-10-13", "09:20");
+  await shot(`24-sonderzeit-geoeffnet-${vp}.png`);
+  await fill("Uhrzeit", "13:00");
+  await sleep(400);
+  await shot(`25-sonderzeit-geschlossen-mittag-${vp}.png`);
+  await fill("Uhrzeit", "15:30");
+  await sleep(400);
+  await shot(`26-sonderzeit-nach-letzter-sprechzeit-${vp}.png`);
+}
+// 10:30 inside the morning block (390)
+await viewport("390x844");
+await go("/lab/praxis-cockpit/frueher-schliessen");
+await fill("Bis wann ist heute geöffnet?", "10:30");
+await click("Vorschau ansehen", "button");
+await sleep(600);
+await shot("27-frueher-schliessen-10-30-vorschau-390x844.png");
 
 writeFileSync(join(OUT, "audit.json"), JSON.stringify(audit, null, 2));
 const issues = Object.entries(audit).filter(([, a]) => a.overflowX || a.smallTargets.length || a.unlabeled.length || a.unnamed || a.h1 !== 1);

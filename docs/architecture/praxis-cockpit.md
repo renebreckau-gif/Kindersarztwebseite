@@ -547,3 +547,22 @@ Each phase ends as usual: tests, commit, report, stop.
 1. **Weekend holidays resolve to UNKNOWN.** The engine checks the holiday policy before `confirmedClosedWeekdays`. With `REQUIRE_EXPLICIT_ENTRY`, Saturday 31.10.2026 and 26.12.2026 show "Aktuelle Sprechzeiten" on the **live** site as well (verified with `PULS_DATA`). This contradicts [practice-pulse-logic.md](practice-pulse-logic.md) §3. It is safe (never falsely open) but needs a deliberate decision: either confirmed closed weekdays win over unresolved holidays, or staff resolve weekend holidays explicitly.
 2. **Special hours read as "Geänderte Sprechzeit heute" all day.** This holds even after the last interval ended, and adjacent intervals are listed separately ("08:00–10:00 Uhr, 10:00–11:00 Uhr, 11:00–12:00 Uhr"). The brief expected "geöffnet bis 13:00", then "geschlossen". Wording and merging should be decided before 09.5.
 3. **Early close inside the lunch break** (13:00 between 12:00 and 14:00) has the same effect as closing at 12:00. The prototype explains this; usability testing should show whether staff understand it.
+
+---
+
+## Phase 09.1.1 note: Praxis Puls / cockpit alignment (2026-10-13)
+
+The three findings from 09.1 are resolved in the engine (spec: [practice-pulse-logic.md](practice-pulse-logic.md) §2a, §2b):
+
+1. A holiday on a confirmed closed weekday stays CLOSED. Weekday holidays stay UNKNOWN.
+2. Special hours are time-aware: open/closed headline, SPECIAL_HOURS + `activeException` kept as subordinate metadata.
+3. Contiguous special intervals are grouped.
+
+**Closed-gap UX rule for "Heute früher schließen"** (cockpit responsibility, `earlyCloseEffect` / `earlyCloseLabel` in `src/lab/cockpit/model.ts`):
+
+- **Time inside an opening block** (e.g. 10:30 or 15:00): the block is cut at that time; later blocks are removed. Button: "Heute um 10:30 Uhr schließen".
+- **Time in an already closed gap** (e.g. 13:00 between 08–12 and 14–16): this is a valid decision, not an error. The cockpit says "Um 13:00 Uhr ist die Praxis regulär bereits geschlossen." and explains the real effect: "Mit dieser Änderung entfällt die Nachmittagssprechzeit von 14:00–16:00 Uhr. Die letzte Sprechzeit endet heute um 12:00 Uhr."
+  - Button: "Nachmittagssprechzeit heute entfallen lassen", never "Heute um 13:00 Uhr schließen".
+  - The chosen time is not snapped silently. The audit entry keeps both the chosen time and the resulting hours.
+- **Time after the last block or before the first:** a field error, with a pointer to "Heute geschlossen".
+- Open/closed status in the preview still comes only from `getPracticeStatus()`; the React components hold no status logic.

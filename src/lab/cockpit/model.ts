@@ -277,6 +277,41 @@ export function cutAt(segs: Segment[], time: LocalTime): Segment[] {
   return segs.filter((s) => parseTime(s.start) < t).map((s) => ({ ...s, end: parseTime(s.end) > t ? time : s.end }));
 }
 
+export interface EarlyCloseEffect {
+  /** INSIDE: time lies in an opening block · GAP: practice is already regularly closed then
+   *  (e.g. lunch break) · TOO_LATE: after the last block · TOO_EARLY: nothing would remain. */
+  kind: "INSIDE" | "GAP" | "TOO_LATE" | "TOO_EARLY";
+  segments: Segment[];
+  lastEnd?: LocalTime;
+  /** Whole opening blocks that disappear (e.g. 14:00–16:00). */
+  removed: { start: LocalTime; end: LocalTime }[];
+}
+
+/**
+ * Change set for "Heute früher schließen" (cockpit responsibility: what the request does to
+ * today's intervals). Whether the practice is open is decided by the engine, not here.
+ */
+export function earlyCloseEffect(segs: Segment[], time: LocalTime): EarlyCloseEffect {
+  const bl = blocks(segs);
+  const t = parseTime(time);
+  if (!bl.length || t >= parseTime(bl[bl.length - 1].end)) return { kind: "TOO_LATE", segments: segs, lastEnd: lastEnd(segs), removed: [] };
+  if (t <= parseTime(bl[0].start)) return { kind: "TOO_EARLY", segments: [], removed: bl };
+  const cut = cutAt(segs, time);
+  return {
+    kind: bl.some((b) => parseTime(b.start) < t && t < parseTime(b.end)) ? "INSIDE" : "GAP",
+    segments: cut,
+    lastEnd: lastEnd(cut),
+    removed: bl.filter((b) => parseTime(b.start) >= t),
+  };
+}
+
+/** Exact publish wording: never "um 13:00 schließen" when 13:00 is already a closed gap. */
+export function earlyCloseLabel(e: EarlyCloseEffect, time: LocalTime): string {
+  if (e.kind !== "GAP") return `Heute um ${time} Uhr schließen`;
+  const afternoon = e.removed.every((b) => parseTime(b.start) >= parseTime("12:00"));
+  return afternoon ? "Nachmittagssprechzeit heute entfallen lassen" : `Sprechzeit ${e.removed.map((b) => `${b.start}–${b.end}`).join(", ")} Uhr heute entfallen lassen`;
+}
+
 export const lastEnd = (segs: Segment[]) => (segs.length ? segs.reduce((m, s) => (parseTime(s.end) > parseTime(m) ? s.end : m), segs[0].end) : undefined);
 
 // ------------------------------------------------------------------ change check ("no new UNKNOWN")

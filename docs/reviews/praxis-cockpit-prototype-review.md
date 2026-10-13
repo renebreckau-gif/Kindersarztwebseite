@@ -30,7 +30,7 @@ Ablauf je Testperson (ca. 20 Minuten):
 
 **Erfolgskriterien**
 
-- **A:** Die Person nutzt „Heute früher schließen“, wählt 13:00 und sieht die Vorschau. Sie bestätigt mit „Heute um 13:00 schließen“ und versteht, dass die Nachmittagssprechstunde entfällt.
+- **A:** Die Person nutzt „Heute früher schließen“, wählt 13:00 und sieht die Vorschau. Sie versteht den Hinweis, dass die Praxis um 13:00 Uhr regulär schon geschlossen ist, und bestätigt mit „Nachmittagssprechzeit heute entfallen lassen“.
 - **B:** Zeitraum Montag–Freitag nächster Woche, eine Vertretung „Praxis Beispiel A“ für den ganzen Zeitraum. Die Person liest die Vorschau, versteht das automatische Ende und veröffentlicht.
 - **C:** Die Person findet „Was sieht die Website?“ (Startseite oder Navigation) oder den Punkt unter „Prüfen“. Sie kann sagen, dass Eltern keinen Status sehen, weil der Feiertag nicht geklärt ist.
 - **D:** Die Person findet „Änderung zurücknehmen“ (Startseite oder Verlauf) und bestätigt die Rücknahme.
@@ -47,8 +47,10 @@ Ablauf je Testperson (ca. 20 Minuten):
 
 ## Bekannte Punkte vor dem Test
 
-- **Samstag-Feiertage** (31.10., 26.12.) erscheinen unter „Prüfen“. Die echte Praxis-Puls-Logik zeigt dort derzeit keinen Status, obwohl am Wochenende ohnehin geschlossen ist. Das muss entschieden werden (praxis-cockpit.md, Phase-09.1-Notiz).
-- Nach „Heute früher schließen“ zeigt die Website-Vorschau den ganzen Tag „Geänderte Sprechzeit heute“ mit einzelnen Zeitblöcken, nicht „geöffnet bis …“ / „geschlossen“.
+- Seit Phase 09.1.1 gilt:
+  - Feiertage am Samstag oder Sonntag (31.10., 26.12.) sind durch die Wochenendregel geklärt. Nur der 25.12. (Freitag) steht unter „Prüfen“.
+  - An Tagen mit Sonderzeit sagt die Website zuerst „geöffnet“ oder „geschlossen“. „Geänderte Sprechzeit heute“ steht nur als Zusatz darunter.
+- Liegt die gewählte Uhrzeit in der Mittagspause (z. B. 13:00 Uhr), erklärt das Cockpit, dass die Nachmittagssprechzeit entfällt. Der Knopf heißt dann „Nachmittagssprechzeit heute entfallen lassen“. Beobachten: Wird das verstanden?
 - Ein Neuladen der Seite setzt den Prototyp zurück.
 
 ---

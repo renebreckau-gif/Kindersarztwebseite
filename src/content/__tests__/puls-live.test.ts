@@ -89,6 +89,37 @@ test("a verified, announced weekend opening still overrides the regular closure"
   assert.notEqual(r.status, "UNKNOWN");
 });
 
+test("holiday on a confirmed closed weekend day → CLOSED (31.10.2026 is a Saturday)", () => {
+  const p = resolvePuls({}, at("2026-10-31", "10:00"));
+  assert.equal(p.result.status, "CLOSED");
+  assert.equal(p.view.detail, "Öffnet am Montag, 2. November um 08:00 Uhr");
+  // Friday before: the weekend holiday no longer hides the next opening
+  assert.equal(resolvePuls({}, at("2026-10-30", "13:00")).view.detail, "Öffnet am Montag, 2. November um 08:00 Uhr");
+});
+
+test("special-hours day on the live data: headline says open/closed, special note subordinate", () => {
+  const data = {
+    ...PULS_DATA,
+    exceptions: [
+      {
+        id: "mi-kurz",
+        kind: "SPECIAL_HOURS" as const,
+        startDate: "2026-10-14",
+        endDate: "2026-10-14",
+        intervals: [{ start: "08:00", end: "10:00", consultationType: "GENERAL" as const }],
+        priority: 1,
+        verification: { status: "VERIFIED_CURRENT" as const, lastVerified: "2026-10-13", reviewDue: "2026-10-14", sourceIds: [] },
+      },
+    ],
+  };
+  const open = getPracticeStatus(at("2026-10-14", "09:00"), data);
+  assert.equal(open.indicator, "OPEN");
+  assert.equal(open.headline, "Praxis geöffnet");
+  const after = getPracticeStatus(at("2026-10-14", "11:00"), data);
+  assert.equal(after.indicator, "NEUTRAL");
+  assert.equal(after.headline, "Heute geschlossen");
+});
+
 test("public holiday stays UNKNOWN (F49 unconfirmed)", () => {
   const p = resolvePuls({}, at("2026-12-25", "09:00")); // Friday, 1. Weihnachtstag
   assert.equal(p.result.status, "UNKNOWN");

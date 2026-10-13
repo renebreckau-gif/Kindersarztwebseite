@@ -357,7 +357,10 @@ export function Choice<T extends string>({ legend, options, value, onChange, nam
 /** Minimal view model for the public StatusStatement (same mapping idea as src/content/puls.ts). */
 export function toPulsView(result: PracticeStatusResult): PulsView {
   const iv = result.currentInterval;
-  const reason = iv && iv.consultationType !== "GENERAL" ? `Jetzt bis ${iv.end} Uhr: ${typeLabel(iv.consultationType)}` : undefined;
+  // Same reason line as src/content/puls.ts (display only; status comes from the engine).
+  const reason =
+    [result.status === "SPECIAL_HOURS" ? "Geänderte Sprechzeit heute" : "", iv && iv.consultationType !== "GENERAL" ? `Jetzt bis ${iv.end} Uhr: ${typeLabel(iv.consultationType)}` : ""].filter(Boolean).join(" · ") ||
+    undefined;
   return {
     mode: "PREVIEW",
     result,

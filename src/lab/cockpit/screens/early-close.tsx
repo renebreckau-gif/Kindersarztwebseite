@@ -4,10 +4,43 @@ import { useState } from "react";
 import s from "../cockpit.module.css";
 import { useCockpit } from "../store";
 import { Blocked, Button, ConfirmedBy, PageHead, Success, TextField, TimeField, WebsitePreview, useBusy } from "../ui";
-import { MOCK_NOW, MOCK_TODAY, ROLES, blocks, checkChange, cutAt, entryVerification, lastEnd, plannedSegments, statusAt, visibleAnnouncements, type CockpitData, type Problem } from "../model";
+import {
+  MOCK_NOW,
+  MOCK_TODAY,
+  ROLES,
+  blocks,
+  checkChange,
+  earlyCloseEffect,
+  earlyCloseLabel,
+  entryVerification,
+  lastEnd,
+  plannedSegments,
+  statusAt,
+  visibleAnnouncements,
+  type CockpitData,
+  type EarlyCloseEffect,
+  type Problem,
+} from "../model";
 import { formatMinutes, parseTime } from "@/domain/time";
 
 type Step = "form" | "preview" | "blocked" | "done";
+
+const range = (b: { start: string; end: string }[]) => b.map((x) => `${x.start}–${x.end}`).join(" und ");
+
+/** Explains a lunch-gap choice: valid decision, not an error — and never silently snapped. */
+function GapExplanation({ effect, time }: { effect: EarlyCloseEffect; time: string }) {
+  const afternoon = effect.removed.every((b) => parseTime(b.start) >= parseTime("12:00"));
+  return (
+    <div className={s.note} role="note">
+      <p>
+        <strong>Um {time} Uhr ist die Praxis regulär bereits geschlossen.</strong>
+      </p>
+      <p>
+        Mit dieser Änderung entfällt die {afternoon ? "Nachmittagssprechzeit" : "Sprechzeit"} von {range(effect.removed)} Uhr. Die letzte Sprechzeit endet heute um {effect.lastEnd} Uhr.
+      </p>
+    </div>
+  );
+}
 
 export function EarlyClose() {
   const { state, apply } = useCockpit();
@@ -22,15 +55,15 @@ export function EarlyClose() {
 
   const today = plannedSegments(state.data, MOCK_TODAY);
   const end = lastEnd(today);
-  const cut = cutAt(today, time || "00:00");
-  const effective = lastEnd(cut);
-  const inBreak = Boolean(effective && time && parseTime(effective) < parseTime(time));
-  const resume = time ? today.find((x) => parseTime(x.start) >= parseTime(time))?.start : undefined;
+  const valid = /^\d{2}:\d{2}$/.test(time);
+  const effect = valid ? earlyCloseEffect(today, time) : undefined;
+  const label = effect ? earlyCloseLabel(effect, time) : "";
 
   function preview() {
-    if (!time) return setError("Bitte eine Uhrzeit wählen.");
+    if (!valid || !effect) return setError("Bitte eine Uhrzeit wählen.");
     if (parseTime(time) <= parseTime(MOCK_NOW)) return setError(`Die Uhrzeit liegt vor jetzt (${MOCK_NOW} Uhr). Wenn die Praxis sofort schließt, nutzen Sie „Heute geschlossen“.`);
-    if (!end || parseTime(time) >= parseTime(end)) return setError(end ? `Heute ist ohnehin nur bis ${end} Uhr geöffnet.` : "Heute ist ohnehin keine Sprechzeit geplant.");
+    if (effect.kind === "TOO_LATE") return setError(end ? `Heute ist ohnehin nur bis ${end} Uhr geöffnet.` : "Heute ist ohnehin keine Sprechzeit geplant.");
+    if (effect.kind === "TOO_EARLY") return setError("Zu dieser Uhrzeit hat die Praxis heute noch nicht geöffnet. Bitte „Heute geschlossen“ nutzen.");
     setError(undefined);
     const who = ROLES[state.role];
     const next: CockpitData = {
@@ -42,7 +75,7 @@ export function EarlyClose() {
           kind: "SPECIAL_HOURS",
           startDate: MOCK_TODAY,
           endDate: MOCK_TODAY,
-          intervals: cut.map((x) => ({ start: x.start, end: x.end, consultationType: x.type })),
+          intervals: effect.segments.map((x) => ({ start: x.start, end: x.end, consultationType: x.type })),
           publicMessage: message.trim() || undefined,
           priority: 1,
           verification: entryVerification(who.person, state.role, MOCK_TODAY),
@@ -58,13 +91,13 @@ export function EarlyClose() {
   }
 
   function publish() {
-    if (!draft) return;
+    if (!draft || !effect) return;
     run(600, () => {
       const id = apply(draft, {
-        title: `Heute um ${time} schließen`,
-        detail: "Öffnungszeit heute geändert",
-        before: `bis ${end}`,
-        after: `bis ${effective}${inBreak ? ` (gewählt: ${time})` : ""}`,
+        title: label,
+        detail: effect.kind === "GAP" ? `Gewählt: ${time} Uhr (regulär bereits geschlossen)` : "Öffnungszeit heute geändert",
+        before: range(blocks(today)),
+        after: range(blocks(effect.segments)),
         undoSentence: `Die Praxis wäre heute wieder bis ${end} geöffnet.`,
         entityIds: [draft.exceptions.at(-1)!.id],
       });
@@ -73,11 +106,11 @@ export function EarlyClose() {
     });
   }
 
-  const after = formatMinutes(Math.max(parseTime(time || "00:00"), parseTime(effective ?? "00:00")) + 1);
+  const after = effect?.lastEnd ? formatMinutes(parseTime(effect.lastEnd) + 1) : MOCK_NOW;
 
   return (
     <div className={s.flow}>
-      <PageHead title="Heute früher schließen" focusKey={step} intro={step === "form" ? `Heute geplant: ${blocks(today).map((b) => `${b.start}–${b.end}`).join(" und ") || "keine Sprechzeit"}` : undefined} />
+      <PageHead title="Heute früher schließen" focusKey={step} intro={step === "form" ? `Heute geplant: ${range(blocks(today)) || "keine Sprechzeit"} Uhr` : undefined} />
 
       {step === "form" ? (
         <form
@@ -89,10 +122,9 @@ export function EarlyClose() {
           noValidate
         >
           <TimeField label="Bis wann ist heute geöffnet?" value={time} onChange={setTime} error={error} big />
-          {inBreak && !error ? (
-            <p className={s.note}>
-              Zwischen {effective} und {resume} Uhr ist ohnehin Pause. Praktisch endet die Sprechzeit heute also um {effective} Uhr; die Sprechzeit {resume}–{end} Uhr entfällt.
-            </p>
+          {effect && !error && effect.kind === "GAP" && parseTime(time) > parseTime(MOCK_NOW) ? <GapExplanation effect={effect} time={time} /> : null}
+          {effect && !error && effect.kind === "INSIDE" && parseTime(time) > parseTime(MOCK_NOW) ? (
+            <p className={s.note}>Danach gilt heute: {range(blocks(effect.segments))} Uhr.</p>
           ) : null}
           <TextField label="Hinweis für die Website" optional value={message} onChange={setMessage} max={140} placeholder="Heute schließen wir früher." />
           <div className={s.actions}>
@@ -103,18 +135,17 @@ export function EarlyClose() {
         </form>
       ) : null}
 
-      {step === "preview" && draft ? (
+      {step === "preview" && draft && effect ? (
         <div className={s.stack}>
+          {effect.kind === "GAP" ? <GapExplanation effect={effect} time={time} /> : null}
+          <p className={s.lead}>Sprechzeiten heute danach: {range(blocks(effect.segments))} Uhr</p>
           <WebsitePreview heading="Jetzt" when={`Heute, ${MOCK_NOW} Uhr`} result={statusAt(draft, MOCK_TODAY, MOCK_NOW)} announcements={visibleAnnouncements(draft, MOCK_TODAY)} />
-          <WebsitePreview heading="Danach" when={`Heute ab ${effective} Uhr`} result={statusAt(draft, MOCK_TODAY, after)} />
-          <p className={s.note}>
-            {inBreak ? `Gewählt: ${time} Uhr. Weil ab ${effective} Uhr ohnehin Pause ist, endet die Sprechzeit praktisch um ${effective} Uhr. ` : ""}
-            Morgen gelten wieder die normalen Sprechzeiten. Die Änderung endet heute Abend automatisch.
-          </p>
+          <WebsitePreview heading="Danach" when={`Heute ab ${effect.lastEnd} Uhr`} result={statusAt(draft, MOCK_TODAY, after)} />
+          <p className={s.note}>Morgen gelten wieder die normalen Sprechzeiten. Die Änderung endet heute Abend automatisch.</p>
           <ConfirmedBy />
           <div className={s.actions}>
             <Button onClick={publish} busy={busy} busyLabel="Wird übernommen …">
-              Heute um {time} schließen
+              {label}
             </Button>
             <Button variant="quiet" onClick={() => setStep("form")}>
               Zurück
