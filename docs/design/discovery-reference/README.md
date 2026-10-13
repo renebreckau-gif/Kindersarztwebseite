@@ -5,9 +5,9 @@ Process: ART DIRECTION → APPROVED VISUAL REFERENCE → ASSET PRODUCTION → CO
 
 Precedent: [hero-reference/README.md](../hero-reference/README.md).
 
-> **Visual approval is not medical, practice or content approval.** These files are approved as artwork only. The editorial (content), practice, physician (scenes 03, 04, 05) and AI-child publication approvals are **still open**; the forms are in [docs/reviews/discovery-approval-package.md](../../reviews/discovery-approval-package.md). `RELEASE.meinArztbesuchApproved` stays `false`.
+> **Visual approval is not medical, practice or content approval.** These files are approved as artwork only. The editorial (content), practice, physician (scenes 03, 04, 05) and AI-child publication approvals are **still open**; the forms are in [docs/reviews/discovery-approval-package.md](../../reviews/discovery-approval-package.md). `RELEASE.meinArztbesuchApproved` stays `false`; the chapter is nevertheless published since 2026-10-13 by explicit decision (`RELEASE.meinArztbesuchPublished = true`).
 
-> **Source references.** These files are the approved masters under `docs/`. Production exports derived from them (no other changes, no upscaling) live in `public/discovery/` (2026-10-12). They are reviewable in the staging preview (`?vorschau=freigabe`); publication is controlled by `RELEASE.meinArztbesuchApproved` and the open approvals.
+> **Source references.** These files are the approved masters under `docs/`. Production exports derived from them (no other changes, no upscaling) live in `public/discovery/` (2026-10-12). They are published on the normal route `/entdecken/mein-arztbesuch`. Publication is controlled by `RELEASE.meinArztbesuchPublished`; the approval records stay separate and truthful.
 
 ## Files
 

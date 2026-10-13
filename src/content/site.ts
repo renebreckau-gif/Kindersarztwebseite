@@ -47,7 +47,7 @@ export const SITEMAP: { label: string; href: string; children: { label: string; 
       { label: "Kontakt & Anfahrt", href: "/praxis/kontakt" },
     ],
   },
-  { label: "Entdecken", href: "/entdecken", children: [{ label: "Mein Arztbesuch", href: "/entdecken#mein-arztbesuch" }] },
+  { label: "Entdecken", href: "/entdecken", children: [{ label: "Mein Arztbesuch", href: "/entdecken/mein-arztbesuch" }] },
 ];
 
 export const LEGAL = [
@@ -97,7 +97,7 @@ export const AGES: AgeRange[] = [
     name: "Kindergartenjahre",
     intro: "Fragen stellen, Dinge verstehen wollen. Hier finden Sie Orientierung für die Kindergartenzeit.",
     scale: 0.52,
-    topics: [VORSORGE, IMPFEN, { label: "Mein Arztbesuch", href: "/entdecken#mein-arztbesuch", text: "Für Kinder erklärt – in Vorbereitung" }],
+    topics: [VORSORGE, IMPFEN, { label: "Mein Arztbesuch", href: "/entdecken/mein-arztbesuch", text: "Für Kinder erklärt" }],
   },
   {
     id: "7-12",
@@ -106,7 +106,7 @@ export const AGES: AgeRange[] = [
     name: "Schuljahre",
     intro: "Mehr Selbstständigkeit, neue Fragen. Hier finden Sie Orientierung für die Schulzeit.",
     scale: 0.74,
-    topics: [VORSORGE, IMPFEN, { label: "Mein Arztbesuch", href: "/entdecken#mein-arztbesuch", text: "Für Kinder erklärt – in Vorbereitung" }],
+    topics: [VORSORGE, IMPFEN, { label: "Mein Arztbesuch", href: "/entdecken/mein-arztbesuch", text: "Für Kinder erklärt" }],
   },
   {
     id: "13-17",

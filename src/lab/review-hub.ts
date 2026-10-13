@@ -31,10 +31,10 @@ export const REVIEW_CARDS: ReviewCard[] = [
   {
     id: "discovery",
     title: "Mein Arztbesuch",
-    text: "Review der sechs Szenen im Bereich Entdecken.",
-    status: "Freigabe ausstehend",
+    text: "Die sechs Szenen im Bereich Entdecken – so, wie sie auf der Website erscheinen.",
+    status: "Veröffentlicht",
     action: "Mein Arztbesuch öffnen",
-    href: "/entdecken/mein-arztbesuch?vorschau=freigabe",
+    href: "/entdecken/mein-arztbesuch",
   },
   {
     id: "website",

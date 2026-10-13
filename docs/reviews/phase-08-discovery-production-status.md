@@ -23,7 +23,7 @@ Checkpoint: Phase 08.8 · updated 2026-10-12 · References and provenance: [docs
 | Production integrated | **yes** (`public/discovery/`, `visual.class` = `AI_CONCEPTUAL`) |
 | Available in staging preview | **yes**: `/entdecken/mein-arztbesuch?vorschau=freigabe` (staging / pre-launch build, not the official practice website) |
 | Formally approved (practice, content, medical 03–05, AI child) | **no**, all open |
-| Publicly released | **no**: `RELEASE.meinArztbesuchApproved = false`; the whole site stays `noindex` (`RELEASE.indexable = false`) |
+| Publicly released | **yes, since 2026-10-13** by explicit decision (`RELEASE.meinArztbesuchPublished = true`); formal approvals still open (`RELEASE.meinArztbesuchApproved = false`); the whole site stays `noindex` (`RELEASE.indexable = false`) |
 
 **Correction (2026-10-13):** Approval entries for practice, content, medical review and the AI-child decision (named reviewer, dated 2026-10-12) had been recorded on 2026-10-12 and the chapter was briefly released (commit `4a35e08`). That provenance was not confirmed approval evidence. It was removed and the release gate was reset. The image integration from that commit remains.
 
@@ -44,7 +44,7 @@ Until 2026-10-11 Higgsfield returned `grace_daily_limit_reached` (`unlock_full_a
 1. **Physician review** of scenes 03, 04 and 05 (instrument form, nothing medically misleading). For scene 04: listening over the sweater, and the silver chest piece, which deviates from the cobalt/brass brief.
 2. **Practice and editorial approval** of all six scenes, their texts and the chapter introduction.
 3. **Decision on publishing an AI-generated child** (as for the hero). Legal and practice decision.
-4. **Release:** record the approvals (name, role, date) in `discovery.ts`, then set `RELEASE.meinArztbesuchApproved = true`.
+4. **Approvals:** record real approvals (name, role, date) in `discovery.ts` when they are given, then set `RELEASE.meinArztbesuchApproved = true`. Publication no longer waits for this (see below).
 
 ## Staging review (2026-10-13)
 
@@ -54,6 +54,21 @@ The complete chapter (six scenes, final images in `public/discovery/`, all track
 - `/entdecken?vorschau=freigabe` → "Mein Arztbesuch"
 - via the review hub `/review`, if `REVIEW_HUB_ENABLED=true` is set
 
-The normal route still shows "In Vorbereitung". This is review availability only, **not** a publication approval: `RELEASE.meinArztbesuchApproved = false` and `RELEASE.indexable = false` are unchanged, and all formal approvals (practice, content, physician 03–05, AI-child decision) remain open without names or dates.
+*(Superseded on 2026-10-13, see "Publication" below.)* At that time the normal route still showed "In Vorbereitung". This was review availability only, **not** a publication approval: `RELEASE.meinArztbesuchApproved = false` and `RELEASE.indexable = false` are unchanged, and all formal approvals (practice, content, physician 03–05, AI-child decision) remain open without names or dates.
 
-**Update (2026-10-13, staging visibility):** On a review deployment (`REVIEW_HUB_ENABLED=true`) `/entdecken` lists "Mein Arztbesuch" as a normal chapter card with a direct link and a quiet note "Vorschau · Inhalte werden noch final geprüft". The chapter shows all six scenes without `?vorschau=freigabe`, still `noindex`. Without the switch (final production) the release gate alone decides, so the chapter stays "In Vorbereitung" while `RELEASE.meinArztbesuchApproved = false`. No approval data was changed.
+*(Superseded, see "Publication" below.)* **Update (2026-10-13, staging visibility):** On a review deployment (`REVIEW_HUB_ENABLED=true`) `/entdecken` lists "Mein Arztbesuch" as a normal chapter card with a direct link and a quiet note "Vorschau · Inhalte werden noch final geprüft". The chapter shows all six scenes without `?vorschau=freigabe`, still `noindex`. Without the switch (final production) the release gate alone decides, so the chapter stays "In Vorbereitung" while `RELEASE.meinArztbesuchApproved = false`. No approval data was changed.
+
+## Publication (2026-10-13)
+
+**Mein Arztbesuch is now published as normal website content** (2026-10-13, explicit project decision).
+
+- **Publication was explicitly enabled.** `RELEASE.meinArztbesuchPublished = true` controls visibility. `/entdecken` lists the chapter as a normal, clickable chapter 1, and `/entdecken/mein-arztbesuch` shows all six scenes. No review flag and no `?vorschau=freigabe` are needed; old review links show the same chapter.
+- **Verification metadata was not fabricated.** The formal approval records stay truthful:
+  - `RELEASE.meinArztbesuchApproved = false`
+  - every practice, content and medical (03–05) record in `src/content/discovery.ts` is `TO_BE_CONFIRMED`, without names or dates
+  - the AI-child publication decision is still documented as open
+  - `approvalsComplete()` reports this separately from `chapterPublishable()`
+- **The text remains editable after publication.** The current wording is V1.
+- **Formal review metadata remains historically truthful.** If approvals are given later, they are recorded with real names and dates. Publication does not depend on them.
+- **Global indexing is unchanged:** `RELEASE.indexable = false`; the site is still `noindex`.
+- **Wording corrected:** the `/entdecken` intro no longer says "Alles hier wird von unseren Ärztinnen geprüft, bevor es erscheint", because that is not true for this chapter yet.

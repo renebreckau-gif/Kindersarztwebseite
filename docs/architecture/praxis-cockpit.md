@@ -16,7 +16,7 @@ Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms
 | **Real authentication** | Not implemented. The prototype has a mock login: test accounts, and `sessionStorage` keeps only the mock role. |
 | **Public website** | Uses the same Praxis Puls engine. Changed only through the engine alignment of 09.1.1. Release gates are unchanged. |
 | **Staging review hub** | `/review` with links to the cockpit prototype, the Mein Arztbesuch review and the staging website. Only active with the server-side flag `REVIEW_HUB_ENABLED=true`; otherwise 404. |
-| **Mein Arztbesuch** | Reviewable on staging via `/entdecken/mein-arztbesuch?vorschau=freigabe`. Not released (`RELEASE.meinArztbesuchApproved = false`, `indexable = false`); formal approvals open. |
+| **Mein Arztbesuch** | Published as normal website content since 2026-10-13 (`RELEASE.meinArztbesuchPublished = true`). Formal approvals still open (`meinArztbesuchApproved = false`, records truthful); site stays `noindex` (`indexable = false`). |
 | **Next phase** | 09.2 (data layer) starts only after the prototype test results are reviewed. |
 
 ### Phase history
@@ -45,7 +45,7 @@ Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms
 | **Replacement practices** | Directory type exists. No entries yet (F53: no legacy import). | A closure can reference only directory entries. Directory entries are verified separately. |
 | **Holidays** | `PUBLIC_HOLIDAYS_ST` with policy `REQUIRE_EXPLICIT_ENTRY`. F49 is unconfirmed, so a weekday holiday resolves to UNKNOWN. Since 09.1.1, a holiday on an explicitly confirmed closed weekday resolves to CLOSED. | The cockpit lists upcoming unresolved weekday holidays under "Prüfen". It never infers "closed". |
 | **Announcements** | `decideAnnouncement()` requires verification, `published`, and today inside `validFrom … validUntil`, or an explicit `OPEN_ENDED`. | Workflow 7 maps onto this directly. |
-| **Release gates** | `RELEASE.pulsPracticeSignOff = true`, `meinArztbesuchApproved = false`, `indexable = false`. | The cockpit does **not** control release gates in V1; they stay deliberate code changes. |
+| **Release gates** | `RELEASE.pulsPracticeSignOff = true`, `meinArztbesuchApproved = false`, `indexable = false` (since 2026-10-13 additionally `meinArztbesuchPublished = true`). | The cockpit does **not** control release gates in V1; they stay deliberate code changes. |
 | **Rendering** | Pages read `searchParams` and compute PULS per request. No CMS, no database. `next.config.ts` sends `X-Robots-Tag: noindex` everywhere. | Data loading moves behind a repository adapter (§10.4). Time is still evaluated per request. |
 | **Deployment** | The repo has no `vercel.json` and no deployment notes. The brief states that the staging preview is deployed on Vercel. | Hosting is decided in §10. The staging deployment must never hold real staff accounts before 09.3. |
 
@@ -759,6 +759,6 @@ The prototype is complete for the staff usability test (tasks A–L in [praxis-c
   - When off, `/review` answers `notFound()` (404).
   - The page is rendered per request (`force-dynamic`), so the switch applies at runtime without a rebuild.
 - **Enable on staging:** set `REVIEW_HUB_ENABLED=true` for the staging/preview environment in the Vercel project settings (not done from this repo). For the final production deployment the variable must not be set.
-- **Same switch for ENTDECKEN:** on a review deployment, unreleased chapters (Mein Arztbesuch) appear in `/entdecken` as normal cards with the note "Vorschau · Inhalte werden noch final geprüft". This is not a release; the release gate stays authoritative in production (`src/content/environment.ts`, `chapterCard()`).
+- **ENTDECKEN does not depend on this switch** (since 2026-10-13). `REVIEW_HUB_ENABLED` controls the review hub only. Mein Arztbesuch is published through `RELEASE.meinArztbesuchPublished`.
 - **Exposure:** no public navigation link, no sitemap entry, `noindex, nofollow` as both meta tag and header. It does not rely on robots.txt or obscurity.
 - **Go-live note:** the hub can be switched off, but the lab routes themselves (`/lab/*`, including the cockpit prototype) are still reachable by URL. Before the final production launch they must be excluded or gated as well (separate decision; not changed in this phase).

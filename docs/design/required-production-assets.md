@@ -27,7 +27,7 @@ All REAL assets: warm natural daylight (light from one side, soft falloff, match
 ## Phase 08 — release rule for D1
 
 - D1 moved from P3 to **P1**: Mein Arztbesuch is the V1 signature experience (S04).
-- **The public release of Mein Arztbesuch may not use placeholders.** This is enforced in code: `chapterPublishable()` (`src/content/discovery.ts`) returns false while any scene has `visual.class === "PLACEHOLDER"`, independent of `RELEASE.meinArztbesuchApproved`.
+- **The public release of Mein Arztbesuch may not use placeholders.** This is enforced in code: `chapterPublishable()` (`src/content/discovery.ts`) returns false while any scene has `visual.class === "PLACEHOLDER"` or no production image, independent of the publication decision `RELEASE.meinArztbesuchPublished`.
 - Order: art direction (done, Phase 08) → **approved visual reference** (one key frame, scene 03 recommended) → asset production 01–06 → code integration. No step may be skipped.
 - Phase 08.8 checkpoint: the approved master, Style Frame 03, character sheet and Scenes 01/02 are in [discovery-reference/](discovery-reference/README.md), with the binding reference hierarchy and the coral-sweater character override. Status: [phase-08-discovery-production-status.md](../reviews/phase-08-discovery-production-status.md).
 - Real practice photography is a separate track: [real-practice-photo-brief.md](real-practice-photo-brief.md) (B1, B2, C1, then C2, C3). Real photos never appear inside the story scenes.

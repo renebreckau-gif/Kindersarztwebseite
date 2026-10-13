@@ -5,7 +5,6 @@ import { PageIntro } from "@/site/blocks";
 import u from "@/site/pages.module.css";
 import { resolvePuls } from "@/content/puls";
 import { CHAPTERS, chapterCard, discoveryReviewMode } from "@/content/discovery";
-import { isReviewEnvironment } from "@/content/environment";
 
 export const metadata: Metadata = {
   title: "Entdecken",
@@ -17,7 +16,7 @@ type Search = Promise<Record<string, string | string[] | undefined>>;
 export default async function Entdecken({ searchParams }: { searchParams: Search }) {
   const q = await searchParams;
   const puls = resolvePuls(q);
-  const mode = discoveryReviewMode(q.vorschau, isReviewEnvironment());
+  const mode = discoveryReviewMode(q.vorschau);
   const preview = mode === "QUERY";
   return (
     <PageFrame current="entdecken" puls={puls} tone="night">
@@ -25,7 +24,7 @@ export default async function Entdecken({ searchParams }: { searchParams: Search
         variant="discovery"
         title="Entdecken"
         back={{ href: preview ? "/?vorschau=freigabe" : "/", label: "Start" }}
-        lede="Ein eigener Bereich für Kinder: neugierig machen, erklären, Unbekanntes vertrauter machen. Für Eltern: Alles hier wird von unseren Ärztinnen geprüft, bevor es erscheint."
+        lede="Ein eigener Bereich für Kinder: neugierig machen, erklären, Unbekanntes vertrauter machen."
       >
         <div className={u.nightOrbs} aria-hidden="true">
           <span />
@@ -39,7 +38,7 @@ export default async function Entdecken({ searchParams }: { searchParams: Search
         </h2>
         <ol>
           {CHAPTERS.map((c, i) => {
-            const { href, state, note } = chapterCard(c, mode);
+            const { href, state } = chapterCard(c, mode);
             return (
               <li key={c.id} id={c.id} data-later={c.state === "COMING_LATER" ? "" : undefined}>
                 <span className={u.chapterNo}>{i + 1}</span>
@@ -52,7 +51,6 @@ export default async function Entdecken({ searchParams }: { searchParams: Search
                 )}
                 <span className={u.chapterText}>{c.teaser}</span>
                 {state ? <span className={u.chapterState}>{state}</span> : null}
-                {note ? <span className={u.chapterNote}>{note}</span> : null}
               </li>
             );
           })}

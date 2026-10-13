@@ -173,8 +173,9 @@ export function HomeChapters({ puls }: { puls: PulsView }) {
           </h2>
           <p className={s.discoverLede}>Ein eigener Bereich für Kinder: Was passiert beim Arztbesuch? Was macht die Ärztin mit dem Stethoskop?</p>
           <p className={s.discoverChapter}>
-            <span className={s.chapterName}>Mein Arztbesuch</span>
-            <span className={s.chapterState}>In Vorbereitung</span>
+            <Link className={`${s.chapterName} ${s.chapterLink}`} href="/entdecken/mein-arztbesuch">
+              Mein Arztbesuch
+            </Link>
           </p>
           <Link className={s.discoverLink} href="/entdecken">
             Mehr über Entdecken

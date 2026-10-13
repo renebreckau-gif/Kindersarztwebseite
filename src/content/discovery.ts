@@ -13,9 +13,10 @@ import type { LocalDate } from "../domain/time.ts";
 import { RELEASE } from "./release.ts";
 
 /**
- * Formal approvals are still open (docs/reviews/discovery-approval-package.md). The final
- * images are integrated and reviewable in the preview (?vorschau=freigabe); an AI_CONCEPTUAL
- * image is visual production, not a practice, content or medical approval.
+ * Formal approvals are still open (docs/reviews/discovery-approval-package.md). The chapter
+ * is published by explicit decision (RELEASE.meinArztbesuchPublished, 2026-10-13); these records
+ * stay truthful. An AI_CONCEPTUAL image is visual production, not a practice, content or medical
+ * approval.
  */
 const DRAFT: FactVerification = { status: "TO_BE_CONFIRMED", sourceIds: [], internalNotes: "Formale Freigabe ausstehend (Praxis, Inhalt, ggf. ärztlich)" };
 
@@ -77,7 +78,7 @@ export const MEIN_ARZTBESUCH: Chapter = {
   audience: "Für Kinder zum gemeinsamen Anschauen und Vorlesen.",
   parentIntro:
     "So kann ein Arztbesuch aussehen. Nicht jeder Besuch läuft genau so ab – manches entfällt, manches kommt dazu. Lesen Sie die kurzen Sätze gern vor; die Bilder erzählen mit.",
-  state: "IN_PREPARATION",
+  state: "AVAILABLE",
   scenes: [
     {
       id: "ankommen",
@@ -169,16 +170,20 @@ export const CHAPTERS: Chapter[] = [
 
 const ok = (v?: FactVerification) => v?.status === "VERIFIED_CURRENT";
 
-/** Is the chapter fully approved for public release (gate + every scene + final art)? */
+/**
+ * Visibility on the normal website. Driven by the explicit publication decision
+ * (RELEASE.meinArztbesuchPublished) — NOT by faking approval records. Final (non-placeholder)
+ * images remain a hard technical requirement. The approval records stay as they are
+ * (see approvalsComplete) and are reported truthfully in the docs.
+ */
 export function chapterPublishable(c: Chapter): boolean {
-  if (c.id !== "mein-arztbesuch" || !RELEASE.meinArztbesuchApproved) return false;
-  return c.scenes.every(
-    (s) =>
-      ok(s.contentApproval) &&
-      ok(s.practiceApproval) &&
-      (s.medicalApproval === undefined || ok(s.medicalApproval)) &&
-      s.visual.class !== "PLACEHOLDER",
-  );
+  if (c.id !== "mein-arztbesuch" || !RELEASE.meinArztbesuchPublished) return false;
+  return c.scenes.length > 0 && c.scenes.every((s) => s.visual.class !== "PLACEHOLDER" && Boolean(s.visual.image));
+}
+
+/** Formal approval status (provenance) — independent of publication. */
+export function approvalsComplete(c: Chapter): boolean {
+  return c.scenes.every((s) => ok(s.contentApproval) && ok(s.practiceApproval) && (s.medicalApproval === undefined || ok(s.medicalApproval)));
 }
 
 export type ChapterView = { mode: "PUBLIC" | "PREVIEW"; chapter: Chapter } | { mode: "GATED"; chapter: Omit<Chapter, "scenes"> };
@@ -192,27 +197,21 @@ export function chapterView(c: Chapter, preview: boolean): ChapterView {
 }
 
 /**
- * How a request may see unreleased chapters:
- * STAGING — review deployment (REVIEW_HUB_ENABLED=true): chapters appear normally, with a quiet note.
- * QUERY   — explicit ?vorschau=freigabe review link (any deployment).
- * null    — the formal release gate alone decides.
- * Review modes never change approvals and never make a chapter PUBLIC (noindex stays).
+ * Review mode for chapters that are not published yet: only the explicit ?vorschau=freigabe
+ * link. Deployment or review-hub switches never publish content.
  */
-export type ReviewMode = "STAGING" | "QUERY" | null;
+export type ReviewMode = "QUERY" | null;
 
-export function discoveryReviewMode(vorschau: unknown, reviewEnvironment: boolean): ReviewMode {
-  if (reviewEnvironment) return "STAGING";
+export function discoveryReviewMode(vorschau: unknown): ReviewMode {
   return vorschau === "freigabe" ? "QUERY" : null;
 }
 
-export const STAGING_REVIEW_NOTE = "Vorschau · Inhalte werden noch final geprüft";
-
-/** Chapter card on /entdecken: link, state chip and optional quiet note. */
-export function chapterCard(c: Chapter, mode: ReviewMode): { href: string | null; state: string | null; note?: string } {
+/** Chapter card on /entdecken: link and optional state chip. Published chapters have no chip. */
+export function chapterCard(c: Chapter, mode: ReviewMode): { href: string | null; state: string | null } {
   const view = c.slug ? chapterView(c, mode !== null) : null;
   if (!view || view.mode === "GATED") return { href: null, state: c.state === "COMING_LATER" ? "Bald entdecken" : "In Vorbereitung" };
   if (view.mode === "PUBLIC") return { href: `/entdecken/${c.slug}`, state: null };
-  return mode === "STAGING" ? { href: `/entdecken/${c.slug}`, state: null, note: STAGING_REVIEW_NOTE } : { href: `/entdecken/${c.slug}?vorschau=freigabe`, state: "Vorschau" };
+  return { href: `/entdecken/${c.slug}?vorschau=freigabe`, state: "Vorschau" };
 }
 
 /** Phrases the child copy must never use (fear/pain/bravery mechanics). */

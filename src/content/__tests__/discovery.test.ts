@@ -1,4 +1,4 @@
-// Phase 08: Mein Arztbesuch release gate, child-copy rules, data safety, 116117 and U10
+// Phase 08 (+ publication 2026-10-13): Mein Arztbesuch publication gate, child-copy rules, data safety, 116117 and U10
 // governance. Run with `npm test`.
 
 import { test } from "node:test";
@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { CHAPTERS, MEIN_ARZTBESUCH, FORBIDDEN_CHILD_PHRASES, chapterPublishable, chapterView } from "../discovery.ts";
+import { CHAPTERS, MEIN_ARZTBESUCH, FORBIDDEN_CHILD_PHRASES, approvalsComplete, chapterPublishable, chapterView } from "../discovery.ts";
 import { RELEASE } from "../release.ts";
 import { publicEmergency } from "../notices.ts";
 import { U10, publicDecisionStatement, practiceOffers } from "../examinations.ts";
@@ -14,26 +14,28 @@ import { U10, publicDecisionStatement, practiceOffers } from "../examinations.ts
 const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
 const read = (rel: string) => readFileSync(join(ROOT, rel), "utf8");
 
-test("release: PULS sign-off stays true; Mein Arztbesuch is NOT released (approvals open)", () => {
+test("release: PULS sign-off true; Mein Arztbesuch published by decision, formal approval still open", () => {
   assert.equal(RELEASE.pulsPracticeSignOff, true);
-  assert.equal(RELEASE.meinArztbesuchApproved, false);
+  assert.equal(RELEASE.meinArztbesuchPublished, true);
+  assert.equal(RELEASE.meinArztbesuchApproved, false, "publication is not an approval record");
   assert.equal(RELEASE.indexable, false);
 });
 
-test("A: final images integrated + approvals open + gate false → not publishable", () => {
+test("A: published chapter with final images is publishable — without complete approvals", () => {
   assert.ok(MEIN_ARZTBESUCH.scenes.every((s) => s.visual.class === "AI_CONCEPTUAL" && s.visual.image));
-  assert.equal(chapterPublishable(MEIN_ARZTBESUCH), false);
+  assert.equal(chapterPublishable(MEIN_ARZTBESUCH), true);
+  assert.equal(approvalsComplete(MEIN_ARZTBESUCH), false, "approvals stay truthfully open");
 });
 
-test("B + E: normal route (no preview) → GATED meta only, no scenes", () => {
+test("B + E: normal route (no preview) → PUBLIC with all scenes", () => {
   const v = chapterView(MEIN_ARZTBESUCH, false);
-  assert.equal(v.mode, "GATED");
-  assert.equal("scenes" in v.chapter, false);
+  assert.equal(v.mode, "PUBLIC");
+  assert.equal("scenes" in v.chapter ? v.chapter.scenes.length : 0, 6);
 });
 
-test("C + D + F: preview → PREVIEW with all six scenes and their final AI_CONCEPTUAL images", () => {
+test("C + D + F: the old ?vorschau link shows the same canonical chapter (six scenes, final images)", () => {
   const v = chapterView(MEIN_ARZTBESUCH, true);
-  assert.equal(v.mode, "PREVIEW");
+  assert.equal(v.mode, "PUBLIC");
   const scenes = "scenes" in v.chapter ? v.chapter.scenes : [];
   assert.deepEqual(
     scenes.map((s) => s.id),
@@ -65,13 +67,14 @@ test("G: an AI_CONCEPTUAL image is not an approval — formal approvals stay ope
   for (const s of medical) assert.equal(s.medicalApproval!.status, "TO_BE_CONFIRMED", s.id);
 });
 
-test("with all approvals verified the gate opens only through the release flag", () => {
+test("approval records alone never publish; the publication decision does", () => {
   const ok = { status: "VERIFIED_CURRENT" as const, sourceIds: [] };
   const approved = {
     ...MEIN_ARZTBESUCH,
     scenes: MEIN_ARZTBESUCH.scenes.map((s) => ({ ...s, contentApproval: ok, practiceApproval: ok, medicalApproval: s.medicalApproval ? ok : undefined })),
   };
-  assert.equal(chapterPublishable(approved), RELEASE.meinArztbesuchApproved);
+  assert.equal(approvalsComplete(approved), true);
+  assert.equal(chapterPublishable(approved), RELEASE.meinArztbesuchPublished);
 });
 
 test("gate: placeholder visuals alone block release, even with all approvals", () => {

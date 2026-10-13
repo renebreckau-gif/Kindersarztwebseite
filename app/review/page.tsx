@@ -48,7 +48,7 @@ export default function ReviewHub() {
                   </dl>
                 </div>
               ) : null}
-              {c.id === "discovery" ? <p className={s.fine}>Die formalen Freigaben sind noch offen. Das Kapitel ist nicht veröffentlicht.</p> : null}
+              {c.id === "discovery" ? <p className={s.fine}>Auf der Website veröffentlicht. Die formalen Freigaben (Praxis, Inhalt, ärztlich, KI-Kind) sind weiterhin offen.</p> : null}
               <Link href={c.href} className={s.action}>
                 {c.action}
               </Link>

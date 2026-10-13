@@ -469,11 +469,6 @@
 .chapterText {
   color: #c9cbe0;
 }
-/* staging review: quiet note, no warning look */
-.chapterNote {
-  font-size: 0.8125rem;
-  color: #a9adc4;
-}
 /* future chapters: quieter, no link, "Bald entdecken" */
 .chapters li[data-later] .chapterNo,
 .chapters li[data-later] .chapterName {
