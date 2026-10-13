@@ -210,7 +210,7 @@ describe("dependency direction", () => {
 
   test("the public app and content never import the backend or Payload (static data stays authoritative)", () => {
     // Only the backend route groups (Payload admin/REST, /intern shell) may use the backend.
-    for (const f of all.filter((p) => !/^(src\/backend\/|app\/\(payload\)\/|app\/\(intern\)\/)/.test(rel(p)))) {
+    for (const f of all.filter((p) => !/^(src\/backend\/|src\/cockpit\/|app\/\(payload\)\/|app\/\(intern\)\/)/.test(rel(p)))) {
       for (const i of imports(f)) {
         assert.doesNotMatch(i, /^payload$|^@payloadcms\//, `${rel(f)} → ${i}`);
         assert.doesNotMatch(i, /(^|\/)backend\//, `${rel(f)} → ${i}`);
@@ -228,7 +228,7 @@ describe("dependency direction", () => {
   });
 
   test("production code does not depend on lab mocks", () => {
-    const prod = all.filter((p) => /^src\/(domain|data|backend|content)\//.test(rel(p)) || (rel(p).startsWith("app/") && !rel(p).startsWith("app/(frontend)/lab/")));
+    const prod = all.filter((p) => /^src\/(domain|data|backend|content|cockpit)\//.test(rel(p)) || (rel(p).startsWith("app/") && !rel(p).startsWith("app/(frontend)/lab/")));
     for (const f of prod) for (const i of imports(f)) assert.doesNotMatch(i, /lab\/cockpit/, `${rel(f)} → ${i}`);
   });
 

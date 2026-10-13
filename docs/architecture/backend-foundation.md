@@ -89,7 +89,7 @@ Enforced by tests in `src/backend/__tests__/backend-foundation.test.ts`:
 
 - `src/domain/` imports nothing from Payload, React, Next, `src/lab`, `src/backend`, `src/data` or `src/content`.
 - No file outside the backend imports `payload`, `@payloadcms/*` or `src/backend`. That covers `app/(frontend)` (public site, review hub, lab), content, data and lab. The public site cannot accidentally read from the database.
-- Backend users are only `app/(payload)` (Payload admin/REST) and `app/(intern)` (staff shell).
+- Backend users are only `app/(payload)` (Payload admin/REST), `app/(intern)` (staff cockpit) and `src/cockpit/` (cockpit read layer, since 09.4).
 - Inside `src/backend/`, Payload is imported **as types only** (generated migrations excepted). Runtime coupling lives in `payload.config.ts`, the two backend route groups and the scripts.
 - Production code (`src/domain`, `src/data`, `src/backend`, `src/content`, and `app/` outside `app/lab`) does not import the lab cockpit (`src/lab/cockpit`: mock accounts, test clock, scenarios).
 - The lab now **uses** the domain operations (`src/lab/cockpit/model.ts` delegates to `src/domain/operations.ts`), so the prototype and the future publish flow share one implementation.
@@ -142,7 +142,7 @@ Defined in `src/backend/collections.ts`. **Website operations only.**
 | Disabled accounts cannot sign in | **Verified** (`beforeLogin` hook, generic message); every access rule treats `active: false` as signed out |
 | Revocation | **Verified:** Payload's server-side sessions (`useSessions` default). Logout deletes the session; a replayed cookie is refused afterwards. Disabling blocks the next request. |
 | Password reset | **Closed** until an email adapter exists (`staffOperationGuard`); ADMIN sets a new password in `/intern/admin` (§17.10). |
-| MFA (TOTP / passkeys) | **Not implemented.** Required for ADMIN before production; recommendation in §17.9. Nothing built from scratch. |
+| MFA (TOTP / passkeys) | **Not implemented.** ADMIN MFA is required before production. Provider/plugin selection remains open and must be re-verified against the then-current Payload version. Market notes in §17.9. Nothing built from scratch. |
 | Login UI | **Built:** `/intern/anmelden` (real Payload auth, generic error, no self-registration). The mock login at `/lab/praxis-cockpit/anmelden` is unchanged. |
 | Real accounts | **None created.** The first ADMIN is created only by `scripts/bootstrap-admin.ts` (§17.3); all current accounts are artificial (`.invalid`). |
 
@@ -273,7 +273,7 @@ These need an owner and a decision before any real data or account exists. This 
 | Maintenance owner | Named person or agency responsible for updates and incidents |
 | Patching | Update cadence for Payload, Next.js and Node; security advisories |
 | Monitoring | Uptime, error tracking, revalidation failures, `/api/puls-version` |
-| MFA | Recommendation in §17.9 (TOTP plugin first, passkeys later); needs an explicit decision and security review |
+| MFA | ADMIN MFA is required before production. Provider/plugin selection remains open and must be re-verified against the then-current Payload version. |
 | Admin route path | **Decided:** `/intern/admin` |
 | Live host / domain / DNS | Access to the existing webhost is unavailable (`LIVE_HOST_ACCESS = OPEN`); registrar and DNS access unknown. See project-blockers LB-13/LB-14. Blocks only the production cutover. |
 
@@ -377,7 +377,9 @@ Integration tests against PostgreSQL and the running server (`02-runtime.test.ts
   - `/intern` shows "Der interne Bereich ist gerade nicht erreichbar" and never crashes.
   - Until Payload has started in a process, a 2-second connection probe runs first, so a failed first initialisation can never stay cached in the adapter.
   - Verified: a cold start with the database stopped, a warm stop/start, and recovery without restarting the server.
-  - Not covered by the probe: `/intern/admin` and `/api` call Payload directly. If one of them is the first backend request after a cold start without a database, it fails, and the process must be restarted before the backend is usable again. Public pages are unaffected in every case.
+  - `/intern/admin` and `/api` call Payload directly. If one of them is the first backend request after a cold start without a database, that request fails with 500.
+  - **Re-tested in 09.4:** once the database is back, Payload initialises again on the next request. Reads and writes (a transaction with an audit event) work **without a process restart** (`getPayload` clears a failed initialisation; every init creates a fresh adapter). The 09.3 suspicion of a permanent failure is not reproducible, so no workaround was added (no fork, no patch).
+  - Public pages are unaffected in every case.
 
 ### 17.6 Static → PostgreSQL → repository parity
 
@@ -438,11 +440,10 @@ Integration tests against PostgreSQL and the running server (`02-runtime.test.ts
   - [`payload-totp`](https://gittrend.io/repo/GeorgeHulpoi/payload-totp) 3.0.6: TOTP via authenticator app, wrapping existing access control. Peer `payload ^3.88.0`, compatible with 3.90.2. Last release 2026-10-04.
   - [`payload-passkey`](https://github.com/Robot-Inventor/payload-passkey) 2.1.2: passkeys/WebAuthn via Better Auth. Peer `payload >=3.69 <4` and Next 16. Last release 2026-10-03. It can be combined with TOTP.
   - Comparison: [buildwithmatija.com](https://www.buildwithmatija.com/blog/md/which-payload-cms-auth-plugin-to-use).
-- **Recommendation:** ADMIN MFA is **required before production**; password-only auth does not meet the final security model.
-  - Preferred first step: `payload-totp`. It is the smallest change on top of Payload's own auth, and authenticator apps are common in practices.
-  - Passkeys can follow later as a convenience factor.
-  - Both are community-maintained, so adopting one needs an explicit decision, a code review of the plugin, pinned versions and an owner for updates.
-- **Not implemented in 09.3.**
+- **Decision status:** ADMIN MFA is required before production. Provider/plugin selection remains open and must be re-verified against the then-current Payload version. Password-only authentication does not meet the final security model.
+  - The plugins above are a market snapshot from 2026-10-13, **not a selection**. No plugin or version is pinned or approved.
+  - Adopting any option needs an explicit decision, a code review, a fresh compatibility check and an owner for updates.
+- **Not implemented** (09.3 and 09.4).
 
 ### 17.10 Password reset
 

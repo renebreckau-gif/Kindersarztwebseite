@@ -170,7 +170,9 @@ test("public site never links to the cockpit prototype", () => {
   walk("app/(frontend)/(site)");
   walk("src/site");
   walk("src/content");
-  for (const f of files.filter((x) => !x.includes("__tests__"))) assert.doesNotMatch(read(f), /praxis-cockpit/, f);
+  // Phase 09.4: the ONLY sanctioned path is the staff entry (footer → /mitarbeiter → prototype on STAGING).
+  const STAFF_ENTRY_FILE = "src/content/staff-entry.ts";
+  for (const f of files.filter((x) => !x.includes("__tests__") && x !== STAFF_ENTRY_FILE)) assert.doesNotMatch(read(f), /praxis-cockpit/, f);
 });
 
 // ---------------------------------------------------------------- Phase 09.1.2: login + vacation journey

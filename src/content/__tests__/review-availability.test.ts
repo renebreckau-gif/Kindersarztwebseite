@@ -124,7 +124,9 @@ describe("review tooling on staging", () => {
 
   test("7: Praxis Cockpit and review hub are not in the patient navigation", () => {
     assert.doesNotMatch(JSON.stringify(NAV), /\/lab|praxis-cockpit|\/review/);
-    for (const f of PUBLIC_CODE) assert.doesNotMatch(read(f), /praxis-cockpit|["'`]\/review["'`?]/, f);
+    // Phase 09.4: the staff entry (footer → /mitarbeiter) is the one sanctioned route to the prototype.
+    for (const f of PUBLIC_CODE.filter((x) => x !== "src/content/staff-entry.ts")) assert.doesNotMatch(read(f), /praxis-cockpit|["'`]\/review["'`?]/, f);
+    assert.doesNotMatch(read("src/content/staff-entry.ts"), /["'`]\/review["'`?]/);
     for (const f of ["app/sitemap.ts", "app/sitemap.xml", "public/sitemap.xml"]) {
       if (existsSync(join(ROOT, f))) assert.doesNotMatch(read(f), /\/review|\/lab/, f);
     }

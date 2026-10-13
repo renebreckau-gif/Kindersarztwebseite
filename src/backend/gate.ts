@@ -6,10 +6,11 @@
 // 404 instead of failing — the public website never depends on the backend.
 
 import { stageAllowsReview, type SiteStage } from "../content/release.ts";
+import { backendConfigured } from "../content/staff-entry.ts";
+
+export { backendConfigured };
 
 type Env = Record<string, string | undefined>;
-
-export const backendConfigured = (env: Env): boolean => Boolean(env.DATABASE_URI?.trim() && env.PAYLOAD_SECRET?.trim());
 
 export const internAvailable = (stage: SiteStage, env: Env): boolean => stageAllowsReview(stage) && backendConfigured(env);
 

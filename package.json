@@ -16,7 +16,7 @@
     "db:bootstrap-admin": "node --env-file-if-exists=.env.local scripts/bootstrap-admin.ts",
     "db:seed-dev": "node --env-file-if-exists=.env.local scripts/seed-dev.ts",
     "test:db:clean": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-db-clean.ps1",
-    "test": "node --test \"src/domain/__tests__/*.test.ts\" \"src/content/__tests__/*.test.ts\" \"src/data/__tests__/*.test.ts\" \"src/backend/__tests__/*.test.ts\""
+    "test": "node --test \"src/domain/__tests__/*.test.ts\" \"src/content/__tests__/*.test.ts\" \"src/data/__tests__/*.test.ts\" \"src/backend/__tests__/*.test.ts\" \"src/cockpit/__tests__/*.test.ts\""
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.90.2",

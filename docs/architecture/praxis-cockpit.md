@@ -1,13 +1,13 @@
 # Praxis Cockpit: Staff Portal Architecture
 
-Current status: Phase 09.3 done: Payload runtime, isolated local PostgreSQL, real staff authentication and the `/intern` shell, all proven locally ([backend-foundation.md](backend-foundation.md) §17). The public site stays static. Details in the status table below.
+Current status: Phase 09.4 done: staff entry from the public footer (`/mitarbeiter`) and a database-backed, read-only real cockpit (`/intern`, `/intern/vorschau`), proven locally. The public site stays static. Details in the status table below.
 Last updated: 2026-10-13
 Historical baseline of the Phase 09.0 architecture decision (§0–§14): `e589478`
 Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms-comparison.md) · [content-model.md](content-model.md) · [content-governance.md](content-governance.md) · [practice-pulse-logic.md](practice-pulse-logic.md) · [privacy-model.md](privacy-model.md) · [phase-04-decisions.md](phase-04-decisions.md)
 
 > **GLOBAL PROJECT RULE — deployment model:** the current Vercel deployment is the project's **STAGING** environment, not the live practice website. Implemented functionality is normally visible there for review; formal publication gates are kept for the future production launch and do not hide staging content. Single switch: `SITE_STAGE` in `src/content/release.ts`. See [deployment-model.md](deployment-model.md).
 
-## Current status (2026-10-13, after Phase 09.3)
+## Current status (2026-10-13, after Phase 09.4)
 
 | | |
 |---|---|
@@ -15,13 +15,15 @@ Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms
 | **Backend** | Runs **locally**: Payload runtime, collections, access rules, provenance, audit and the publish guard, against an isolated PostgreSQL cluster. It is proven by integration tests from an empty database (24 tests). See [backend-foundation.md](backend-foundation.md) §17. Not connected to the public site, and not hosted anywhere yet. |
 | **Payload** | 3.90.2 with `@payloadcms/next`/`ui`/`db-postgres` 3.90.2 (no force flags). Admin at **`/intern/admin`** (ADMIN only), REST at `/api`, GraphQL disabled. First-user registration closed; the first ADMIN is created only by `scripts/bootstrap-admin.ts`. |
 | **Database / persistence** | Local only: isolated PostgreSQL 16.2 cluster on 127.0.0.1:5433 (`kinderarzt_app`, not a superuser). Migrations from zero via the Payload CLI. Production provider open. The prototype state still lives in memory; a reload resets it. |
-| **Real authentication** | Payload auth on `staff`, verified: login, generic failures, disabled accounts, lockout, logout with session revocation, cookie `HttpOnly; SameSite=Lax; Secure`. Artificial `.invalid` test accounts only; no real accounts. MFA and password reset are open, with a recommendation in backend-foundation §17.9–17.10. The prototype keeps its mock login. |
+| **Real authentication** | Payload auth on `staff`, verified: login, generic failures, disabled accounts, lockout, logout with session revocation, cookie `HttpOnly; SameSite=Lax; Secure`. Artificial `.invalid` test accounts only; no real accounts. Still required before production: transactional password reset and ADMIN MFA (backend-foundation §17.9–17.10). The prototype keeps its mock login. |
 | **Public website** | Uses the same Praxis Puls engine. `resolvePuls` still consumes the **static snapshot directly** (`staticPulsData()`, synchronous). It does not load through `PracticeRepository.getPulsData()`; repository-based public loading arrives with the cutover. `DATA_SOURCE = "STATIC"` is a reserved migration-target selector, not yet an active switch. Output unchanged (tested). Release gates are unchanged. |
-| **Internal routes** | `/intern/anmelden` (real login) and `/intern` (authenticated shell: name, role, "Backend verbunden · Testumgebung", prototype link, logout). Operational workflows are **not** connected yet. They exist only on STAGING **with** a configured database (`proxy.ts`). On Vercel staging, which has no database yet, they answer 404 and the public site is unaffected. |
-| **Review hub** | `/review`: a convenience overview with links to the website, the cockpit prototype and Mein Arztbesuch. Available automatically while `SITE_STAGE = "STAGING"`; 404 in PRODUCTION. It unlocks nothing. Deliberately no `/intern` link: the deployed staging has no database, and a link would break there. |
+| **Staff entry** | Footer link **"Mitarbeiterbereich"** (after Impressum · Datenschutz · Barrierefreiheit; not in the main navigation, dock or hero) → **`/mitarbeiter`**, the stable human entry point. STAGING without backend (Vercel today): prototype only. STAGING with a configured database (local): prototype **and** real login, clearly labelled. PRODUCTION (later): real login only, never the lab. The footer placement is a UX choice, **not** security. |
+| **Internal routes** | `/intern/anmelden` (real login); `/intern` (real, **read-only** cockpit: Praxis heute from the database, Nächste Termine, Prüfen; Schnellaktionen point to the prototype); `/intern/vorschau` (Website-Vorschau for any Berlin date/time plus a comparison with the current static website); `/intern/admin` (ADMIN only). They exist only on STAGING **with** a configured database (`proxy.ts`); on Vercel staging, which has no database yet, they answer 404. Operational writes are **not** connected yet. |
+| **Review hub** | `/review` is **project review tooling** (developers and reviewers): links to the website, the cockpit prototype and Mein Arztbesuch. It is **not** the staff entry; that is `/mitarbeiter`. Available while `SITE_STAGE = "STAGING"`; 404 in PRODUCTION. No `/intern` link, because the deployed staging has no database. |
 | **Mein Arztbesuch** | Visible on STAGING for review (`SITE_STAGE`). Not released for production: `meinArztbesuchPublished = false`, formal approvals open (`meinArztbesuchApproved = false`, records truthful); site stays `noindex` (`indexable = false`). |
-| **Launch blockers (new)** | `LIVE_HOST_ACCESS = OPEN` (existing webhost not accessible), and domain/DNS access unknown (project-blockers LB-13/LB-14). Production backend infrastructure: LB-15. None of these blocks staging or development. |
-| **Next phase** | Not started: connecting cockpit workflows to persistence, and (separately) the public data cutover. |
+| **Next phase** | Not started: connecting the cockpit workflows to persistence (writes and publishing), and separately the public data cutover. |
+| **Launch blockers** | `LIVE_HOST_ACCESS = OPEN` (existing webhost not accessible), and domain/DNS access unknown (project-blockers LB-13/LB-14). Production backend infrastructure: LB-15. None of these blocks staging or development. |
+
 
 ### Phase history
 
@@ -34,7 +36,8 @@ Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms
 | 09.1.3 | Live Website-Vorschau (edit left / preview right), automatic expiry, history retention, lab test clock | `ecdd432` |
 | 09.1.4 | Editing existing changes (edit vs. supersede vs. conflict), prototype lock, documentation cleanup; staging review hub and Discovery review availability | `b5466f5` + review hub commit |
 | 09.2 | Backend foundation: repository layer (static authoritative), domain operations extracted, Payload + PostgreSQL adapter, collections, access/provenance/audit, parity tests | `8edc9cf` |
-| 09.3 | Isolated PostgreSQL dev cluster, migrations, Payload runtime (`/intern/admin`, `/api`), closed first-user registration + bootstrap script, `/intern` auth shell, integration tests from zero (auth, roles, provenance, audit, transactions, DB parity) | `3d2c316` (prep) + "feat: establish isolated Payload runtime and authenticated intern" |
+| 09.3 | Isolated PostgreSQL dev cluster, migrations, Payload runtime (`/intern/admin`, `/api`), closed first-user registration + bootstrap script, `/intern` auth shell, integration tests from zero (auth, roles, provenance, audit, transactions, DB parity) | `0e53670` (preparatory work: `3d2c316`) |
+| 09.4 | Staff entry (footer → `/mitarbeiter`), real read-only cockpit from the database (Praxis heute, Nächste Termine, Prüfen), Website-Vorschau with static-vs-database comparison, role-aware navigation | this phase: \"feat: add staff entry and connect real cockpit read experience\" |
 
 **How to read this document:** §0–§14 are the Phase 09.0 architecture decision and remain valid unless a later phase note says otherwise. The phase notes at the end record what the prototype changed or proved. Statements that became outdated are marked inline ("since 09.1.x").
 
@@ -517,7 +520,7 @@ Improved from the brief's 09.1–09.9. The changes: a click prototype with staff
 |---|---|---|
 | **09.1 Prototype + infrastructure decisions** | Lab click-prototype `/lab/praxis-cockpit` (mock data, "PROTOTYP — keine echten Daten", not linked) for home + 7.1, 7.5, 7.7; walkthrough with 2 staff members. In parallel: choose DB/e-mail/hosting providers, DPAs ⚖, maintenance agreement, confirm Payload ↔ Next.js version compatibility. | Staff feedback recorded; providers and maintainer named; no real data |
 | **09.2 Data layer** *(done; see [backend-foundation.md](backend-foundation.md) — repository in `src/data/`, not `src/content/repository.ts`; no DB connected yet)* | `resolvePuls(data)` refactor (no behaviour change); `src/content/repository.ts` with static-file source + fail-safe dataset; Payload installed with collections mirroring `src/domain` types; seed from the current content files; local + staging DB with synthetic data | All existing tests pass; repository failure → UNKNOWN test; public site unchanged |
-| **09.3 Accounts, roles, audit** | Staff auth collection, invite/reset, lockout, TOTP for ADMIN, `/intern` guard, `audit_events` (append-only), access control per role | Security review of auth; tests for access per role; no production accounts yet |
+| **09.3 Accounts, roles, audit** *(done, `0e53670`: Payload auth, roles, bootstrap, migrations, audit, `/intern` auth shell, integration proof. **Not** delivered, still required before production: transactional password reset, invites and ADMIN MFA)* | Staff auth collection, invite/reset, lockout, TOTP for ADMIN, `/intern` guard, `audit_events` (append-only), access control per role | Security review of auth; tests for access per role; no production accounts yet |
 | **09.4 Cockpit shell + preview** | `app/(intern)` layout, home (PRAXIS HEUTE, Nächste Termine, Prüfen), `/intern/vorschau` with the engine | 390/768/1440 checks; WCAG 2.2 AA review |
 | **09.5 Today workflows** | 7.1, 7.2, 7.3, 7.4 incl. "no new UNKNOWN" publish check and undo | Engine-based validation tests per conflict reason code |
 | **09.6 Closures + replacements** | 7.5, 7.6, directory verification | ≤ 3 min vacation test with staff |
@@ -801,7 +804,61 @@ Full record: [backend-foundation.md](backend-foundation.md) §17.
   - `/intern/admin` is Payload's structural administration, ADMIN only.
   - The earlier proposal `/verwaltung-intern` is dropped.
 - **Still open before production:**
-  - MFA for ADMIN (recommendation: `payload-totp`, then passkeys)
+  - ADMIN MFA: required before production; provider/plugin selection remains open and must be re-verified against the then-current Payload version
   - transactional email for password reset (closed until then)
   - hosted database (EU, DPA/AVV, backups, PITR), monitoring, maintenance owner
   - live host / domain / DNS access
+
+---
+
+## Phase 09.4 note: staff entry and the real cockpit read experience (2026-10-13)
+
+### Staff entry (permanent routing concept)
+
+```
+PUBLIC WEBSITE → Footer "Mitarbeiterbereich" → /mitarbeiter
+   current STAGING (Vercel, no database)   → Praxis Cockpit Prototyp (/lab/praxis-cockpit/anmelden)
+   local backend testing (database set)    → Prototyp  AND  real login (/intern/anmelden)
+   future PRODUCTION                       → real login (/intern/anmelden) only, never the lab
+```
+
+- `/mitarbeiter` is the **stable** staff-facing URL. The footer never links `/lab/…` or `/intern/…` directly, so those implementation routes may change.
+- The decision lives in one pure function, `staffEntryActions(SITE_STAGE, backendConfigured(env))` in `src/content/staff-entry.ts` (tested).
+- **`/review` ≠ `/mitarbeiter`.**
+  - `/review` is project review tooling for developers and reviewers.
+  - `/mitarbeiter` is the human staff entry from the normal website.
+- **The footer link is UX, not security.** Security remains authentication, roles and server-side access control.
+- **Presentation flow on Vercel** (verified with a build without any backend configuration): website → footer → "Mitarbeiterbereich" → "Praxis Cockpit öffnen" → prototype login → test access → all prototype workflows. No typed URL, no query parameter, no environment setup.
+
+### Real cockpit (READ + PREVIEW, no writes)
+
+- **Read layer** `src/cockpit/`:
+  - `read-model.ts`: Praxis heute, Nächste Termine, Prüfen (pure)
+  - `preview.ts`: date/time input and the static-vs-database comparison
+  - `navigation.ts`: role-aware navigation
+  - `queries.ts`: Payload Local API → `PayloadPracticeRepository`
+- **Dependency direction:** `app/(intern)` → `src/cockpit` → repository → domain. React never sees Payload documents; the public frontend never imports the cockpit layer (tested).
+- **Praxis heute:** PostgreSQL → Payload → `PayloadPracticeRepository` → `PulsData` → `getPracticeStatus()`, rendered with the public `StatusStatement` component through `resolvePuls({}, now, databaseData)`. There is no status logic in React, and `staticPulsData()` is not used for the cockpit status.
+- **Nächste Termine:** current and upcoming closures, changed hours and published notices within 90 days, chronological. Expired records are history and not shown; the end date is inclusive, in Berlin.
+- **Prüfen:** only actionable items:
+  - weekday public holidays the engine cannot resolve (next 60 days)
+  - replacement practices that cannot be shown during a coming closure
+  - unconfirmed current/upcoming operational records
+  - a missing or soon-due weekly-schedule confirmation
+
+  Unused TO_BE_CONFIRMED fields raise no alarm.
+- **Schnellaktionen:** clearly marked "im Prototyp ansehen" with a sentence that publishing comes in a later stage. There are no buttons that pretend to work.
+- **Website-Vorschau** (`/intern/vorschau`):
+  - Datum + Uhrzeit (Europe/Berlin), default now, future allowed.
+  - Database result through the same engine and the public presentation component.
+  - Staging comparison with the static website: "Stimmt mit der aktuellen Website überein." or "Abweichung zur aktuellen Website" with the named differences (status, notice text, current interval, next opening, closure, changed hours, replacement, data confidence).
+  - Authenticated only.
+- **Navigation:** Übersicht and Website-Vorschau for everyone; **Verwaltung** (`/intern/admin`) only for ADMIN. The server-side ADMIN rule stays authoritative.
+- **Failures:** unauthenticated → `/intern/anmelden`; database unavailable → the calm "nicht erreichbar" page. The public website is unaffected (verified with the database stopped).
+
+### Still required before production
+
+- Transactional password reset.
+- ADMIN MFA: required before production. Provider/plugin selection remains open and must be re-verified against the then-current Payload version.
+- Hosted database (EU, DPA/AVV, backups, PITR), monitoring, maintenance owner.
+- `LIVE_HOST_ACCESS = OPEN`; domain/DNS access unknown (LB-13/LB-14).

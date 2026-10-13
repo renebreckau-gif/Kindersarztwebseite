@@ -21,8 +21,8 @@ export const REVIEW_CARDS: ReviewCard[] = [
   {
     id: "cockpit",
     title: "Praxis Cockpit",
-    text: "Interner Bereich für Öffnungszeiten, Urlaub, Vertretungen und Hinweise.",
-    status: "Prototyp",
+    text: "Prototyp-Review mit Testdaten: alle Arbeitsabläufe für Öffnungszeiten, Urlaub, Vertretungen und Hinweise. Der normale Zugang für das Praxisteam ist der „Mitarbeiterbereich“ im Footer der Website.",
+    status: "Prototyp · Testdaten",
     action: "Praxis Cockpit öffnen",
     href: "/lab/praxis-cockpit/anmelden",
   },

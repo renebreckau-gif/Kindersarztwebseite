@@ -125,7 +125,8 @@ describe("runtime after bootstrap", { skip: skipDb }, () => {
       assert.equal(status, 200, `${role} login`);
       const intern = await http("/intern", { cookie });
       assert.equal(intern.status, 200, `${role} /intern`);
-      assert.match(intern.body, /Backend verbunden · Testumgebung/);
+      assert.match(intern.body, /Praxis heute/);
+      assert.match(intern.body, /class="cp-env">Testumgebung</);
       assert.ok(intern.body.includes(label), `${role} role label`);
       const admin = await http("/intern/admin", { cookie });
       if (role === "ADMIN") {

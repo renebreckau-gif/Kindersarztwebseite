@@ -8,6 +8,7 @@ import { Icon } from "@/design-system/icons";
 import { StatusMark } from "@/design-system/components/primitives";
 import { PRACTICE, publicAddress } from "@/content/practice";
 import { LEGAL, PRIMARY, SITEMAP, type PathKey } from "@/content/site";
+import { STAFF_ENTRY } from "@/content/staff-entry";
 import { RELEASE } from "@/content/release";
 import type { PulsView } from "@/content/puls";
 import { MenuButton, MobileMenu } from "./mobile-menu";
@@ -160,6 +161,8 @@ export function SiteFooter() {
             {l.label}
           </Link>
         ))}
+        {/* Staff entry: a quiet utility link for the practice team (UX placement, not security). */}
+        <Link href={STAFF_ENTRY.href}>{STAFF_ENTRY.label}</Link>
       </p>
     </footer>
   );
