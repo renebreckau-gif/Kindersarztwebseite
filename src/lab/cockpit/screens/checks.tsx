@@ -4,9 +4,9 @@
 
 import { useState } from "react";
 import s from "../cockpit.module.css";
-import { useCockpit } from "../store";
+import { useClock, useCockpit } from "../store";
 import { Button, Choice, ConfirmedBy, LinkButton, PageHead, Success, WebsitePreview, useBusy } from "../ui";
-import { MOCK_HOLIDAYS, MOCK_TODAY, ROLES, checkChange, dayMonth, directoryState, entryVerification, longDate, statusAt, type CockpitData } from "../model";
+import { MOCK_HOLIDAYS, ROLES, checkChange, dayMonth, directoryState, entryVerification, longDate, statusAt, type CockpitData } from "../model";
 import { addDays } from "@/domain/time";
 
 export function Holiday({ date }: { date: string }) {
@@ -49,7 +49,7 @@ export function Holiday({ date }: { date: string }) {
       {step === "view" ? (
         <div className={s.stack}>
           {!resolved ? <p className={s.lead}>Für diesen Feiertag ist noch nicht bestätigt, ob die Praxis geöffnet oder geschlossen ist.</p> : null}
-          <WebsitePreview heading="Das sehen Eltern an diesem Tag" when={`${longDate(date)}, 10:00 Uhr`} result={current} />
+          <WebsitePreview heading="Aktuell auf der Website" when={`${longDate(date)}, 10:00 Uhr`} result={current} />
           {!resolved ? (
             <form className={s.form} noValidate onSubmit={(e) => (e.preventDefault(), preview())}>
               <Choice
@@ -106,7 +106,7 @@ export function Holiday({ date }: { date: string }) {
       ) : null}
       {step === "done" && draft ? (
         <Success title="Änderung übernommen" undoId={doneId}>
-          <WebsitePreview heading="Website würde dann zeigen" headingLevel={3} when={`${longDate(date)}, 10:00 Uhr`} result={statusAt(draft, date, "10:00")} />
+          <WebsitePreview heading="Mit dieser Änderung" headingLevel={3} when={`${longDate(date)}, 10:00 Uhr`} result={statusAt(draft, date, "10:00")} />
         </Success>
       ) : null}
     </div>
@@ -115,11 +115,12 @@ export function Holiday({ date }: { date: string }) {
 
 export function DirectoryCheck({ id }: { id: string }) {
   const { state, apply } = useCockpit();
+  const { today } = useClock();
   const p = state.data.directory.find((x) => x.id === id);
   const [done, setDone] = useState<string>();
   const { busy, run } = useBusy();
   if (!p) return <PageHead title="Vertretung nicht gefunden" />;
-  const st = directoryState(p);
+  const st = directoryState(p, today, today);
 
   if (state.role === "STAFF") {
     return (
@@ -158,14 +159,14 @@ export function DirectoryCheck({ id }: { id: string }) {
                 const who = ROLES[state.role];
                 const next: CockpitData = {
                   ...state.data,
-                  directory: state.data.directory.map((x) => (x.id === p.id ? { ...x, verification: entryVerification(who.person, state.role, addDays(MOCK_TODAY, 182)) } : x)),
+                  directory: state.data.directory.map((x) => (x.id === p.id ? { ...x, verification: entryVerification(who.person, state.role, addDays(today, 182)) } : x)),
                 };
                 setDone(
                   apply(next, {
                     title: "Vertretung bestätigt",
                     detail: `${p.practiceName} (telefonisch)`,
                     before: "Prüfung abgelaufen",
-                    after: `bestätigt bis ${dayMonth(addDays(MOCK_TODAY, 182))}`,
+                    after: `bestätigt bis ${dayMonth(addDays(today, 182))}`,
                     undoSentence: `${p.practiceName} wäre wieder nicht auswählbar.`,
                     entityIds: [p.id],
                   }),

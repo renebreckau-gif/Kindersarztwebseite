@@ -81,7 +81,7 @@ export function Shell({ children }: { children: ReactNode }) {
         </a>
         <div className={s.labBar}>
           <p>
-            <strong>Elternansicht</strong> · PROTOTYP · Testdaten, so würde die Website aussehen
+            <strong>Website-Ansicht</strong> · PROTOTYP · Testdaten, so sieht es auf der Website aus
           </p>
           <Link href="/lab/praxis-cockpit" className={s.btnQuiet}>
             <Glyph name="back" size={18} />
@@ -141,10 +141,11 @@ export function Shell({ children }: { children: ReactNode }) {
 
 /** Lab-only test controls. Not a production feature. */
 function TestPanel() {
-  const { state, setRole, reset, apply } = useCockpit();
+  const { state, setRole, reset, apply, setClock } = useCockpit();
   const [done, setDone] = useState("");
+  const today = state.clock.date;
   const seedConflict = () => {
-    const segs = cutAt(plannedSegments(state.data, MOCK_TODAY), "15:00");
+    const segs = cutAt(plannedSegments(state.data, today), "15:00");
     apply(
       {
         ...state.data,
@@ -153,11 +154,11 @@ function TestPanel() {
           {
             id: "szenario-sonderzeit",
             kind: "SPECIAL_HOURS",
-            startDate: MOCK_TODAY,
-            endDate: MOCK_TODAY,
+            startDate: today,
+            endDate: today,
             intervals: segs.map((x) => ({ start: x.start, end: x.end, consultationType: x.type })),
             priority: 1,
-            verification: entryVerification(ROLES[state.role].person, state.role, MOCK_TODAY),
+            verification: entryVerification(ROLES[state.role].person, state.role, today, today),
           },
         ],
       },
@@ -170,6 +171,37 @@ function TestPanel() {
       <details className={s.test}>
         <summary className={s.testSummary}>Testmodus (nur Labor)</summary>
         <div className={s.testBody}>
+          <fieldset className={s.testRoles}>
+            <legend>Testuhr (nur Labor)</legend>
+            <p className={s.muted}>Stellt das Datum des Prototyps um, z. B. um das automatische Ende eines Urlaubs zu prüfen. Keine Funktion des echten Cockpits.</p>
+            <div className={s.chips} role="group" aria-label="Testdatum">
+              {[
+                { label: "13.10. (Start)", date: MOCK_TODAY, time: MOCK_NOW },
+                { label: "18.10. vor dem Urlaub", date: "2026-10-18", time: "09:00" },
+                { label: "20.10. im Urlaub", date: "2026-10-20", time: "09:00" },
+                { label: "23.10. letzter Urlaubstag", date: "2026-10-23", time: "09:00" },
+                { label: "24.10. erster Tag danach", date: "2026-10-24", time: "09:00" },
+                { label: "26.10. Montag", date: "2026-10-26", time: "09:00" },
+              ].map((c) => (
+                <button
+                  key={c.label}
+                  type="button"
+                  className={s.chipBtn}
+                  aria-pressed={state.clock.date === c.date && state.clock.time === c.time}
+                  onClick={() => {
+                    setClock(c.date, c.time);
+                    setDone("");
+                  }}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+            <div className={s.row2}>
+              <DateField label="Testdatum" value={state.clock.date} onChange={(v) => v && setClock(v, state.clock.time)} />
+              <TimeField label="Testuhrzeit" value={state.clock.time} onChange={(v) => v && setClock(state.clock.date, v)} />
+            </div>
+          </fieldset>
           <fieldset className={s.testRoles}>
             <legend>Rolle simulieren</legend>
             {(Object.keys(ROLES) as Role[]).map((r) => (
@@ -200,7 +232,7 @@ function TestPanel() {
             {done}
           </p>
           <p className={s.muted}>
-            Testzeit: {longDate(MOCK_TODAY)}, {MOCK_NOW} Uhr. Alle Namen, Praxen und Zeiten sind erfunden. Änderungen werden nicht gespeichert.
+            Testzeit: {longDate(state.clock.date)}, {state.clock.time} Uhr. Alle Namen, Praxen und Zeiten sind erfunden. Änderungen werden nicht gespeichert.
           </p>
         </div>
       </details>
@@ -432,7 +464,7 @@ export function toPulsView(result: PracticeStatusResult): PulsView {
   };
 }
 
-export function WebsitePreview({ result, when, announcements = [], heading = "So sieht es die Website", headingLevel = 2, explain = true }: { result: PracticeStatusResult; when: string; announcements?: Announcement[]; heading?: string; headingLevel?: 2 | 3; explain?: boolean }) {
+export function WebsitePreview({ result, when, announcements = [], heading = "Website-Vorschau", headingLevel = 2, explain = true }: { result: PracticeStatusResult; when: string; announcements?: Announcement[]; heading?: string; headingLevel?: 2 | 3; explain?: boolean }) {
   const H = headingLevel === 2 ? "h2" : "h3";
   const note = explain ? unknownExplanation(result) : null;
   const message = result.activeClosure?.message ?? result.activeException?.message;

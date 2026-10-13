@@ -149,208 +149,127 @@ for (const vp of Object.keys(VP)) {
   }
 }
 
-// ---------------------------------------------------------------- HOME
-for (const vp of ["390x844", "768x1024", "1440x900"]) {
+// ---------------------------------------------------------------- Phase 09.1.3 review set
+// Pattern: EDIT → LIVE WEBSITE PREVIEW → PUBLISH → AUTO-EXPIRE → NORMAL RULES RESUME.
+const ALL = ["390x844", "768x1024", "1440x900"];
+
+// HOME
+for (const vp of ALL) {
   await viewport(vp);
   await go("/lab/praxis-cockpit");
-  await shot(`01-home-${vp}.png`);
+  await shot(`01-start-${vp}.png`);
 }
 
-// ---------------------------------------------------------------- TASK A at 390: early close → preview → success
-await viewport("390x844");
-await go("/lab/praxis-cockpit");
-await click("Heute früher schließen", "a");
-await shot("02-frueher-schliessen-form-390x844.png");
-await click("Vorschau ansehen", "button");
-await sleep(600);
-await shot("03-frueher-schliessen-vorschau-390x844.png");
-await click("Nachmittagssprechzeit heute entfallen lassen", "button");
-await sleep(600);
-await shot("04-frueher-schliessen-erfolg-390x844.png");
-
-// ---------------------------------------------------------------- ERROR 1: second special time today (390)
-await click("Zur Startseite", "a");
-await shot("05-home-nach-aenderung-390x844.png");
-await click("Heute früher schließen", "a");
-await fill("Bis wann ist heute geöffnet?", "11:00");
-await click("Vorschau ansehen", "button");
-await sleep(600);
-await shot("06-fehler-widerspruechliche-sonderzeiten-390x844.png");
-
-// ---------------------------------------------------------------- TASK D: undo from home (390)
-await click("Zurück", "button");
-await click("Startseite", "a");
-await click("Änderung zurücknehmen", "a");
-await shot("07-ruecknahme-vorschau-390x844.png");
-await click("Rücknahme bestätigen", "button");
-await sleep(600);
-await shot("08-ruecknahme-erfolg-390x844.png");
-
-// ---------------------------------------------------------------- TASK C + ERROR 2: 25 December (390)
-await go("/lab/praxis-cockpit/website");
-await click("25. Dezember, 10:00", "button");
-await shot("09-website-vorschau-25-dezember-390x844.png");
-await go("/lab/praxis-cockpit");
-await click("Prüfen", "a[href*='feiertag?datum=2026-12-25']");
-await shot("10-fehler-feiertag-nicht-geklaert-390x844.png");
-
-// ---------------------------------------------------------------- ERROR 3: replacement must be confirmed (390)
-await viewport("390x844");
-await go("/lab/praxis-cockpit/geschlossen");
-await click("Ab sofort", "label");
-await shot("15-fehler-vertretung-bestaetigen-390x844.png");
-
-// ---------------------------------------------------------------- notice without end date (390)
-await go("/lab/praxis-cockpit/hinweis");
-await fill("Titel", "Neue Telefonzeiten (Test)");
-await fill("Kurzer Hinweis", "Testtext für den Prototyp.");
-await fill("Gültig bis", "");
-await click("Vorschau ansehen", "button");
-await shot("16-hinweis-ohne-enddatum-390x844.png");
-
-// ---------------------------------------------------------------- history (1440)
-await viewport("1440x900");
-await go("/lab/praxis-cockpit/verlauf");
-await shot("17-verlauf-1440x900.png");
-
-// ---------------------------------------------------------------- Phase 09.1.1 alignment QA (390 + 1440)
-async function websiteAt(date, time) {
-  await click("Website-Vorschau", "nav a");
-  await fill("Tag", date);
-  await fill("Uhrzeit", time);
-  await sleep(400);
-}
-for (const vp of ["390x844", "1440x900"]) {
+// A/B: Heute früher schließen — edit left, Website-Vorschau right (desktop) / stacked (mobile)
+for (const vp of ALL) {
   await viewport(vp);
-  // 1 + 2: weekend holiday vs. weekday holiday (fresh state)
-  await go("/lab/praxis-cockpit");
-  await websiteAt("2026-10-31", "10:00");
-  await shot(`20-wochenend-feiertag-31-oktober-${vp}.png`);
-  await fill("Tag", "2026-12-25");
-  await sleep(400);
-  await shot(`21-werktag-feiertag-25-dezember-${vp}.png`);
-  // 5: lunch-gap case (13:00) — form explanation and preview with exact button
-  await click("Start", "nav a");
-  await click("Heute früher schließen", "a");
-  await fill("Bis wann ist heute geöffnet?", "13:00");
-  await shot(`22-frueher-schliessen-13-uhr-hinweis-${vp}.png`);
-  await click("Vorschau ansehen", "button");
-  await sleep(600);
-  await shot(`23-frueher-schliessen-13-uhr-vorschau-${vp}.png`);
-  // 3 + 4: special-hours day (close at 15:00) — preview while open and while closed
-  await click("Zurück", "button");
+  await go("/lab/praxis-cockpit/frueher-schliessen");
+  await sleep(1100); // settled live preview
+  await shot(`02-frueher-schliessen-13-uhr-${vp}.png`);
   await fill("Bis wann ist heute geöffnet?", "15:00");
-  await click("Vorschau ansehen", "button");
-  await sleep(600);
-  await click("Heute um 15:00 Uhr schließen", "button");
-  await sleep(600);
-  await websiteAt("2026-10-13", "09:20");
-  await shot(`24-sonderzeit-geoeffnet-${vp}.png`);
-  await fill("Uhrzeit", "13:00");
-  await sleep(400);
-  await shot(`25-sonderzeit-geschlossen-mittag-${vp}.png`);
-  await fill("Uhrzeit", "15:30");
-  await sleep(400);
-  await shot(`26-sonderzeit-nach-letzter-sprechzeit-${vp}.png`);
+  await sleep(1100);
+  await shot(`03-frueher-schliessen-15-uhr-${vp}.png`);
 }
-// 10:30 inside the morning block (390)
-await viewport("390x844");
-await go("/lab/praxis-cockpit/frueher-schliessen");
-await fill("Bis wann ist heute geöffnet?", "10:30");
-await click("Vorschau ansehen", "button");
-await sleep(600);
-await shot("27-frueher-schliessen-10-30-vorschau-390x844.png");
 
-// ---------------------------------------------------------------- Phase 09.1.2: full staff journey
-async function vacationTo(step3) {
-  await click("Urlaub eintragen", "a");
+// Heute geschlossen (ab sofort, Krankheit, Praxis Beispiel A)
+for (const vp of ALL) {
+  await viewport(vp);
+  await go("/lab/praxis-cockpit/geschlossen");
+  await click("Ab sofort", "label");
+  await click("Krankheit", "label");
+  await click("Praxis Beispiel A", "label");
+  await shot(`04-heute-geschlossen-${vp}.png`);
+}
+
+// C/E: Urlaub with one replacement
+async function vacationForm() {
+  await go("/lab/praxis-cockpit/urlaub");
   await fill("Von", "2026-10-19");
   await fill("Bis", "2026-10-23");
-  return step3;
 }
-for (const vp of ["390x844", "768x1024", "1440x900"]) {
+for (const vp of ALL) {
   await viewport(vp);
-  // LOGIN (signed out first)
-  await go("/lab/praxis-cockpit");
-  await click("Abmelden", "button");
-  await shot(`30-anmelden-${vp}.png`);
-  if (vp === "390x844") {
-    await fill("E-Mail-Adresse", "team@beispiel.test");
-    await fill("Passwort", "falsch");
-    await click("Anmelden", "button[type=submit]");
-    await shot(`31-anmelden-fehler-${vp}.png`);
-  }
-  await click("Testzugang einsetzen", "button");
-  await click("Anmelden", "button[type=submit]");
-  await sleep(600);
-  await shot(`32-cockpit-start-${vp}.png`);
-  // URLAUB 19.–23. Oktober → Praxis Beispiel A
-  await vacationTo();
-  await shot(`33-urlaub-zeitraum-${vp}.png`);
-  await click("Weiter", "button");
-  await shot(`34-urlaub-text-${vp}.png`);
-  await click("Weiter", "button");
+  await vacationForm();
   await click("Eine Vertretung für den ganzen Zeitraum", "label");
-  await click("Praxis Beispiel C", "button");
-  await shot(`35-urlaub-vertretung-auswahl-${vp}.png`);
   await click("Praxis Beispiel A", "label");
-  await click("Vorschau ansehen", "button");
-  await sleep(700);
-  await shot(`36-urlaub-vorschau-${vp}.png`);
-  await click("Vertretung anzeigen", "button");
-  await shot(`37-urlaub-vorschau-vertretung-${vp}.png`);
-  await click("Urlaub vom 19.–23. Oktober veröffentlichen", "button");
-  await sleep(700);
-  await shot(`38-urlaub-eingetragen-${vp}.png`);
-  // PARENT VIEW
-  await click("Ansicht für Eltern öffnen", "a");
-  await shot(`39-elternansicht-urlaub-${vp}.png`);
-  await click("Vertretung anzeigen", "button");
-  await shot(`40-elternansicht-vertretung-${vp}.png`);
-  // COCKPIT HOME → URLAUB ANSEHEN → LOGOUT
-  await click("Zurück zum Cockpit", "a");
-  await shot(`41-start-nach-urlaub-${vp}.png`);
-  await click("Ansehen", "a[href*='/urlaub/']");
-  await shot(`42-urlaub-detail-${vp}.png`);
-  await click("Abmelden", "button");
-  await shot(`43-abgemeldet-${vp}.png`, false);
-  await click("Testzugang einsetzen", "button");
-  await click("Anmelden", "button[type=submit]");
   await sleep(600);
+  await shot(`05-urlaub-eine-vertretung-${vp}.png`);
 }
 
-// SPLIT: 19.–21. Praxis Beispiel A, 22.–23. Praxis Beispiel B
+// D: split replacement plan
 for (const vp of ["390x844", "1440x900"]) {
   await viewport(vp);
-  await go("/lab/praxis-cockpit");
-  await vacationTo();
-  await click("Weiter", "button");
-  await click("Weiter", "button");
+  await vacationForm();
   await click("Zeitraum aufteilen", "label");
   await choose("Vertretung", "vb-a", 0);
   await choose("Vertretung", "vb-b", 1);
-  await shot(`44-aufgeteilt-eingabe-${vp}.png`);
-  await click("Vorschau ansehen", "button");
-  await sleep(700);
-  await click("Urlaub vom 19.–23. Oktober veröffentlichen", "button");
-  await sleep(700);
-  await click("Ansicht für Eltern öffnen", "a");
-  await click("Vertretung anzeigen", "button");
-  await shot(`45-aufgeteilt-elternansicht-${vp}.png`);
+  await sleep(600);
+  await shot(`06-urlaub-aufgeteilt-${vp}.png`);
 }
 
-// NO REPLACEMENT (390)
+// Hinweis with automatic end
+for (const vp of ALL) {
+  await viewport(vp);
+  await go("/lab/praxis-cockpit/hinweis");
+  await fill("Titel", "Neue Telefonzeiten (Test)");
+  await fill("Kurzer Hinweis", "Testtext für den Prototyp.");
+  await sleep(600);
+  await shot(`07-hinweis-${vp}.png`);
+}
+
+// Publish the vacation, then F–I: advance the lab test clock (Testmodus) — no manual cleanup
+await viewport("1440x900");
+await vacationForm();
+await click("Eine Vertretung für den ganzen Zeitraum", "label");
+await click("Praxis Beispiel A", "label");
+await click("Urlaub vom 19.–23. Oktober veröffentlichen", "button");
+await sleep(800);
+await shot("08-urlaub-veroeffentlicht-1440x900.png");
+await click("Zur Cockpit-Startseite", "a");
+await click("Testmodus", "summary");
+const STEPS = [
+  ["18.10. vor dem Urlaub", "09-vor-dem-urlaub-18-10"],
+  ["20.10. im Urlaub", "10-im-urlaub-20-10"],
+  ["23.10. letzter Urlaubstag", "11-letzter-urlaubstag-23-10"],
+  ["24.10. erster Tag danach", "12-erster-tag-danach-24-10"],
+  ["26.10. Montag", "13-naechster-montag-26-10"],
+];
+for (const [chip, name] of STEPS) {
+  await click(chip, "button");
+  await click("Start", "nav a");
+  await shot(`${name}-start-1440x900.png`);
+  await click("Website-Vorschau", "nav a");
+  await shot(`${name}-website-vorschau-1440x900.png`);
+}
+await click("Verlauf", "nav a");
+await shot("14-verlauf-nach-ablauf-1440x900.png");
+
+// Conflict shown live in the preview (390): publish an early close, then try another one
 await viewport("390x844");
-await go("/lab/praxis-cockpit");
-await vacationTo();
-await click("Weiter", "button");
-await click("Weiter", "button");
-await click("Keine Vertretung eintragen", "label");
-await shot("46-keine-vertretung-hinweis-390x844.png");
-await click("Vorschau ansehen", "button");
+await go("/lab/praxis-cockpit/frueher-schliessen");
+await fill("Bis wann ist heute geöffnet?", "11:00");
+await sleep(400);
+await click("Heute um 11:00 Uhr schließen", "button");
 await sleep(700);
-await click("Notfall-Hinweise", "button");
-await shot("47-keine-vertretung-vorschau-390x844.png");
+await shot("15-frueher-schliessen-veroeffentlicht-390x844.png");
+await click("Startseite", "a");
+await click("Heute früher schließen", "a");
+await fill("Bis wann ist heute geöffnet?", "10:30");
+await sleep(1100);
+await shot("16-fehler-widerspruch-live-390x844.png");
+// Undo from home
+await click("Startseite", "a");
+await click("Änderung zurücknehmen", "a");
+await shot("17-ruecknahme-390x844.png");
+
+// Login + website preview for 25 December (390)
+await go("/lab/praxis-cockpit/website");
+await click("25. Dezember, 10:00", "button");
+await shot("18-website-vorschau-25-dezember-390x844.png");
+await go("/lab/praxis-cockpit");
+await click("Abmelden", "button");
+await shot("19-anmelden-390x844.png");
+await login();
 
 writeFileSync(join(OUT, "audit.json"), JSON.stringify(audit, null, 2));
 const issues = Object.entries(audit).filter(([, a]) => a.overflowX || a.smallTargets.length || a.unlabeled.length || a.unnamed || a.h1 !== 1);

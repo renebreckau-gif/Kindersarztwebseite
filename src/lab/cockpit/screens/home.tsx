@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import s from "../cockpit.module.css";
-import { useCockpit } from "../store";
+import { useClock, useCockpit } from "../store";
 import { Glyph, LinkButton, StatusWord } from "../ui";
-import { MOCK_NOW, MOCK_TODAY, ROLES, blocks, checks, longDate, nowStatus, plannedSegments, typeLabel, upcoming } from "../model";
+import { ROLES, blocks, checks, longDate, nowStatus, pastRecords, plannedSegments, typeLabel, upcoming } from "../model";
 import { parseTime } from "@/domain/time";
 
 const QUICK = [
@@ -19,20 +19,26 @@ export function Home() {
   const { state } = useCockpit();
   const { data, role } = state;
   const who = ROLES[role];
-  const result = nowStatus(data);
-  const segs = plannedSegments(data, MOCK_TODAY);
-  const now = parseTime(MOCK_NOW);
+  const { today, now: nowTime } = useClock();
+  const result = nowStatus(data, today, nowTime);
+  const segs = plannedSegments(data, today);
+  const now = parseTime(nowTime);
+  const greeting = now < parseTime("11:00") ? "Guten Morgen" : now < parseTime("18:00") ? "Guten Tag" : "Guten Abend";
+  const past = pastRecords(data, today);
   const current = segs.find((x) => parseTime(x.start) <= now && now < parseTime(x.end));
   const next = segs.find((x) => parseTime(x.start) > now && (!current || x.type !== current.type || parseTime(x.start) > parseTime(current.end)));
-  const items = upcoming(data);
-  const todo = checks(data, role);
-  const last = state.audit.find((e) => e.snapshot && !e.revertedBy && !e.revertOf);
+  const items = upcoming(data, today);
+  const todo = checks(data, role, today);
+  // Quick undo only on the day of the change; older changes are reachable in the Verlauf.
+  const last = state.audit.find((e) => e.snapshot && !e.revertedBy && !e.revertOf && e.date === today);
 
   return (
     <div className={s.home}>
       <div className={s.greet}>
-        <h1 className={s.h1}>Guten Morgen, {who.greeting}</h1>
-        <p className={s.intro}>{longDate(MOCK_TODAY)}</p>
+        <h1 className={s.h1}>
+          {greeting}, {who.greeting}
+        </h1>
+        <p className={s.intro}>{longDate(today)}</p>
       </div>
 
       {last ? (
@@ -64,6 +70,7 @@ export function Home() {
               ))}
             </ul>
           ) : null}
+          {current || next ? (
           <dl className={s.nowNext}>
             {current ? (
               <div>
@@ -80,9 +87,10 @@ export function Home() {
               </div>
             ) : null}
           </dl>
+          ) : null}
           <LinkButton href="/lab/praxis-cockpit/website">
             <Glyph name="eye" size={20} />
-            Was sieht die Website?
+            Website-Vorschau
           </LinkButton>
         </section>
 
@@ -138,8 +146,9 @@ export function Home() {
                       <span className={s.dateNote}>Vertretung: {i.closure.replacement}</span>
                       <span className={s.published}>
                         <Glyph name="check" size={16} />
-                        veröffentlicht
+                        Auf der Website veröffentlicht
                       </span>
+                      {i.endsOn ? <span className={s.dateNote}>Endet automatisch: {longDate(i.endsOn)} · keine Aktion nötig</span> : null}
                       <span className={s.dateActions}>
                         <Link href={`/lab/praxis-cockpit/urlaub/${encodeURIComponent(i.closure.id)}`} className={s.textLink}>
                           Ansehen<span className="visually-hidden">: {i.note} {i.label}</span>
@@ -150,9 +159,12 @@ export function Home() {
                       </span>
                     </span>
                   ) : (
-                    <span className={s.dateNote}>
-                      {i.attention ? <span className={s.dot} aria-hidden="true" /> : null}
-                      {i.note}
+                    <span className={s.dateClosure}>
+                      <span className={s.dateNote}>
+                        {i.attention ? <span className={s.dot} aria-hidden="true" /> : null}
+                        {i.note}
+                      </span>
+                      {i.endsOn ? <span className={s.dateNote}>Endet automatisch: {longDate(i.endsOn)}</span> : null}
                     </span>
                   )}
                 </li>
@@ -161,6 +173,11 @@ export function Home() {
           ) : (
             <p className={s.muted}>In den nächsten Wochen ist nichts Besonderes eingetragen.</p>
           )}
+          {past.length ? (
+            <Link href="/lab/praxis-cockpit/verlauf" className={s.textLink}>
+              {past.length === 1 ? "1 abgelaufener Eintrag" : `${past.length} abgelaufene Einträge`} im Verlauf
+            </Link>
+          ) : null}
         </section>
 
         <section className={`${s.panel} ${s.checks}`} aria-labelledby="pruefen-title">

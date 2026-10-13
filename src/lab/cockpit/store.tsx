@@ -4,12 +4,13 @@
 // returns to the same starting situation for the next usability session.
 
 import { createContext, useContext, useEffect, useMemo, useReducer, useState, type ReactNode } from "react";
-import { initialState, readSession, writeSession, MOCK_NOW, MOCK_TODAY, ROLES, type AuditEntry, type CockpitData, type CockpitState, type Role } from "./model";
+import { initialState, readSession, writeSession, ROLES, type AuditEntry, type CockpitData, type CockpitState, type Role } from "./model";
 
 type ChangeInput = Omit<AuditEntry, "id" | "date" | "time" | "actor" | "role" | "snapshot">;
 
 type Action =
   | { type: "role"; role: Role }
+  | { type: "clock"; date: string; time: string }
   | { type: "reset" }
   | { type: "apply"; next: CockpitData; entry: ChangeInput; id: string }
   | { type: "revert"; id: string; revertId: string };
@@ -18,11 +19,13 @@ function reducer(state: CockpitState, a: Action): CockpitState {
   switch (a.type) {
     case "role":
       return { ...state, role: a.role };
+    case "clock":
+      return { ...state, clock: { date: a.date, time: a.time } };
     case "reset":
       return { ...initialState(), role: state.role };
     case "apply": {
       const who = ROLES[state.role];
-      const entry: AuditEntry = { ...a.entry, id: a.id, date: MOCK_TODAY, time: MOCK_NOW, actor: who.person, role: state.role, snapshot: state.data };
+      const entry: AuditEntry = { ...a.entry, id: a.id, date: state.clock.date, time: state.clock.time, actor: who.person, role: state.role, snapshot: state.data };
       return { ...state, seq: state.seq + 1, data: a.next, audit: [entry, ...state.audit] };
     }
     case "revert": {
@@ -31,8 +34,8 @@ function reducer(state: CockpitState, a: Action): CockpitState {
       const who = ROLES[state.role];
       const entry: AuditEntry = {
         id: a.revertId,
-        date: MOCK_TODAY,
-        time: MOCK_NOW,
+        date: state.clock.date,
+        time: state.clock.time,
         actor: who.person,
         role: state.role,
         title: "Änderung zurückgenommen",
@@ -74,6 +77,8 @@ interface Store {
   signIn: (r: Role) => void;
   signOut: () => void;
   setRole: (r: Role) => void;
+  /** Lab-only test clock. */
+  setClock: (date: string, time: string) => void;
   reset: () => void;
   /** Returns the id of the new audit entry. */
   apply: (next: CockpitData, entry: ChangeInput) => string;
@@ -112,6 +117,7 @@ export function CockpitProvider({ children }: { children: ReactNode }) {
         dispatch({ type: "role", role });
       },
       reset: () => dispatch({ type: "reset" }),
+      setClock: (date, time) => dispatch({ type: "clock", date, time }),
       apply: (next, entry) => {
         const id = newId("c");
         dispatch({ type: "apply", next, entry, id });
@@ -132,4 +138,10 @@ export function useCockpit(): Store {
   const s = useContext(Ctx);
   if (!s) throw new Error("useCockpit outside CockpitProvider");
   return s;
+}
+
+/** Current prototype time (Europe/Berlin wall clock of the lab test clock). */
+export function useClock(): { today: string; now: string } {
+  const { state } = useCockpit();
+  return { today: state.clock.date, now: state.clock.time };
 }

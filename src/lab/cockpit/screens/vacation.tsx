@@ -2,15 +2,14 @@
 
 import { useState } from "react";
 import s from "../cockpit.module.css";
-import { useCockpit } from "../store";
-import { Blocked, Button, Choice, ConfirmedBy, DateField, FieldError, LinkButton, PageHead, Success, TextField, useBusy } from "../ui";
+import { useClock, useCockpit } from "../store";
+import { Button, Choice, ConfirmedBy, DateField, FieldError, LinkButton, PageHead, Success, TextField, useBusy } from "../ui";
 import { ReplacementPicker, StaleReplacements } from "./replacement";
-import { ParentPreview } from "./parent";
-import { MOCK_TODAY, ROLES, checkChange, dateRange, dayMonth, directoryState, entryVerification, longDate, replacementSchedule, statusAt, type CockpitData, type Problem } from "../model";
+import { EditLayout, LivePreview, ReplacementPreview, Validity } from "./live";
+import { ROLES, checkChange, dateRange, dayMonth, directoryState, entryVerification, longDate, replacementSchedule, type CockpitData } from "../model";
 import { addDays, compareDates, isLocalDate, type LocalDate } from "@/domain/time";
 import type { Closure } from "@/domain/content-types";
 
-type Step = 1 | 2 | 3 | 4 | "blocked" | "done";
 type Mode = "ganz" | "teilen" | "keine";
 interface Period {
   from: string;
@@ -18,7 +17,6 @@ interface Period {
   practice: string;
 }
 
-const STEPS = ["Zeitraum", "Text für Eltern", "Vertretung", "Vorschau"];
 const DEFAULT_TEXT = "Die Praxis ist in diesem Zeitraum geschlossen.";
 const overlapsRange = (a: { from: string; to: string }, b: { from: string; to: string }) => compareDates(a.from, b.to) <= 0 && compareDates(b.from, a.to) <= 0;
 
@@ -38,9 +36,9 @@ function fromClosure(c: Closure | undefined) {
 
 export function Vacation({ editId }: { editId?: string }) {
   const { state, apply } = useCockpit();
+  const { today } = useClock();
   const editing = editId ? state.data.closures.find((c) => c.id === editId) : undefined;
   const init = fromClosure(editing);
-  const [step, setStep] = useState<Step>(1);
   const [from, setFrom] = useState(init?.from ?? "");
   const [to, setTo] = useState(init?.to ?? "");
   const [extra, setExtra] = useState(init?.extra ?? "");
@@ -48,31 +46,60 @@ export function Vacation({ editId }: { editId?: string }) {
   const [whole, setWhole] = useState(init?.whole ?? "");
   const [periods, setPeriods] = useState<Period[]>(init?.periods ?? []);
   const [gapOk, setGapOk] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [draft, setDraft] = useState<CockpitData>();
-  const [problem, setProblem] = useState<Problem>();
-  const [doneId, setDoneId] = useState<string>();
-  const [previewDate, setPreviewDate] = useState("");
+  const [previewDay, setPreviewDay] = useState("");
+  const [done, setDone] = useState<string>();
   const { busy, run } = useBusy();
+  const [closureId] = useState(() => editId ?? `urlaub-${Date.now().toString(36)}`);
 
+  const base = state.data;
   const datesOk = isLocalDate(from) && isLocalDate(to) && compareDates(to, from) >= 0;
   const range = datesOk ? dateRange(from, to) : "";
   const message = extra.trim() ? `${DEFAULT_TEXT} ${extra.trim()}` : DEFAULT_TEXT;
-  const usable = state.data.directory.filter((p) => datesOk && directoryState(p, to).usable);
-  const name = (id: string) => state.data.directory.find((p) => p.id === id)?.practiceName ?? "";
+  const usable = base.directory.filter((p) => datesOk && directoryState(p, to, today).usable);
+  const name = (id: string) => base.directory.find((p) => p.id === id)?.practiceName ?? "";
 
-  function next1() {
-    const e: Record<string, string> = {};
-    if (!isLocalDate(from)) e.from = "Bitte den ersten Urlaubstag wählen.";
-    else if (compareDates(from, MOCK_TODAY) < 0) e.from = "Der erste Tag liegt in der Vergangenheit.";
-    if (!isLocalDate(to)) e.to = "Bitte den letzten Urlaubstag wählen.";
-    else if (isLocalDate(from) && compareDates(to, from) < 0) e.to = "Der letzte Tag liegt vor dem ersten Tag.";
-    const other = state.data.closures.find((c) => c.id !== editId && isLocalDate(from) && isLocalDate(to) && overlapsRange({ from, to }, { from: c.startDate, to: c.endDate }));
-    if (other && !e.from && !e.to) e.to = `In diesem Zeitraum ist bereits eine Schließung eingetragen (${dateRange(other.startDate, other.endDate)}).`;
-    setErrors(e);
-    if (Object.keys(e).length) return;
-    setStep(2);
+  // ---- live validation (plain German, field-level; nothing blocks typing)
+  const e: Record<string, string> = {};
+  if (from && !isLocalDate(from)) e.from = "Bitte ein gültiges Datum wählen.";
+  else if (isLocalDate(from) && compareDates(from, today) < 0) e.from = "Der erste Tag liegt in der Vergangenheit.";
+  if (isLocalDate(from) && isLocalDate(to) && compareDates(to, from) < 0) e.to = "Der letzte Tag liegt vor dem ersten Tag.";
+  const other = datesOk ? base.closures.find((c) => c.id !== editId && compareDates(c.endDate, today) >= 0 && overlapsRange({ from, to }, { from: c.startDate, to: c.endDate })) : undefined;
+  if (other) e.to = `In diesem Zeitraum ist bereits eine Schließung eingetragen (${dateRange(other.startDate, other.endDate)}).`;
+  const gaps = mode === "teilen" && datesOk ? uncovered(from, to, periods) : [];
+  if (mode === "teilen") {
+    periods.forEach((p, i) => {
+      if (!p.from || !p.to) return;
+      if (!isLocalDate(p.from) || !isLocalDate(p.to) || compareDates(p.to, p.from) < 0) e[`p${i}`] = "Bitte einen gültigen Zeitraum wählen.";
+      else if (datesOk && (compareDates(p.from, from) < 0 || compareDates(p.to, to) > 0)) e[`p${i}`] = `Dieser Zeitraum liegt außerhalb des Urlaubs (${range}).`;
+      else if (periods.some((q, j) => j !== i && isLocalDate(q.from) && isLocalDate(q.to) && overlapsRange(p, q))) e[`p${i}`] = "Dieser Zeitraum überschneidet sich mit einer anderen Vertretung.";
+    });
   }
+  const periodsComplete = periods.every((p) => isLocalDate(p.from) && isLocalDate(p.to) && p.practice);
+  const replacementReady = mode === "keine" || (mode === "ganz" && whole) || (mode === "teilen" && periodsComplete && (!gaps.length || gapOk));
+  const datesReady = datesOk && !e.from && !e.to;
+
+  const who = ROLES[state.role];
+  // Preview draft: as soon as the dates are valid; replacements are added as far as they are complete.
+  const replacements =
+    mode === "ganz" && whole
+      ? [{ replacementPracticeId: whole, from, until: to }]
+      : mode === "teilen"
+        ? [...periods]
+            .filter((p, i) => isLocalDate(p.from) && isLocalDate(p.to) && p.practice && !e[`p${i}`])
+            .sort((a, b) => a.from.localeCompare(b.from))
+            .map((p) => ({ replacementPracticeId: p.practice, from: p.from, until: p.to }))
+        : [];
+  const draft: CockpitData | null = datesReady
+    ? {
+        ...base,
+        closures: [
+          ...base.closures.filter((c) => c.id !== editId),
+          { id: closureId, kind: "VACATION", startDate: from, endDate: to, announceFrom: addDays(from, -14), publicMessage: message, replacements, verification: entryVerification(who.person, state.role, to, today) },
+        ],
+      }
+    : null;
+  const problem = draft ? checkChange(base, draft, from, to, today) : null;
+  const canPublish = Boolean(draft) && !problem && replacementReady && !Object.keys(e).some((k) => k.startsWith("p"));
 
   function chooseMode(m: Mode) {
     setMode(m);
@@ -82,132 +109,98 @@ export function Vacation({ editId }: { editId?: string }) {
     }
   }
 
-  const gaps = mode === "teilen" ? uncovered(from, to, periods) : [];
-
-  function next3() {
-    const e: Record<string, string> = {};
-    if (!mode) e.mode = "Bitte wählen, wer die Vertretung übernimmt – oder „Keine Vertretung eintragen“.";
-    if (mode === "ganz" && !whole) e.whole = "Bitte eine Praxis wählen.";
-    if (mode === "teilen") {
-      periods.forEach((p, i) => {
-        if (!isLocalDate(p.from) || !isLocalDate(p.to) || compareDates(p.to, p.from) < 0) e[`p${i}`] = "Bitte einen gültigen Zeitraum wählen.";
-        else if (compareDates(p.from, from) < 0 || compareDates(p.to, to) > 0) e[`p${i}`] = `Dieser Zeitraum liegt außerhalb des Urlaubs (${range}).`;
-        else if (periods.some((q, j) => j !== i && isLocalDate(q.from) && isLocalDate(q.to) && overlapsRange(p, q))) e[`p${i}`] = "Dieser Zeitraum überschneidet sich mit einer anderen Vertretung.";
-        if (!p.practice) e[`pp${i}`] = "Bitte eine Vertretung wählen.";
-      });
-      if (gaps.length && !gapOk && !Object.keys(e).length) e.gap = "Bitte die Lücke schließen oder bewusst ohne Vertretung lassen.";
-    }
-    setErrors(e);
-    if (Object.keys(e).length) return;
-    const who = ROLES[state.role];
-    const replacements = mode === "ganz" ? [{ replacementPracticeId: whole, from, until: to }] : mode === "teilen" ? [...periods].sort((a, b) => a.from.localeCompare(b.from)).map((p) => ({ replacementPracticeId: p.practice, from: p.from, until: p.to })) : [];
-    const closure: Closure = {
-      id: editId ?? `urlaub-${from}-${Date.now().toString(36)}`,
-      kind: "VACATION",
-      startDate: from,
-      endDate: to,
-      announceFrom: addDays(from, -14),
-      publicMessage: message,
-      replacements,
-      verification: entryVerification(who.person, state.role, to),
-    };
-    const nextData: CockpitData = { ...state.data, closures: [...state.data.closures.filter((c) => c.id !== editId), closure] };
-    run(800, () => {
-      const p = checkChange(state.data, nextData, from, to);
-      setDraft(nextData);
-      setProblem(p ?? undefined);
-      setPreviewDate(from);
-      setStep(p ? "blocked" : 4);
-    });
-  }
-
   function publish() {
-    if (!draft) return;
-    const c = draft.closures.find((x) => x.startDate === from && x.endDate === to)!;
+    if (!draft || !canPublish) return;
     run(700, () => {
-      const id = apply(draft, {
-        title: editing ? `Urlaub vom ${range} geändert` : `Urlaub vom ${range} eingetragen`,
-        detail: c.replacements.length ? `Vertretung: ${c.replacements.map((r) => `${name(r.replacementPracticeId)} (${dateRange(r.from, r.until)})`).join(", ")}` : "ohne Vertretung",
-        before: editing ? `${dateRange(editing.startDate, editing.endDate)}` : "normale Sprechzeiten",
-        after: `geschlossen ${range}`,
-        undoSentence: editing ? "Der Urlaub wäre wieder wie vor der Änderung eingetragen." : `Die Praxis wäre vom ${range} wieder mit den normalen Sprechzeiten auf der Website.`,
-        entityIds: [c.id],
-      });
-      setDoneId(id);
-      setStep("done");
+      setDone(
+        apply(draft, {
+          title: editing ? `Urlaub vom ${range} geändert` : `Urlaub vom ${range} eingetragen`,
+          detail: replacements.length ? `Vertretung: ${replacements.map((r) => `${name(r.replacementPracticeId)} (${dateRange(r.from, r.until)})`).join(", ")}` : "ohne Vertretung",
+          before: editing ? dateRange(editing.startDate, editing.endDate) : "normale Sprechzeiten",
+          after: `geschlossen ${range}`,
+          undoSentence: editing ? "Der Urlaub wäre wieder wie vor der Änderung eingetragen." : `Die Praxis wäre vom ${range} wieder mit den normalen Sprechzeiten auf der Website.`,
+          entityIds: [closureId],
+        }),
+      );
     });
   }
 
-  const stepNo = typeof step === "number" ? step : 4;
-  const closureId = draft?.closures.find((x) => x.startDate === from && x.endDate === to)?.id;
-  const previewChips: { label: string; date: string }[] = draft
+  if (done) {
+    return (
+      <div className={s.flowWide}>
+        <PageHead title={editing ? "Urlaub ändern" : "Urlaub eintragen"} focusKey={done} />
+        <div className={s.doneLayout}>
+          <Success
+            title={editing ? "Urlaub geändert" : "Urlaub eingetragen"}
+            undoId={done}
+            actions={
+              <>
+                <LinkButton href={`/lab/praxis-cockpit/elternansicht?datum=${from}&zeit=09:00`} variant="primary">
+                  Ansicht auf der Website öffnen
+                </LinkButton>
+                <LinkButton href="/lab/praxis-cockpit">Zur Cockpit-Startseite</LinkButton>
+              </>
+            }
+          >
+            <p>
+              Auf der Website veröffentlicht: Praxisurlaub {range}. Er endet am {longDate(to)} automatisch – danach gelten wieder die regulären Sprechzeiten, ohne dass jemand etwas ausschalten muss.
+            </p>
+          </Success>
+          <LivePreview
+            base={state.data}
+            draft={null}
+            moments={[{ label: `${longDate(from)}, 09:00 Uhr`, date: from, time: "09:00", extra: () => <ReplacementPreview periods={replacementSchedule(state.data, closureId, from)} /> }]}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Preview day: chosen chip, else first vacation day (or today if the vacation already runs).
+  const firstDay = datesOk ? (compareDates(from, today) < 0 ? today : from) : today;
+  const day = previewDay && datesOk && compareDates(previewDay, addDays(to, 1)) <= 0 ? previewDay : firstDay;
+  const chips: { label: string; date: LocalDate }[] = datesOk
     ? [
-        { label: `Erster Tag (${dayMonth(from, true)})`, date: from },
-        ...(mode === "teilen" ? periods.slice(1).map((p) => ({ label: `Ab ${dayMonth(p.from, true)}`, date: p.from })) : []),
-        { label: `Danach (${dayMonth(addDays(to, 1), true)})`, date: addDays(to, 1) },
+        { label: `Erster Tag (${dayMonth(firstDay, true)})`, date: firstDay },
+        ...(mode === "teilen" ? replacements.slice(1).map((r) => ({ label: `Ab ${dayMonth(r.from, true)}`, date: r.from })) : []),
+        { label: `Erster Tag danach (${dayMonth(addDays(to, 1), true)})`, date: addDays(to, 1) },
       ]
     : [];
-  const doneResult = draft ? statusAt(draft, from, "09:00") : undefined;
-  const doneReps = draft && closureId ? replacementSchedule(draft, closureId, from) : [];
 
   return (
     <div className={s.flowWide}>
-      <PageHead title={editing ? "Urlaub ändern" : "Urlaub eintragen"} focusKey={step} step={typeof step === "number" ? `Schritt ${step} von 4 · ${STEPS[step - 1]}` : undefined} />
-      <div className={s.wizard}>
-        <ol className={s.steps} aria-label="Schritte">
-          {STEPS.map((label, i) => (
-            <li key={label} className={s.stepItem} aria-current={stepNo === i + 1 ? "step" : undefined} data-done={stepNo > i + 1 || step === "done" ? "" : undefined}>
-              <span className={s.stepNum}>{i + 1}</span>
-              <span>{label}</span>
-            </li>
-          ))}
-        </ol>
-
-        <div className={s.wizardMain}>
-          {step === 1 ? (
-            <form className={s.form} noValidate onSubmit={(e) => (e.preventDefault(), next1())}>
-              <h2 className={s.h2}>Von wann bis wann bleibt die Praxis geschlossen?</h2>
+      <PageHead title={editing ? "Urlaub ändern" : "Urlaub eintragen"} />
+      <EditLayout
+        edit={
+          <div className={s.form}>
+            <fieldset className={s.section}>
+              <legend className={s.h3}>Von wann bis wann bleibt die Praxis geschlossen?</legend>
               <div className={s.row2}>
-                <DateField label="Von" value={from} onChange={setFrom} min={MOCK_TODAY} error={errors.from} />
-                <DateField label="Bis" value={to} onChange={setTo} min={from || MOCK_TODAY} error={errors.to} />
+                <DateField label="Von" value={from} onChange={setFrom} min={today} error={e.from} />
+                <DateField label="Bis" value={to} onChange={setTo} min={from || today} error={e.to} />
               </div>
               {datesOk ? (
-                <p className={s.lead} aria-live="polite">
+                <p className={s.lead}>
                   {longDate(from)} bis {longDate(to)}
                 </p>
               ) : null}
-              <div className={s.actions}>
-                <Button type="submit">Weiter</Button>
-              </div>
-            </form>
-          ) : null}
+            </fieldset>
 
-          {step === 2 ? (
-            <form className={s.form} noValidate onSubmit={(e) => (e.preventDefault(), setStep(3))}>
-              <h2 className={s.h2}>Was sollen Eltern sehen?</h2>
+            <fieldset className={s.section}>
+              <legend className={s.h3}>Text auf der Website</legend>
               <div className={s.quote}>
-                <p className={s.muted}>Text auf der Website</p>
                 <p>{DEFAULT_TEXT}</p>
               </div>
               <TextField label="Zusätzlicher Hinweis" optional value={extra} onChange={setExtra} max={140} placeholder="z. B. Rezepte bitte vorher abholen." />
-              <div className={s.actions}>
-                <Button type="submit">Weiter</Button>
-                <Button variant="quiet" onClick={() => setStep(1)}>
-                  Zurück
-                </Button>
-              </div>
-            </form>
-          ) : null}
+            </fieldset>
 
-          {step === 3 ? (
-            <form className={s.form} noValidate onSubmit={(e) => (e.preventDefault(), next3())}>
-              <h2 className={s.h2}>Wer übernimmt die Vertretung?</h2>
+            <fieldset className={s.section}>
+              <legend className={s.h3}>Wer übernimmt die Vertretung?</legend>
               <Choice
-                legend={`Vertretung für ${range}`}
+                legend={range ? `Vertretung für ${range}` : "Vertretung"}
                 name="vertretung-art"
                 value={mode}
                 onChange={chooseMode}
-                error={errors.mode}
                 options={[
                   { value: "ganz", label: "Eine Vertretung für den ganzen Zeitraum" },
                   { value: "teilen", label: "Zeitraum aufteilen", note: "Unterschiedliche Praxen für Teilzeiträume" },
@@ -220,7 +213,7 @@ export function Vacation({ editId }: { editId?: string }) {
                   <p>Auf der Website wird dann keine Vertretung angezeigt. Eltern sehen stattdessen die Notfall-Hinweise.</p>
                 </div>
               ) : null}
-              {mode === "ganz" ? <ReplacementPicker name="vertretung-ganz" value={whole} onChange={setWhole} until={to} allowNone={false} legend="Welche Praxis vertritt?" error={errors.whole} /> : null}
+              {mode === "ganz" ? <ReplacementPicker name="vertretung-ganz" value={whole} onChange={setWhole} until={to || today} allowNone={false} legend="Welche Praxis vertritt?" /> : null}
               {mode === "teilen" ? (
                 <div className={s.stack}>
                   {periods.map((p, i) => (
@@ -228,20 +221,13 @@ export function Vacation({ editId }: { editId?: string }) {
                       <legend className={s.h3}>Teilzeitraum {i + 1}</legend>
                       <div className={s.row2}>
                         <DateField label="Von" value={p.from} min={from} onChange={(v) => setPeriods(periods.map((q, j) => (j === i ? { ...q, from: v } : q)))} />
-                        <DateField label="Bis" value={p.to} min={p.from || from} onChange={(v) => setPeriods(periods.map((q, j) => (j === i ? { ...q, to: v } : q)))} error={errors[`p${i}`]} />
+                        <DateField label="Bis" value={p.to} min={p.from || from} onChange={(v) => setPeriods(periods.map((q, j) => (j === i ? { ...q, to: v } : q)))} error={e[`p${i}`]} />
                       </div>
                       <div className={s.field}>
                         <label className={s.label} htmlFor={`vertretung-${i}`}>
                           Vertretung
                         </label>
-                        <select
-                          id={`vertretung-${i}`}
-                          className={s.input}
-                          value={p.practice}
-                          onChange={(e) => setPeriods(periods.map((q, j) => (j === i ? { ...q, practice: e.target.value } : q)))}
-                          aria-invalid={errors[`pp${i}`] ? true : undefined}
-                          aria-describedby={errors[`pp${i}`] ? `vertretung-${i}-err` : undefined}
-                        >
+                        <select id={`vertretung-${i}`} className={s.input} value={p.practice} onChange={(ev) => setPeriods(periods.map((q, j) => (j === i ? { ...q, practice: ev.target.value } : q)))}>
                           <option value="">Bitte wählen</option>
                           {usable.map((u) => (
                             <option key={u.id} value={u.id}>
@@ -249,7 +235,6 @@ export function Vacation({ editId }: { editId?: string }) {
                             </option>
                           ))}
                         </select>
-                        <FieldError id={`vertretung-${i}-err`}>{errors[`pp${i}`]}</FieldError>
                       </div>
                       {periods.length > 1 ? (
                         <Button variant="quiet" onClick={() => setPeriods(periods.filter((_, j) => j !== i))}>
@@ -263,124 +248,66 @@ export function Vacation({ editId }: { editId?: string }) {
                       Weiteren Zeitraum hinzufügen
                     </Button>
                   ) : null}
-                  <StaleReplacements until={to} />
+                  <StaleReplacements until={to || today} />
                   {gaps.length ? (
                     <div className={s.inlineBlock} role="note">
                       <p className={s.inlineBlockTitle}>Ohne Vertretung: {gaps.map((g) => dateRange(g.from, g.to)).join(", ")}</p>
                       <p>An diesen Tagen zeigt die Website die Notfall-Hinweise.</p>
                       <label className={s.check}>
-                        <input type="checkbox" checked={gapOk} onChange={(e) => setGapOk(e.target.checked)} aria-describedby={errors.gap ? "gap-err" : undefined} />
+                        <input type="checkbox" checked={gapOk} onChange={(ev) => setGapOk(ev.target.checked)} />
                         <span>Diese Tage bewusst ohne Vertretung lassen</span>
                       </label>
-                      <FieldError id="gap-err">{errors.gap}</FieldError>
+                      {!gapOk ? <FieldError id="gap-hint">Bitte die Lücke schließen oder bewusst ohne Vertretung lassen.</FieldError> : null}
                     </div>
                   ) : null}
                 </div>
               ) : null}
-              <div className={s.actions}>
-                <Button type="submit" busy={busy} busyLabel="Vorschau wird erstellt …">
-                  Vorschau ansehen
-                </Button>
-                <Button variant="quiet" onClick={() => setStep(2)}>
-                  Zurück
-                </Button>
-              </div>
-            </form>
-          ) : null}
+            </fieldset>
 
-          {step === 4 && draft ? (
-            <div className={s.stack}>
-              <h2 className={s.h2}>Was sehen Eltern?</h2>
-              <div className={s.chips} role="group" aria-label="Tag der Vorschau">
-                {previewChips.map((c) => (
-                  <button key={c.label} type="button" className={s.chipBtn} aria-pressed={previewDate === c.date} onClick={() => setPreviewDate(c.date)}>
-                    {c.label}
-                  </button>
-                ))}
-              </div>
-              <section className={s.preview} aria-label={`So sieht es die Website: ${longDate(previewDate)}`}>
-                <div className={s.previewHead}>
-                  <h3 className={s.previewTitle}>So sieht es die Website</h3>
-                  <p className={s.previewWhen}>{longDate(previewDate)}, 09:00 Uhr</p>
+            {datesReady ? <Validity data={draft} from={from} to={to} noun="Dieser Urlaub" /> : null}
+          </div>
+        }
+        preview={
+          datesReady ? (
+            <LivePreview
+              base={base}
+              draft={draft}
+              problem={problem}
+              moments={[
+                {
+                  label: `${longDate(day)}, 09:00 Uhr`,
+                  date: day,
+                  time: "09:00",
+                  compare: true,
+                  extra: (r) => (draft && r.activeClosure ? <ReplacementPreview periods={replacementSchedule(draft, closureId, day)} /> : null),
+                },
+              ]}
+              footer={
+                <div className={s.chips} role="group" aria-label="Tag der Vorschau">
+                  {chips.map((c) => (
+                    <button key={c.label} type="button" className={s.chipBtn} aria-pressed={day === c.date} onClick={() => setPreviewDay(c.date)}>
+                      {c.label}
+                    </button>
+                  ))}
                 </div>
-                <ParentPreview key={previewDate} data={draft} date={previewDate} time="09:00" />
-              </section>
-              <div className={s.note}>
-                <p>
-                  <strong>Dieser Urlaub endet automatisch am {dayMonth(to)}.</strong>
-                </p>
-                <p>Ab dem nächsten Tag verwendet die Website wieder den regulären Wochenplan. Angekündigt wird der Urlaub ab {dayMonth(addDays(from, -14))}.</p>
-              </div>
-              <ConfirmedBy />
-              <div className={s.actions}>
-                <Button onClick={publish} busy={busy} busyLabel="Wird veröffentlicht …">
-                  {editing ? `Änderung am Urlaub (${range}) veröffentlichen` : `Urlaub vom ${range} veröffentlichen`}
-                </Button>
-                <Button variant="quiet" onClick={() => setStep(3)}>
-                  Zurück
-                </Button>
-              </div>
-            </div>
-          ) : null}
-
-          {step === "blocked" && problem ? <Blocked problem={problem} onBack={() => setStep(3)} /> : null}
-
-          {step === "done" && draft && doneResult ? (
-            <Success
-              title={editing ? "Urlaub geändert" : "Urlaub eingetragen"}
-              undoId={doneId}
-              actions={
-                <>
-                  <LinkButton href={`/lab/praxis-cockpit/elternansicht?datum=${from}&zeit=09:00`} variant="primary">
-                    Ansicht für Eltern öffnen
-                  </LinkButton>
-                  <LinkButton href="/lab/praxis-cockpit">Zur Cockpit-Startseite</LinkButton>
-                </>
               }
-            >
-              <div className={s.quote}>
-                <p className={s.muted}>Website würde jetzt anzeigen</p>
-                <p className={s.quoteStrong}>{doneResult.headline}</p>
-                <p>{range}</p>
-                <p>
-                  Vertretung:{" "}
-                  {doneReps.length ? doneReps.map((r) => (doneReps.length > 1 ? `${r.rep.practiceName} (${dateRange(r.from, r.until)})` : r.rep.practiceName)).join(", ") : "keine – Notfall-Hinweise"}
-                </p>
-              </div>
-            </Success>
-          ) : null}
-        </div>
-
-        {typeof step === "number" && step > 1 ? (
-          <aside className={s.summary} aria-label="Ihre Angaben">
-            <h2 className={s.h3}>Ihre Angaben</h2>
-            <dl>
-              <dt>Zeitraum</dt>
-              <dd>{range}</dd>
-              {step > 2 ? (
-                <>
-                  <dt>Text für Eltern</dt>
-                  <dd>{message}</dd>
-                </>
-              ) : null}
-              {step > 3 ? (
-                <>
-                  <dt>Vertretung</dt>
-                  <dd>
-                    {mode === "keine"
-                      ? "keine"
-                      : (mode === "ganz" ? [{ practice: whole, from, to }] : periods).map((p) => (
-                          <span key={`${p.practice}-${p.from}`} className={s.block}>
-                            {name(p.practice)} ({dateRange(p.from, p.to)})
-                          </span>
-                        ))}
-                  </dd>
-                </>
-              ) : null}
-            </dl>
-          </aside>
-        ) : null}
-      </div>
+            />
+          ) : (
+            <LivePreview base={base} draft={null} moments={[{ label: `Heute · ${longDate(today)}`, date: today, time: "09:00" }]} footer={<p className={s.muted}>Sobald der Zeitraum eingetragen ist, zeigt die Vorschau den Urlaub.</p>} />
+          )
+        }
+        actions={
+          <>
+            <ConfirmedBy />
+            <div className={s.actions}>
+              <Button onClick={publish} busy={busy} busyLabel="Wird veröffentlicht …" disabled={!canPublish}>
+                {range ? (editing ? `Änderung am Urlaub (${range}) veröffentlichen` : `Urlaub vom ${range} veröffentlichen`) : "Urlaub veröffentlichen"}
+              </Button>
+            </div>
+            {!canPublish && datesReady && !problem ? <p className={s.muted}>Bitte noch die Vertretung festlegen – oder „Keine Vertretung eintragen“.</p> : null}
+          </>
+        }
+      />
     </div>
   );
 }

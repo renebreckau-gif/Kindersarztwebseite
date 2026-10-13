@@ -3,15 +3,17 @@
 import Link from "next/link";
 import { useState } from "react";
 import s from "../cockpit.module.css";
-import { canUndo, useCockpit } from "../store";
+import { canUndo, useClock, useCockpit } from "../store";
 import { Button, Glyph, LinkButton, PageHead, WebsitePreview, useBusy, useFocusOnChange } from "../ui";
-import { MOCK_NOW, MOCK_TODAY, ROLES, dayMonth, statusAt, type AuditEntry } from "../model";
+import { ROLES, dayMonth, pastRecords, statusAt, type AuditEntry } from "../model";
 import { addDays } from "@/domain/time";
 
-const dayLabel = (d: string) => (d === MOCK_TODAY ? "Heute" : d === addDays(MOCK_TODAY, -1) ? "Gestern" : dayMonth(d, true));
+const dayLabel = (d: string, today: string) => (d === today ? "Heute" : d === addDays(today, -1) ? "Gestern" : dayMonth(d, true));
 
 export function History() {
   const { state } = useCockpit();
+  const { today } = useClock();
+  const past = pastRecords(state.data, today);
   return (
     <div className={s.flow}>
       <PageHead title="Verlauf" intro="Jede Änderung mit Person und Uhrzeit. Nichts wird gelöscht – Rücknahmen erscheinen als eigener Eintrag." />
@@ -19,7 +21,7 @@ export function History() {
         {state.audit.map((e) => (
           <li key={e.id} className={s.historyItem}>
             <p className={s.historyMeta}>
-              {dayLabel(e.date)} · {e.time} Uhr · {e.actor} <span className={s.muted}>({ROLES[e.role].label})</span>
+              {dayLabel(e.date, today)} · {e.time} Uhr · {e.actor} <span className={s.muted}>({ROLES[e.role].label})</span>
             </p>
             <h2 className={s.h3}>{e.title}</h2>
             {e.detail ? <p>{e.detail}</p> : null}
@@ -38,12 +40,33 @@ export function History() {
           </li>
         ))}
       </ol>
+      <section className={s.panel} aria-labelledby="vergangen">
+        <h2 id="vergangen" className={s.h2}>
+          Vergangene Einträge
+        </h2>
+        <p className={s.muted}>Abgelaufene Schließungen, Sonderzeiten und Hinweise wirken nicht mehr auf die Website. Sie werden nicht gelöscht und bleiben hier nachvollziehbar.</p>
+        {past.length ? (
+          <ul className={s.dates}>
+            {past.map((p) => (
+              <li key={p.id} className={s.dateRow}>
+                <span className={s.dateLabel}>{p.label}</span>
+                <span className={s.dateNote}>
+                  {p.title} · automatisch beendet nach dem {dayMonth(p.endedOn)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>Noch keine abgelaufenen Einträge.</p>
+        )}
+      </section>
     </div>
   );
 }
 
 export function HistoryDetail({ id, entity, startUndo }: { id: string; entity?: string; startUndo?: boolean }) {
   const { state, revert } = useCockpit();
+  const { today, now } = useClock();
   const entry: AuditEntry | undefined = id === "eintrag" && entity ? state.audit.find((e) => e.entityIds.includes(entity)) : state.audit.find((e) => e.id === id);
   const [mode, setMode] = useState<"view" | "confirm" | "done">(startUndo ? "confirm" : "view");
   const { busy, run } = useBusy();
@@ -68,7 +91,7 @@ export function HistoryDetail({ id, entity, startUndo }: { id: string; entity?: 
           {entry.title}
         </h2>
         <p className={s.historyMeta}>
-          {dayLabel(entry.date)} · {entry.time} Uhr · {entry.actor} ({ROLES[entry.role].label})
+          {dayLabel(entry.date, today)} · {entry.time} Uhr · {entry.actor} ({ROLES[entry.role].label})
         </p>
         {entry.detail ? <p>{entry.detail}</p> : null}
         <dl className={s.compare}>
@@ -103,7 +126,7 @@ export function HistoryDetail({ id, entity, startUndo }: { id: string; entity?: 
             Änderung zurücknehmen?
           </h2>
           <p className={s.lead}>{entry.undoSentence}</p>
-          <WebsitePreview heading="Website nach der Rücknahme" headingLevel={3} when={`Heute, ${MOCK_NOW} Uhr`} result={statusAt(entry.snapshot, MOCK_TODAY, MOCK_NOW)} />
+          <WebsitePreview heading="Mit dieser Rücknahme" headingLevel={3} when={`Heute, ${now} Uhr`} result={statusAt(entry.snapshot, today, now)} />
           <div className={s.actions}>
             <Button busy={busy} busyLabel="Wird zurückgenommen …" onClick={() => run(600, () => (revert(entry.id), setMode("done")))}>
               Rücknahme bestätigen
@@ -124,7 +147,7 @@ export function HistoryDetail({ id, entity, startUndo }: { id: string; entity?: 
             </span>
             Änderung zurückgenommen
           </h2>
-          <WebsitePreview heading="Website würde jetzt zeigen" headingLevel={3} when={`Heute, ${MOCK_NOW} Uhr`} result={statusAt(state.data, MOCK_TODAY, MOCK_NOW)} />
+          <WebsitePreview heading="Aktuell auf der Website" headingLevel={3} when={`Heute, ${now} Uhr`} result={statusAt(state.data, today, now)} />
           <p className={s.muted}>Die Rücknahme steht als eigener Eintrag im Verlauf.</p>
           <div className={s.actions}>
             <LinkButton href="/lab/praxis-cockpit" variant="primary">

@@ -6,9 +6,17 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { getPracticeStatus } from "../../domain/practice-status.ts";
+import { zonedToInstant } from "../../domain/time.ts";
 import {
   MOCK_ACCOUNTS,
   MOCK_TODAY,
+  afterEnd,
+  pastRecords,
+  previewPair,
+  pulsDataOf,
+  upcoming,
+  visibleAnnouncements,
   blocks,
   checkChange,
   earlyCloseEffect,
@@ -269,5 +277,129 @@ describe("vacation as parents see it (real engine, mock data)", () => {
     assert.equal(saturday.status, "CLOSED");
     assert.equal(saturday.nextOpening?.label, "am Montag, 26. Oktober um 08:00 Uhr");
     assert.equal(statusAt(d, "2026-10-26", "09:00").status, "OPEN");
+  });
+});
+
+// ---------------------------------------------------------------- Phase 09.1.3: live preview + automatic expiry
+
+describe("automatic expiry: temporary records stop counting, normal rules resume", () => {
+  const withVacation = (from: string, to: string): CockpitData => {
+    const d = initialState().data;
+    return {
+      ...d,
+      closures: [{ id: "u", kind: "VACATION", startDate: from, endDate: to, publicMessage: "Die Praxis ist in diesem Zeitraum geschlossen.", replacements: [], verification: entryVerification("Anna Beispiel", "STAFF", to) }],
+    };
+  };
+
+  test("1 + 2: vacation 19.–23.10. → 20./23. vacation, 24. weekend rule, 26. 09:00 normal Monday", () => {
+    const d = withVacation("2026-10-19", "2026-10-23");
+    assert.equal(statusAt(d, "2026-10-20", "09:00").status, "VACATION");
+    assert.equal(statusAt(d, "2026-10-23", "09:00").status, "VACATION");
+    const sat = statusAt(d, "2026-10-24", "10:00");
+    assert.equal(sat.status, "CLOSED");
+    assert.equal(sat.activeClosure, undefined);
+    assert.equal(statusAt(d, "2026-10-26", "09:00").status, "OPEN");
+    const after = afterEnd(d, "2026-10-23");
+    assert.equal(after.clear, true);
+    assert.equal(after.text, "Nächste Sprechzeit am Montag, 26. Oktober um 08:00 Uhr.");
+  });
+
+  test("3: another active exception after the vacation still wins", () => {
+    const d = withVacation("2026-10-19", "2026-10-23");
+    d.exceptions = [
+      ...d.exceptions,
+      {
+        id: "mo-kurz",
+        kind: "SPECIAL_HOURS",
+        startDate: "2026-10-26",
+        endDate: "2026-10-26",
+        intervals: [{ start: "08:00", end: "10:00", consultationType: "GENERAL" }],
+        priority: 1,
+        verification: entryVerification("Anna Beispiel", "STAFF", "2026-10-26"),
+      },
+    ];
+    const r = statusAt(d, "2026-10-26", "09:00");
+    assert.equal(r.status, "SPECIAL_HOURS");
+    assert.equal(r.detail, "Heute bis 10:00 Uhr");
+  });
+
+  test("4: a weekday holiday after the vacation follows holiday rules (never assumed open)", () => {
+    const d = withVacation("2026-12-21", "2026-12-24");
+    const xmas = statusAt(d, "2026-12-25", "10:00");
+    assert.equal(xmas.status, "UNKNOWN");
+    assert.equal(xmas.reason, "HOLIDAY_WITHOUT_RULE");
+    const after = afterEnd(d, "2026-12-24");
+    assert.equal(after.clear, false);
+    assert.match(after.text, /Der Zustand nach diesem Zeitraum ist noch nicht eindeutig\. Am Freitag, 25\. Dezember ist ein Feiertag/);
+  });
+
+  test("5: expired announcement is no longer shown", () => {
+    const d = initialState().data;
+    assert.deepEqual(visibleAnnouncements(d, "2026-10-14").map((a) => a.id), ["mock-hinweis-fortbildung"]);
+    assert.deepEqual(visibleAnnouncements(d, "2026-10-15"), []);
+  });
+
+  test("6: one-day special hours stop affecting the next day", () => {
+    const d = initialState().data; // Wed 14.10. special hours 08–12
+    assert.equal(statusAt(d, "2026-10-14", "09:00").status, "SPECIAL_HOURS");
+    assert.equal(statusAt(d, "2026-10-15", "09:00").status, "OPEN");
+    assert.equal(statusAt(d, "2026-10-15", "15:00").status, "OPEN");
+  });
+
+  test("7: one-day closure stops affecting the next day", () => {
+    const d = initialState().data;
+    d.closures = [{ id: "kurz", kind: "SHORT_NOTICE", startDate: "2026-10-15", endDate: "2026-10-15", replacements: [], verification: entryVerification("Anna Beispiel", "STAFF", "2026-10-15") }];
+    assert.equal(statusAt(d, "2026-10-15", "09:00").status, "TEMPORARILY_CLOSED");
+    assert.equal(statusAt(d, "2026-10-16", "09:00").status, "OPEN");
+  });
+
+  test("12: expired records are kept for history, not deleted", () => {
+    const d = withVacation("2026-10-19", "2026-10-23");
+    assert.ok(upcoming(d, "2026-10-20").some((i) => i.closure?.id === "u"));
+    assert.equal(upcoming(d, "2026-10-24").some((i) => i.closure?.id === "u"), false);
+    assert.deepEqual(pastRecords(d, "2026-10-24").map((p) => p.id).filter((id) => id === "u"), ["u"]);
+    assert.equal(d.closures.length, 1, "expiry never removes the record");
+    assert.ok(pastRecords(initialState().data, "2026-10-15").some((p) => p.id === "mock-hinweis-fortbildung"));
+  });
+});
+
+describe("Website-Vorschau", () => {
+  test("8: preview uses the same domain engine as the public state", () => {
+    const base = initialState().data;
+    const draft = earlyClose(base, "x", "11:00");
+    const pair = previewPair(base, draft, MOCK_TODAY, "09:20");
+    assert.deepEqual(pair.current, getPracticeStatus(zonedToInstant(MOCK_TODAY, "09:20"), pulsDataOf(base)));
+    assert.deepEqual(pair.changed, getPracticeStatus(zonedToInstant(MOCK_TODAY, "09:20"), pulsDataOf(draft)));
+  });
+
+  test("9: preview follows the current change set", () => {
+    const base = initialState().data;
+    const at11 = previewPair(base, earlyClose(base, "x", "11:00"), MOCK_TODAY, "09:20");
+    assert.equal(at11.current.detail, "Heute bis 12:00 Uhr");
+    assert.equal(at11.changed?.detail, "Heute bis 11:00 Uhr");
+    const at1030 = previewPair(base, earlyClose(base, "y", "10:30"), MOCK_TODAY, "09:20");
+    assert.equal(at1030.changed?.detail, "Heute bis 10:30 Uhr");
+    assert.equal(previewPair(base, null, MOCK_TODAY, "09:20").changed, undefined);
+  });
+
+  test("10 + 11: cockpit wording uses Website-Vorschau, not the old labels", () => {
+    const files: string[] = [];
+    const walk = (dir: string) => {
+      for (const f of readdirSync(join(ROOT, dir))) {
+        const rel = `${dir}/${f}`;
+        if (statSync(join(ROOT, rel)).isDirectory()) walk(rel);
+        else if (/\.tsx?$/.test(f)) files.push(rel);
+      }
+    };
+    walk("src/lab/cockpit");
+    walk("app/lab/praxis-cockpit");
+    for (const f of files) {
+      const src = read(f);
+      assert.doesNotMatch(src, /Was sieht die Website\?/, f);
+      assert.doesNotMatch(src, /Was sehen Eltern\?/, f);
+      assert.doesNotMatch(src, /Website würde/, f);
+    }
+    assert.match(read("src/lab/cockpit/screens/live.tsx"), /Website-Vorschau/);
+    assert.match(read("src/lab/cockpit/screens/live.tsx"), /So sieht es auf der Website aus\./);
   });
 });

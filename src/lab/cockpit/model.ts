@@ -150,6 +150,8 @@ export interface AuditEntry {
 }
 
 export interface CockpitState {
+  /** Lab-only test clock (Europe/Berlin wall time). */
+  clock: { date: LocalDate; time: LocalTime };
   role: Role;
   data: CockpitData;
   audit: AuditEntry[];
@@ -161,6 +163,7 @@ const segmentsToIntervals = (segs: Segment[]) => segs.map((s) => ({ start: s.sta
 export function initialState(): CockpitState {
   const wednesday = "2026-10-14";
   return {
+    clock: { date: MOCK_TODAY, time: MOCK_NOW },
     role: "STAFF",
     seq: 0,
     data: {
@@ -254,7 +257,7 @@ export function statusAt(d: CockpitData, date: LocalDate, time: LocalTime): Prac
   return getPracticeStatus(zonedToInstant(date, time), pulsDataOf(d));
 }
 
-export const nowStatus = (d: CockpitData) => statusAt(d, MOCK_TODAY, MOCK_NOW);
+export const nowStatus = (d: CockpitData, today: LocalDate = MOCK_TODAY, now: LocalTime = MOCK_NOW) => statusAt(d, today, now);
 
 // ------------------------------------------------------------------ day plans (display only)
 
@@ -357,8 +360,8 @@ export interface Problem {
   relatedIds: string[];
 }
 
-function problemFor(reason: ReasonCode, date: LocalDate, relatedIds: string[]): Problem {
-  const day = date === MOCK_TODAY ? "heute" : `den ${dayMonth(date)}`;
+function problemFor(reason: ReasonCode, date: LocalDate, relatedIds: string[], today: LocalDate): Problem {
+  const day = date === today ? "heute" : `den ${dayMonth(date)}`;
   switch (reason) {
     case "EXCEPTION_CONFLICT":
       return { title: "Widersprüchliche Sonderzeiten", text: `Für ${day} gibt es bereits eine andere Sonderzeit. Bitte prüfen Sie die bestehende Änderung.`, date, relatedIds };
@@ -378,13 +381,13 @@ function problemFor(reason: ReasonCode, date: LocalDate, relatedIds: string[]): 
  * Blocks a change that makes a day UNKNOWN that was not UNKNOWN before (praxis-cockpit.md §8).
  * Uses the engine for both sides; no own conflict rules.
  */
-export function checkChange(base: CockpitData, draft: CockpitData, from: LocalDate, to: LocalDate = from): Problem | null {
+export function checkChange(base: CockpitData, draft: CockpitData, from: LocalDate, to: LocalDate = from, today: LocalDate = MOCK_TODAY): Problem | null {
   for (let date = from; compareDates(date, to) <= 0; date = addDays(date, 1)) {
     const before = statusAt(base, date, "12:00");
     const after = statusAt(draft, date, "12:00");
     if (after.status === "UNKNOWN" && before.status !== "UNKNOWN") {
       const own = new Set([...draft.exceptions, ...draft.closures].map((x) => x.id).filter((id) => ![...base.exceptions, ...base.closures].some((b) => b.id === id)));
-      return problemFor(after.reason, date, after.sourceRecordIds.filter((id) => !own.has(id)));
+      return problemFor(after.reason, date, after.sourceRecordIds.filter((id) => !own.has(id)), today);
     }
   }
   return null;
@@ -392,8 +395,8 @@ export function checkChange(base: CockpitData, draft: CockpitData, from: LocalDa
 
 // ------------------------------------------------------------------ directory
 
-export function directoryState(p: ReplacementPractice, until: LocalDate = MOCK_TODAY): { usable: boolean; note: string } {
-  const now = evaluateFreshness(p.verification, MOCK_TODAY, "replacementPractice");
+export function directoryState(p: ReplacementPractice, until: LocalDate = MOCK_TODAY, today: LocalDate = MOCK_TODAY): { usable: boolean; note: string } {
+  const now = evaluateFreshness(p.verification, today, "replacementPractice");
   const later = evaluateFreshness(p.verification, until, "replacementPractice");
   if (now !== "CURRENT" && now !== "REVIEW_DUE") return { usable: false, note: "Diese Vertretung wurde länger nicht geprüft und kann deshalb noch nicht veröffentlicht werden." };
   if (later !== "CURRENT" && later !== "REVIEW_DUE") return { usable: false, note: `Die Prüfung läuft am ${dayMonth(p.verification.reviewDue!)} ab – vor dem Ende dieses Zeitraums.` };
@@ -436,6 +439,68 @@ export function replacementSummary(d: CockpitData, c: Closure): string {
   return c.replacements.map((r) => `${name(r.replacementPracticeId)} (${dateRange(r.from, r.until)})`).join(", ");
 }
 
+// ------------------------------------------------------------------ live website preview + automatic end
+
+export interface PreviewPair {
+  /** "Aktuell auf der Website": published data only. */
+  current: PracticeStatusResult;
+  /** "Mit dieser Änderung": published data + current change set (undefined = no valid change yet). */
+  changed?: PracticeStatusResult;
+}
+
+/** Both sides come from the same real engine call — the preview has no own status logic. */
+export function previewPair(base: CockpitData, draft: CockpitData | null | undefined, date: LocalDate, time: LocalTime): PreviewPair {
+  return { current: statusAt(base, date, time), changed: draft ? statusAt(draft, date, time) : undefined };
+}
+
+export interface AfterEnd {
+  /** First Berlin day after the temporary state. */
+  date: LocalDate;
+  /** true when the engine can tell what applies then (incl. next opening). */
+  clear: boolean;
+  /** Plain German, e.g. "Nächste Sprechzeit am Montag, 26. Oktober um 08:00 Uhr." */
+  text: string;
+}
+
+/**
+ * What applies after an inclusive end date: the expired record simply stops counting and the
+ * remaining rules are evaluated. Never assumes "open" — doubt is reported in plain German.
+ */
+export function afterEnd(d: CockpitData, endDate: LocalDate): AfterEnd {
+  const date = addDays(endDate, 1);
+  const r = statusAt(d, date, "00:01");
+  if (r.status === "UNKNOWN") {
+    const holiday = MOCK_HOLIDAYS.find((h) => h.date === date);
+    const why =
+      r.reason === "HOLIDAY_WITHOUT_RULE" && holiday
+        ? `Am ${longDate(date)} ist ein Feiertag (${holiday.name}) noch nicht geklärt.`
+        : r.reason === "EXCEPTION_CONFLICT" || r.reason === "CLOSURE_EXCEPTION_CONFLICT"
+          ? `Am ${longDate(date)} widersprechen sich zwei Angaben.`
+          : `Für ${longDate(date)} fehlt eine bestätigte Angabe.`;
+    return { date, clear: false, text: `Der Zustand nach diesem Zeitraum ist noch nicht eindeutig. ${why}` };
+  }
+  if (r.nextOpening === null) return { date, clear: false, text: "Der Zustand nach diesem Zeitraum ist noch nicht eindeutig. Die nächste Sprechzeit lässt sich nicht sicher bestimmen." };
+  // Absolute date: the engine label ("heute"/"morgen") is relative to the day after the end.
+  const next = r.nextOpening ? `Nächste Sprechzeit am ${longDate(r.nextOpening.date)} um ${r.nextOpening.time} Uhr.` : "";
+  return { date, clear: true, text: next };
+}
+
+export interface PastRecord {
+  id: string;
+  label: string;
+  title: string;
+  endedOn: LocalDate;
+}
+
+/** Expired temporary records: kept for history and correction review, no longer active. */
+export function pastRecords(d: CockpitData, today: LocalDate = MOCK_TODAY): PastRecord[] {
+  const out: PastRecord[] = [];
+  for (const c of d.closures) if (compareDates(c.endDate, today) < 0) out.push({ id: c.id, label: dateRange(c.startDate, c.endDate), title: c.kind === "VACATION" ? "Urlaub" : "Schließung", endedOn: c.endDate });
+  for (const x of d.exceptions) if (compareDates(x.endDate, today) < 0) out.push({ id: x.id, label: dayMonth(x.startDate, true), title: x.kind === "CLOSED" ? "Geschlossen" : "Geänderte Sprechzeit", endedOn: x.endDate });
+  for (const a of d.announcements) if (a.validUntil !== "OPEN_ENDED" && compareDates(a.validUntil, today) < 0) out.push({ id: a.id, label: `bis ${dayMonth(a.validUntil)}`, title: `Hinweis „${a.title}“`, endedOn: a.validUntil });
+  return out.sort((x, y) => compareDates(y.endedOn, x.endedOn));
+}
+
 // ------------------------------------------------------------------ home lists
 
 export interface Upcoming {
@@ -445,26 +510,32 @@ export interface Upcoming {
   attention: boolean;
   /** Closures: published entry with detail and edit links. */
   closure?: { id: string; replacement: string };
+  /** Temporary entries end by themselves on this (inclusive) Berlin date. */
+  endsOn?: LocalDate;
 }
 
 const holidayOf = (date: LocalDate) => MOCK_HOLIDAYS.find((h) => h.date === date);
 
-export function upcoming(d: CockpitData, horizonDays = 90): Upcoming[] {
-  const end = addDays(MOCK_TODAY, horizonDays);
+/**
+ * Active and future items only. Expired temporary records are NOT deleted: they stay in the
+ * data (and the audit log) and simply stop counting — see pastRecords().
+ */
+export function upcoming(d: CockpitData, today: LocalDate = MOCK_TODAY, horizonDays = 90): Upcoming[] {
+  const end = addDays(today, horizonDays);
   const items: Upcoming[] = [];
   for (const c of d.closures) {
-    if (compareDates(c.endDate, MOCK_TODAY) < 0) continue;
+    if (compareDates(c.endDate, today) < 0) continue;
     const kind = c.kind === "VACATION" ? "Urlaub" : c.kind === "TRAINING" ? "Fortbildung" : c.kind === "SHORT_NOTICE" ? "Praxis geschlossen" : "Schließzeit";
-    items.push({ date: c.startDate, label: dateRange(c.startDate, c.endDate), note: kind, attention: false, closure: { id: c.id, replacement: replacementSummary(d, c) } });
+    items.push({ date: c.startDate, label: dateRange(c.startDate, c.endDate), note: kind, attention: false, closure: { id: c.id, replacement: replacementSummary(d, c) }, endsOn: c.endDate });
   }
   for (const x of d.exceptions) {
-    if (compareDates(x.endDate, MOCK_TODAY) < 0) continue;
+    if (compareDates(x.endDate, today) < 0) continue;
     const segs = x.intervals.map((i) => ({ start: i.start, end: i.end, type: i.consultationType }));
     const note = x.kind === "CLOSED" ? (holidayOf(x.startDate) ? `${holidayOf(x.startDate)!.name} · geschlossen` : "Geschlossen") : `Geänderte Sprechzeit · ${blocks(segs).map((b) => `${b.start}–${b.end}`).join(", ")}`;
-    items.push({ date: x.startDate, label: x.startDate === x.endDate ? dayMonth(x.startDate, true) : dateRange(x.startDate, x.endDate), note, attention: false });
+    items.push({ date: x.startDate, label: x.startDate === x.endDate ? dayMonth(x.startDate, true) : dateRange(x.startDate, x.endDate), note, attention: false, endsOn: x.kind === "SPECIAL_HOURS" ? x.endDate : undefined });
   }
   for (const h of MOCK_HOLIDAYS) {
-    if (compareDates(h.date, MOCK_TODAY) < 0 || compareDates(h.date, end) > 0) continue;
+    if (compareDates(h.date, today) < 0 || compareDates(h.date, end) > 0) continue;
     if (d.exceptions.some((x) => covers(x, h.date))) continue;
     const r = statusAt(d, h.date, "10:00");
     if (r.status === "UNKNOWN") items.push({ date: h.date, label: dayMonth(h.date, true), note: `${h.name} · Prüfung nötig`, attention: true });
@@ -482,10 +553,10 @@ export interface CheckItem {
   action: string;
 }
 
-export function checks(d: CockpitData, role: Role): CheckItem[] {
+export function checks(d: CockpitData, role: Role, today: LocalDate = MOCK_TODAY): CheckItem[] {
   const out: CheckItem[] = [];
   for (const h of MOCK_HOLIDAYS) {
-    if (compareDates(h.date, MOCK_TODAY) < 0) continue;
+    if (compareDates(h.date, today) < 0) continue;
     const r = statusAt(d, h.date, "10:00");
     if (r.status === "UNKNOWN" && r.reason === "HOLIDAY_WITHOUT_RULE") {
       out.push({
@@ -499,7 +570,7 @@ export function checks(d: CockpitData, role: Role): CheckItem[] {
   }
   if (role !== "STAFF") {
     for (const p of d.directory) {
-      if (!directoryState(p).usable) {
+      if (!directoryState(p, today, today).usable) {
         out.push({
           id: `vertretung-${p.id}`,
           title: `${p.practiceName} · Vertretung`,

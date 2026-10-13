@@ -592,3 +592,65 @@ The prototype now covers the whole journey: **login → cockpit → Urlaub eintr
   - Practice subtitle and public note are display-only fields of the mock directory.
   - Telephone buttons never dial in the prototype.
 - **Dates:** the brief's example "Montag 20. – Freitag 24. Oktober" does not exist in 2026: 20 Oct 2026 is a Tuesday and 24 Oct a Saturday. The prototype and tests use the real Monday–Friday week **19.–23. Oktober 2026**, with the next opening Monday 26 October.
+
+---
+
+## Phase 09.1.3 decision: live website preview and automatic expiry (2026-10-13)
+
+**Core cockpit pattern:** EDIT → LIVE WEBSITE PREVIEW → PUBLISH → AUTO-EXPIRE → NORMAL RULES RESUME.
+
+### Terminology
+
+| Term | Use |
+|---|---|
+| **Website-Vorschau** | The standard name of the preview, with the line "So sieht es auf der Website aus." |
+| **Aktuell auf der Website** | Published state |
+| **Mit dieser Änderung** | Published state plus the current change set |
+| **Ansicht auf der Website öffnen** | Opens the full page view |
+| **Auf der Website veröffentlicht** | Success message |
+
+"Was sieht die Website?", "Was sehen Eltern?" and "Website würde …" are no longer used in the cockpit; a test enforces this. The lab route `/elternansicht` stays as an internal name.
+
+### Layout
+
+- **Desktop (≥ 64em):** the change on the left, the Website-Vorschau on the right, and the exact publish action under the change.
+- **Tablet and mobile:** stacked in the order change → Website-Vorschau → publish action. The effect is always visible before publishing.
+- Shared components: `EditLayout`, `LivePreview`, `Validity`, `ReplacementPreview` in `src/lab/cockpit/screens/live.tsx`.
+
+### Live preview
+
+- The preview updates on every valid form change. There is no separate "Vorschau ansehen" step.
+- Both sides come from `previewPair(base, draft, date, time)`, which makes two calls to the real `getPracticeStatus()`: published mock data, and published data plus the change set. The React components contain no open/closed logic.
+- Where useful, a moment shows "Aktuell auf der Website" in compact form above "Mit dieser Änderung". Later moments are added where they matter, e.g. "Ab 12:00 Uhr" or the day after a notice ends.
+- Conflicts appear inside the preview. The publish button stays disabled until they are resolved.
+- The preview reuses the public `StatusStatement` and public action styles. Inside the preview the buttons are static (not focusable); on the website they work.
+- Accessibility:
+  - Only a settled one-line summary is announced (`aria-live="polite"`, about 0.9 s after the last change).
+  - Focus never jumps while editing.
+  - The preview has its own heading ("Website-Vorschau").
+
+### Workflows converted
+
+Heute früher schließen, Heute geschlossen, Akutsprechstunde (change for today / today cancelled), Hinweis, and Urlaub (one form: dates, text, one or split or no replacement; the preview shows the replacement cards with the dates leading).
+
+### Automatic expiry
+
+- Temporary records end by themselves after their inclusive Berlin end date: vacation and closures (`endDate`), today's closures and special hours (end of the local day), announcements (`validUntil`).
+  - No manual "end vacation" or "wieder öffnen" exists or is needed.
+  - The expiry is part of the original publishing decision: the button names the period, and the "Automatisches Ende" box shows "Gültig … / Danach …".
+- **History is retained:** expiry never deletes. Expired records stay in the data and in the audit log; they are simply ignored by the engine and listed under Verlauf → "Vergangene Einträge" (`pastRecords`). The home screen only shows active and future items, with "Endet automatisch: …" and a link to the expired entries.
+  - Deleting a record is only an explicit, audited "Urlaub zurücknehmen".
+- **Fail-safe after expiry:** expiry removes the record from the active decision set and evaluates all remaining rules: other closures and exceptions, confirmed closed weekdays, holiday policy, schedule verification, conflicts. It never means "back to open".
+  - `afterEnd()` says in plain German what follows, with an absolute date ("Nächste Sprechzeit am Montag, 26. Oktober um 08:00 Uhr.").
+  - If the state is not clear, it says so and why, e.g. "Der Zustand nach diesem Zeitraum ist noch nicht eindeutig. Am Freitag, 25. Dezember ist ein Feiertag (1. Weihnachtstag) noch nicht geklärt."
+- **Time zone:** all validity uses Europe/Berlin calendar dates through the engine. There is no client or server time zone logic.
+
+### Lab test clock
+
+"Testmodus → Testuhr" (lab only, not a staff feature) moves the prototype date: 13.10. start, 18.10. before the vacation, 20.10. during it, 23.10. last day, 24.10. first day after, 26.10. Monday.
+
+Verified with vacation 19.–23.10.2026:
+- 20. and 23.10.: Praxisurlaub.
+- 24.10. (Saturday): normal weekend rule, CLOSED, opens Monday 26.10. at 08:00.
+- 26.10. at 09:00: normal Monday, OPEN.
+- After the end the vacation no longer appears on the home screen and is listed under "Vergangene Einträge".

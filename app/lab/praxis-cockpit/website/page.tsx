@@ -1,6 +1,6 @@
 import { Website } from "@/lab/cockpit/screens/website";
 
-export const metadata = { title: "Was sieht die Website?" };
+export const metadata = { title: "Website-Vorschau" };
 
 type Search = Promise<{ datum?: string; zeit?: string }>;
 
