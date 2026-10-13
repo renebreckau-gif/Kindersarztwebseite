@@ -493,3 +493,57 @@ Improved from the brief's 09.1–09.9. The changes: a click prototype with staff
 | **09.9 Go-live of the data source** | Staff training, real accounts created by ADMIN, switch `repository.ts` from static files to the database (one reviewed change, reversible), monitoring for one week | Sign-off by the practice; the rollback path is tested |
 
 Each phase ends as usual: tests, commit, report, stop.
+
+---
+
+## Phase 09.1 note: interactive UX prototype (2026-10-13)
+
+**Path:** `/lab/praxis-cockpit` (lab only, `noindex`, not linked from any navigation, labelled "PROTOTYP · keine echten Daten"). Code: `src/lab/cockpit/` and `app/lab/praxis-cockpit/`. Review sheet: [docs/reviews/praxis-cockpit-prototype-review.md](../reviews/praxis-cockpit-prototype-review.md).
+
+**Implemented:**
+
+- Home: Guten Morgen, Praxis heute, Schnellaktionen, Nächste Termine, Prüfen.
+- Workflows:
+  - Heute früher schließen
+  - Heute geschlossen
+  - Urlaub eintragen (4 steps, one or several replacement periods)
+  - Akutsprechstunde (overview, "Heute ändern", "Heute entfällt")
+  - Hinweis veröffentlichen (explicit "Unbefristet veröffentlichen")
+- Was sieht die Website? (any date and time)
+- Verlauf with detail and "Änderung zurücknehmen"
+- Feiertag prüfen and Vertretung prüfen (DOCTOR)
+- Lab-only test mode: role switch STAFF / DOCTOR / ADMIN, reset, conflict scenario.
+
+**Engine use:** All statuses and all blocking states come from the real `getPracticeStatus()` with **mock** `PulsData` (`src/lab/cockpit/model.ts`). The "no new UNKNOWN" check (§8) runs as specified. The prototype has no own status logic and reads nothing from `src/content/`. The website preview reuses the public `StatusStatement` component.
+
+**Governance boundary (to implement in 09.3/09.5):** Publication by an authenticated STAFF account creates `VERIFIED_CURRENT` provenance **only for operational records that role may confirm**:
+
+- Allowed for STAFF:
+  - today's exception
+  - a closure entered by the practice
+  - an operational announcement
+  - assigning an already verified replacement practice
+- Never automatically by STAFF:
+  - medical content approval
+  - emergency medical wording
+  - initial confirmation of acute-consultation rules
+  - initial or changed weekly schedule
+  - re-confirming a replacement practice
+  - ENTDECKEN medical approval
+  - legal content
+
+  These need DOCTOR (or legal review). The prototype shows this boundary in the UI: who confirms, a disabled stale replacement for STAFF, and the acute-rule and schedule notes.
+
+**Prototype limitations:**
+
+- Fixed test clock (Tue 13 Oct 2026, 09:20).
+- State in memory only (a reload resets it).
+- No authentication, persistence, real audit log, or concurrency handling.
+- Undo is limited to the newest session change.
+- Sonderöffnungszeiten on holidays, permanent rule changes and the admin areas are stubs.
+
+**Engine findings from the prototype** (not changed in 09.1; the public Praxis Puls is untouched):
+
+1. **Weekend holidays resolve to UNKNOWN.** The engine checks the holiday policy before `confirmedClosedWeekdays`. With `REQUIRE_EXPLICIT_ENTRY`, Saturday 31.10.2026 and 26.12.2026 show "Aktuelle Sprechzeiten" on the **live** site as well (verified with `PULS_DATA`). This contradicts [practice-pulse-logic.md](practice-pulse-logic.md) §3. It is safe (never falsely open) but needs a deliberate decision: either confirmed closed weekdays win over unresolved holidays, or staff resolve weekend holidays explicitly.
+2. **Special hours read as "Geänderte Sprechzeit heute" all day.** This holds even after the last interval ended, and adjacent intervals are listed separately ("08:00–10:00 Uhr, 10:00–11:00 Uhr, 11:00–12:00 Uhr"). The brief expected "geöffnet bis 13:00", then "geschlossen". Wording and merging should be decided before 09.5.
+3. **Early close inside the lunch break** (13:00 between 12:00 and 14:00) has the same effect as closing at 12:00. The prototype explains this; usability testing should show whether staff understand it.
