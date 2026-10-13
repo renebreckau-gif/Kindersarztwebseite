@@ -4,7 +4,7 @@
 // persisted, and nothing is read from src/content/. Status and conflicts come from the
 // real, pure PRAXIS PULS engine (src/domain) — there is no second status implementation.
 
-import { getPracticeStatus, type PulsData, type PracticeStatusResult, type ReasonCode } from "../../domain/practice-status.ts";
+import { getPracticeStatus, type PublicReplacement, type PulsData, type PracticeStatusResult, type ReasonCode } from "../../domain/practice-status.ts";
 import type {
   Announcement,
   Closure,
@@ -28,8 +28,8 @@ export type Role = "STAFF" | "DOCTOR" | "ADMIN";
 
 export const ROLES: Record<Role, { label: string; person: string; greeting: string }> = {
   STAFF: { label: "Praxisteam", person: "Anna Beispiel", greeting: "Anna" },
-  DOCTOR: { label: "Ärztin / Arzt", person: "Dr. Beispiel", greeting: "Dr. Beispiel" },
-  ADMIN: { label: "Verwaltung", person: "Ben Beispiel", greeting: "Ben" },
+  DOCTOR: { label: "Ärztin / Arzt", person: "Dr. Lena Beispiel", greeting: "Dr. Beispiel" },
+  ADMIN: { label: "Verwaltung", person: "Max Beispiel", greeting: "Max" },
 };
 
 // ------------------------------------------------------------------ mock practice
@@ -70,23 +70,56 @@ export const MOCK_HOLIDAYS: { date: LocalDate; name: string }[] = [
   { date: "2026-12-26", name: "2. Weihnachtstag" },
 ];
 
-const directoryEntry = (id: string, letter: string, verification: FactVerification): ReplacementPractice => ({
-  id,
-  practiceName: `Praxis Beispiel ${letter}`,
-  contactPersons: [],
-  street: `Beispielstraße ${letter === "A" ? 1 : letter === "B" ? 2 : 3}`,
-  postalCode: "00000",
-  city: "Musterstadt",
-  phone: `0000 00000${letter === "A" ? 1 : letter === "B" ? 2 : 3}`,
-  verification,
-});
+const mockCheck = (lastVerified: LocalDate, reviewDue: LocalDate): FactVerification => ({ status: "VERIFIED_CURRENT", lastVerified, reviewDue, verifiedBy: "Prototyp-Testdaten", sourceIds: ["MOCK"] });
 
+/** Invented replacement practices — no real external practice, address or phone number. */
 export const MOCK_DIRECTORY: ReplacementPractice[] = [
-  directoryEntry("vb-a", "A", { status: "VERIFIED_CURRENT", lastVerified: "2026-09-15", reviewDue: "2027-03-15", verifiedBy: "Prototyp-Testdaten", sourceIds: ["MOCK"] }),
-  directoryEntry("vb-b", "B", { status: "VERIFIED_CURRENT", lastVerified: "2026-08-20", reviewDue: "2027-02-20", verifiedBy: "Prototyp-Testdaten", sourceIds: ["MOCK"] }),
-  // Review expired → not selectable: "Vertretung muss bestätigt werden".
-  directoryEntry("vb-c", "C", { status: "VERIFIED_CURRENT", lastVerified: "2026-03-30", reviewDue: "2026-09-30", verifiedBy: "Prototyp-Testdaten", sourceIds: ["MOCK"] }),
+  { id: "vb-a", practiceName: "Praxis Beispiel A", contactPersons: [], street: "Beispielstraße 12", postalCode: "00000", city: "Musterstadt", phone: "01234 567890", publicNote: "Bitte melden Sie sich vorher telefonisch.", verification: mockCheck("2026-09-15", "2027-03-15") },
+  { id: "vb-b", practiceName: "Praxis Beispiel B", contactPersons: [], street: "Am Beispielpark 3", postalCode: "00000", city: "Beispielhausen", phone: "01234 567891", verification: mockCheck("2026-08-20", "2027-02-20") },
+  // Review expired → not selectable: "Vertretung muss zuerst erneut bestätigt werden".
+  { id: "vb-c", practiceName: "Praxis Beispiel C", contactPersons: [], street: "Musterweg 7", postalCode: "00000", city: "Musterstadt", phone: "01234 567892", verification: mockCheck("2026-03-30", "2026-09-30") },
 ];
+
+/** Public subtitle per mock practice (display only). */
+export const DIRECTORY_SUBTITLE: Record<string, string> = {
+  "vb-a": "Kinderarztpraxis Musterstadt",
+  "vb-b": "Kinderzentrum Beispielhausen",
+  "vb-c": "Kinderarztpraxis am Musterweg",
+};
+
+// ------------------------------------------------------------------ mock login (no real authentication)
+
+/** Obvious test accounts for the lab prototype only. Not real users, not real passwords. */
+export const MOCK_ACCOUNTS: { email: string; password: string; role: Role }[] = [
+  { email: "team@beispiel.test", password: "test1234", role: "STAFF" },
+  { email: "aerztin@beispiel.test", password: "test1234", role: "DOCTOR" },
+  { email: "verwaltung@beispiel.test", password: "test1234", role: "ADMIN" },
+];
+
+export function mockLogin(email: string, password: string): Role | null {
+  const a = MOCK_ACCOUNTS.find((x) => x.email === email.trim().toLowerCase());
+  return a && a.password === password ? a.role : null;
+}
+
+/** Prototype session (sessionStorage): only the mock role, never a password or token. */
+export const SESSION_KEY = "praxis-cockpit-prototyp-rolle";
+type SessionStore = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+export function readSession(store: SessionStore | undefined): Role | null {
+  try {
+    const v = store?.getItem(SESSION_KEY);
+    return v === "STAFF" || v === "DOCTOR" || v === "ADMIN" ? v : null;
+  } catch {
+    return null;
+  }
+}
+export function writeSession(store: SessionStore | undefined, role: Role | null): void {
+  try {
+    if (role) store?.setItem(SESSION_KEY, role);
+    else store?.removeItem(SESSION_KEY);
+  } catch {
+    // storage blocked: the prototype then simply forgets the login on reload
+  }
+}
 
 // ------------------------------------------------------------------ state
 
@@ -140,7 +173,7 @@ export function initialState(): CockpitState {
           intervals: segmentsToIntervals(rulesSegments(wednesday).filter((s) => parseTime(s.end) <= parseTime("12:00"))),
           publicMessage: "Am Nachmittag ist das Team auf Fortbildung.",
           priority: 1,
-          verification: entryVerification("Dr. Beispiel", "DOCTOR", wednesday, "2026-10-12"),
+          verification: entryVerification("Dr. Lena Beispiel", "DOCTOR", wednesday, "2026-10-12"),
         },
       ],
       closures: [],
@@ -155,7 +188,7 @@ export function initialState(): CockpitState {
           priority: 1,
           homepageHighlight: false,
           published: true,
-          verification: entryVerification("Dr. Beispiel", "DOCTOR", wednesday, "2026-10-12"),
+          verification: entryVerification("Dr. Lena Beispiel", "DOCTOR", wednesday, "2026-10-12"),
         },
       ],
       directory: MOCK_DIRECTORY,
@@ -165,7 +198,7 @@ export function initialState(): CockpitState {
         id: "seed-2",
         date: "2026-10-12",
         time: "15:21",
-        actor: "Dr. Beispiel",
+        actor: "Dr. Lena Beispiel",
         role: "DOCTOR",
         title: "Hinweis veröffentlicht",
         detail: "„Fortbildung am Mittwoch“",
@@ -176,7 +209,7 @@ export function initialState(): CockpitState {
         id: "seed-1",
         date: "2026-10-12",
         time: "15:18",
-        actor: "Dr. Beispiel",
+        actor: "Dr. Lena Beispiel",
         role: "DOCTOR",
         title: "Sonderzeit eingetragen",
         detail: "Mittwoch, 14. Oktober",
@@ -367,6 +400,42 @@ export function directoryState(p: ReplacementPractice, until: LocalDate = MOCK_T
   return { usable: true, note: `Zuletzt bestätigt am ${dayMonth(p.verification.lastVerified!)}` };
 }
 
+// ------------------------------------------------------------------ replacements as parents see them
+
+export interface ReplacementPeriod {
+  from: LocalDate;
+  until: LocalDate;
+  rep: PublicReplacement;
+  subtitle?: string;
+  note?: string;
+}
+
+/**
+ * Who is responsible when, from `fromDate` to the end of a closure. Each period comes from the
+ * real engine evaluated on a day of that period, so only verified, fresh replacements appear.
+ * Subtitle and public note are display-only fields of the mock directory.
+ */
+export function replacementSchedule(d: CockpitData, closureId: string, fromDate: LocalDate): ReplacementPeriod[] {
+  const c = d.closures.find((x) => x.id === closureId);
+  if (!c) return [];
+  const out: ReplacementPeriod[] = [];
+  for (const a of c.replacements) {
+    if (compareDates(a.until, fromDate) < 0) continue;
+    const day = compareDates(a.from, fromDate) < 0 ? fromDate : a.from;
+    const rep = statusAt(d, day, "09:00").replacementPractices.find((p) => p.id === a.replacementPracticeId && p.from === a.from);
+    if (rep) out.push({ from: a.from, until: a.until, rep, subtitle: DIRECTORY_SUBTITLE[rep.id], note: d.directory.find((p) => p.id === rep.id)?.publicNote });
+  }
+  return out.sort((x, y) => compareDates(x.from, y.from));
+}
+
+/** Internal (staff) summary of a closure's replacement assignments. */
+export function replacementSummary(d: CockpitData, c: Closure): string {
+  if (!c.replacements.length) return "keine – Website zeigt die Notfall-Hinweise";
+  const name = (id: string) => d.directory.find((p) => p.id === id)?.practiceName ?? "unbekannt";
+  if (c.replacements.length === 1 && c.replacements[0].from === c.startDate && c.replacements[0].until === c.endDate) return name(c.replacements[0].replacementPracticeId);
+  return c.replacements.map((r) => `${name(r.replacementPracticeId)} (${dateRange(r.from, r.until)})`).join(", ");
+}
+
 // ------------------------------------------------------------------ home lists
 
 export interface Upcoming {
@@ -374,6 +443,8 @@ export interface Upcoming {
   label: string;
   note: string;
   attention: boolean;
+  /** Closures: published entry with detail and edit links. */
+  closure?: { id: string; replacement: string };
 }
 
 const holidayOf = (date: LocalDate) => MOCK_HOLIDAYS.find((h) => h.date === date);
@@ -384,7 +455,7 @@ export function upcoming(d: CockpitData, horizonDays = 90): Upcoming[] {
   for (const c of d.closures) {
     if (compareDates(c.endDate, MOCK_TODAY) < 0) continue;
     const kind = c.kind === "VACATION" ? "Urlaub" : c.kind === "TRAINING" ? "Fortbildung" : c.kind === "SHORT_NOTICE" ? "Praxis geschlossen" : "Schließzeit";
-    items.push({ date: c.startDate, label: dateRange(c.startDate, c.endDate), note: kind, attention: false });
+    items.push({ date: c.startDate, label: dateRange(c.startDate, c.endDate), note: kind, attention: false, closure: { id: c.id, replacement: replacementSummary(d, c) } });
   }
   for (const x of d.exceptions) {
     if (compareDates(x.endDate, MOCK_TODAY) < 0) continue;

@@ -2,6 +2,12 @@
    Green only via the PULS status mark for valid/open; red only for emergency (unused here);
    coral only as a small attention marker. */
 
+.app,
+.loginPage {
+  --surface: #fbf9f5;
+  --line: color-mix(in srgb, var(--palette-ink) 14%, transparent);
+  --line-strong: color-mix(in srgb, var(--palette-ink) 38%, transparent);
+}
 .app {
   --surface: #fbf9f5;
   --line: color-mix(in srgb, var(--palette-ink) 14%, transparent);
@@ -1142,4 +1148,355 @@
   .quickLinkQuiet {
     transition: none;
   }
+}
+
+/* ================================================================ Phase 09.1.2 */
+
+.gate {
+  padding: var(--space-8) var(--space-gutter);
+  color: var(--color-text-secondary);
+}
+.account {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.account .user {
+  margin-left: 0;
+}
+.btnBlock {
+  width: 100%;
+}
+
+/* ---------------------------------------------------------------- login */
+
+.loginPage {
+  min-height: 100dvh;
+  background: var(--color-canvas);
+  display: grid;
+  place-items: center;
+  padding: var(--space-7) var(--space-gutter);
+}
+.loginMain {
+  width: 100%;
+  max-width: 28rem;
+  display: grid;
+  gap: var(--space-6);
+}
+.loginCard {
+  display: grid;
+  gap: var(--space-3);
+  padding: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+  background: #fbf9f5;
+  border: 1px solid color-mix(in srgb, var(--palette-ink) 14%, transparent);
+  border-radius: 18px;
+  box-shadow: 0 1px 2px rgb(23 26 29 / 0.05), 0 18px 40px -24px rgb(23 26 29 / 0.35);
+}
+.loginCard .form {
+  margin-top: var(--space-5);
+  gap: var(--space-5);
+}
+.loginBrand {
+  display: grid;
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  line-height: 1.25;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-4);
+}
+.loginBrand span:last-child {
+  color: var(--color-text);
+  font-size: 1.25rem;
+}
+.loginError {
+  padding: var(--space-4) var(--space-5);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--palette-coral) 14%, #fbf9f5);
+  border: 1px solid color-mix(in srgb, var(--palette-coral) 55%, transparent);
+  font-weight: 600;
+}
+.loginForgot {
+  justify-self: center;
+}
+.loginFoot {
+  margin-top: var(--space-4);
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+.loginTest {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  padding: var(--space-5);
+  border: 1px dashed color-mix(in srgb, var(--palette-ink) 38%, transparent);
+  border-radius: 14px;
+  font-size: var(--text-small);
+}
+
+/* ---------------------------------------------------------------- parent view */
+
+.labBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-5);
+  padding: var(--space-3) var(--space-gutter);
+  background: var(--palette-ink);
+  color: var(--palette-paper);
+  font-size: var(--text-small);
+}
+.labBar .btnQuiet {
+  color: #c9d0ff;
+}
+.labBar .btnQuiet:focus-visible {
+  outline-color: var(--palette-cobalt-luminous);
+}
+.parentMain:focus {
+  outline: none;
+}
+.parentPage {
+  display: grid;
+}
+.parentControls,
+.parentInner {
+  width: 100%;
+  max-width: var(--width-content);
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-gutter) 0;
+  display: grid;
+  gap: var(--space-4);
+}
+.parentMore summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  cursor: pointer;
+  color: var(--palette-cobalt-text);
+  font-weight: 600;
+}
+.parentMore .row2 {
+  padding-top: var(--space-4);
+  max-width: 32rem;
+}
+.parentStatus {
+  display: grid;
+  gap: var(--space-5);
+}
+.parentMessage {
+  max-width: 34rem;
+  font-size: var(--text-body-l);
+}
+.parentActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+.parentAction {
+  min-height: 52px;
+  border: 0;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.parentAction[aria-expanded="true"] {
+  outline: 2px solid var(--palette-ink);
+  outline-offset: 3px;
+}
+.parentEmbed {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--pad, 1.25rem) var(--pad, 1.25rem);
+}
+.parentEmbed .parentStatus > div:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.callNote {
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+  min-height: 1px;
+}
+.parentSection {
+  display: grid;
+  gap: var(--space-4);
+  padding-top: var(--space-5);
+  border-top: 1px solid color-mix(in srgb, var(--palette-ink) 14%, transparent);
+}
+.parentSectionTitle {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.5rem;
+}
+
+.repList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--space-5);
+}
+@media (min-width: 48em) {
+  .repTwo {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.repCard {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  justify-items: start;
+  padding: clamp(1.125rem, 0.9rem + 1vw, 1.75rem);
+  border-radius: 16px;
+  background: var(--palette-paper-raised);
+  border: 1px solid color-mix(in srgb, var(--palette-ink) 14%, transparent);
+}
+.repDate {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 1.3rem + 1vw, 2rem);
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  margin-bottom: var(--space-3);
+}
+.repName {
+  font-size: 1.1875rem;
+  font-weight: 600;
+}
+.repSub {
+  color: var(--color-text-secondary);
+}
+.repAddress {
+  display: grid;
+  margin-top: var(--space-3);
+}
+.repPhone {
+  font-weight: 600;
+}
+.repNote {
+  margin-top: var(--space-2);
+  font-size: var(--text-small);
+}
+.repCard .parentAction {
+  margin-top: var(--space-4);
+}
+
+/* ---------------------------------------------------------------- vacation + replacements */
+
+.optSub {
+  display: block;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+.verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: var(--space-3);
+  color: var(--palette-green-text);
+  font-weight: 600;
+}
+.staleList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+.staleCard {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 56px;
+  padding: 14px 16px;
+  border: 1.5px dashed color-mix(in srgb, var(--palette-ink) 38%, transparent);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.staleCard:focus-visible {
+  outline: 3px solid var(--palette-cobalt);
+  outline-offset: 2px;
+}
+.staleBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-small);
+  font-weight: 600;
+}
+.staleBadge svg {
+  color: #b8513b;
+}
+.quote {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border-radius: 12px;
+  background: var(--palette-paper);
+  border: 1px solid color-mix(in srgb, var(--palette-ink) 14%, transparent);
+}
+.quoteStrong {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: var(--target-min);
+  cursor: pointer;
+  font-weight: 600;
+}
+.check input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--palette-cobalt-text);
+}
+.facts {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+}
+.facts div {
+  display: grid;
+  gap: 2px;
+}
+@media (min-width: 36em) {
+  .facts div {
+    grid-template-columns: 11rem 1fr;
+    gap: var(--space-5);
+  }
+}
+.facts dt {
+  color: var(--color-text-secondary);
+}
+.facts dd {
+  margin: 0;
+  font-weight: 500;
+}
+.published {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--palette-green-text);
+  font-weight: 600;
+}
+.dateClosure {
+  display: grid;
+  gap: 2px;
+}
+.dateTitle {
+  font-weight: 600;
+}
+.dateActions {
+  display: flex;
+  gap: var(--space-5);
 }

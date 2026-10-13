@@ -3,7 +3,7 @@
 // Shared building blocks for the Praxis Cockpit prototype (German UI, paper / ink / cobalt).
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import s from "./cockpit.module.css";
 import { StatusStatement } from "@/site/blocks";
@@ -46,11 +46,55 @@ const NAV = [
   { href: "/lab/praxis-cockpit/verlauf", label: "Verlauf" },
 ];
 
+export const LOGIN_PATH = "/lab/praxis-cockpit/anmelden";
+export const PARENT_PATH = "/lab/praxis-cockpit/elternansicht";
+
 export function Shell({ children }: { children: ReactNode }) {
   const path = usePathname();
-  const { state } = useCockpit();
+  const router = useRouter();
+  const { state, signedIn, signOut } = useCockpit();
   const who = ROLES[state.role];
+  const isLogin = path.startsWith(LOGIN_PATH);
   const current = (href: string) => (href === "/lab/praxis-cockpit" ? path === href : path.startsWith(href));
+
+  // Prototype gate only: no real authentication, the session holds just the mock role.
+  useEffect(() => {
+    if (!isLogin && signedIn === false) router.replace(LOGIN_PATH);
+  }, [isLogin, signedIn, router]);
+
+  if (isLogin) return <>{children}</>;
+  if (!signedIn) {
+    return (
+      <div className={s.app}>
+        <p className={s.gate} role="status">
+          {signedIn === null ? "Wird geladen …" : "Bitte anmelden …"}
+        </p>
+      </div>
+    );
+  }
+
+  if (path.startsWith(PARENT_PATH)) {
+    return (
+      <div className={s.app}>
+        <a className="skip-link" href="#inhalt">
+          Zum Inhalt
+        </a>
+        <div className={s.labBar}>
+          <p>
+            <strong>Elternansicht</strong> · PROTOTYP · Testdaten, so würde die Website aussehen
+          </p>
+          <Link href="/lab/praxis-cockpit" className={s.btnQuiet}>
+            <Glyph name="back" size={18} />
+            Zurück zum Cockpit
+          </Link>
+        </div>
+        <main id="inhalt" className={s.parentMain} tabIndex={-1}>
+          {children}
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className={s.app}>
       <a className="skip-link" href="#inhalt">
@@ -62,10 +106,22 @@ export function Shell({ children }: { children: ReactNode }) {
             Praxis Cockpit
           </Link>
           <p className={s.proto}>PROTOTYP · keine echten Daten</p>
-          <p className={s.user}>
-            <span className={s.userName}>{who.person}</span>
-            <span className={s.userRole}>{who.label}</span>
-          </p>
+          <div className={s.account}>
+            <p className={s.user}>
+              <span className={s.userName}>{who.person}</span>
+              <span className={s.userRole}>{who.label}</span>
+            </p>
+            <button
+              type="button"
+              className={s.btnQuiet}
+              onClick={() => {
+                signOut();
+                router.push(LOGIN_PATH);
+              }}
+            >
+              Abmelden
+            </button>
+          </div>
         </div>
         <nav className={s.nav} aria-label="Cockpit">
           {NAV.map((n) => (
@@ -472,7 +528,7 @@ export function Blocked({ problem, onBack }: { problem: Problem; onBack: () => v
   );
 }
 
-export function Success({ title, children, undoId }: { title: string; children?: ReactNode; undoId?: string }) {
+export function Success({ title, children, undoId, actions }: { title: string; children?: ReactNode; undoId?: string; actions?: ReactNode }) {
   const ref = useRef<HTMLHeadingElement>(null);
   useEffect(() => ref.current?.focus(), []);
   return (
@@ -486,9 +542,11 @@ export function Success({ title, children, undoId }: { title: string; children?:
       {children}
       <p className={s.muted}>Im echten Cockpit wird die Änderung danach automatisch protokolliert.</p>
       <div className={s.actions}>
-        <LinkButton href="/lab/praxis-cockpit" variant="primary">
-          Zur Startseite
-        </LinkButton>
+        {actions ?? (
+          <LinkButton href="/lab/praxis-cockpit" variant="primary">
+            Zur Startseite
+          </LinkButton>
+        )}
         {undoId ? (
           <LinkButton href={`/lab/praxis-cockpit/verlauf/${undoId}?ruecknahme=1`} variant="quiet">
             <Glyph name="undo" size={18} />

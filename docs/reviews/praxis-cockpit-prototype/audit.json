@@ -1,4 +1,18 @@
 {
+  "390x844 /anmelden": {
+    "overflowX": false,
+    "h1": 1,
+    "smallTargets": [],
+    "unlabeled": [],
+    "unnamed": 0
+  },
+  "390x844 /elternansicht": {
+    "overflowX": false,
+    "h1": 1,
+    "smallTargets": [],
+    "unlabeled": [],
+    "unnamed": 0
+  },
   "390x844 /": {
     "overflowX": false,
     "h1": 1,
@@ -62,6 +76,20 @@
     "unlabeled": [],
     "unnamed": 0
   },
+  "768x1024 /anmelden": {
+    "overflowX": false,
+    "h1": 1,
+    "smallTargets": [],
+    "unlabeled": [],
+    "unnamed": 0
+  },
+  "768x1024 /elternansicht": {
+    "overflowX": false,
+    "h1": 1,
+    "smallTargets": [],
+    "unlabeled": [],
+    "unnamed": 0
+  },
   "768x1024 /": {
     "overflowX": false,
     "h1": 1,
@@ -119,6 +147,20 @@
     "unnamed": 0
   },
   "768x1024 /feiertag?datum=2026-12-25": {
+    "overflowX": false,
+    "h1": 1,
+    "smallTargets": [],
+    "unlabeled": [],
+    "unnamed": 0
+  },
+  "1440x900 /anmelden": {
+    "overflowX": false,
+    "h1": 1,
+    "smallTargets": [],
+    "unlabeled": [],
+    "unnamed": 0
+  },
+  "1440x900 /elternansicht": {
     "overflowX": false,
     "h1": 1,
     "smallTargets": [],

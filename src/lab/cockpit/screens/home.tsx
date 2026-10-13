@@ -132,10 +132,29 @@ export function Home() {
               {items.map((i) => (
                 <li key={`${i.date}-${i.note}`} className={s.dateRow}>
                   <span className={s.dateLabel}>{i.label}</span>
-                  <span className={s.dateNote}>
-                    {i.attention ? <span className={s.dot} aria-hidden="true" /> : null}
-                    {i.note}
-                  </span>
+                  {i.closure ? (
+                    <span className={s.dateClosure}>
+                      <span className={s.dateTitle}>{i.note}</span>
+                      <span className={s.dateNote}>Vertretung: {i.closure.replacement}</span>
+                      <span className={s.published}>
+                        <Glyph name="check" size={16} />
+                        veröffentlicht
+                      </span>
+                      <span className={s.dateActions}>
+                        <Link href={`/lab/praxis-cockpit/urlaub/${encodeURIComponent(i.closure.id)}`} className={s.textLink}>
+                          Ansehen<span className="visually-hidden">: {i.note} {i.label}</span>
+                        </Link>
+                        <Link href={`/lab/praxis-cockpit/urlaub?bearbeiten=${encodeURIComponent(i.closure.id)}`} className={s.textLink}>
+                          Ändern<span className="visually-hidden">: {i.note} {i.label}</span>
+                        </Link>
+                      </span>
+                    </span>
+                  ) : (
+                    <span className={s.dateNote}>
+                      {i.attention ? <span className={s.dot} aria-hidden="true" /> : null}
+                      {i.note}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>

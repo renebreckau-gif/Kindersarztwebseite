@@ -1,19 +1,81 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
 import s from "../cockpit.module.css";
 import { useCockpit } from "../store";
-import { Choice } from "../ui";
-import { directoryState } from "../model";
-import type { LocalDate } from "@/domain/time";
+import { Button, Choice, Glyph } from "../ui";
+import { DIRECTORY_SUBTITLE, MOCK_TODAY, ROLES, dayMonth, directoryState, entryVerification, type CockpitData } from "../model";
+import { addDays, type LocalDate } from "@/domain/time";
+import type { ReplacementPractice } from "@/domain/content-types";
 
-/**
- * Replacement choice from the verified directory only. Stale entries are visible but cannot
- * be chosen ("Vertretung muss bestätigt werden"); only Ärztin/Arzt can re-confirm them.
- */
+/** Re-confirm a stale directory entry (DOCTOR/ADMIN only; operational provenance). */
+export function useConfirmReplacement() {
+  const { state, apply } = useCockpit();
+  return (p: ReplacementPractice) => {
+    const who = ROLES[state.role];
+    const due = addDays(MOCK_TODAY, 182);
+    const next: CockpitData = {
+      ...state.data,
+      directory: state.data.directory.map((x) => (x.id === p.id ? { ...x, verification: entryVerification(who.person, state.role, due) } : x)),
+    };
+    return apply(next, {
+      title: "Vertretung bestätigt",
+      detail: `${p.practiceName} (telefonisch)`,
+      before: "Bestätigung abgelaufen",
+      after: `bestätigt bis ${dayMonth(due)}`,
+      undoSentence: `${p.practiceName} wäre wieder nicht auswählbar.`,
+      entityIds: [p.id],
+    });
+  };
+}
+
+/** Stale entries: visible, never selectable; clicking explains what is needed. */
+export function StaleReplacements({ until }: { until: LocalDate }) {
+  const { state } = useCockpit();
+  const confirm = useConfirmReplacement();
+  const [open, setOpen] = useState<string | null>(null);
+  const stale = state.data.directory.filter((p) => !directoryState(p, until).usable);
+  if (!stale.length) return null;
+  return (
+    <ul className={s.staleList}>
+      {stale.map((p) => (
+        <li key={p.id}>
+          <button type="button" className={s.staleCard} aria-expanded={open === p.id} onClick={() => setOpen(open === p.id ? null : p.id)}>
+            <span className={s.choiceText}>
+              <span className={s.choiceLabel}>{p.practiceName}</span>
+              <span className={s.choiceNote}>{DIRECTORY_SUBTITLE[p.id]}</span>
+            </span>
+            <span className={s.staleBadge}>
+              <Glyph name="attention" size={18} />
+              Bestätigung abgelaufen
+            </span>
+          </button>
+          {open === p.id ? (
+            <div className={s.inlineBlock} role="note">
+              <p className={s.inlineBlockTitle}>Diese Vertretung muss zuerst erneut bestätigt werden.</p>
+              <p className={s.muted}>{directoryState(p, until).note}</p>
+              {state.role === "STAFF" ? (
+                <p>Eine Ärztin oder ein Arzt muss diese Vertretung bestätigen.</p>
+              ) : (
+                <>
+                  <p>Bitte rufen Sie die Praxis an und klären Sie, ob die Vertretung weiter gilt.</p>
+                  <Button variant="secondary" onClick={() => (confirm(p), setOpen(null))}>
+                    Vertretung bestätigen
+                  </Button>
+                </>
+              )}
+            </div>
+          ) : null}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Choice from the verified directory only (cards with city, phone and confirmation state). */
 export function ReplacementPicker({ value, onChange, until, legend = "Vertretung", name, allowNone = true, error }: { value: string; onChange: (id: string) => void; until: LocalDate; legend?: string; name: string; allowNone?: boolean; error?: string }) {
   const { state } = useCockpit();
-  const blocked = state.data.directory.filter((p) => !directoryState(p, until).usable);
+  const usable = state.data.directory.filter((p) => directoryState(p, until).usable);
   return (
     <div className={s.stackTight}>
       <Choice
@@ -22,37 +84,30 @@ export function ReplacementPicker({ value, onChange, until, legend = "Vertretung
         value={value}
         onChange={onChange}
         error={error}
-        hint="Nur Praxen aus der geprüften Vertretungsliste (Testdaten)."
+        hint="Nur bestätigte Praxen aus der Vertretungsliste (Testdaten)."
         options={[
+          ...usable.map((p) => ({
+            value: p.id,
+            label: (
+              <>
+                {p.practiceName}
+                <span className={s.optSub}>{DIRECTORY_SUBTITLE[p.id]}</span>
+              </>
+            ),
+            note: (
+              <>
+                {p.city} · Telefon {p.phone}
+                <span className={s.verified}>
+                  <Glyph name="check" size={16} />
+                  bestätigt
+                </span>
+              </>
+            ),
+          })),
           ...(allowNone ? [{ value: "keine", label: "Keine Vertretung", note: "Die Website zeigt dann die Notfall-Hinweise und die Telefonnummer." }] : []),
-          ...state.data.directory.map((p) => {
-            const st = directoryState(p, until);
-            return {
-              value: p.id,
-              label: p.practiceName,
-              note: st.usable ? `${p.street}, ${p.city} · ${st.note}` : st.note,
-              disabled: !st.usable,
-            };
-          }),
         ]}
       />
-      {blocked.length ? (
-        <div className={s.inlineBlock} role="note">
-          <p className={s.inlineBlockTitle}>Vertretung muss bestätigt werden</p>
-          <p>
-            {blocked.map((p) => p.practiceName).join(", ")}: Diese Vertretung wurde länger nicht geprüft und kann deshalb noch nicht veröffentlicht werden.
-          </p>
-          {state.role === "STAFF" ? (
-            <p className={s.muted}>Bestätigen kann nur eine Ärztin oder ein Arzt der Praxis.</p>
-          ) : (
-            <p>
-              <Link href={`/lab/praxis-cockpit/vertretung-pruefen?id=${blocked[0].id}`} className={s.textLink}>
-                {blocked[0].practiceName} jetzt prüfen
-              </Link>
-            </p>
-          )}
-        </div>
-      ) : null}
+      <StaleReplacements until={until} />
     </div>
   );
 }

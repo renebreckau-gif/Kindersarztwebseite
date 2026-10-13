@@ -3,8 +3,8 @@
 // In-memory prototype state. Nothing is persisted: a reload or "Prototyp zurücksetzen"
 // returns to the same starting situation for the next usability session.
 
-import { createContext, useContext, useMemo, useReducer, type ReactNode } from "react";
-import { initialState, MOCK_NOW, MOCK_TODAY, ROLES, type AuditEntry, type CockpitData, type CockpitState, type Role } from "./model";
+import { createContext, useContext, useEffect, useMemo, useReducer, useState, type ReactNode } from "react";
+import { initialState, readSession, writeSession, MOCK_NOW, MOCK_TODAY, ROLES, type AuditEntry, type CockpitData, type CockpitState, type Role } from "./model";
 
 type ChangeInput = Omit<AuditEntry, "id" | "date" | "time" | "actor" | "role" | "snapshot">;
 
@@ -69,6 +69,10 @@ export function canUndo(state: CockpitState, id: string): UndoCheck {
 
 interface Store {
   state: CockpitState;
+  /** null = not yet read from the prototype session (first client render). */
+  signedIn: boolean | null;
+  signIn: (r: Role) => void;
+  signOut: () => void;
   setRole: (r: Role) => void;
   reset: () => void;
   /** Returns the id of the new audit entry. */
@@ -83,10 +87,30 @@ const newId = (p: string) => `${p}-${Date.now().toString(36)}-${(counter++).toSt
 
 export function CockpitProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, undefined, initialState);
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const storage = () => (typeof window === "undefined" ? undefined : window.sessionStorage);
+  useEffect(() => {
+    const role = readSession(storage());
+    if (role) dispatch({ type: "role", role });
+    setSignedIn(Boolean(role));
+  }, []);
   const store = useMemo<Store>(
     () => ({
       state,
-      setRole: (role) => dispatch({ type: "role", role }),
+      signedIn,
+      signIn: (role) => {
+        writeSession(storage(), role);
+        dispatch({ type: "role", role });
+        setSignedIn(true);
+      },
+      signOut: () => {
+        writeSession(storage(), null);
+        setSignedIn(false);
+      },
+      setRole: (role) => {
+        writeSession(storage(), role);
+        dispatch({ type: "role", role });
+      },
       reset: () => dispatch({ type: "reset" }),
       apply: (next, entry) => {
         const id = newId("c");
@@ -99,7 +123,7 @@ export function CockpitProvider({ children }: { children: ReactNode }) {
         return revertId;
       },
     }),
-    [state],
+    [state, signedIn],
   );
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>;
 }

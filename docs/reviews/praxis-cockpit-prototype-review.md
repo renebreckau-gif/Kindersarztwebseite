@@ -28,12 +28,25 @@ Ablauf je Testperson (ca. 20 Minuten):
 | **C** | „Prüfe, was Eltern am 25. Dezember auf der Website sehen würden.“ | ohne Hilfe |
 | **D** | „Mach die letzte Änderung wieder rückgängig.“ | ≤ 15 Sekunden |
 
+| **E** | „Melde dich im Praxis Cockpit an.“ (Testzugang: team@beispiel.test / test1234) | ohne Hilfe |
+| **F** | „Trag Urlaub von Montag, 19., bis Freitag, 23. Oktober ein und wähle Praxis Beispiel A als Vertretung.“ | ≤ 3 Minuten |
+| **G** | „Zeig mir, was Eltern während des Urlaubs auf der Website sehen.“ | ohne Hilfe |
+| **H** | „Teile die Vertretung auf: Praxis Beispiel A bis Mittwoch, Praxis Beispiel B Donnerstag und Freitag.“ | ≤ 3 Minuten |
+
+Hinweis zu F und H: Im Auftrag stand „20.–24. Oktober“ als Montag bis Freitag. 2026 ist der 20. Oktober aber ein Dienstag. Getestet wird deshalb die Woche Montag, 19., bis Freitag, 23. Oktober 2026.
+
 **Erfolgskriterien**
 
 - **A:** Die Person nutzt „Heute früher schließen“, wählt 13:00 und sieht die Vorschau. Sie versteht den Hinweis, dass die Praxis um 13:00 Uhr regulär schon geschlossen ist, und bestätigt mit „Nachmittagssprechzeit heute entfallen lassen“.
 - **B:** Zeitraum Montag–Freitag nächster Woche, eine Vertretung „Praxis Beispiel A“ für den ganzen Zeitraum. Die Person liest die Vorschau, versteht das automatische Ende und veröffentlicht.
 - **C:** Die Person findet „Was sieht die Website?“ (Startseite oder Navigation) oder den Punkt unter „Prüfen“. Sie kann sagen, dass Eltern keinen Status sehen, weil der Feiertag nicht geklärt ist.
 - **D:** Die Person findet „Änderung zurücknehmen“ (Startseite oder Verlauf) und bestätigt die Rücknahme.
+
+- **E:** Die Person meldet sich mit dem Testzugang an (selbst eingetippt oder mit „Testzugang einsetzen“) und landet auf der Cockpit-Startseite. Bei falschem Passwort versteht sie die Meldung.
+- **F:** Zeitraum Montag bis Freitag, „Eine Vertretung für den ganzen Zeitraum“, Praxis Beispiel A. Die Person liest die Vorschau „Was sehen Eltern?“ und das automatische Ende und veröffentlicht mit „Urlaub vom 19.–23. Oktober veröffentlichen“.
+- **G:** Die Person öffnet „Ansicht für Eltern öffnen“ (oder „Ansehen“ → „Vorschau“), tippt auf „Vertretung anzeigen“ und kann sagen, welche Praxis zuständig ist und wann die Praxis wieder öffnet.
+- **H:** „Zeitraum aufteilen“: 19.–21. Praxis Beispiel A, 22.–23. Praxis Beispiel B. In der Elternansicht ist sofort klar, wer wann zuständig ist.
+- Beobachten: Versucht die Person, Praxis Beispiel C zu wählen, und versteht sie die Erklärung?
 
 ## Zusätzlich beobachten
 
@@ -76,6 +89,17 @@ Allgemeine Notizen:
 | B | | | | |
 | C | | | | |
 | D | | | | |
+
+Allgemeine Notizen:
+
+### Aufgaben E–H
+
+| Testperson | Aufgabe | Zeit | Ohne Hilfe? | Fehler / Zögern | Zitat / Notiz |
+|---|---|---|---|---|---|
+| | E | | | | |
+| | F | | | | |
+| | G | | | | |
+| | H | | | | |
 
 Allgemeine Notizen:
 

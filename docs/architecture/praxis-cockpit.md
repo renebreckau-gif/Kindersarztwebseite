@@ -566,3 +566,29 @@ The three findings from 09.1 are resolved in the engine (spec: [practice-pulse-l
   - The chosen time is not snapped silently. The audit entry keeps both the chosen time and the resulting hours.
 - **Time after the last block or before the first:** a field error, with a pointer to "Heute geschlossen".
 - Open/closed status in the preview still comes only from `getPracticeStatus()`; the React components hold no status logic.
+
+---
+
+## Phase 09.1.2 note: complete staff test flow (2026-10-13)
+
+The prototype now covers the whole journey: **login → cockpit → Urlaub eintragen → Vertretung → website preview → simulated publish → parent view → logout.** It is still a prototype: **no real authentication, no persistence, no accounts, no e-mail.**
+
+- **Mock login** at `/lab/praxis-cockpit/anmelden`, labelled "PROTOTYP · keine echten Konten".
+  - Test accounts: `team@beispiel.test`, `aerztin@beispiel.test` and `verwaltung@beispiel.test`, all with password `test1234`. They map to Anna Beispiel (Praxisteam), Dr. Lena Beispiel (Ärztin) and Max Beispiel (Verwaltung).
+  - A "Testzugang einsetzen" button fills in the first account.
+  - A wrong login shows one neutral message: "E-Mail-Adresse oder Passwort stimmen nicht."
+  - `sessionStorage` keeps only the mock role (no password, no token, no cookie). "Abmelden" clears it.
+  - All other cockpit routes redirect to the login when there is no prototype session.
+  - The role switcher stays under "Testmodus" only.
+- **Vacation journey** (`/urlaub`, edit via `?bearbeiten=<id>`, detail at `/urlaub/<id>`). Four steps: Zeitraum, Text für Eltern (fixed default sentence plus an optional note of up to 140 characters), Vertretung, Vorschau. Three replacement cases:
+  - one practice for the whole period
+  - split into sub-periods; overlaps and periods outside the vacation are blocked, and gaps need explicit confirmation
+  - no replacement, with a warning
+  - The stale "Praxis Beispiel C" is visible but never selectable. Clicking it explains what is needed; DOCTOR can re-confirm it.
+  - After publishing, home shows the vacation under "Nächste Termine" with Vertretung, "veröffentlicht", "Ansehen" and "Ändern". The detail view offers Vorschau, Urlaub ändern and Urlaub zurücknehmen.
+- **Parent view** at `/lab/praxis-cockpit/elternansicht` reuses the public `PageIntro`, `StatusStatement`, `Section` and public action styles.
+  - Status, dates, next opening and replacements come from the real engine with mock data.
+  - The replacement schedule asks the engine once per sub-period (`replacementSchedule`), so only verified, fresh practices appear, and each card leads with its dates. With exactly two periods the cards sit in two columns on desktop and stack on phones.
+  - Practice subtitle and public note are display-only fields of the mock directory.
+  - Telephone buttons never dial in the prototype.
+- **Dates:** the brief's example "Montag 20. – Freitag 24. Oktober" does not exist in 2026: 20 Oct 2026 is a Tuesday and 24 Oct a Saturday. The prototype and tests use the real Monday–Friday week **19.–23. Oktober 2026**, with the next opening Monday 26 October.

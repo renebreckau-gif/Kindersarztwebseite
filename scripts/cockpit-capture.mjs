@@ -86,6 +86,25 @@ async function fill(label, value, nth = 0) {
   if (!ok) throw new Error(`no field: ${label}`);
   await sleep(150);
 }
+/** Choose an option of a <select> by its label (nth occurrence). */
+async function choose(label, value, nth = 0) {
+  const ok = await evalJs(`(() => {
+    const l = [...document.querySelectorAll('label')].filter(l => l.textContent.trim().startsWith(${JSON.stringify(label)}))[${nth}];
+    const el = l && document.getElementById(l.htmlFor); if (!el || el.tagName !== 'SELECT') return false;
+    Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(el, ${JSON.stringify(value)});
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    return true; })()`);
+  if (!ok) throw new Error(`no select: ${label}`);
+  await sleep(150);
+}
+async function login() {
+  await go("/lab/praxis-cockpit/anmelden");
+  await fill("E-Mail-Adresse", "team@beispiel.test");
+  await fill("Passwort", "test1234");
+  await click("Anmelden", "button[type=submit]");
+  await sleep(700);
+}
+
 async function shot(file, full = true) {
   await evalJs("window.scrollTo(0,0)");
   await sleep(200);
@@ -119,7 +138,9 @@ async function check(key) {
 }
 
 // ---------------------------------------------------------------- responsive audit of every screen
-const ROUTES = ["", "/frueher-schliessen", "/geschlossen", "/akutsprechstunde", "/urlaub", "/hinweis", "/website", "/verlauf", "/feiertag?datum=2026-12-25"];
+await viewport("390x844");
+await login();
+const ROUTES = ["/anmelden", "/elternansicht", "", "/frueher-schliessen", "/geschlossen", "/akutsprechstunde", "/urlaub", "/hinweis", "/website", "/verlauf", "/feiertag?datum=2026-12-25"];
 for (const vp of Object.keys(VP)) {
   await viewport(vp);
   for (const r of ROUTES) {
@@ -172,25 +193,6 @@ await shot("09-website-vorschau-25-dezember-390x844.png");
 await go("/lab/praxis-cockpit");
 await click("Prüfen", "a[href*='feiertag?datum=2026-12-25']");
 await shot("10-fehler-feiertag-nicht-geklaert-390x844.png");
-
-// ---------------------------------------------------------------- TASK B at 1440: vacation with Praxis Beispiel A
-await viewport("1440x900");
-await go("/lab/praxis-cockpit");
-await click("Urlaub eintragen", "a");
-await fill("Von", "2026-10-19");
-await fill("Bis", "2026-10-23");
-await shot("11-urlaub-schritt-1-1440x900.png");
-await click("Weiter", "button");
-await click("Weiter", "button");
-await click("Eine Praxis für den ganzen Zeitraum", "label");
-await shot("12-urlaub-schritt-3-vertretung-1440x900.png");
-await click("Praxis Beispiel A", "label");
-await click("Vorschau ansehen", "button");
-await sleep(700);
-await shot("13-urlaub-vorschau-1440x900.png");
-await click("veröffentlichen", "button");
-await sleep(700);
-await shot("14-urlaub-erfolg-1440x900.png");
 
 // ---------------------------------------------------------------- ERROR 3: replacement must be confirmed (390)
 await viewport("390x844");
@@ -258,6 +260,97 @@ await fill("Bis wann ist heute geöffnet?", "10:30");
 await click("Vorschau ansehen", "button");
 await sleep(600);
 await shot("27-frueher-schliessen-10-30-vorschau-390x844.png");
+
+// ---------------------------------------------------------------- Phase 09.1.2: full staff journey
+async function vacationTo(step3) {
+  await click("Urlaub eintragen", "a");
+  await fill("Von", "2026-10-19");
+  await fill("Bis", "2026-10-23");
+  return step3;
+}
+for (const vp of ["390x844", "768x1024", "1440x900"]) {
+  await viewport(vp);
+  // LOGIN (signed out first)
+  await go("/lab/praxis-cockpit");
+  await click("Abmelden", "button");
+  await shot(`30-anmelden-${vp}.png`);
+  if (vp === "390x844") {
+    await fill("E-Mail-Adresse", "team@beispiel.test");
+    await fill("Passwort", "falsch");
+    await click("Anmelden", "button[type=submit]");
+    await shot(`31-anmelden-fehler-${vp}.png`);
+  }
+  await click("Testzugang einsetzen", "button");
+  await click("Anmelden", "button[type=submit]");
+  await sleep(600);
+  await shot(`32-cockpit-start-${vp}.png`);
+  // URLAUB 19.–23. Oktober → Praxis Beispiel A
+  await vacationTo();
+  await shot(`33-urlaub-zeitraum-${vp}.png`);
+  await click("Weiter", "button");
+  await shot(`34-urlaub-text-${vp}.png`);
+  await click("Weiter", "button");
+  await click("Eine Vertretung für den ganzen Zeitraum", "label");
+  await click("Praxis Beispiel C", "button");
+  await shot(`35-urlaub-vertretung-auswahl-${vp}.png`);
+  await click("Praxis Beispiel A", "label");
+  await click("Vorschau ansehen", "button");
+  await sleep(700);
+  await shot(`36-urlaub-vorschau-${vp}.png`);
+  await click("Vertretung anzeigen", "button");
+  await shot(`37-urlaub-vorschau-vertretung-${vp}.png`);
+  await click("Urlaub vom 19.–23. Oktober veröffentlichen", "button");
+  await sleep(700);
+  await shot(`38-urlaub-eingetragen-${vp}.png`);
+  // PARENT VIEW
+  await click("Ansicht für Eltern öffnen", "a");
+  await shot(`39-elternansicht-urlaub-${vp}.png`);
+  await click("Vertretung anzeigen", "button");
+  await shot(`40-elternansicht-vertretung-${vp}.png`);
+  // COCKPIT HOME → URLAUB ANSEHEN → LOGOUT
+  await click("Zurück zum Cockpit", "a");
+  await shot(`41-start-nach-urlaub-${vp}.png`);
+  await click("Ansehen", "a[href*='/urlaub/']");
+  await shot(`42-urlaub-detail-${vp}.png`);
+  await click("Abmelden", "button");
+  await shot(`43-abgemeldet-${vp}.png`, false);
+  await click("Testzugang einsetzen", "button");
+  await click("Anmelden", "button[type=submit]");
+  await sleep(600);
+}
+
+// SPLIT: 19.–21. Praxis Beispiel A, 22.–23. Praxis Beispiel B
+for (const vp of ["390x844", "1440x900"]) {
+  await viewport(vp);
+  await go("/lab/praxis-cockpit");
+  await vacationTo();
+  await click("Weiter", "button");
+  await click("Weiter", "button");
+  await click("Zeitraum aufteilen", "label");
+  await choose("Vertretung", "vb-a", 0);
+  await choose("Vertretung", "vb-b", 1);
+  await shot(`44-aufgeteilt-eingabe-${vp}.png`);
+  await click("Vorschau ansehen", "button");
+  await sleep(700);
+  await click("Urlaub vom 19.–23. Oktober veröffentlichen", "button");
+  await sleep(700);
+  await click("Ansicht für Eltern öffnen", "a");
+  await click("Vertretung anzeigen", "button");
+  await shot(`45-aufgeteilt-elternansicht-${vp}.png`);
+}
+
+// NO REPLACEMENT (390)
+await viewport("390x844");
+await go("/lab/praxis-cockpit");
+await vacationTo();
+await click("Weiter", "button");
+await click("Weiter", "button");
+await click("Keine Vertretung eintragen", "label");
+await shot("46-keine-vertretung-hinweis-390x844.png");
+await click("Vorschau ansehen", "button");
+await sleep(700);
+await click("Notfall-Hinweise", "button");
+await shot("47-keine-vertretung-vorschau-390x844.png");
 
 writeFileSync(join(OUT, "audit.json"), JSON.stringify(audit, null, 2));
 const issues = Object.entries(audit).filter(([, a]) => a.overflowX || a.smallTargets.length || a.unlabeled.length || a.unnamed || a.h1 !== 1);
