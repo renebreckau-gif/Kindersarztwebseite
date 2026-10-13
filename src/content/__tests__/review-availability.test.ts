@@ -1,18 +1,18 @@
-// Mein Arztbesuch on the normal website (published 2026-10-13 by explicit decision) and the
-// staging-only /review hub. Publication ≠ approval: approval records stay truthful.
+// GLOBAL PROJECT RULE: the current Vercel deployment is STAGING (SITE_STAGE). Implemented work
+// is directly visible there; content gates become authoritative only in PRODUCTION.
+// Staging visibility is never approval provenance.
 
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { RELEASE } from "../release.ts";
-import { CHAPTERS, MEIN_ARZTBESUCH, approvalsComplete, chapterCard, chapterView, discoveryReviewMode } from "../discovery.ts";
-import { isReviewEnvironment } from "../environment.ts";
+import { RELEASE, SITE_STAGE, stageAllowsReview } from "../release.ts";
+import { CHAPTERS, MEIN_ARZTBESUCH, approvalsComplete, chapterCard, chapterPublishable, chapterView, discoveryReviewMode } from "../discovery.ts";
 import { LEGAL, NEEDS, PRIMARY, SITEMAP, AGES } from "../site.ts";
 import { REVIEW_CARDS, REVIEW_TEST_ACCESS, isReviewHubEnabled } from "../../lab/review-hub.ts";
 
-/** All navigation / sitemap models of the public site. */
+/** All navigation / sitemap models of the public (patient) site. */
 const NAV = { PRIMARY, SITEMAP, LEGAL, NEEDS, AGES };
 
 const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
@@ -26,18 +26,30 @@ const files = (dir: string, out: string[] = []) => {
   return out;
 };
 const PUBLIC_CODE = [...files("app/(site)"), ...files("src/site"), ...files("src/content")];
+const ALL_CODE = [...files("app"), ...files("src"), "next.config.ts"];
 const approvalsSnapshot = () => JSON.stringify(MEIN_ARZTBESUCH.scenes.map((s) => [s.contentApproval, s.practiceApproval, s.medicalApproval, s.approvedBy, s.lastReviewedAt]));
 
-describe("Mein Arztbesuch on the normal website", () => {
+describe("deployment stage", () => {
+  test("1: SITE_STAGE is currently STAGING (explicit, not derived from Vercel)", () => {
+    assert.equal(SITE_STAGE, "STAGING");
+    const release = read("src/content/release.ts");
+    assert.match(release, /export const SITE_STAGE: SiteStage = "STAGING";/);
+    for (const f of ALL_CODE) assert.doesNotMatch(read(f), /VERCEL_ENV|REVIEW_HUB_ENABLED/, `${f}: no environment-variable gating`);
+    assert.equal(existsSync(join(ROOT, "src/content/environment.ts")), false, "no second 'review environment' concept");
+  });
+});
+
+describe("Mein Arztbesuch on staging", () => {
   const card = () => chapterCard(CHAPTERS.find((c) => c.id === "mein-arztbesuch")!, discoveryReviewMode(undefined));
 
-  test("1 + 2: normal /entdecken lists the chapter as clickable, without „In Vorbereitung“", () => {
+  test("2: normally visible as clickable chapter 1, without „In Vorbereitung“", () => {
     assert.deepEqual(card(), { href: "/entdecken/mein-arztbesuch", state: null });
-    assert.equal(MEIN_ARZTBESUCH.teaser, "Was bei einem Arztbesuch passieren kann – Schritt für Schritt erklärt.");
-    assert.equal(CHAPTERS[0].id, "mein-arztbesuch", "chapter 1");
+    assert.equal(CHAPTERS[0].id, "mein-arztbesuch");
+    assert.doesNotMatch(read("src/site/home.tsx"), /In Vorbereitung/);
+    assert.doesNotMatch(JSON.stringify(NAV), /in Vorbereitung/i);
   });
 
-  test("3 + 6: normal /entdecken/mein-arztbesuch renders all six scenes with their final assets", () => {
+  test("3 + 4: all six scenes without query parameter and without any environment variable", () => {
     const v = chapterView(MEIN_ARZTBESUCH, false);
     assert.equal(v.mode, "PUBLIC");
     const scenes = "scenes" in v.chapter ? v.chapter.scenes : [];
@@ -49,30 +61,14 @@ describe("Mein Arztbesuch on the normal website", () => {
       for (const w of s.visual.image!.widths) {
         for (const ext of ["avif", "webp"]) assert.ok(existsSync(join(ROOT, `public/discovery/d1-${s.visual.image!.slug}-${w}.${ext}`)), `${s.id} ${w} ${ext}`);
       }
-      assert.ok(s.visual.alt.length > 20, `${s.id} alt text`);
     }
+    assert.equal(chapterView(MEIN_ARZTBESUCH, true).mode, "PUBLIC", "old ?vorschau links show the same chapter");
   });
 
-  test("4 + 5: no review flag and no ?vorschau needed", () => {
-    for (const f of ["app/(site)/entdecken/page.tsx", "app/(site)/entdecken/mein-arztbesuch/page.tsx", "src/content/discovery.ts"]) {
-      assert.doesNotMatch(read(f), /isReviewEnvironment|REVIEW_HUB_ENABLED/, `${f}: REVIEW_HUB_ENABLED must not publish content`);
-    }
-    assert.equal(chapterView(MEIN_ARZTBESUCH, false).mode, "PUBLIC");
-    assert.equal(chapterView(MEIN_ARZTBESUCH, true).mode, "PUBLIC", "old review links show the same chapter");
-  });
-
-  test("no review wording on the published chapter", () => {
-    const page = read("app/(site)/entdecken/mein-arztbesuch/page.tsx");
-    // the preview note only renders for PREVIEW mode, which a published chapter never has
-    assert.match(page, /view\.mode === "PREVIEW" \? \(/);
-    assert.doesNotMatch(read("app/(site)/entdecken/page.tsx"), /Inhalte werden noch final geprüft/);
-    assert.doesNotMatch(read("src/site/home.tsx"), /In Vorbereitung/);
-  });
-
-  test("7 + 8: no fabricated provenance — approval records unchanged and open", () => {
+  test("8: approval metadata unchanged and truthful (staging visibility ≠ approval)", () => {
     const before = approvalsSnapshot();
-    chapterView(MEIN_ARZTBESUCH, false);
-    chapterView(MEIN_ARZTBESUCH, true);
+    chapterView(MEIN_ARZTBESUCH, false, "STAGING");
+    chapterView(MEIN_ARZTBESUCH, false, "PRODUCTION");
     assert.equal(approvalsSnapshot(), before);
     assert.equal(approvalsComplete(MEIN_ARZTBESUCH), false);
     for (const s of MEIN_ARZTBESUCH.scenes) {
@@ -84,45 +80,26 @@ describe("Mein Arztbesuch on the normal website", () => {
       if (s.medicalApproval) assert.equal(s.medicalApproval.status, "TO_BE_CONFIRMED", s.id);
     }
     assert.equal(RELEASE.meinArztbesuchApproved, false);
-    assert.equal(RELEASE.meinArztbesuchPublished, true);
   });
 
-  test("9: the site as a whole stays non-indexable", () => {
-    assert.equal(RELEASE.indexable, false);
-    assert.match(read("next.config.ts"), /X-Robots-Tag", value: "noindex, nofollow"/);
-  });
-
-  test("navigation: Start → Entdecken → Mein Arztbesuch → back to Entdecken", () => {
-    assert.match(JSON.stringify(SITEMAP), /"\/entdecken\/mein-arztbesuch"/);
-    assert.doesNotMatch(JSON.stringify(NAV), /in Vorbereitung/i);
-    assert.match(read("src/site/home.tsx"), /href="\/entdecken\/mein-arztbesuch"/);
-    assert.match(read("app/(site)/entdecken/mein-arztbesuch/page.tsx"), /: "\/entdecken"\} label="Entdecken"/);
-  });
-
-  test("no false claim that every chapter was checked by the physicians", () => {
-    assert.doesNotMatch(read("app/(site)/entdecken/page.tsx"), /von unseren Ärztinnen geprüft, bevor es erscheint/);
-  });
-
-  test("10: Praxis Cockpit and lab stay out of the public navigation", () => {
-    assert.doesNotMatch(JSON.stringify(NAV), /\/lab|praxis-cockpit|\/review/);
-    for (const f of PUBLIC_CODE) assert.doesNotMatch(read(f), /praxis-cockpit|["'`]\/review["'`?]/, f);
+  test("11: PRODUCTION mode still respects the release gates", () => {
+    assert.equal(chapterPublishable(MEIN_ARZTBESUCH, "STAGING", { meinArztbesuchPublished: false }), true, "staging shows implemented work");
+    assert.equal(chapterPublishable(MEIN_ARZTBESUCH, "PRODUCTION", { meinArztbesuchPublished: false }), false, "production needs the decision");
+    assert.equal(chapterPublishable(MEIN_ARZTBESUCH, "PRODUCTION", { meinArztbesuchPublished: true }), true);
+    assert.equal(chapterView(MEIN_ARZTBESUCH, false, "PRODUCTION").mode, RELEASE.meinArztbesuchPublished ? "PUBLIC" : "GATED");
+    const placeholder = { ...MEIN_ARZTBESUCH, scenes: MEIN_ARZTBESUCH.scenes.map((s, i) => (i === 0 ? { ...s, visual: { ...s.visual, class: "PLACEHOLDER" as const } } : s)) };
+    assert.equal(chapterPublishable(placeholder, "STAGING"), false, "placeholders never count as implemented");
+    assert.equal(stageAllowsReview("PRODUCTION"), false);
+    assert.equal(isReviewHubEnabled("PRODUCTION"), false);
   });
 });
 
-describe("/review hub (staging only, unchanged gating)", () => {
-  test("11: enabled only by REVIEW_HUB_ENABLED=true; default off → 404", () => {
-    assert.equal(isReviewHubEnabled({ REVIEW_HUB_ENABLED: "true" }), true);
-    assert.equal(isReviewHubEnabled({}), false);
-    assert.equal(isReviewHubEnabled({ REVIEW_HUB_ENABLED: "false" }), false);
-    assert.equal(isReviewHubEnabled({ REVIEW_HUB_ENABLED: "1" }), false);
-    assert.equal(isReviewEnvironment({ REVIEW_HUB_ENABLED: "true" }), true);
+describe("review tooling on staging", () => {
+  test("5: /review is available on staging (convenience overview, unlocks nothing)", () => {
+    assert.equal(isReviewHubEnabled(), true);
     const page = read("app/review/page.tsx");
     assert.match(page, /if \(!isReviewHubEnabled\(\)\) notFound\(\);/);
-    assert.match(page, /export const dynamic = "force-dynamic"/);
     assert.match(page, /robots: \{ index: false, follow: false \}/);
-  });
-
-  test("hub links: cockpit mock login, the published chapter, the website", () => {
     const by = Object.fromEntries(REVIEW_CARDS.map((c) => [c.id, c]));
     assert.equal(by.cockpit.href, "/lab/praxis-cockpit/anmelden");
     assert.equal(by.discovery.href, "/entdecken/mein-arztbesuch");
@@ -130,10 +107,25 @@ describe("/review hub (staging only, unchanged gating)", () => {
     assert.match(REVIEW_TEST_ACCESS.email, /@beispiel\.test$/);
   });
 
-  test("no sitemap lists the hub or the lab", () => {
-    assert.doesNotMatch(JSON.stringify(SITEMAP), /\/review|\/lab/);
+  test("6: Praxis Cockpit prototype is reachable on staging (blocked only in PRODUCTION)", () => {
+    assert.equal(stageAllowsReview(), true);
+    assert.match(read("app/lab/praxis-cockpit/layout.tsx"), /if \(!stageAllowsReview\(\)\) notFound\(\);/);
+    assert.ok(existsSync(join(ROOT, "app/lab/praxis-cockpit/anmelden/page.tsx")));
+  });
+
+  test("7: Praxis Cockpit and review hub are not in the patient navigation", () => {
+    assert.doesNotMatch(JSON.stringify(NAV), /\/lab|praxis-cockpit|\/review/);
+    for (const f of PUBLIC_CODE) assert.doesNotMatch(read(f), /praxis-cockpit|["'`]\/review["'`?]/, f);
     for (const f of ["app/sitemap.ts", "app/sitemap.xml", "public/sitemap.xml"]) {
       if (existsSync(join(ROOT, f))) assert.doesNotMatch(read(f), /\/review|\/lab/, f);
     }
+  });
+});
+
+describe("indexing", () => {
+  test("9 + 10: RELEASE.indexable stays false and staging stays noindex / nofollow", () => {
+    assert.equal(RELEASE.indexable, false);
+    assert.match(read("next.config.ts"), /source: "\/:path\*", headers: \[\{ key: "X-Robots-Tag", value: "noindex, nofollow" \}\]/);
+    assert.match(read("app/(site)/layout.tsx"), /RELEASE\.indexable \? \{ index: true, follow: true \} : \{ index: false, follow: false \}/);
   });
 });

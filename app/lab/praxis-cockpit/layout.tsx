@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { stageAllowsReview } from "@/content/release";
 import "@/design-system/tokens.css";
 import "@/design-system/base.css";
 import "@/site/site-tokens.css";
@@ -13,6 +15,8 @@ export const metadata: Metadata = {
 };
 
 export default function CockpitLayout({ children }: { children: React.ReactNode }) {
+  // Staff prototype: reachable on STAGING for testing, never part of the patient navigation.
+  if (!stageAllowsReview()) notFound();
   return (
     <div className="ds-root">
       <CockpitProvider>

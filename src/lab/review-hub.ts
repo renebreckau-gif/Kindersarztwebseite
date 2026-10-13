@@ -1,11 +1,9 @@
-// Staging review hub (/review): one entry point for reviewers. Server-side switch only —
-// never relies on robots.txt or obscurity. Default OFF; the final production deployment
-// simply does not set the flag, and /review answers 404.
+// Review hub (/review): a convenience overview for reviewers — it unlocks nothing. Available
+// while SITE_STAGE is "STAGING" (src/content/release.ts); in PRODUCTION /review answers 404.
 
-import { isReviewEnvironment } from "../content/environment.ts";
+import { stageAllowsReview, type SiteStage } from "../content/release.ts";
 
-/** `REVIEW_HUB_ENABLED=true` (exact, server-side env) enables the hub; anything else disables it. */
-export const isReviewHubEnabled = isReviewEnvironment;
+export const isReviewHubEnabled = (stage?: SiteStage) => stageAllowsReview(stage);
 
 /** Mock test account shown on the hub (lab prototype only, no real account). */
 export const REVIEW_TEST_ACCESS = { email: "team@beispiel.test", password: "test1234" } as const;

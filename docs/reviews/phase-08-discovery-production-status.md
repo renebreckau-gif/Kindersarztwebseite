@@ -52,7 +52,7 @@ The complete chapter (six scenes, final images in `public/discovery/`, all track
 
 - `/entdecken/mein-arztbesuch?vorschau=freigabe`
 - `/entdecken?vorschau=freigabe` → "Mein Arztbesuch"
-- via the review hub `/review`, if `REVIEW_HUB_ENABLED=true` is set
+- via the review hub `/review` (since the deployment-model rule: always on STAGING, no environment variable)
 
 *(Superseded on 2026-10-13, see "Publication" below.)* At that time the normal route still showed "In Vorbereitung". This was review availability only, **not** a publication approval: `RELEASE.meinArztbesuchApproved = false` and `RELEASE.indexable = false` are unchanged, and all formal approvals (practice, content, physician 03–05, AI-child decision) remain open without names or dates.
 
@@ -72,3 +72,7 @@ The complete chapter (six scenes, final images in `public/discovery/`, all track
 - **Formal review metadata remains historically truthful.** If approvals are given later, they are recorded with real names and dates. Publication does not depend on them.
 - **Global indexing is unchanged:** `RELEASE.indexable = false`; the site is still `noindex`.
 - **Wording corrected:** the `/entdecken` intro no longer says "Alles hier wird von unseren Ärztinnen geprüft, bevor es erscheint", because that is not true for this chapter yet.
+
+## Deployment model (2026-10-13)
+
+The current Vercel deployment is **STAGING** (`SITE_STAGE` in `src/content/release.ts`, [deployment-model.md](../architecture/deployment-model.md)). Mein Arztbesuch is visible there on the normal routes. No `?vorschau=freigabe` and no environment variable are needed; `REVIEW_HUB_ENABLED` was removed. In a future PRODUCTION stage the chapter stays visible because of the explicit publication decision (`RELEASE.meinArztbesuchPublished = true`). Approval records are unchanged and open.

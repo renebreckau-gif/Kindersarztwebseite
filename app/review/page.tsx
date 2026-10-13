@@ -6,8 +6,7 @@ import "@/design-system/base.css";
 import s from "./review.module.css";
 import { REVIEW_CARDS, REVIEW_TEST_ACCESS, isReviewHubEnabled } from "@/lab/review-hub";
 
-// Staging-only review hub. Evaluated per request so the server-side flag decides at runtime.
-export const dynamic = "force-dynamic";
+// Review hub: convenience overview on STAGING (SITE_STAGE); 404 in PRODUCTION.
 
 export const metadata: Metadata = {
   title: "Projekt-Review",

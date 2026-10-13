@@ -12,7 +12,7 @@ Dieses Blatt ist leer. Bitte erst während eines echten Tests ausfüllen. Keine 
 
 Die Testperson bekommt **nur**:
 
-- die Adresse des Prototyps: Vercel-URL des Prototyps, Pfad `/lab/praxis-cockpit/anmelden` (wird vor dem Test hier eingetragen: ……)
+- die Adresse des Prototyps auf der Staging-Website (Vercel), Pfad `/lab/praxis-cockpit/anmelden`; ohne besondere Einstellung erreichbar, auch über `/review` (Vercel-Adresse wird vor dem Test hier eingetragen: ……)
 - die Testzugangsdaten: `team@beispiel.test` / `test1234`
 - die Aufgaben A–L, einzeln vorgelesen
 

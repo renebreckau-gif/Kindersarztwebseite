@@ -5,17 +5,19 @@ Date: 2026-10-13
 Baseline: `e589478`
 Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms-comparison.md) · [content-model.md](content-model.md) · [content-governance.md](content-governance.md) · [practice-pulse-logic.md](practice-pulse-logic.md) · [privacy-model.md](privacy-model.md) · [phase-04-decisions.md](phase-04-decisions.md)
 
+> **GLOBAL PROJECT RULE — deployment model:** the current Vercel deployment is the project's **STAGING** environment, not the live practice website. Implemented functionality is normally visible there for review; formal publication gates are kept for the future production launch and do not hide staging content. Single switch: `SITE_STAGE` in `src/content/release.ts`. See [deployment-model.md](deployment-model.md).
+
 ## Current status (2026-10-13, after Phase 09.1.4)
 
 | | |
 |---|---|
-| **Prototype** | Implemented through Phase 09.1.4 and locked for staff usability testing: `/lab/praxis-cockpit`. Lab only, `noindex`, not linked, mock data only. |
+| **Prototype** | Implemented through Phase 09.1.4 and locked for staff usability testing: `/lab/praxis-cockpit`. Directly reachable on STAGING; not in the patient navigation; `noindex`; mock data only. Blocked (404) once `SITE_STAGE = "PRODUCTION"`. |
 | **Production backend** | Not implemented. |
 | **Payload** | Not installed. |
 | **Database / persistence** | None. The prototype state lives in memory; a reload resets it. |
 | **Real authentication** | Not implemented. The prototype has a mock login: test accounts, and `sessionStorage` keeps only the mock role. |
 | **Public website** | Uses the same Praxis Puls engine. Changed only through the engine alignment of 09.1.1. Release gates are unchanged. |
-| **Staging review hub** | `/review` with links to the cockpit prototype, the Mein Arztbesuch review and the staging website. Only active with the server-side flag `REVIEW_HUB_ENABLED=true`; otherwise 404. |
+| **Review hub** | `/review`: a convenience overview with links to the website, the cockpit prototype and Mein Arztbesuch. Available automatically while `SITE_STAGE = "STAGING"`; 404 in PRODUCTION. It unlocks nothing. |
 | **Mein Arztbesuch** | Published as normal website content since 2026-10-13 (`RELEASE.meinArztbesuchPublished = true`). Formal approvals still open (`meinArztbesuchApproved = false`, records truthful); site stays `noindex` (`indexable = false`). |
 | **Next phase** | 09.2 (data layer) starts only after the prototype test results are reviewed. |
 
@@ -748,17 +750,15 @@ The prototype logic lives in `src/lab/cockpit/`. Nothing is moved now. Mock logi
 
 The prototype is complete for the staff usability test (tasks A–L in [praxis-cockpit-prototype-review.md](../reviews/praxis-cockpit-prototype-review.md)). No further prototype features are planned. Findings from the test feed into 09.2–09.5.
 
-### Staging review hub (`/review`)
+### Review hub (`/review`)
 
-- **Purpose:** one URL for reviewers. It has three cards:
+*(Revised 2026-10-13 by the deployment-model rule, [deployment-model.md](deployment-model.md).)*
+
+- **Purpose:** one convenience URL for reviewers. It has three cards:
   - Praxis Cockpit: mock login, with the test account shown as "nur Testdaten"
-  - Mein Arztbesuch: `?vorschau=freigabe`, status "Freigabe ausstehend"
-  - the normal staging website
-- **Switch:** server-side environment variable `REVIEW_HUB_ENABLED`.
-  - Only the exact value `true` enables the hub; the default is off.
-  - When off, `/review` answers `notFound()` (404).
-  - The page is rendered per request (`force-dynamic`), so the switch applies at runtime without a rebuild.
-- **Enable on staging:** set `REVIEW_HUB_ENABLED=true` for the staging/preview environment in the Vercel project settings (not done from this repo). For the final production deployment the variable must not be set.
-- **ENTDECKEN does not depend on this switch** (since 2026-10-13). `REVIEW_HUB_ENABLED` controls the review hub only. Mein Arztbesuch is published through `RELEASE.meinArztbesuchPublished`.
-- **Exposure:** no public navigation link, no sitemap entry, `noindex, nofollow` as both meta tag and header. It does not rely on robots.txt or obscurity.
-- **Go-live note:** the hub can be switched off, but the lab routes themselves (`/lab/*`, including the cockpit prototype) are still reachable by URL. Before the final production launch they must be excluded or gated as well (separate decision; not changed in this phase).
+  - Mein Arztbesuch: the normal route
+  - the website
+- **It unlocks nothing.** Every linked area is reachable without it.
+- **Availability:** automatic while `SITE_STAGE = "STAGING"`. In PRODUCTION `/review` answers 404. The former `REVIEW_HUB_ENABLED` environment variable was removed, so no Vercel configuration is needed.
+- **Exposure:** not in the patient navigation, no sitemap entry, `noindex, nofollow` as both meta tag and header.
+- **Cockpit prototype:** directly reachable on STAGING. Its layout answers 404 once `SITE_STAGE = "PRODUCTION"`. The other `/lab` routes still need a decision before launch.

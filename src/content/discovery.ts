@@ -10,7 +10,7 @@
 import type { FactVerification } from "../domain/verification.ts";
 import type { MediaClass } from "../domain/content-types.ts";
 import type { LocalDate } from "../domain/time.ts";
-import { RELEASE } from "./release.ts";
+import { RELEASE, SITE_STAGE, type SiteStage } from "./release.ts";
 
 /**
  * Formal approvals are still open (docs/reviews/discovery-approval-package.md). The chapter
@@ -171,14 +171,17 @@ export const CHAPTERS: Chapter[] = [
 const ok = (v?: FactVerification) => v?.status === "VERIFIED_CURRENT";
 
 /**
- * Visibility on the normal website. Driven by the explicit publication decision
- * (RELEASE.meinArztbesuchPublished) — NOT by faking approval records. Final (non-placeholder)
- * images remain a hard technical requirement. The approval records stay as they are
- * (see approvalsComplete) and are reported truthfully in the docs.
+ * Visibility on the website.
+ * STAGING    — implemented chapters (final images present) are shown for review.
+ * PRODUCTION — the explicit publication decision is required (RELEASE.meinArztbesuchPublished).
+ * Never decided by approval records (see approvalsComplete) and never by faking them. Final
+ * (non-placeholder) production images are a hard technical requirement in both stages.
  */
-export function chapterPublishable(c: Chapter): boolean {
-  if (c.id !== "mein-arztbesuch" || !RELEASE.meinArztbesuchPublished) return false;
-  return c.scenes.length > 0 && c.scenes.every((s) => s.visual.class !== "PLACEHOLDER" && Boolean(s.visual.image));
+export function chapterPublishable(c: Chapter, stage: SiteStage = SITE_STAGE, release: { meinArztbesuchPublished: boolean } = RELEASE): boolean {
+  const implemented = c.scenes.length > 0 && c.scenes.every((s) => s.visual.class !== "PLACEHOLDER" && Boolean(s.visual.image));
+  if (!implemented) return false;
+  if (stage === "STAGING") return true;
+  return c.id === "mein-arztbesuch" && release.meinArztbesuchPublished;
 }
 
 /** Formal approval status (provenance) — independent of publication. */
@@ -189,8 +192,8 @@ export function approvalsComplete(c: Chapter): boolean {
 export type ChapterView = { mode: "PUBLIC" | "PREVIEW"; chapter: Chapter } | { mode: "GATED"; chapter: Omit<Chapter, "scenes"> };
 
 /** What a visitor may see. Preview (?vorschau=freigabe) shows drafts, clearly labelled. */
-export function chapterView(c: Chapter, preview: boolean): ChapterView {
-  if (chapterPublishable(c)) return { mode: "PUBLIC", chapter: c };
+export function chapterView(c: Chapter, preview: boolean, stage: SiteStage = SITE_STAGE): ChapterView {
+  if (chapterPublishable(c, stage)) return { mode: "PUBLIC", chapter: c };
   if (preview) return { mode: "PREVIEW", chapter: c };
   const { scenes: _scenes, ...meta } = c;
   return { mode: "GATED", chapter: meta };
@@ -198,7 +201,8 @@ export function chapterView(c: Chapter, preview: boolean): ChapterView {
 
 /**
  * Review mode for chapters that are not published yet: only the explicit ?vorschau=freigabe
- * link. Deployment or review-hub switches never publish content.
+ * link (compatibility; on STAGING implemented chapters are visible anyway). Environment
+ * variables never publish content — SITE_STAGE and RELEASE do.
  */
 export type ReviewMode = "QUERY" | null;
 

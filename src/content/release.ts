@@ -1,6 +1,24 @@
 // Release gates: decisions that are not facts but launch conditions
 // (docs/research/project-blockers.md). One place, so launch is a reviewed change.
 
+/**
+ * GLOBAL PROJECT RULE — deployment stage (docs/architecture/deployment-model.md).
+ *
+ * The current Vercel deployment is the project's STAGING / review environment, NOT the live
+ * practice website. On STAGING, implemented work is directly visible for review (no special
+ * query, no hidden URL, no Vercel environment variable). The content-specific gates in RELEASE
+ * become authoritative only when SITE_STAGE is switched to "PRODUCTION" in a deliberate launch
+ * step. Deliberately NOT derived from Vercel's environment name: Vercel calls the main-branch deployment
+ * "production" although the project still uses it as staging.
+ *
+ * Staging visibility is never approval provenance: approval records stay truthful.
+ */
+export type SiteStage = "STAGING" | "PRODUCTION";
+export const SITE_STAGE: SiteStage = "STAGING";
+
+/** Review tooling (the /review hub and the cockpit prototype under /lab) is reachable on STAGING only. */
+export const stageAllowsReview = (stage: SiteStage = SITE_STAGE) => stage === "STAGING";
+
 export const RELEASE = {
   /**
    * LB-00 — the practice has signed off the opening hours for PRAXIS PULS.
