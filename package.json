@@ -10,11 +10,14 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "lab:capture": "node scripts/lab-capture.mjs",
-    "test": "node --test \"src/domain/__tests__/*.test.ts\" \"src/content/__tests__/*.test.ts\""
+    "test": "node --test \"src/domain/__tests__/*.test.ts\" \"src/content/__tests__/*.test.ts\" \"src/data/__tests__/*.test.ts\" \"src/backend/__tests__/*.test.ts\""
   },
   "dependencies": {
+    "@payloadcms/db-postgres": "3.90.2",
     "@react-three/fiber": "9.8.1",
+    "graphql": "16.14.2",
     "next": "16.4.0",
+    "payload": "3.90.2",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "three": "0.186.1"

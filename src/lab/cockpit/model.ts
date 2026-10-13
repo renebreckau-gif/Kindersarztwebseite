@@ -16,7 +16,11 @@ import type {
 } from "../../domain/content-types.ts";
 import { evaluateFreshness, type FactVerification } from "../../domain/verification.ts";
 import { decideAnnouncement } from "../../domain/publication.ts";
-import { addDays, compareDates, formatMinutes, isLocalDate, parseTime, weekdayOf, zonedToInstant, type IsoWeekday, type LocalDate, type LocalTime } from "../../domain/time.ts";
+import { addDays, compareDates, parseTime, weekdayOf, zonedToInstant, type IsoWeekday, type LocalDate, type LocalTime } from "../../domain/time.ts";
+// Shared operational logic (Phase 09.2): the lab and the server-side publish flow use the same functions.
+import * as ops from "../../domain/operations.ts";
+import { blocks, cutAt, earlyCloseEffect, lastEnd, uncoveredDays, type EarlyCloseEffect, type PeriodInput, type Segment } from "../../domain/operations.ts";
+export { blocks, cutAt, earlyCloseEffect, lastEnd, uncoveredDays, type EarlyCloseEffect, type PeriodInput, type Segment };
 
 // ------------------------------------------------------------------ clock & people
 
@@ -261,30 +265,8 @@ export const nowStatus = (d: CockpitData, today: LocalDate = MOCK_TODAY, now: Lo
 
 // ------------------------------------------------------------------ day plans (display only)
 
-export interface Segment {
-  start: LocalTime;
-  end: LocalTime;
-  type: ConsultationTypeCode;
-}
-
-/** Weekly rules for a date as non-overlapping segments (acute cut out of the general block). */
-export function rulesSegments(date: LocalDate): Segment[] {
-  const wd = weekdayOf(date);
-  const rules = MOCK_RULES.filter((r) => r.weekday === wd);
-  const acute = rules.filter((r) => r.consultationType === "ACUTE");
-  const out: Segment[] = [];
-  for (const g of rules.filter((r) => r.consultationType !== "ACUTE")) {
-    let cursor = parseTime(g.start);
-    const end = parseTime(g.end);
-    for (const a of acute.filter((x) => parseTime(x.start) >= cursor && parseTime(x.end) <= end).sort((x, y) => parseTime(x.start) - parseTime(y.start))) {
-      if (parseTime(a.start) > cursor) out.push({ start: formatMinutes(cursor), end: a.start, type: g.consultationType });
-      out.push({ start: a.start, end: a.end, type: "ACUTE" });
-      cursor = parseTime(a.end);
-    }
-    if (cursor < end) out.push({ start: formatMinutes(cursor), end: g.end, type: g.consultationType });
-  }
-  return out.sort((a, b) => parseTime(a.start) - parseTime(b.start));
-}
+/** Weekly mock rules for a date as non-overlapping segments (domain logic, mock rules). */
+export const rulesSegments = (date: LocalDate): Segment[] => ops.rulesSegments(MOCK_RULES, date);
 
 const covers = (x: { startDate: LocalDate; endDate: LocalDate }, date: LocalDate) => compareDates(x.startDate, date) <= 0 && compareDates(date, x.endDate) <= 0;
 
@@ -297,58 +279,12 @@ export function plannedSegments(d: CockpitData, date: LocalDate): Segment[] {
   return rulesSegments(date);
 }
 
-/** Merge touching segments into opening blocks ("08:00–12:00"). */
-export function blocks(segs: Segment[]): { start: LocalTime; end: LocalTime }[] {
-  const out: { start: LocalTime; end: LocalTime }[] = [];
-  for (const s of [...segs].sort((a, b) => parseTime(a.start) - parseTime(b.start))) {
-    const last = out.at(-1);
-    if (last && last.end === s.start) last.end = s.end;
-    else out.push({ start: s.start, end: s.end });
-  }
-  return out;
-}
-
-export function cutAt(segs: Segment[], time: LocalTime): Segment[] {
-  const t = parseTime(time);
-  return segs.filter((s) => parseTime(s.start) < t).map((s) => ({ ...s, end: parseTime(s.end) > t ? time : s.end }));
-}
-
-export interface EarlyCloseEffect {
-  /** INSIDE: time lies in an opening block · GAP: practice is already regularly closed then
-   *  (e.g. lunch break) · TOO_LATE: after the last block · TOO_EARLY: nothing would remain. */
-  kind: "INSIDE" | "GAP" | "TOO_LATE" | "TOO_EARLY";
-  segments: Segment[];
-  lastEnd?: LocalTime;
-  /** Whole opening blocks that disappear (e.g. 14:00–16:00). */
-  removed: { start: LocalTime; end: LocalTime }[];
-}
-
-/**
- * Change set for "Heute früher schließen" (cockpit responsibility: what the request does to
- * today's intervals). Whether the practice is open is decided by the engine, not here.
- */
-export function earlyCloseEffect(segs: Segment[], time: LocalTime): EarlyCloseEffect {
-  const bl = blocks(segs);
-  const t = parseTime(time);
-  if (!bl.length || t >= parseTime(bl[bl.length - 1].end)) return { kind: "TOO_LATE", segments: segs, lastEnd: lastEnd(segs), removed: [] };
-  if (t <= parseTime(bl[0].start)) return { kind: "TOO_EARLY", segments: [], removed: bl };
-  const cut = cutAt(segs, time);
-  return {
-    kind: bl.some((b) => parseTime(b.start) < t && t < parseTime(b.end)) ? "INSIDE" : "GAP",
-    segments: cut,
-    lastEnd: lastEnd(cut),
-    removed: bl.filter((b) => parseTime(b.start) >= t),
-  };
-}
-
 /** Exact publish wording: never "um 13:00 schließen" when 13:00 is already a closed gap. */
 export function earlyCloseLabel(e: EarlyCloseEffect, time: LocalTime): string {
   if (e.kind !== "GAP") return `Heute um ${time} Uhr schließen`;
   const afternoon = e.removed.every((b) => parseTime(b.start) >= parseTime("12:00"));
   return afternoon ? "Nachmittagssprechzeit heute entfallen lassen" : `Sprechzeit ${e.removed.map((b) => `${b.start}–${b.end}`).join(", ")} Uhr heute entfallen lassen`;
 }
-
-export const lastEnd = (segs: Segment[]) => (segs.length ? segs.reduce((m, s) => (parseTime(s.end) > parseTime(m) ? s.end : m), segs[0].end) : undefined);
 
 // ------------------------------------------------------------------ change check ("no new UNKNOWN")
 
@@ -387,15 +323,8 @@ function problemFor(reason: ReasonCode, date: LocalDate, relatedIds: string[], t
  * Uses the engine for both sides; no own conflict rules.
  */
 export function checkChange(base: CockpitData, draft: CockpitData, from: LocalDate, to: LocalDate = from, today: LocalDate = MOCK_TODAY): Problem | null {
-  for (let date = from; compareDates(date, to) <= 0; date = addDays(date, 1)) {
-    const before = statusAt(base, date, "12:00");
-    const after = statusAt(draft, date, "12:00");
-    if (after.status === "UNKNOWN" && before.status !== "UNKNOWN") {
-      const own = new Set([...draft.exceptions, ...draft.closures].map((x) => x.id).filter((id) => ![...base.exceptions, ...base.closures].some((b) => b.id === id)));
-      return problemFor(after.reason, date, after.sourceRecordIds.filter((id) => !own.has(id)), today);
-    }
-  }
-  return null;
+  const hit = ops.introducedUnknown(pulsDataOf(base), pulsDataOf(draft), from, to);
+  return hit ? problemFor(hit.reason, hit.date, hit.relatedIds, today) : null;
 }
 
 // ------------------------------------------------------------------ directory
@@ -452,19 +381,14 @@ export function replacementSummary(d: CockpitData, c: Closure): string {
 // Only current records are offered for editing; expired ones belong to the history.
 
 /** Today's published special hours (single day) — the record "Bestehende Änderung anpassen" edits. */
-export function existingTodayChange(d: CockpitData, today: LocalDate): OpeningHourException | undefined {
-  return d.exceptions.find((x) => x.kind === "SPECIAL_HOURS" && x.startDate === today && x.endDate === today);
-}
+export const existingTodayChange = (d: CockpitData, today: LocalDate): OpeningHourException | undefined => ops.findDaySpecialHours(d.exceptions, today);
 
 /** Today's published short-notice closure ("Heute geschlossen"). */
-export function existingTodayClosure(d: CockpitData, today: LocalDate): Closure | undefined {
-  return d.closures.find((c) => c.kind === "SHORT_NOTICE" && covers(c, today));
-}
+export const existingTodayClosure = (d: CockpitData, today: LocalDate): Closure | undefined => ops.findShortNoticeClosure(d.closures, today);
 
 /** A current or upcoming vacation overlapping [from, to] — likely the one the user wants to edit. */
-export function overlappingVacation(d: CockpitData, from: LocalDate, to: LocalDate, today: LocalDate, excludeId?: string): Closure | undefined {
-  return d.closures.find((c) => c.kind === "VACATION" && c.id !== excludeId && compareDates(c.endDate, today) >= 0 && compareDates(c.startDate, to) <= 0 && compareDates(from, c.endDate) <= 0);
-}
+export const overlappingVacation = (d: CockpitData, from: LocalDate, to: LocalDate, today: LocalDate, excludeId?: string): Closure | undefined =>
+  ops.findOverlappingVacation(d.closures, from, to, today, excludeId);
 
 /** Published announcements that are current or upcoming (editable); expired ones are history. */
 export function editableAnnouncements(d: CockpitData, today: LocalDate): Announcement[] {
@@ -503,81 +427,31 @@ export function earlyCloseDraft(
   return { effect, draft: withException(base, record) };
 }
 
-export interface PeriodInput {
-  from: string;
-  to: string;
-  practice: string;
-}
-export interface PeriodIssue {
-  index: number;
-  kind: "invalid" | "outside" | "beyond" | "overlap";
+export interface PeriodIssue extends ops.PeriodIssue {
+  /** German wording for the lab UI (the domain returns only the issue kind). */
   text: string;
-  /** Suggested correction for "beyond" (clamp to the vacation). */
-  fix?: { from: LocalDate; to: LocalDate };
 }
-export interface CoverageCheck {
+export interface CoverageCheck extends Omit<ops.CoverageCheck, "issues"> {
   issues: PeriodIssue[];
-  /** Vacation days without a replacement. */
-  gaps: { from: LocalDate; to: LocalDate }[];
-  /** Gaps on days that were NOT part of the previous vacation (extension). */
-  newGaps: { from: LocalDate; to: LocalDate }[];
 }
 
-/** Uncovered days of [from, to] given replacement periods (only valid periods count). */
-export function uncoveredDays(from: LocalDate, to: LocalDate, periods: { from: string; to: string }[]): { from: LocalDate; to: LocalDate }[] {
-  if (!isLocalDate(from) || !isLocalDate(to) || compareDates(to, from) < 0) return [];
-  const out: { from: LocalDate; to: LocalDate }[] = [];
-  let start: LocalDate | null = null;
-  for (let d = from; compareDates(d, to) <= 0; d = addDays(d, 1)) {
-    const covered = periods.some((p) => isLocalDate(p.from) && isLocalDate(p.to) && compareDates(p.from, d) <= 0 && compareDates(d, p.to) <= 0);
-    if (!covered && start === null) start = d;
-    if (covered && start !== null) {
-      out.push({ from: start, to: addDays(d, -1) });
-      start = null;
-    }
+function periodText(issue: ops.PeriodIssue, from: LocalDate, to: LocalDate): string {
+  switch (issue.kind) {
+    case "invalid":
+      return "Bitte einen gültigen Zeitraum wählen.";
+    case "outside":
+      return `Dieser Zeitraum liegt außerhalb des Urlaubs (${dateRange(from, to)}). Bitte entfernen oder anpassen.`;
+    case "beyond":
+      return issue.side === "end" ? `Diese Vertretung reicht über das Urlaubsende (${dayMonth(to)}) hinaus. Bitte das Ende anpassen.` : `Diese Vertretung beginnt vor dem Urlaub (${dayMonth(from)}). Bitte den Beginn anpassen.`;
+    case "overlap":
+      return "Dieser Zeitraum überschneidet sich mit einer anderen Vertretung.";
   }
-  if (start !== null) out.push({ from: start, to });
-  return out;
 }
 
-/**
- * Revalidates replacement periods against a (possibly edited) vacation:
- * inside → keep · beyond the new range → correction required · overlap → blocked ·
- * new vacation days without replacement → warning (never stretched silently).
- */
+/** Revalidates replacement periods against a (possibly edited) vacation (domain validation + lab wording). */
 export function checkReplacementPeriods(from: LocalDate, to: LocalDate, periods: PeriodInput[], previous?: { from: LocalDate; to: LocalDate }): CoverageCheck {
-  const issues: PeriodIssue[] = [];
-  const range = dateRange(from, to);
-  periods.forEach((p, i) => {
-    if (!p.from && !p.to) return;
-    if (!isLocalDate(p.from) || !isLocalDate(p.to) || compareDates(p.to, p.from) < 0) {
-      issues.push({ index: i, kind: "invalid", text: "Bitte einen gültigen Zeitraum wählen." });
-      return;
-    }
-    if (compareDates(p.from, to) > 0 || compareDates(p.to, from) < 0) {
-      issues.push({ index: i, kind: "outside", text: `Dieser Zeitraum liegt außerhalb des Urlaubs (${range}). Bitte entfernen oder anpassen.` });
-      return;
-    }
-    if (compareDates(p.to, to) > 0 || compareDates(p.from, from) < 0) {
-      const fix = { from: compareDates(p.from, from) < 0 ? from : p.from, to: compareDates(p.to, to) > 0 ? to : p.to };
-      issues.push({
-        index: i,
-        kind: "beyond",
-        text: compareDates(p.to, to) > 0 ? `Diese Vertretung reicht über das Urlaubsende (${dayMonth(to)}) hinaus. Bitte das Ende anpassen.` : `Diese Vertretung beginnt vor dem Urlaub (${dayMonth(from)}). Bitte den Beginn anpassen.`,
-        fix,
-      });
-      return;
-    }
-    if (periods.some((q, j) => j !== i && isLocalDate(q.from) && isLocalDate(q.to) && compareDates(p.from, q.to) <= 0 && compareDates(q.from, p.to) <= 0)) {
-      issues.push({ index: i, kind: "overlap", text: "Dieser Zeitraum überschneidet sich mit einer anderen Vertretung." });
-    }
-  });
-  const valid = periods.filter((_, i) => !issues.some((x) => x.index === i && x.kind !== "overlap"));
-  const gaps = uncoveredDays(from, to, valid);
-  const newGaps = previous
-    ? gaps.flatMap((g) => uncoveredDays(g.from, g.to, [{ from: previous.from, to: previous.to }]))
-    : [];
-  return { issues, gaps, newGaps };
+  const r = ops.validateReplacementPeriods(from, to, periods, previous);
+  return { ...r, issues: r.issues.map((i) => ({ ...i, text: periodText(i, from, to) })) };
 }
 
 // ------------------------------------------------------------------ live website preview + automatic end

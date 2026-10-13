@@ -7,3 +7,5 @@ export * from "./source.ts";
 export type * from "./content-types.ts";
 export * from "./practice-status.ts";
 export * from "./publication.ts";
+export * from "./operations.ts";
+export * from "./governance.ts";

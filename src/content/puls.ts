@@ -5,7 +5,9 @@
 import { getPracticeStatus, type PracticeStatusResult } from "../domain/practice-status.ts";
 import { zonedToInstant } from "../domain/time.ts";
 import type { DemoPuls } from "../design-system/demo-fixtures.ts";
-import { PULS_DATA, CONSULTATION_TYPES } from "./schedule.ts";
+import type { PulsData } from "../domain/practice-status.ts";
+import { CONSULTATION_TYPES } from "./schedule.ts";
+import { staticPulsData } from "../data/static-repository.ts";
 import { RELEASE } from "./release.ts";
 import { UNCONFIRMED } from "./practice.ts";
 
@@ -33,13 +35,18 @@ function reviewInstant(zeit: string): Date {
 }
 
 /** `now` is injectable for tests only; pages never pass it (live = real time). */
-export function resolvePuls(params: { vorschau?: string | string[]; zeit?: string | string[] } = {}, now: Date = new Date()): PulsView {
+/** `source` is the repository snapshot (static in 09.2; see docs/architecture/backend-foundation.md). */
+export function resolvePuls(
+  params: { vorschau?: string | string[]; zeit?: string | string[] } = {},
+  now: Date = new Date(),
+  source: PulsData = staticPulsData(),
+): PulsView {
   const preview = params.vorschau === "freigabe";
   const at = preview && typeof params.zeit === "string" ? reviewInstant(params.zeit) : now;
   // Until LB-00 the schedule may be displayed but not used for a live state: the engine
   // receives it as unconfirmed and resolves to UNKNOWN by its own rules.
   const usable = RELEASE.pulsPracticeSignOff || preview;
-  const data = usable ? PULS_DATA : { ...PULS_DATA, schedule: { ...PULS_DATA.schedule!, verification: UNCONFIRMED } };
+  const data = usable || !source.schedule ? source : { ...source, schedule: { ...source.schedule, verification: UNCONFIRMED } };
   const result = getPracticeStatus(at, data);
   const [secondary] = result.secondaryActions;
   // Current consultation type (verified data, e.g. F41 "bitte nur gesunde Kinder") — the engine

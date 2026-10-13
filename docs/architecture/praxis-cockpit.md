@@ -7,19 +7,19 @@ Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms
 
 > **GLOBAL PROJECT RULE — deployment model:** the current Vercel deployment is the project's **STAGING** environment, not the live practice website. Implemented functionality is normally visible there for review; formal publication gates are kept for the future production launch and do not hide staging content. Single switch: `SITE_STAGE` in `src/content/release.ts`. See [deployment-model.md](deployment-model.md).
 
-## Current status (2026-10-13, after Phase 09.1.4)
+## Current status (2026-10-13, after Phase 09.2)
 
 | | |
 |---|---|
 | **Prototype** | Implemented through Phase 09.1.4 and locked for staff usability testing: `/lab/praxis-cockpit`. Directly reachable on STAGING; not in the patient navigation; `noindex`; mock data only. Blocked (404) once `SITE_STAGE = "PRODUCTION"`. |
-| **Production backend** | Not implemented. |
-| **Payload** | Not installed. |
-| **Database / persistence** | None. The prototype state lives in memory; a reload resets it. |
-| **Real authentication** | Not implemented. The prototype has a mock login: test accounts, and `sessionStorage` keeps only the mock role. |
-| **Public website** | Uses the same Praxis Puls engine. Changed only through the engine alignment of 09.1.1. Release gates are unchanged. |
+| **Production backend** | Foundation only (Phase 09.2): repository layer, shared domain operations, Payload collections, access rules, provenance and audit hooks. See [backend-foundation.md](backend-foundation.md). Not connected to the site. |
+| **Payload** | `payload@3.90.2` + `@payloadcms/db-postgres@3.90.2` installed (compatibility verified, no force flags). Local API only: no admin UI, REST or GraphQL route mounted. |
+| **Database / persistence** | None connected. PostgreSQL adapter configured via `DATABASE_URI` (placeholder in `.env.example`); provider open. The prototype state lives in memory; a reload resets it. |
+| **Real authentication** | Configured in Payload (`staff` auth: lockout, secure cookies, disabled accounts), but not exposed and no accounts exist. The prototype keeps its mock login: test accounts, and `sessionStorage` keeps only the mock role. |
+| **Public website** | Uses the same Praxis Puls engine and reads **static data** through `StaticPracticeRepository` (`DATA_SOURCE = "STATIC"`). Output unchanged (tested). Release gates are unchanged. |
 | **Review hub** | `/review`: a convenience overview with links to the website, the cockpit prototype and Mein Arztbesuch. Available automatically while `SITE_STAGE = "STAGING"`; 404 in PRODUCTION. It unlocks nothing. |
 | **Mein Arztbesuch** | Visible on STAGING for review (`SITE_STAGE`). Not released for production: `meinArztbesuchPublished = false`, formal approvals open (`meinArztbesuchApproved = false`, records truthful); site stays `noindex` (`indexable = false`). |
-| **Next phase** | 09.2 (data layer) starts only after the prototype test results are reviewed. |
+| **Next phase** | 09.3: local database + migrations, ADMIN-only Payload admin route, first account by script, MFA decision, DB integration tests. Not started. |
 
 ### Phase history
 
@@ -31,6 +31,7 @@ Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms
 | 09.1.2 | Mock login, vacation and replacement end to end, website view for parents | `35dc9d2` |
 | 09.1.3 | Live Website-Vorschau (edit left / preview right), automatic expiry, history retention, lab test clock | `ecdd432` |
 | 09.1.4 | Editing existing changes (edit vs. supersede vs. conflict), prototype lock, documentation cleanup; staging review hub and Discovery review availability | `b5466f5` + review hub commit |
+| 09.2 | Backend foundation: repository layer (static authoritative), domain operations extracted, Payload + PostgreSQL adapter, collections, access/provenance/audit, parity tests | this phase's commit |
 
 **How to read this document:** §0–§14 are the Phase 09.0 architecture decision and remain valid unless a later phase note says otherwise. The phase notes at the end record what the prototype changed or proved. Statements that became outdated are marked inline ("since 09.1.x").
 
@@ -512,7 +513,7 @@ Improved from the brief's 09.1–09.9. The changes: a click prototype with staff
 | Phase | Content | Exit criteria |
 |---|---|---|
 | **09.1 Prototype + infrastructure decisions** | Lab click-prototype `/lab/praxis-cockpit` (mock data, "PROTOTYP — keine echten Daten", not linked) for home + 7.1, 7.5, 7.7; walkthrough with 2 staff members. In parallel: choose DB/e-mail/hosting providers, DPAs ⚖, maintenance agreement, confirm Payload ↔ Next.js version compatibility. | Staff feedback recorded; providers and maintainer named; no real data |
-| **09.2 Data layer** | `resolvePuls(data)` refactor (no behaviour change); `src/content/repository.ts` with static-file source + fail-safe dataset; Payload installed with collections mirroring `src/domain` types; seed from the current content files; local + staging DB with synthetic data | All existing tests pass; repository failure → UNKNOWN test; public site unchanged |
+| **09.2 Data layer** *(done; see [backend-foundation.md](backend-foundation.md) — repository in `src/data/`, not `src/content/repository.ts`; no DB connected yet)* | `resolvePuls(data)` refactor (no behaviour change); `src/content/repository.ts` with static-file source + fail-safe dataset; Payload installed with collections mirroring `src/domain` types; seed from the current content files; local + staging DB with synthetic data | All existing tests pass; repository failure → UNKNOWN test; public site unchanged |
 | **09.3 Accounts, roles, audit** | Staff auth collection, invite/reset, lockout, TOTP for ADMIN, `/intern` guard, `audit_events` (append-only), access control per role | Security review of auth; tests for access per role; no production accounts yet |
 | **09.4 Cockpit shell + preview** | `app/(intern)` layout, home (PRAXIS HEUTE, Nächste Termine, Prüfen), `/intern/vorschau` with the engine | 390/768/1440 checks; WCAG 2.2 AA review |
 | **09.5 Today workflows** | 7.1, 7.2, 7.3, 7.4 incl. "no new UNKNOWN" publish check and undo | Engine-based validation tests per conflict reason code |
@@ -762,3 +763,21 @@ The prototype is complete for the staff usability test (tasks A–L in [praxis-c
 - **Availability:** automatic while `SITE_STAGE = "STAGING"`. In PRODUCTION `/review` answers 404. The former `REVIEW_HUB_ENABLED` environment variable was removed, so no Vercel configuration is needed.
 - **Exposure:** not in the patient navigation, no sitemap entry, `noindex, nofollow` as both meta tag and header.
 - **Cockpit prototype:** directly reachable on STAGING. Its layout answers 404 once `SITE_STAGE = "PRODUCTION"`. The other `/lab` routes still need a decision before launch.
+
+---
+
+## Phase 09.2 note: backend foundation (2026-10-13)
+
+Full record: [backend-foundation.md](backend-foundation.md).
+
+- **Domain extraction done.** The candidates marked DOMAIN in the 09.1.4 table now live in `src/domain/operations.ts`:
+  - schedule derivation
+  - change sets and the "no new UNKNOWN" guard
+  - edit / supersede / new / conflict classification
+  - record lookup, expiry, replacement-period validation
+- The lab model delegates to these functions. German wording, the test clock, mock accounts and scenarios stay in `src/lab/cockpit/`.
+- **Governance in code.** `src/domain/governance.ts` holds:
+  - `canConfirm`: STAFF confirms operational records only; medical scope is DOCTOR only; ADMIN gets no bypass
+  - generated provenance
+  - append-only audit events without secrets, and REVERT as a new event
+- **Payload** is the backend framework as decided in §2. It is used only through the Local API until 09.3. Public site, mock login, `SITE_STAGE`, `indexable`, Mein Arztbesuch approvals and Discovery provenance are unchanged.
