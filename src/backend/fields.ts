@@ -3,8 +3,8 @@
 // as "HH:MM" — exactly the domain's LocalDate / LocalTime, so the engine sees no timezone drift.
 
 import type { Field } from "payload";
+import { isLocalDate } from "../domain/time.ts";
 
-const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 export const localDate = (name: string, label: string, required = true): Field => ({
@@ -12,7 +12,8 @@ export const localDate = (name: string, label: string, required = true): Field =
   label,
   type: "text",
   required,
-  validate: (v: unknown) => (!v && !required) || (typeof v === "string" && DATE.test(v)) || "Bitte ein Datum im Format JJJJ-MM-TT angeben.",
+  // Format AND a real calendar day (no "2026-02-30").
+  validate: (v: unknown) => (!v && !required) || (typeof v === "string" && isLocalDate(v)) || "Bitte ein gültiges Datum im Format JJJJ-MM-TT angeben.",
 });
 
 export const localTime = (name: string, label: string): Field => ({

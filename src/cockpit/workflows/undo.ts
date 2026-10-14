@@ -62,8 +62,18 @@ export function businessOf(collection: LifecycleCollection, doc: unknown): strin
   return JSON.stringify(rest);
 }
 
-/** The restored version is re-confirmed NOW by the person undoing (the hook regenerates provenance). */
-const restoredVerification = (today: LocalDate): FactVerification => ({ status: "VERIFIED_CURRENT", lastVerified: today, reviewDue: today, verifiedBy: "Vorschau", sourceIds: ["PRACTICE_COCKPIT"] });
+/**
+ * The restored version is re-confirmed NOW by the person undoing (the hook regenerates provenance).
+ * Mirrors reviewDueFor: temporary records are due at their end date (a multi-day vacation stays
+ * usable for its whole range in the preview, exactly as after the real write).
+ */
+const restoredVerification = (today: LocalDate, endDate: LocalDate | undefined): FactVerification => ({
+  status: "VERIFIED_CURRENT",
+  lastVerified: today,
+  reviewDue: endDate && compareDates(endDate, today) > 0 ? endDate : today,
+  verifiedBy: "Vorschau",
+  sourceIds: ["PRACTICE_COCKPIT"],
+});
 
 function toDomain(collection: LifecycleCollection, doc: unknown): Closure | OpeningHourException {
   return collection === "closures" ? closureFromDoc(doc as ClosureDoc) : exceptionFromDoc(doc as ExceptionDoc);
@@ -84,7 +94,10 @@ export function applyUndo(data: PulsData, actions: UndoAction[], records: Record
   };
   for (const a of actions) {
     if (a.kind === "RETIRE") drop(a.entityType, a.entityId);
-    if (a.kind === "RESTORE") put(a.entityType, { ...toDomain(a.entityType, a.doc), verification: restoredVerification(today) });
+    if (a.kind === "RESTORE") {
+      const restored = toDomain(a.entityType, a.doc);
+      put(a.entityType, { ...restored, verification: restoredVerification(today, restored.endDate) });
+    }
     if (a.kind === "REACTIVATE") put(a.entityType, toDomain(a.entityType, records[keyOf(a)]));
   }
   return { ...data, exceptions, closures };

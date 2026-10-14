@@ -8,6 +8,11 @@ import { formatGermanDate, zonedParts, type LocalDate } from "../domain/time.ts"
 import { blocks } from "../domain/operations.ts";
 import type { PayloadReader } from "../backend/payload-repository.ts";
 import { entityKey, planUndo, type HistoryEvent, type LifecycleCollection, type StoredRecord, type UndoPlan } from "./workflows/undo.ts";
+import { CLOSURE_KIND_TITLE, shortRange } from "./workflows/wording.ts";
+
+/** 09.5C planned closures in history sentences. */
+const PLANNED = new Set(["VACATION", "TRAINING", "OTHER"]);
+const AN_DEM: Record<string, string> = { VACATION: "am Urlaub", TRAINING: "an der Fortbildung", OTHER: "an der Schließung" };
 
 const COLLECTIONS: LifecycleCollection[] = ["openingHourExceptions", "closures"];
 
@@ -51,11 +56,24 @@ export function describeEvent(e: HistoryEvent, today: LocalDate): string {
     return end ? `${day} um ${end} Uhr schließen` : `${day}: geänderte Sprechzeiten`;
   }
   if (snap.kind === "SHORT_NOTICE") return day === "Heute" ? "Praxis heute geschlossen" : `${day}: Praxis geschlossen`;
+  if (snap.kind && PLANNED.has(snap.kind) && snap.startDate && snap.endDate) {
+    // "Urlaub 19.–23. Oktober eingetragen" / "Urlaub 19.–24. Oktober geändert"
+    return `${CLOSURE_KIND_TITLE[snap.kind as "VACATION"]} ${shortRange(snap.startDate, snap.endDate)} ${e.operation === "CREATE" ? "eingetragen" : "geändert"}`;
+  }
   return `${day}: Schließung`;
 }
 
+/** A revert of a planned closure: its creation ("Urlaub … zurückgenommen") or an edit ("Änderung am Urlaub …"). */
+function describeRevert(events: HistoryEvent[]): string {
+  const e = events.find((x) => x.entityType === "closures" && PLANNED.has(String((x.next as { kind?: string } | null)?.kind)));
+  if (!e) return "Änderung zurückgenommen";
+  const snap = e.next as { kind: string; startDate: string; endDate: string; recordState?: string };
+  const title = CLOSURE_KIND_TITLE[snap.kind as "VACATION"];
+  return snap.recordState === "RETIRED" ? `${title} ${shortRange(snap.startDate, snap.endDate)} zurückgenommen` : `Änderung ${AN_DEM[snap.kind]} zurückgenommen`;
+}
+
 export function describeGroup(events: HistoryEvent[], today: LocalDate): string {
-  if (events.some((e) => e.operation === "REVERT")) return "Änderung zurückgenommen";
+  if (events.some((e) => e.operation === "REVERT")) return describeRevert(events);
   const main = events.find((e) => e.operation !== "SUPERSEDE") ?? events[0];
   const text = describeEvent(main, today);
   return events.some((e) => e.operation === "SUPERSEDE") ? `Bestehende Änderung ersetzt: ${text}` : text;

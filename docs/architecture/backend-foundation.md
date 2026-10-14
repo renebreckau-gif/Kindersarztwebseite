@@ -126,6 +126,10 @@ Defined in `src/backend/collections.ts`. **Website operations only.**
 - Payload `versions` are **not** enabled; the history is `auditEvents`. Nothing is deleted (no delete access, unchanged).
 - The repository (`payload-repository.ts`) loads exceptions and closures with `recordState != RETIRED` (`active()`), so the engine only ever sees active records.
 
+**Since 09.5C (validation only, no schema change — `payload migrate:create --skip-empty` found nothing to migrate):**
+- `closures.publicMessage` allows up to 280 characters (the "Hinweis für die Website" of a planned closure); `openingHourExceptions.publicMessage` stays at 200.
+- `localDate` fields accept only real calendar days (`isLocalDate` round-trip check; e.g. `2026-02-30` is rejected).
+
 `Sources` was **not** added. Provenance uses the fixed source id `PRACTICE_COCKPIT`. A source registry follows only if editorial sources move into the backend.
 
 **Storage format:**

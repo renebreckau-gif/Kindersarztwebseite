@@ -1,4 +1,5 @@
-// Publish path of the today workflows (Phase 09.5A). Server-side only.
+// Publish path of the real cockpit workflows (today workflows 09.5A, planned closures 09.5C).
+// Server-side only.
 //
 // INPUT → SERVER DRAFT → PREVIEW → [publish:] SERVER REVALIDATION → ONE DATABASE TRANSACTION
 // (business record + generated provenance + audit with changeSetId) → CONFIRMATION.
@@ -19,9 +20,13 @@ import { planFor } from "../history.ts";
 import type { UndoAction, UndoPlan } from "./undo.ts";
 import { datasetFingerprint } from "./snapshot.ts";
 import { closedTodayDraft, earlyCloseDraft } from "./today.ts";
-import type { Blocked, ClosedTodayInput, Draft, EarlyCloseInput, ReadyDraft, WorkflowKind } from "./types.ts";
+import { plannedClosureDraft } from "./planned.ts";
+import type { Blocked, ClosedTodayInput, Draft, EarlyCloseInput, PlannedClosureInput, ReadyDraft, WorkflowKind } from "./types.ts";
 
-export type WorkflowRequest = { kind: "EARLY_CLOSE"; input: EarlyCloseInput } | { kind: "CLOSED_TODAY"; input: ClosedTodayInput };
+export type WorkflowRequest =
+  | { kind: "EARLY_CLOSE"; input: EarlyCloseInput }
+  | { kind: "CLOSED_TODAY"; input: ClosedTodayInput }
+  | { kind: "PLANNED_CLOSURE"; input: PlannedClosureInput };
 
 export type PublishResult =
   | { ok: true; changeSetId: string; mode: "NEW" | "EDIT" | "SUPERSEDE"; recordId: string; kind: WorkflowKind }
@@ -30,7 +35,9 @@ export type PublishResult =
 export const STALE_MESSAGE = "Inzwischen wurde etwas geändert. Bitte prüfen Sie die Vorschau erneut.";
 
 export function buildDraft(request: WorkflowRequest, data: PulsData, now: Date, fingerprint: string): Draft {
-  return request.kind === "EARLY_CLOSE" ? earlyCloseDraft(data, now, request.input, fingerprint) : closedTodayDraft(data, now, request.input, fingerprint);
+  if (request.kind === "EARLY_CLOSE") return earlyCloseDraft(data, now, request.input, fingerprint);
+  if (request.kind === "CLOSED_TODAY") return closedTodayDraft(data, now, request.input, fingerprint);
+  return plannedClosureDraft(data, now, request.input, fingerprint).draft;
 }
 
 /** Preview: the current DATABASE snapshot (never the static website data) + the proposed change. */

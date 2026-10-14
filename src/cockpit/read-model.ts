@@ -2,12 +2,13 @@
 //
 // app/(intern) → src/cockpit (queries → read model) → PayloadPracticeRepository → src/domain
 // Status always comes from the domain engine (getPracticeStatus); this module only selects,
-// sorts and words what the cockpit shows. Phase 09.4 is READ + PREVIEW: nothing is written.
+// sorts and words what the cockpit shows. Writes happen only in src/cockpit/workflows (publish.ts).
 
 import type { Announcement, Closure, OpeningHourException } from "../domain/content-types.ts";
 import { getPracticeStatus, type PracticeStatusResult, type PulsData } from "../domain/practice-status.ts";
-import { announcementExpired, blocks, notExpired, rulesSegments } from "../domain/operations.ts";
+import { announcementExpired, blocks, notExpired, rulesSegments, uncoveredDays } from "../domain/operations.ts";
 import { evaluateFreshness } from "../domain/verification.ts";
+import { shortRange } from "./workflows/wording.ts";
 import { addDays, compareDates, daysBetween, formatGermanDate, weekdayOf, zonedParts, zonedToInstant, formatMinutes, type LocalDate, type LocalTime } from "../domain/time.ts";
 
 export interface CockpitInput {
@@ -37,6 +38,10 @@ export interface UpcomingItem {
   active: boolean;
   /** Not confirmed: the website does not show it. */
   unconfirmed: boolean;
+  /** 09.5C: confirmation state in plain German (closures). */
+  confirmation?: string;
+  /** 09.5C: edit route of an editable ACTIVE planned closure (domain record id, never the database id). */
+  editHref?: string;
 }
 
 export interface ReviewItem {
@@ -90,6 +95,14 @@ export function todayView(data: PulsData, now: Date): TodayView {
 
 const verified = (x: { verification: { status: string } }) => x.verification.status === "VERIFIED_CURRENT";
 
+/** "Vertretung: Praxis A (19.–21. Oktober), Praxis B (23. Oktober) · ohne Vertretung: 22. Oktober". */
+export function closureReplacementText(c: Closure, practiceName: (id: string) => string): string {
+  if (!c.replacements.length) return "Keine Vertretung eingetragen";
+  const gaps = c.kind === "SHORT_NOTICE" ? [] : uncoveredDays(c.startDate, c.endDate, c.replacements.map((r) => ({ from: r.from, to: r.until })));
+  const list = [...c.replacements].sort((a, b) => compareDates(a.from, b.from)).map((r) => `${practiceName(r.replacementPracticeId)} (${shortRange(r.from, r.until)})`);
+  return `Vertretung: ${list.join(", ")}${gaps.length ? ` · ohne Vertretung: ${gaps.map((g) => shortRange(g.from, g.to)).join(", ")}` : ""}`;
+}
+
 /** Current and upcoming operational records, chronological; expired ones are history (not shown). */
 export function upcomingItems(data: PulsData, announcements: Announcement[], today: LocalDate): UpcomingItem[] {
   const horizon = addDays(today, HORIZON_DAYS);
@@ -105,9 +118,11 @@ export function upcomingItems(data: PulsData, announcements: Announcement[], tod
       endDate: c.endDate,
       when: dateRange(c.startDate, c.endDate),
       title: CLOSURE_TITLE[c.kind],
-      detail: c.replacements.length ? `Vertretung: ${[...new Set(c.replacements.map((r) => practiceName(r.replacementPracticeId)))].join(", ")}` : "Keine Vertretung eingetragen",
+      detail: closureReplacementText(c, practiceName),
       active: compareDates(c.startDate, today) <= 0,
       unconfirmed: !verified(c),
+      confirmation: verified(c) ? `Bestätigt${c.verification.verifiedBy ? ` von ${c.verification.verifiedBy.split(",")[0]}` : ""}` : undefined,
+      ...(c.kind !== "SHORT_NOTICE" ? { editHref: `/intern/urlaub/${encodeURIComponent(c.id)}` } : {}),
     }));
 
   const exceptions: UpcomingItem[] = notExpired(data.exceptions, today)

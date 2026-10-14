@@ -67,7 +67,8 @@ describe("Nächste Termine", () => {
   test("chronological, current ones first, beyond the horizon excluded", () => {
     assert.deepEqual(items.map((i) => i.id), ["laeuft", "n1", "sonder", "spaeter"]);
     assert.equal(items[0].active, true);
-    assert.equal(items.find((i) => i.id === "spaeter")!.detail, "Vertretung: Praxis A");
+    // 09.5C: the summary names each replacement period (and any day without replacement).
+    assert.equal(items.find((i) => i.id === "spaeter")!.detail, "Vertretung: Praxis A (2.–6. November)");
   });
 
   test("expired records and unpublished notices are not shown (they stay history)", () => {

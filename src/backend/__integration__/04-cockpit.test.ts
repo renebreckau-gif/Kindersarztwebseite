@@ -83,7 +83,8 @@ describe("real cockpit read experience", { skip: skipDb }, () => {
 
     const home = await loadCockpitHome(reader, zonedToInstant("2026-10-13", "09:30"));
     const item = home.upcoming.find((i) => i.id === "it-urlaub");
-    assert.ok(item && item.title === "Urlaub" && item.detail === "Vertretung: Praxis Beispiel (Test)");
+    // 09.5C: the summary names each replacement period.
+    assert.ok(item && item.title === "Urlaub" && item.detail === "Vertretung: Praxis Beispiel (Test) (2.–6. November)", item?.detail);
     assert.ok(home.review.some((r) => r.id === "replacement-it-urlaub-it-vertretung-2026-11-02"));
 
     const page = await http("/intern", { cookie: staff });

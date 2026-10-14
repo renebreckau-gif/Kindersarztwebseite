@@ -87,7 +87,10 @@ export function formatMinutes(min: number): LocalTime {
 }
 
 export function isLocalDate(s: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(`${s}T00:00:00Z`));
+  // Round trip: Date.parse rolls impossible days over ("2026-02-30" → 2 March), so compare back.
+  if (typeof s !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const t = Date.parse(`${s}T00:00:00Z`);
+  return !Number.isNaN(t) && new Date(t).toISOString().slice(0, 10) === s;
 }
 
 /** Pure calendar arithmetic (no timezone involved). */

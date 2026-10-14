@@ -13,6 +13,8 @@ import { STAGING_PUBLISHED, STALE_UNDO } from "@/cockpit/workflows/wording";
 import { zonedParts } from "@/domain/time";
 import type { PayloadReader } from "@/backend/payload-repository";
 import { StatusStatement } from "@/site/blocks";
+import { dayDiffs } from "@/cockpit/facts";
+import { DayDiffList } from "../../../facts-parts";
 import { CockpitFrame } from "../../../../cockpit-frame";
 import { internSession } from "../../../../session";
 import { Unavailable } from "../../../../unavailable";
@@ -91,6 +93,8 @@ export default async function Zuruecknehmen({ params, searchParams }: { params: 
                 <StatusStatement puls={resolvePuls({}, now, plan.after)} />
               </section>
             </div>
+            {/* 09.5C: identical headlines can hide different hours, closures or replacements — show the facts. */}
+            <DayDiffList diffs={dayDiffs(data, plan.after, zonedParts(now).date)} />
             <form method="post" action="/intern/verlauf/ruecknahme" className="cp-panel cp-publish">
               <p className="cp-effect">Der vorherige Stand wird wiederhergestellt. Nichts wird gelöscht: Die Änderung und ihre Rücknahme bleiben im Verlauf.</p>
               <p className="cp-muted">{STAGING_PUBLISHED.website}</p>

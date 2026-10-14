@@ -191,7 +191,8 @@ export const Closures = tracked(
     localDate("startDate", "Von"),
     localDate("endDate", "Bis"),
     localDate("announceFrom", "Ankündigen ab", false),
-    { name: "publicMessage", label: "Öffentlicher Text", type: "text", maxLength: 200 },
+    // 280: "Hinweis für die Website" of a planned closure (09.5C). Validation only — no schema change.
+    { name: "publicMessage", label: "Öffentlicher Text", type: "text", maxLength: 280 },
     {
       name: "replacements",
       label: "Vertretungen",

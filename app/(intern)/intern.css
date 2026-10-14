@@ -828,3 +828,274 @@ body.intern {
     width: 100%;
   }
 }
+/* ---------------------------------------------------------------- 09.5C Urlaub / Schließzeit */
+
+.cp-planned .cp-form {
+  gap: var(--space-6);
+}
+.cp-section {
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--line);
+}
+.cp-form > .cp-section:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+.cp-step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.cp-step-no {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-round);
+  background: color-mix(in srgb, var(--palette-cobalt) 12%, var(--surface));
+  color: var(--palette-cobalt-text);
+  font-family: var(--font-text);
+  font-size: var(--text-small);
+  font-weight: 700;
+}
+.cp-row2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 14rem));
+  gap: var(--space-4);
+}
+.cp-choices-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+.cp-input-date {
+  max-width: 14rem;
+}
+.cp-select {
+  width: 100%;
+  max-width: 34rem;
+}
+.cp-textarea {
+  width: 100%;
+  max-width: 40rem;
+  min-height: 6rem;
+  resize: vertical;
+  line-height: 1.5;
+}
+.cp-input[aria-invalid="true"] {
+  border-color: color-mix(in srgb, var(--palette-coral) 80%, var(--palette-ink));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--palette-coral) 80%, var(--palette-ink));
+}
+.cp-field-error {
+  margin: 0;
+  padding-left: var(--space-3);
+  border-left: 3px solid color-mix(in srgb, var(--palette-coral) 80%, var(--palette-ink));
+  font-weight: 600;
+  display: grid;
+  gap: var(--space-1);
+}
+.cp-field-error p {
+  margin: 0;
+}
+.cp-summary ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: var(--space-2);
+  font-weight: 400;
+}
+.cp-text-link {
+  color: var(--palette-cobalt-text);
+  font-weight: 600;
+  text-underline-offset: 0.2em;
+}
+.cp-text-link:focus-visible,
+.cp-choice input:focus-visible {
+  outline: 3px solid var(--palette-cobalt);
+  outline-offset: 3px;
+}
+.cp-period {
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.cp-period legend {
+  padding: 0 var(--space-2);
+}
+.cp-split {
+  justify-self: start;
+}
+.cp-note {
+  padding: var(--space-3) var(--space-4);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--palette-cobalt) 6%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--palette-cobalt) 25%, transparent);
+  display: grid;
+  gap: var(--space-2);
+}
+.cp-note p {
+  margin: 0;
+}
+.cp-note-title {
+  font-weight: 600;
+}
+.cp-existing {
+  overflow-wrap: anywhere;
+}
+
+.cp-moments {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  gap: var(--space-4);
+}
+.cp-moment {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  min-width: 0;
+}
+.cp-public {
+  display: grid;
+  gap: var(--space-2);
+}
+.cp-public:empty {
+  display: none;
+}
+.cp-public-note {
+  margin: 0;
+}
+.cp-public-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.cp-public-list li {
+  display: grid;
+  overflow-wrap: anywhere;
+}
+
+.cp-changes {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-small);
+}
+.cp-changes caption {
+  text-align: left;
+  font-weight: 600;
+  padding-bottom: var(--space-2);
+}
+.cp-changes th,
+.cp-changes td {
+  text-align: left;
+  vertical-align: top;
+  padding: var(--space-2) var(--space-3) var(--space-2) 0;
+  border-top: 1px solid var(--line);
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+.cp-changes thead th {
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  border-top: 0;
+}
+.cp-changes tbody th {
+  font-weight: 600;
+}
+.cp-changes + .cp-changes {
+  margin-top: var(--space-4);
+}
+.cp-date-edit {
+  justify-self: start;
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 30em) {
+  .cp-row2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cp-period .cp-btn,
+  .cp-split {
+    width: 100%;
+  }
+}
+/* Date inputs focus an internal field, so :focus-visible never matches the input itself —
+   show the same ring whenever focus is inside (keyboard and pointer alike). */
+.cp-input[type="date"]:focus,
+.cp-input[type="date"]:focus-within {
+  outline: 3px solid var(--palette-cobalt);
+  outline-offset: 3px;
+}
+/* Stacked change rows: on phones, and always inside the narrow preview cards. */
+.cp-moment .cp-changes thead {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+.cp-moment .cp-changes tr {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0 var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--line);
+}
+.cp-moment .cp-changes tbody th {
+  grid-column: 1 / -1;
+}
+.cp-moment .cp-changes th,
+.cp-moment .cp-changes td {
+  border-top: 0;
+  padding: 0;
+}
+.cp-moment .cp-changes td::before {
+  content: attr(data-label);
+  display: block;
+  font-size: var(--text-label);
+  color: var(--color-text-secondary);
+}
+@media (max-width: 30em) {
+  .cp-changes thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .cp-changes tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0 var(--space-3);
+    padding: var(--space-2) 0;
+    border-top: 1px solid var(--line);
+  }
+  .cp-changes tbody th {
+    grid-column: 1 / -1;
+  }
+  .cp-changes th,
+  .cp-changes td {
+    border-top: 0;
+    padding: 0;
+  }
+  .cp-changes td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: var(--text-label);
+    color: var(--color-text-secondary);
+  }
+}

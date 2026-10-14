@@ -1,6 +1,8 @@
-// Real Praxis Cockpit — Übersicht (READ ONLY, Phase 09.4).
+// Real Praxis Cockpit — Übersicht.
 // Every number and status comes from PostgreSQL → Payload → PayloadPracticeRepository → engine.
-// Operational changes are not connected yet; the prototype shows how they will work.
+// Real operational writes (cockpit database only; the public website stays static): Heute früher
+// schließen, Heute geschlossen (09.5A), Urlaub / Schließzeit (09.5C); "Letzte Änderung" with safe
+// undo (09.5B). "Hinweis veröffentlichen" is still prototype-only.
 
 import config from "@payload-config";
 import Link from "next/link";
@@ -17,15 +19,13 @@ import { CockpitFrame } from "../cockpit-frame";
 import { internSession } from "../session";
 import { Unavailable } from "../unavailable";
 
-// Phase 09.5A: the two today workflows write to the cockpit database; the others remain prototype-only.
+// Real workflows write to the cockpit database (09.5A today, 09.5C Urlaub); announcements remain prototype-only.
 const REAL_ACTIONS = [
   { href: "/intern/heute/frueher-schliessen", label: "Heute früher schließen" },
   { href: "/intern/heute/geschlossen", label: "Heute geschlossen" },
+  { href: "/intern/urlaub", label: "Urlaub eintragen" },
 ];
-const PROTOTYPE_ACTIONS = [
-  { href: "/lab/praxis-cockpit/urlaub", label: "Urlaub eintragen" },
-  { href: "/lab/praxis-cockpit/hinweis", label: "Hinweis veröffentlichen" },
-];
+const PROTOTYPE_ACTIONS = [{ href: "/lab/praxis-cockpit/hinweis", label: "Hinweis veröffentlichen" }];
 
 export default async function Intern() {
   const session = await internSession();
@@ -115,7 +115,7 @@ export default async function Intern() {
               ))}
             </ul>
             <h3 className="cp-h3 cp-quick-later">Später verfügbar</h3>
-            <p className="cp-muted">Diese Abläufe zeigt bis dahin der Prototyp mit Testdaten.</p>
+            <p className="cp-muted">Dieser Ablauf ist bis dahin nur im Prototyp mit Testdaten zu sehen.</p>
             <ul className="cp-quick-list">
               {PROTOTYPE_ACTIONS.map((q) => (
                 <li key={q.href}>
@@ -142,7 +142,13 @@ export default async function Intern() {
                       {i.active ? <span className="cp-badge">läuft</span> : null}
                     </span>
                     {i.detail ? <span className="cp-date-note">{i.detail}</span> : null}
+                    {i.confirmation ? <span className="cp-date-note">{i.confirmation}</span> : null}
                     {i.unconfirmed ? <span className="cp-date-note">Nicht bestätigt · erscheint nicht auf der Website</span> : null}
+                    {i.editHref ? (
+                      <Link href={i.editHref} className="cp-btn cp-btn-quiet cp-date-edit" aria-label={`${i.title} ${i.when} bearbeiten`}>
+                        Bearbeiten
+                      </Link>
+                    ) : null}
                   </li>
                 ))}
               </ul>

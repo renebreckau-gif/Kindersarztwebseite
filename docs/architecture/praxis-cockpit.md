@@ -1,27 +1,27 @@
 # Praxis Cockpit: Staff Portal Architecture
 
-Current status: Phase 09.5B done: the real operational writes of 09.5A (7.1 Heute früher schließen, 7.2 Heute geschlossen) now have an explicit record lifecycle (ACTIVE / RETIRED), explicit supersede and a safe "Änderung zurücknehmen" for the latest change, proven locally against PostgreSQL. The public website stays static: cockpit publishes do not change it yet. Details in the status table below.
+Current status: Phase 09.5C done: the first real multi-day workflow, 7.5 Urlaub / geplante Schließzeit (create, edit of the same record, replacement periods with explicit gaps, multi-date preview, undo via the 09.5B lifecycle), writes to the isolated cockpit database. Before that, Phase 09.5B: the real operational writes of 09.5A (7.1 Heute früher schließen, 7.2 Heute geschlossen) now have an explicit record lifecycle (ACTIVE / RETIRED), explicit supersede and a safe "Änderung zurücknehmen" for the latest change, proven locally against PostgreSQL. The public website stays static: cockpit publishes do not change it yet. Details in the status table below.
 Last updated: 2026-10-14
 Historical baseline of the Phase 09.0 architecture decision (§0–§14): `e589478`
 Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms-comparison.md) · [content-model.md](content-model.md) · [content-governance.md](content-governance.md) · [practice-pulse-logic.md](practice-pulse-logic.md) · [privacy-model.md](privacy-model.md) · [phase-04-decisions.md](phase-04-decisions.md)
 
 > **GLOBAL PROJECT RULE — deployment model:** the current Vercel deployment is the project's **STAGING** environment, not the live practice website. Implemented functionality is normally visible there for review; formal publication gates are kept for the future production launch and do not hide staging content. Single switch: `SITE_STAGE` in `src/content/release.ts`. See [deployment-model.md](deployment-model.md).
 
-## Current status (2026-10-14, after Phase 09.5B)
+## Current status (2026-10-14, after Phase 09.5C)
 
 | | |
 |---|---|
 | **Prototype** | Implemented through Phase 09.1.4 and locked for staff usability testing: `/lab/praxis-cockpit`. Directly reachable on STAGING; not in the patient navigation; `noindex`; mock data only. Blocked (404) once `SITE_STAGE = "PRODUCTION"`. |
-| **Backend** | Runs **locally**: Payload runtime, collections, access rules, provenance, audit and the publish guard, against an isolated PostgreSQL cluster. It is proven by integration tests from an empty database (61 tests in 6 steps). See [backend-foundation.md](backend-foundation.md) §17. Not connected to the public site, and not hosted anywhere yet. |
+| **Backend** | Runs **locally**: Payload runtime, collections, access rules, provenance, audit and the publish guard, against an isolated PostgreSQL cluster. It is proven by integration tests from an empty database (79 tests in 7 steps). See [backend-foundation.md](backend-foundation.md) §17. Not connected to the public site, and not hosted anywhere yet. |
 | **Payload** | 3.90.2 with `@payloadcms/next`/`ui`/`db-postgres` 3.90.2 (no force flags). Admin at **`/intern/admin`** (ADMIN only), REST at `/api`, GraphQL disabled. First-user registration closed; the first ADMIN is created only by `scripts/bootstrap-admin.ts`. |
 | **Database / persistence** | Local only: isolated PostgreSQL 16.2 cluster on 127.0.0.1:5433 (`kinderarzt_app`, not a superuser). Migrations from zero via the Payload CLI. Production provider open. The prototype state still lives in memory; a reload resets it. |
 | **Real authentication** | Payload auth on `staff`, verified: login, generic failures, disabled accounts, lockout, logout with session revocation, cookie `HttpOnly; SameSite=Lax; Secure`. Artificial `.invalid` test accounts only; no real accounts. Still required before production: transactional password reset and ADMIN MFA (backend-foundation §17.9–17.10). The prototype keeps its mock login. |
 | **Public website** | Uses the same Praxis Puls engine. `resolvePuls` still consumes the **static snapshot directly** (`staticPulsData()`, synchronous). It does not load through `PracticeRepository.getPulsData()`; repository-based public loading arrives with the cutover. `DATA_SOURCE = "STATIC"` is a reserved migration-target selector, not yet an active switch. Output unchanged (tested). Release gates are unchanged. |
 | **Staff entry** | Footer link **"Mitarbeiterbereich"** (after Impressum · Datenschutz · Barrierefreiheit; not in the main navigation, dock or hero) → **`/mitarbeiter`**, the stable human entry point. STAGING without backend (Vercel today): prototype only. STAGING with a configured database (local): prototype **and** real login, clearly labelled. PRODUCTION: real login only when `RELEASE.staffPortalProductionEnabled` — the **same** decision as the request gate (`staffPortalAvailable`), so the footer can never lead to a 404; never the lab. The footer placement is a UX choice, **not** security. |
-| **Internal routes** | `/intern/anmelden` (real login); `/intern` (real cockpit: Praxis heute from the database, Nächste Termine, Prüfen); `/intern/heute/frueher-schliessen` and `/intern/heute/geschlossen` (**real writes** to the cockpit database, 09.5A); `/intern/verlauf/[vorgang]/zuruecknehmen` (undo preview; the undo itself is an authenticated POST to `/intern/verlauf/ruecknahme`) and `/intern/verlauf/zurueckgenommen` (09.5B); `/intern/vorschau` (Website-Vorschau + comparison with the static website); `/intern/admin` (ADMIN only). Available where the real staff portal is available: STAGING with a configured database; in PRODUCTION only with `RELEASE.staffPortalProductionEnabled` (currently `false`). On Vercel staging (no database) they answer 404. Urlaub, Hinweise, Sonderöffnungszeiten and Akutsprechstunde remain prototype-only. |
+| **Internal routes** | `/intern/anmelden` (real login); `/intern` (real cockpit: Praxis heute from the database, Nächste Termine, Prüfen); `/intern/heute/frueher-schliessen` and `/intern/heute/geschlossen` (**real writes** to the cockpit database, 09.5A); `/intern/urlaub` and `/intern/urlaub/[eintrag]` (**real** Urlaub / Schließzeit, create and edit, 09.5C; write entry POST `/intern/urlaub/veroeffentlichen`, confirmation `/intern/urlaub/veroeffentlicht`); `/intern/verlauf/[vorgang]/zuruecknehmen` (undo preview; the undo itself is an authenticated POST to `/intern/verlauf/ruecknahme`) and `/intern/verlauf/zurueckgenommen` (09.5B); `/intern/vorschau` (Website-Vorschau + comparison with the static website); `/intern/admin` (ADMIN only). Available where the real staff portal is available: STAGING with a configured database; in PRODUCTION only with `RELEASE.staffPortalProductionEnabled` (currently `false`). On Vercel staging (no database) they answer 404. Hinweise, Sonderöffnungszeiten and Akutsprechstunde remain prototype-only. |
 | **Review hub** | `/review` is **project review tooling** (developers and reviewers): links to the website, the cockpit prototype and Mein Arztbesuch. It is **not** the staff entry; that is `/mitarbeiter`. Available while `SITE_STAGE = "STAGING"`; 404 in PRODUCTION. No `/intern` link, because the deployed staging has no database. |
 | **Mein Arztbesuch** | Visible on STAGING for review (`SITE_STAGE`). Not released for production: `meinArztbesuchPublished = false`, formal approvals open (`meinArztbesuchApproved = false`, records truthful); site stays `noindex` (`indexable = false`). |
-| **Next phase** | 09.5C (not started; scope set by its own brief). Later: further workflows (Sonderöffnungszeiten, Akutsprechstunde, Urlaub, Hinweise) and, separately, the public data cutover. |
+| **Next phase** | Not started; scope set by the next brief (announcements and acute hours are explicitly not part of 09.5C). Later: further workflows (Sonderöffnungszeiten, Akutsprechstunde, Urlaub, Hinweise) and, separately, the public data cutover. |
 | **Launch blockers** | `LIVE_HOST_ACCESS = OPEN` (existing webhost not accessible), and domain/DNS access unknown (project-blockers LB-13/LB-14). Production backend infrastructure: LB-15. None of these blocks staging or development. |
 
 
@@ -39,7 +39,8 @@ Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms
 | 09.3 | Isolated PostgreSQL dev cluster, migrations, Payload runtime (`/intern/admin`, `/api`), closed first-user registration + bootstrap script, `/intern` auth shell, integration tests from zero (auth, roles, provenance, audit, transactions, DB parity) | `0e53670` (preparatory work: `3d2c316`) |
 | 09.4 | Staff entry (footer → `/mitarbeiter`), real read-only cockpit from the database (Praxis heute, Nächste Termine, Prüfen), Website-Vorschau with static-vs-database comparison, role-aware navigation | `5b549be` |
 | 09.5A | Real operational writes for 7.1 Heute früher schließen and 7.2 Heute geschlossen (server draft → engine preview → revalidation → one transaction with provenance + audit + changeSetId), dataset fingerprint against stale previews, production staff-portal release gate | `13b62a5` |
-| 09.5B | Record lifecycle (ACTIVE / RETIRED, server-controlled), explicit supersede in both directions, multi-day safety, safe undo of the latest change (CREATE → retire, EDIT → restore, SUPERSEDE → reactivate) with REVERT audit events, "Letzte Änderung" on `/intern` | this commit |
+| 09.5B | Record lifecycle (ACTIVE / RETIRED, server-controlled), explicit supersede in both directions, multi-day safety, safe undo of the latest change (CREATE → retire, EDIT → restore, SUPERSEDE → reactivate) with REVERT audit events, "Letzte Änderung" on `/intern` | `8c33fe7` |
+| 09.5C | Real 7.5 Urlaub / geplante Schließzeit (VACATION / TRAINING / OTHER): Zeitraum, Ankündigen ab, replacement periods from the verified directory with explicit gaps, multi-date engine preview, edit of the same record, overlap blocks, undo via the 09.5B lifecycle; undo preview shows structured differences; strict calendar-date validation | this commit |
 
 **How to read this document:** §0–§14 are the Phase 09.0 architecture decision and remain valid unless a later phase note says otherwise. The phase notes at the end record what the prototype changed or proved. Statements that became outdated are marked inline ("since 09.1.x").
 
@@ -89,6 +90,8 @@ Acceptance (unchanged from cms-requirements §8, plus two new criteria). Measure
 
 **Option A: Payload as the backend (data, auth, access control, versions, migrations) plus a custom, task-oriented Next.js cockpit at `/intern`, in the same codebase as the public site, on PostgreSQL in the EU.**
 
+> Implementation note (since 09.5B): Payload supports versioning, but this project currently uses its own append-only audit/lifecycle model for operational undo (`auditEvents` with previous / next snapshots, `changeSetId`, `revertOf`, and the ACTIVE / RETIRED record lifecycle). Payload collection `versions` are not enabled. The evaluation below is kept as the historical decision record.
+
 This confirms the Phase 04 decision (Payload, self-controlled data, PostgreSQL, EU) and sharpens it on one point:
 
 > **Staff never use the generic Payload admin UI.** They use a purpose-built cockpit that calls the Payload Local API on the server. The Payload admin panel is reachable only for ADMIN, for rare structural tasks: accounts, the replacement directory, the holiday calendar and the weekly schedule.
@@ -109,11 +112,13 @@ This confirms the Phase 04 decision (Payload, self-controlled data, PostgreSQL, 
                       │  src/cockpit/*   workflows → draft change set → preview (engine) ─────────────────┘  │
                       │        │         publish: validate (engine) → write → audit → revalidateTag           │
                       │        ▼                                                                             │
-                      │  Payload (Local API, auth, access control, versions)   /intern/admin (ADMIN only)    │
+                      │  Payload (Local API, auth, access control, [versions]) /intern/admin (ADMIN only)    │
                       └────────┼─────────────────────────────────────────────────────────────────────────────┘
                                ▼
                      PostgreSQL (EU)  ·  object storage (EU, media only)  ·  transactional e-mail (EU, invites/reset)
 ```
+
+`[versions]`: available in Payload but not enabled; operational history and undo come from `auditEvents` and the record lifecycle (implementation note above).
 
 Why one codebase: the domain engine, the preview and the public site must be **the same TypeScript**. Phase 04 named this as CMS risk 5, preview fidelity. A separate cockpit service would need to import or copy `src/domain`, and copying it is exactly the drift this architecture exists to prevent.
 
@@ -128,7 +133,7 @@ Scale: ++ strong · + good · ○ neutral · – weak · –– problematic, for
 | Ease of use for staff | ++ (custom cockpit) | ++ (custom cockpit) | + (Studio is polished but data-type oriented; custom task UI is possible as Studio tools) |
 | Authentication | + built-in auth collections: cookie sessions, lockout, password reset | ○ we assemble and own it (library + our code) | ○ Sanity accounts managed by the vendor; SSO is Enterprise |
 | Roles | ++ code-defined, field-level | ++ but all hand-built | + 5 roles on Growth (Phase 04 check) |
-| Audit | + versions built in; our append-only audit collection via hooks | ○ all hand-built | – document history exists; a full audit trail is Enterprise (Phase 04 check) |
+| Audit | + versions built in (not enabled; see the implementation note above); our append-only audit collection via hooks | ○ all hand-built | – document history exists; a full audit trail is Enterprise (Phase 04 check) |
 | Validation (server-side, blocking) | ++ hooks call `src/domain` in-process | ++ | – Studio validation is client-centric; server-side guarantees need extra infrastructure |
 | TS domain-engine compatibility | ++ same process, shared types | ++ | ○ engine runs on the site, not at edit time; preview needs a separate integration |
 | Praxis Puls integration | ++ preview and publish check use the same function | ++ | ○ possible, but the publish check cannot block inside the content store |
@@ -751,7 +756,7 @@ The prototype logic lives in `src/lab/cockpit/`. Nothing is moved now. Mock logi
 | What applies after an end date (`afterEnd`) | **DOMAIN** | Preview + publish summary |
 | Expiry filtering / history (`upcoming`, `pastRecords`, `editableAnnouncements`) | **DOMAIN** (filtering) / **WORKFLOW** (presentation) | Queries in the repository layer |
 | Edit vs. new vs. conflict decision (`existingTodayChange`, `overlappingVacation`, `earlyCloseDraft` with `existing`) | **WORKFLOW / DOMAIN boundary** | Detection = domain queries; the choice (edit / supersede / new) = cockpit workflow |
-| Versioning and undo of the latest version (`state.ts` reducer, `versionOf`, `canUndo`) | **WORKFLOW** | Payload versions + own audit collection (§9) |
+| Versioning and undo of the latest version (`state.ts` reducer, `versionOf`, `canUndo`) | **WORKFLOW** | Planned: Payload versions + own audit collection (§9). Implemented (09.5B): own audit collection + record lifecycle only. Payload supports versioning, but this project currently uses its own append-only audit/lifecycle model for operational undo. |
 | Preview pair (`previewPair`) | **WORKFLOW** | Cockpit server action calling the engine twice |
 | Plain-German messages (`problemFor`, `unknownExplanation`, coverage texts) | **UI ONLY** (wording) on top of domain reason codes | Cockpit |
 | Button wording (`earlyCloseLabel`, "Bestehende Änderung aktualisieren", …) | **UI ONLY** | Cockpit |
@@ -1007,3 +1012,56 @@ Unchanged: `DATA_SOURCE = "STATIC"`, `staticPulsData()`, no revalidation of publ
 ### Ops note before production
 
 `sameOrigin()` (`app/(intern)/same-origin.ts`, shared by publish and undo) refuses posts without `Origin` and compares the `Origin` host with the request `Host` header. Before production, verify how `Host`, `X-Forwarded-Host` and `Origin` arrive in the real hosting topology (custom domain, reverse proxy) and only then adjust the check; never weaken it speculatively.
+
+## Phase 09.5C note: Urlaub / geplante Schließzeit (2026-10-14)
+
+Baseline `8c33fe7`. One workflow family: 7.5. Not part of this phase: announcements, acute consultation, weekly schedule editing, replacement-directory management (add / edit / re-verify / contact persons), holiday-policy editing, the full audit browser, the public Payload cutover, MFA, email reset, production hosting.
+
+### Cleanup
+
+- 09.5B commit recorded as `8c33fe7`.
+- Versions wording: §2, the alternatives table and the 09.1.4 extraction table now state that Payload supports versioning, but this project currently uses its own append-only audit / lifecycle model for operational undo. The historical evaluation is kept.
+- `/intern` page comment describes the current implementation (real writes, undo).
+- Undo preview: besides the two status cards it shows **"Was sich ändert"**, the structured facts per affected day that differ (Sprechzeiten, Schließung, Vertretung, Angekündigte Schließung, Nächste Sprechzeit; `src/cockpit/facts.ts`). Identical headlines no longer hide different hours.
+
+### Workflow (`/intern/urlaub`, `/intern/urlaub/[eintrag]`)
+
+- **Pure planner** `src/cockpit/workflows/planned.ts` (`plannedClosureDraft`), used for the preview AND again inside the publish transaction. Same publish path as 09.5A: server draft → preview → dataset fingerprint → revalidation → one transaction with provenance hook, publish guard and audit (`changeSetId`) → confirmation. No second mutation architecture.
+- **Kinds:** Urlaub → `VACATION`, Fortbildung → `TRAINING`, Sonstiges → `OTHER`. Never `SHORT_NOTICE`. One `Closure` per planned closure (no new collection); several replacement assignments stay inside that one record and one change set.
+- **Sections** (one server-rendered page; on phones they read as numbered steps): 1 Art und Zeitraum · 2 Auf der Website ankündigen ab · 3 Vertretung · 4 Hinweis für die Website · 5 Website-Vorschau · 6 Veröffentlichen. Works without JavaScript; structure buttons ("Zeitraum teilen", "… entfernen", "Auf … anpassen") are GET-only and never write.
+- **Zeitraum:** Europe/Berlin calendar dates, both required, end ≥ start, end not in the past, a new closure does not start in the past (a running closure keeps its original start), at most 366 days (bound for the engine checks). Dates are validated as real calendar days (`isLocalDate` now rejects e.g. 2026-02-30).
+- **Ankündigen ab:** proposal 14 days before the start, or today if that has passed; any valid date up to the last day may be chosen. No minimum lead time is invented. An unchanged proposal follows changed dates.
+- **Hinweis für die Website:** optional, at most 280 characters, plain text, privacy hint shown.
+- **Vertretung:** "Eine Vertretung für den ganzen Zeitraum", "Zeitraum aufteilen" or "Keine Vertretung eintragen". Only entries of the existing directory, shown with their state; selectable only when usable by `evaluateFreshness(…, "replacementPractice")`. Periods use `validateReplacementPeriods` / `uncoveredDays`.
+  - **Gaps are allowed** but must be confirmed explicitly ("Diese Tage bewusst ohne Vertretung lassen"); the preview says "Ohne Vertretung: 22. Oktober" and "Die Website zeigt in diesem Zeitraum Telefon und Notfall-Hinweise." A neighbouring period is never stretched.
+  - **Expiry:** a practice whose confirmation ends before the end of its sub-period blocks publishing: "Die Bestätigung der Vertretungspraxis … läuft am … ab. Danach kann sie auf der Website nicht mehr angezeigt werden." Re-verification is not done here (directory / physician workflow).
+  - ADMIN selecting a practice never makes it physician-confirmed; unverified entries are not selectable for anyone.
+- **Preview dates** (all via `getPracticeStatus`, 09:00): announcement date (engine `upcomingClosure`), first (remaining) day, one date in each replacement period, each day without replacement, days freed by shortening an edit, the first day after. Per date: the public status card, the parent-facing information the engine exposes (announcement, public message, replacement name / address / phone or the fallback), and the facts that differ from the current database state. No internal verification data appears in the parent-facing part.
+
+### Conflicts
+
+- Another ACTIVE closure overlapping the range (from today on) → blocked, the overlapping dates are named; a planned one offers its edit page. Ranges are never merged.
+- ACTIVE `SPECIAL_HOURS` overlapping the range → blocked with the dates and hours (the engine would report `CLOSURE_EXCEPTION_CONFLICT`). No supersede across a range in this phase. A `CLOSED` exception is compatible (the closure takes precedence in the engine).
+- No new UNKNOWN: `introducedUnknown` from one day before to one day after the affected range (old and new range on edit; past days are history).
+
+### Edit
+
+- The edit route names the domain record id (never the database id); the server re-loads the ACTIVE record. Only planned kinds that have not ended are editable; RETIRED records are never offered.
+- Same record id, `UPDATE` audit with previous / next, no duplicate row. Start, end, kind, announcement date, replacements and message can change.
+- The form starts with EXPLICIT replacement periods. Shortening: a period beyond the new range must be corrected with its own button (never clamped silently). Extending: new uncovered days are shown and must be confirmed; the last replacement is not extended automatically.
+
+### Lifecycle and undo
+
+- No vacation-specific undo: the 09.5B change-set undo applies. CREATE → `RETIRED / REVERTED` (record kept, repository stops returning it); EDIT → previous content restored on the same record, `REVERT` audit with `revertOf`; a later edit blocks the older one; a closure whose effect is over offers no quick undo (24 h + still effective rules unchanged).
+- Fix found while integrating: the undo preview mirrored restored provenance with `reviewDue = today`, which made later days of a restored multi-day closure look unverified (wrongly "UNSAFE"). It now mirrors the hook (`reviewDue` = end date).
+
+### Cockpit overview and history
+
+- Schnellaktionen: real "Heute früher schließen", "Heute geschlossen", **"Urlaub eintragen"**; still prototype-only: "Hinweis veröffentlichen".
+- Nächste Termine: date range, kind, replacement periods (and days without replacement), confirmation state, **"Bearbeiten"** for editable ACTIVE planned closures.
+- History labels: "Urlaub 19.–23. Oktober eingetragen", "Urlaub 19.–24. Oktober geändert", "Urlaub 19.–23. Oktober zurückgenommen", "Änderung am Urlaub zurückgenommen".
+- Confirmation page: kind, range, announcement, replacement summary, Website-Vorschau, Zur Übersicht, "Änderung zurücknehmen" only when the server confirms eligibility. Wording stays "In der Testumgebung veröffentlicht" / "Die öffentliche Website verwendet derzeit noch die bisherigen Daten."
+
+### Public website
+
+Unchanged and STATIC: `DATA_SOURCE = "STATIC"`, `staticPulsData()`, no revalidation of public pages. A vacation in the cockpit database does not appear on `/heute` (tested); public routes answer 200 with PostgreSQL stopped.
