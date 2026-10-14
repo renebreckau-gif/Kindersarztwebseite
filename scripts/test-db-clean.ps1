@@ -14,6 +14,7 @@
 #   9. integration step 5: real operational writes (today workflows)
 #  10. integration step 6: lifecycle, supersede and safe undo
 #  11. integration step 7: Urlaub / geplante Schließzeit (planned closures)
+#  12. integration step 8: Hinweis veröffentlichen (announcements)
 # Secrets are read from the git-ignored .env.local and never printed.
 
 $ErrorActionPreference = "Stop"
@@ -39,7 +40,7 @@ function Invoke-Super([string]$sql, [string]$database = "postgres") {
   finally { Remove-Item Env:PGPASSWORD -ErrorAction SilentlyContinue }
 }
 
-Write-Host "1/11 fresh empty database $db"
+Write-Host "1/12 fresh empty database $db"
 Invoke-Super "DROP DATABASE IF EXISTS $db WITH (FORCE);"
 Invoke-Super "CREATE DATABASE $db OWNER $appUser ENCODING 'UTF8';"
 Invoke-Super "ALTER SCHEMA public OWNER TO $appUser; REVOKE ALL ON DATABASE $db FROM PUBLIC;" $db
@@ -51,23 +52,23 @@ $env:PAYLOAD_SECRET = $vals.PAYLOAD_SECRET
 $server = $null
 $failed = 0
 try {
-  Write-Host "2/11 migrations (Payload CLI)"
+  Write-Host "2/12 migrations (Payload CLI)"
   & npx payload migrate 2>&1 | Where-Object { "$_" -match "Migrat|Done|Error" } | ForEach-Object { "   $_" }
   if ($LASTEXITCODE -ne 0) { throw "migrate failed" }
   & npx payload migrate:status 2>&1 | Where-Object { "$_" -match "initial|Error" } | ForEach-Object { "   $_" }
 
-  Write-Host "3/11 start app on $Base against $db"
+  Write-Host "3/12 start app on $Base against $db"
   $log = Join-Path $env:TEMP "kinderarzt-test-server.log"
   $server = Start-Process -FilePath "node" -ArgumentList "node_modules/next/dist/bin/next", "start", "-p", "$Port" -WorkingDirectory $Root -RedirectStandardOutput $log -RedirectStandardError "$log.err" -WindowStyle Hidden -PassThru
   $ready = $false
   for ($i = 0; $i -lt 60 -and -not $ready; $i++) { Start-Sleep -Milliseconds 500; try { $ready = (Invoke-WebRequest -UseBasicParsing "$Base/review" -TimeoutSec 5).StatusCode -eq 200 } catch { } }
   if (-not $ready) { throw "server did not start (see $log)" }
 
-  Write-Host "4/11 integration: empty database"
+  Write-Host "4/12 integration: empty database"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/01-empty-database.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "5/11 bootstrap first ADMIN (real script, generated password)"
+  Write-Host "5/12 bootstrap first ADMIN (real script, generated password)"
   $bytes = New-Object byte[] 24; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
   $env:BOOTSTRAP_ADMIN_EMAIL = "verwaltung@integration-test.invalid"
   $env:BOOTSTRAP_ADMIN_NAME = "Test Verwaltung (künstlich)"
@@ -78,28 +79,32 @@ try {
   $env:E2E_ADMIN_PASSWORD = $env:BOOTSTRAP_ADMIN_PASSWORD
   Remove-Item Env:BOOTSTRAP_ADMIN_EMAIL, Env:BOOTSTRAP_ADMIN_NAME, Env:BOOTSTRAP_ADMIN_PASSWORD
 
-  Write-Host "6/11 integration: runtime, auth, roles, provenance, audit, transactions"
+  Write-Host "6/12 integration: runtime, auth, roles, provenance, audit, transactions"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/02-runtime.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "7/11 integration: static -> PostgreSQL -> repository parity"
+  Write-Host "7/12 integration: static -> PostgreSQL -> repository parity"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/03-parity.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "8/11 integration: real cockpit read experience"
+  Write-Host "8/12 integration: real cockpit read experience"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/04-cockpit.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "9/11 integration: real operational writes (today workflows)"
+  Write-Host "9/12 integration: real operational writes (today workflows)"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/05-workflows.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "10/11 integration: lifecycle, supersede and safe undo"
+  Write-Host "10/12 integration: lifecycle, supersede and safe undo"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/06-lifecycle.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "11/11 integration: Urlaub / geplante Schliesszeit"
+  Write-Host "11/12 integration: Urlaub / geplante Schliesszeit"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/07-planned.test.ts"
+  if ($LASTEXITCODE -ne 0) { $failed++ }
+
+  Write-Host "12/12 integration: Hinweis veroeffentlichen"
+  & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/08-announcements.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 }
 finally {

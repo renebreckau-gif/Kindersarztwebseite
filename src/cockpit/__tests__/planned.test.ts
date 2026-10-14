@@ -8,11 +8,11 @@ import type { Closure, OpeningHourException, OpeningHoursRule, ReplacementPracti
 import { getPracticeStatus, type PulsData } from "../../domain/practice-status.ts";
 import { applyChangeSet } from "../../domain/operations.ts";
 import type { FactVerification } from "../../domain/verification.ts";
-import { isLocalDate, zonedToInstant } from "../../domain/time.ts";
+import { addDays as addDaysT, isLocalDate, zonedToInstant } from "../../domain/time.ts";
 import { closureToDoc } from "../../data/payload-mapping.ts";
 import { applyPeriodAction, defaultAnnounceFrom, directoryOptions, inputFromClosure, plannedClosureDraft, prepareFormInput, type PlannedResult } from "../workflows/planned.ts";
 import { parsePeriodAction, parsePlannedClosure, plannedQuery, fromSearch } from "../workflows/form.ts";
-import type { PlannedClosureInput, ReadyDraft } from "../workflows/types.ts";
+import { MAX_PERIODS, type PlannedClosureInput, type ReadyDraft } from "../workflows/types.ts";
 import { NO_REPLACEMENT_EFFECT, shortRange } from "../workflows/wording.ts";
 import { planUndo, type HistoryEvent } from "../workflows/undo.ts";
 import { describeGroup } from "../history.ts";
@@ -129,6 +129,22 @@ describe("7.5 create: kinds, dates, announcement, message, replacements", () => 
     const gap = r.details.moments.find((m) => m.kind === "GAP")!;
     assert.equal(gap.date, "2026-10-22");
     assert.deepEqual([gap.after.replacementPractices.length, gap.after.replacementFallback], [0, true]);
+  });
+
+  test("09.5D regression: with the maximum number of periods no mandatory preview moment is dropped", () => {
+    // 8 two-day periods with one uncovered day after each (8 gaps), over 24 days.
+    const from = "2026-10-19";
+    const to = addDaysT(from, 23);
+    const periods = Array.from({ length: MAX_PERIODS }, (_, i) => ({ from: addDaysT(from, 3 * i), to: addDaysT(from, 3 * i + 1), practice: i % 2 ? "b" : "a" }));
+    const r = run({ from, to, mode: "TEILEN", gapsAccepted: true, periods });
+    const d = ready(r);
+    assert.equal(d.record.value.replacements.length, MAX_PERIODS);
+    const dates = new Set(r.details.moments.map((m) => m.date));
+    for (const p of periods) assert.ok(dates.has(p.from), `period from ${p.from}`);
+    assert.equal(r.details.gaps.length, MAX_PERIODS);
+    for (const g of r.details.gaps) assert.ok(dates.has(g.from), `gap ${g.from}`);
+    assert.ok(dates.has(addDaysT(to, 1)), "first day after the closure");
+    assert.ok(r.details.moments.length > 8, "more than the old cap of 8");
   });
 
   test("every preview status is the engine's own result", () => {

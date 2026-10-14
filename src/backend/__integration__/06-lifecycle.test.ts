@@ -61,7 +61,9 @@ const eventsOf = async (changeSetId: string) =>
 const earlyClose = (user: Staff, time: string, replaceExisting = false) => fp().then((f) => publishWorkflow(payload, user as never, { kind: "EARLY_CLOSE", input: { time, ...(replaceExisting ? { replaceExisting } : {}) } }, f, now));
 const closeToday = (user: Staff, replaceExisting = false) =>
   fp().then((f) => publishWorkflow(payload, user as never, { kind: "CLOSED_TODAY", input: { mode: "NOW", reason: "KEINER", replacementIds: [], ...(replaceExisting ? { replaceExisting } : {}) } }, f, now));
-const undo = (user: Staff | null, cs: string) => fp().then((f) => revertChange(payload, user as never, cs, f, now));
+// 09.5D: undo previews fingerprint the whole operational state (Puls data + announcements).
+const undoFp = async () => (await previewUndo(payload, null, crypto.randomUUID(), now)).fingerprint;
+const undo = (user: Staff | null, cs: string) => undoFp().then((f) => revertChange(payload, user as never, cs, f, now));
 
 describe("lifecycle, supersede and undo", { skip: skipDb }, () => {
   before(async () => {
@@ -76,7 +78,7 @@ describe("lifecycle, supersede and undo", { skip: skipDb }, () => {
     before(freshSetup);
     test("lifecycle migration applied from zero; records default to ACTIVE", async () => {
       const m = (await payload.find({ collection: "payload-migrations", overrideAccess: true, limit: 10, sort: "id" })).docs.map((d) => (d as { name?: string }).name);
-      assert.deepEqual(m, ["20261013_122224_initial", "20261014_080446_operational_lifecycle"]);
+      assert.deepEqual(m, ["20261013_122224_initial", "20261014_080446_operational_lifecycle", "20261014_123515_announcement_lifecycle"]);
       const r = await earlyClose(users.STAFF, "11:00");
       assert.ok(r.ok);
       assert.equal((await record("openingHourExceptions", r.ok ? r.recordId : "")).recordState, "ACTIVE");
@@ -292,7 +294,7 @@ describe("lifecycle, supersede and undo", { skip: skipDb }, () => {
       // A direct REST write has no cockpit change set: the cockpit refuses to undo it.
       const latest = (await payload.find({ collection: "auditEvents", where: { entityId: { equals: rec.id } }, sort: "-id", limit: 1, overrideAccess: true })).docs[0] as unknown as { changeSetId: string | null };
       assert.equal(latest.changeSetId, null);
-      const viaRest = await revertChange(payload, users.STAFF as never, crypto.randomUUID(), await fp(), now);
+      const viaRest = await revertChange(payload, users.STAFF as never, crypto.randomUUID(), await undoFp(), now);
       assert.equal(!viaRest.ok && viaRest.code, "BLOCKED");
       // freeze: retire via a real cockpit supersede, then try to edit the retired record over REST
       assert.ok((await closeToday(users.STAFF, true)).ok);

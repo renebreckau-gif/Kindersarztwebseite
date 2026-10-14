@@ -68,6 +68,14 @@ export function decideAnnouncement(a: Announcement, today: LocalDate): Publicati
   return { ...base, editorMessages: [...base.editorMessages, msg] };
 }
 
+/**
+ * The notices the public may see on a day — the ONLY selection rule (static website today,
+ * cockpit database preview, later the cutover): decideAnnouncement per record, then priority.
+ */
+export function selectPublicAnnouncements(list: Announcement[], today: LocalDate): Announcement[] {
+  return list.filter((a) => decideAnnouncement(a, today).visible).sort((a, b) => a.priority - b.priority);
+}
+
 export function decidePerson(p: Doctor | TeamMember, today: LocalDate): PublicationDecision {
   if (!p.active) return { mode: "BLOCKED", visible: false, editorMessages: ["Nicht mehr aktiv – wird nicht als aktuelles Team angezeigt."] };
   const consent = p.publicationConsent;

@@ -69,7 +69,8 @@ const events = async (where: Record<string, unknown>) =>
   (await payload.find({ collection: "auditEvents", where: where as never, sort: "id", pagination: false, overrideAccess: true })).docs.map((e) => doc<Record<string, unknown>>(e));
 const input = (p: Partial<PlannedClosureInput> = {}): PlannedClosureInput => ({ kind: "VACATION", from: S, to: E, announceFrom: addDays(S, -7), mode: "KEINE", periods: [], gapsAccepted: false, ...p });
 const publish = async (user: Staff | null, p: Partial<PlannedClosureInput> = {}, fingerprint?: string) => publishWorkflow(payload, user as never, { kind: "PLANNED_CLOSURE", input: input(p) }, fingerprint ?? (await fp()));
-const undo = async (user: Staff, cs: string, now = new Date()) => revertChange(payload, user as never, cs, await fp(), now);
+const undoFp = async () => (await previewUndo(payload, null, crypto.randomUUID())).fingerprint;
+const undo = async (user: Staff, cs: string, now = new Date()) => revertChange(payload, user as never, cs, await undoFp(), now);
 const TWO_PERIODS_WITH_GAP = { mode: "TEILEN" as const, gapsAccepted: true, periods: [{ from: S, to: d(1), practice: "vertretung-a" }, { from: d(3), to: E, practice: "vertretung-b" }] };
 
 describe("7.5 Urlaub / Schließzeit against PostgreSQL", { skip: skipDb }, () => {
@@ -355,7 +356,8 @@ describe("7.5 Urlaub / Schließzeit against PostgreSQL", { skip: skipDb }, () =>
       assert.ok(home.body.includes(`href="/intern/urlaub/${id}"`), "Bearbeiten link");
       assert.ok(home.body.includes('href="/intern/urlaub"'), "Urlaub eintragen is a real action");
       assert.ok(!home.body.includes('href="/lab/praxis-cockpit/urlaub"'), "no longer the prototype");
-      assert.ok(home.body.includes('href="/lab/praxis-cockpit/hinweis"'), "announcements stay prototype-only");
+      // 09.5D: "Hinweis veröffentlichen" is a real workflow now (no prototype link).
+      assert.ok(home.body.includes('href="/intern/hinweis"') && !home.body.includes('href="/lab/praxis-cockpit/hinweis"'), "announcements are real");
       const preview = await http(`/intern/vorschau?datum=${S}&zeit=09:00`, { cookie });
       assert.match(preview.body, /Praxisurlaub/);
       assert.match(preview.body, /Praxis Beispiel A \(Test\)/);

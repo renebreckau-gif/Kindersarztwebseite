@@ -1,4 +1,4 @@
-// Publish path of the real cockpit workflows (today workflows 09.5A, planned closures 09.5C).
+// Publish path of the real cockpit workflows (today 09.5A, planned closures 09.5C, announcements 09.5D).
 // Server-side only.
 //
 // INPUT → SERVER DRAFT → PREVIEW → [publish:] SERVER REVALIDATION → ONE DATABASE TRANSACTION
@@ -12,13 +12,15 @@
 import { randomUUID } from "node:crypto";
 import { commitTransaction, createLocalReq, initTransaction, killTransaction, type Payload, type PayloadRequest } from "payload";
 import type { PulsData } from "../../domain/practice-status.ts";
-import { closureToDoc, exceptionToDoc } from "../../data/payload-mapping.ts";
+import { announcementToDoc, closureToDoc, exceptionToDoc } from "../../data/payload-mapping.ts";
+import type { Announcement } from "../../domain/content-types.ts";
 import { activeRole, type StaffUserLike } from "../../backend/access.ts";
 import { PayloadPracticeRepository, type PayloadReader } from "../../backend/payload-repository.ts";
 import { changeSetIdOf, SERVER_CONTEXT } from "../../backend/server-context.ts";
 import { planFor } from "../history.ts";
-import type { UndoAction, UndoPlan } from "./undo.ts";
-import { datasetFingerprint } from "./snapshot.ts";
+import type { LifecycleCollection, UndoAction, UndoPlan } from "./undo.ts";
+import { announcementFingerprint, datasetFingerprint, operationalFingerprint } from "./snapshot.ts";
+import { announcementDraft, type AnnouncementInput } from "./announcement.ts";
 import { closedTodayDraft, earlyCloseDraft } from "./today.ts";
 import { plannedClosureDraft } from "./planned.ts";
 import type { Blocked, ClosedTodayInput, Draft, EarlyCloseInput, PlannedClosureInput, ReadyDraft, WorkflowKind } from "./types.ts";
@@ -47,7 +49,7 @@ export async function previewWorkflow(payload: Payload, request: WorkflowRequest
 }
 
 /** A new record never reuses the id of an existing (also RETIRED) record: append -2, -3, … */
-async function freeRecordId(payload: Payload, req: PayloadRequest, collection: "openingHourExceptions" | "closures", wanted: string): Promise<string> {
+async function freeRecordId(payload: Payload, req: PayloadRequest, collection: LifecycleCollection, wanted: string): Promise<string> {
   for (let n = 1; ; n++) {
     const id = n === 1 ? wanted : `${wanted}-${n}`;
     const hit = await payload.find({ collection, where: { recordId: { equals: id } }, limit: 1, depth: 0, overrideAccess: true, req });
@@ -132,12 +134,27 @@ export type UndoResult =
   | { ok: true; changeSetId: string; revertedChangeSetId: string }
   | { ok: false; code: "UNAUTHENTICATED" | "STALE" | "BLOCKED" | "FAILED"; message: string };
 
-/** Preview of an undo: current ACTIVE database data + plan (both through the engine on the page). */
-export async function previewUndo(payload: Payload, user: StaffUserLike | null | undefined, changeSetId: string, now: Date = new Date()): Promise<{ plan: UndoPlan; data: PulsData; fingerprint: string }> {
-  const reader = payload as unknown as PayloadReader;
-  const data = await new PayloadPracticeRepository(reader).getPulsData();
-  const plan = await planFor(reader, changeSetId, data, now, activeRole(user));
-  return { plan, data, fingerprint: datasetFingerprint(data) };
+/** ACTIVE operational state (Praxis Puls data + announcements), optionally inside a transaction. */
+async function loadState(payload: Payload, req?: PayloadRequest): Promise<{ data: PulsData; announcements: Announcement[] }> {
+  const repo = new PayloadPracticeRepository(payload as unknown as PayloadReader, req);
+  const data = await repo.getPulsData();
+  const announcements = await repo.getAnnouncements();
+  return { data, announcements };
+}
+
+/**
+ * Preview of an undo: current ACTIVE database state + plan. A change set may hold any operational
+ * entity type, so the concurrency detector covers BOTH Puls data and announcements (09.5D).
+ */
+export async function previewUndo(
+  payload: Payload,
+  user: StaffUserLike | null | undefined,
+  changeSetId: string,
+  now: Date = new Date(),
+): Promise<{ plan: UndoPlan; data: PulsData; announcements: Announcement[]; fingerprint: string }> {
+  const state = await loadState(payload);
+  const plan = await planFor(payload as unknown as PayloadReader, changeSetId, state, now, activeRole(user));
+  return { plan, ...state, fingerprint: operationalFingerprint(state) };
 }
 
 export async function revertChange(
@@ -154,13 +171,13 @@ export async function revertChange(
   await initTransaction(req);
   try {
     const reader = payload as unknown as PayloadReader;
-    const data = await new PayloadPracticeRepository(reader, req).getPulsData();
-    if (datasetFingerprint(data) !== previewFingerprint) {
+    const state = await loadState(payload, req);
+    if (operationalFingerprint(state) !== previewFingerprint) {
       await killTransaction(req);
       return { ok: false, code: "STALE", message: STALE_MESSAGE };
     }
     // Rebuilt from server history inside the transaction — nothing from the browser but the change-set id.
-    const plan = await planFor(reader, changeSetId, data, now, role, req);
+    const plan = await planFor(reader, changeSetId, state, now, role, req);
     if (!plan.ok) {
       await killTransaction(req);
       return { ok: false, code: "BLOCKED", message: plan.message };
@@ -209,4 +226,66 @@ export async function publishWorkflow(
     const publicMessage = err && typeof err === "object" && err.isPublic && typeof err.message === "string" ? err.message : undefined;
     return { ok: false, code: "FAILED", message: publicMessage ?? "Die Änderung konnte nicht gespeichert werden. Es wurde nichts verändert." };
   }
+}
+
+
+// ---------------------------------------------------------------- "Hinweis veröffentlichen" (09.5D)
+
+export type AnnouncementPublishResult =
+  | { ok: true; changeSetId: string; mode: "NEW" | "EDIT"; recordId: string }
+  | { ok: false; code: "UNAUTHENTICATED" | "STALE" | "BLOCKED" | "FAILED"; message: string };
+
+/**
+ * Same pipeline as publishWorkflow: session account → new server changeSetId → transaction →
+ * re-read ACTIVE announcements → fingerprint → full revalidation (pure draft) → write (provenance
+ * hook, shape hook, audit hook) → commit. published / category / priority / highlight come from
+ * the draft (server rules), never from the browser.
+ */
+export async function publishAnnouncement(
+  payload: Payload,
+  user: (StaffUserLike & Record<string, unknown>) | null | undefined,
+  input: AnnouncementInput,
+  previewFingerprint: string,
+  now: Date = new Date(),
+): Promise<AnnouncementPublishResult> {
+  if (!user || !activeRole(user)) return { ok: false, code: "UNAUTHENTICATED", message: "Bitte melden Sie sich erneut an." };
+  const changeSetId = randomUUID();
+  const req = await createLocalReq({ user: user as never, context: { [SERVER_CONTEXT.CHANGE_SET]: changeSetId } }, payload);
+  await initTransaction(req);
+  try {
+    const announcements = await new PayloadPracticeRepository(payload as unknown as PayloadReader, req).getAnnouncements();
+    const fingerprint = announcementFingerprint(announcements);
+    if (fingerprint !== previewFingerprint) {
+      await killTransaction(req);
+      return { ok: false, code: "STALE", message: STALE_MESSAGE };
+    }
+    const { draft } = announcementDraft(announcements, now, input, fingerprint);
+    if (!draft.ok) {
+      await killTransaction(req);
+      return { ok: false, code: "BLOCKED", message: draft.blocked.message };
+    }
+    const recordId = await commitAnnouncement(payload, req, draft.mode, draft.record);
+    await commitTransaction(req);
+    return { ok: true, changeSetId, mode: draft.mode, recordId };
+  } catch (e) {
+    await killTransaction(req);
+    const err = e as { isPublic?: boolean; message?: string } | null;
+    const publicMessage = err && typeof err === "object" && err.isPublic && typeof err.message === "string" ? err.message : undefined;
+    return { ok: false, code: "FAILED", message: publicMessage ?? "Der Hinweis konnte nicht gespeichert werden. Es wurde nichts verändert." };
+  }
+}
+
+/** Write one announcement inside the given transaction (exported for the rollback tests). */
+export async function commitAnnouncement(payload: Payload, req: PayloadRequest, mode: "NEW" | "EDIT", record: Announcement): Promise<string> {
+  const common = { req, user: req.user, overrideAccess: false as const, depth: 0, context: req.context };
+  if (mode === "EDIT") {
+    const current = (await payload.find({ collection: "announcements", where: { and: [{ recordId: { equals: record.id } }, { recordState: { not_equals: "RETIRED" } }] }, limit: 1, depth: 0, overrideAccess: true, req })).docs[0] as { id: number | string } | undefined;
+    if (!current) throw new Error("Der zu bearbeitende Hinweis existiert nicht mehr.");
+    await payload.update({ collection: "announcements", id: current.id, data: announcementToDoc(record) as never, ...common });
+    return record.id;
+  }
+  // A new record never reuses the id of an existing (also RETIRED) record: -2, -3, …
+  const recordId = await freeRecordId(payload, req, "announcements", record.id);
+  await payload.create({ collection: "announcements", data: announcementToDoc({ ...record, id: recordId }) as never, ...common });
+  return recordId;
 }

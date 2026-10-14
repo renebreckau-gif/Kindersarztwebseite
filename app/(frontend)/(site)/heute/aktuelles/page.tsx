@@ -4,6 +4,7 @@ import { PageIntro, Section, CallAction } from "@/site/blocks";
 import u from "@/site/pages.module.css";
 import { resolvePuls } from "@/content/puls";
 import { activeAnnouncements } from "@/content/notices";
+import { NoticeList } from "@/site/notice-list";
 
 export const metadata: Metadata = {
   title: "Aktuelles",
@@ -11,8 +12,6 @@ export const metadata: Metadata = {
 };
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
-
-const deDate = (d: string) => `${d.slice(8, 10)}.${d.slice(5, 7)}.${d.slice(0, 4)}`;
 
 export default async function Aktuelles({ searchParams }: { searchParams: Search }) {
   const puls = resolvePuls(await searchParams);
@@ -22,15 +21,7 @@ export default async function Aktuelles({ searchParams }: { searchParams: Search
       <PageIntro variant="utility" title="Aktuelles" back={{ href: "/heute", label: "Heute" }} lede="Hier steht nur, was heute gilt. Abgelaufene Hinweise verschwinden automatisch." />
       <Section id="liste" tone="paper">
         {notices.length ? (
-          <ul className={u.notices}>
-            {notices.map((n) => (
-              <li key={n.id}>
-                <strong>{n.title}</strong>
-                <span>{n.shortText}</span>
-                {n.validUntil !== "OPEN_ENDED" ? <span className={u.fine}>Gültig bis {deDate(n.validUntil)}</span> : null}
-              </li>
-            ))}
-          </ul>
+          <NoticeList notices={notices} showValidity />
         ) : (
           <div className={u.empty}>
             <p className={u.emptyTitle}>Derzeit gibt es keine besonderen Hinweise.</p>

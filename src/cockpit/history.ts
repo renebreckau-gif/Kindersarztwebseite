@@ -3,18 +3,19 @@
 // Reads auditEvents through a minimal reader; React never sees raw audit documents.
 
 import type { StaffRole } from "../domain/governance.ts";
+import type { Announcement } from "../domain/content-types.ts";
 import type { PulsData } from "../domain/practice-status.ts";
 import { formatGermanDate, zonedParts, type LocalDate } from "../domain/time.ts";
 import { blocks } from "../domain/operations.ts";
 import type { PayloadReader } from "../backend/payload-repository.ts";
-import { entityKey, planUndo, type HistoryEvent, type LifecycleCollection, type StoredRecord, type UndoPlan } from "./workflows/undo.ts";
+import { entityKey, planUndo, type HistoryEvent, type LifecycleCollection, type OperationalState, type StoredRecord, type UndoPlan } from "./workflows/undo.ts";
 import { CLOSURE_KIND_TITLE, shortRange } from "./workflows/wording.ts";
 
 /** 09.5C planned closures in history sentences. */
 const PLANNED = new Set(["VACATION", "TRAINING", "OTHER"]);
 const AN_DEM: Record<string, string> = { VACATION: "am Urlaub", TRAINING: "an der Fortbildung", OTHER: "an der Schließung" };
 
-const COLLECTIONS: LifecycleCollection[] = ["openingHourExceptions", "closures"];
+const COLLECTIONS: LifecycleCollection[] = ["openingHourExceptions", "closures", "announcements"];
 
 export interface ChangeGroup {
   key: string;
@@ -47,6 +48,11 @@ const berlinDate = (iso: string) => zonedParts(new Date(iso)).date;
 
 /** Plain-German description of one business event (from its server snapshot). */
 export function describeEvent(e: HistoryEvent, today: LocalDate): string {
+  if (e.entityType === "announcements") {
+    // „Telefon am Freitag eingeschränkt“ veröffentlicht / geändert
+    const title = ((e.next ?? e.previous ?? {}) as { title?: string }).title ?? "Hinweis";
+    return `„${title}“ ${e.operation === "CREATE" ? "veröffentlicht" : "geändert"}`;
+  }
   const snap = (e.next ?? e.previous ?? {}) as { kind?: string; startDate?: string; endDate?: string; intervals?: { start: string; end: string; consultationType: string }[] };
   const day = snap.startDate === today && snap.endDate === today ? "Heute" : snap.startDate ? formatGermanDate(snap.startDate) : "";
   if (e.entityType === "openingHourExceptions") {
@@ -65,6 +71,11 @@ export function describeEvent(e: HistoryEvent, today: LocalDate): string {
 
 /** A revert of a planned closure: its creation ("Urlaub … zurückgenommen") or an edit ("Änderung am Urlaub …"). */
 function describeRevert(events: HistoryEvent[]): string {
+  const notice = events.find((x) => x.entityType === "announcements");
+  if (notice) {
+    const snap = (notice.next ?? {}) as { title?: string; recordState?: string };
+    return snap.recordState === "RETIRED" ? `„${snap.title ?? "Hinweis"}“ zurückgenommen` : `Änderung an „${snap.title ?? "Hinweis"}“ zurückgenommen`;
+  }
   const e = events.find((x) => x.entityType === "closures" && PLANNED.has(String((x.next as { kind?: string } | null)?.kind)));
   if (!e) return "Änderung zurückgenommen";
   const snap = e.next as { kind: string; startDate: string; endDate: string; recordState?: string };
@@ -124,8 +135,12 @@ export interface LatestChange {
   reason?: string;
 }
 
+/** Puls data alone (09.5B call sites) or the full operational state incl. announcements (09.5D). */
+export type UndoState = PulsData | OperationalState;
+const stateOf = (s: UndoState): OperationalState => ("data" in s && "announcements" in s ? s : { data: s as PulsData, announcements: [] as Announcement[] });
+
 /** "Letzte Änderung" for the home page (latest cockpit change set and whether it can be undone now). */
-export async function latestChange(reader: PayloadReader, data: PulsData, now: Date, role: StaffRole | null): Promise<LatestChange | null> {
+export async function latestChange(reader: PayloadReader, data: UndoState, now: Date, role: StaffRole | null): Promise<LatestChange | null> {
   const today = zonedParts(now).date;
   const groups = groupChanges(await recentEvents(reader, 30), today);
   const group = groups.find((g) => g.changeSetId) ?? groups[0];
@@ -135,9 +150,10 @@ export async function latestChange(reader: PayloadReader, data: PulsData, now: D
   return { group, undoable: plan.ok, reason: plan.ok ? undefined : plan.message };
 }
 
-export async function planFor(reader: PayloadReader, changeSetId: string, data: PulsData, now: Date, role: StaffRole | null, req?: unknown): Promise<UndoPlan> {
+export async function planFor(reader: PayloadReader, changeSetId: string, state: UndoState, now: Date, role: StaffRole | null, req?: unknown): Promise<UndoPlan> {
   const inputs = await loadUndoInputs(reader, changeSetId, req);
-  return planUndo({ ...inputs, data, now, role });
+  const { data, announcements } = stateOf(state);
+  return planUndo({ ...inputs, data, announcements, now, role });
 }
 
 /** "vor 4 Minuten" — relative time for the home card. */

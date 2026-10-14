@@ -5,6 +5,7 @@ import { PageIntro, Section, StatusStatement, CallAction, EmergencyLink, DayRule
 import u from "@/site/pages.module.css";
 import { resolvePuls } from "@/content/puls";
 import { activeAnnouncements } from "@/content/notices";
+import { NoticeList } from "@/site/notice-list";
 import { publicAddress } from "@/content/practice";
 import { WEEKDAYS } from "@/content/schedule";
 import { RELEASE } from "@/content/release";
@@ -61,14 +62,7 @@ export default async function Heute({ searchParams }: { searchParams: Search }) 
 
       <Section id="hinweise" title="Aktuelle Hinweise" tone="paper">
         {notices.length ? (
-          <ul className={u.notices}>
-            {notices.map((n) => (
-              <li key={n.id}>
-                <strong>{n.title}</strong>
-                <span>{n.shortText}</span>
-              </li>
-            ))}
-          </ul>
+          <NoticeList notices={notices} />
         ) : (
           <p className={u.lead}>Derzeit gibt es keine besonderen Hinweise.</p>
         )}

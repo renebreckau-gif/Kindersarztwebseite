@@ -21,7 +21,7 @@ describe("empty database (after migrations, before bootstrap)", { skip: skipDb }
     const migrations = await payload.find({ collection: "payload-migrations", overrideAccess: true, limit: 10, sort: "id" });
     assert.deepEqual(
       migrations.docs.map((m) => (m as { name?: string }).name),
-      ["20261013_122224_initial", "20261014_080446_operational_lifecycle"],
+      ["20261013_122224_initial", "20261014_080446_operational_lifecycle", "20261014_123515_announcement_lifecycle"],
     );
     for (const c of ["staff", "weeklySchedules", "consultationTypes", "openingHourExceptions", "closures", "replacementPractices", "announcements", "auditEvents"] as const) {
       assert.equal((await payload.count({ collection: c, overrideAccess: true })).totalDocs, 0, c);

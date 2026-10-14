@@ -2,11 +2,12 @@
 // WEBSITE OPERATIONS ONLY — no patient data (enforced by privacy.ts at config build and in tests).
 // Access: ACCESS matrix (access.ts). Who may CONFIRM what: provenance hook (governance.canConfirm).
 
-import type { CollectionConfig, Field, GlobalConfig } from "payload";
+import type { CollectionBeforeChangeHook, CollectionConfig, Field, GlobalConfig } from "payload";
 import type { ConfirmableKind } from "../domain/governance.ts";
 import { ACCESS, activeRole, adminOnly, signedIn } from "./access.ts";
 import { CONSULTATION_TYPE_OPTIONS, localDate, localTime, recordId, verification } from "./fields.ts";
-import { auditHook, holidayPolicyHook, provenanceHook, publishGuardHook, retiredRecordGuard, staffCreateGuard, staffOperationGuard } from "./hooks.ts";
+import { announcementShapeHook, auditHook, holidayPolicyHook, provenanceHook, publishGuardHook, retiredRecordGuard, staffCreateGuard, staffOperationGuard } from "./hooks.ts";
+import { ANNOUNCEMENT_DEFAULT_PRIORITY, ANNOUNCEMENT_TEXT_MAX, ANNOUNCEMENT_TITLE_MAX } from "../domain/announcements.ts";
 import { isLifecycleWrite, RejectedError } from "./server-context.ts";
 
 const opts = (values: string[]) => values.map((v) => ({ label: v, value: v }));
@@ -67,7 +68,7 @@ function tracked(
   slug: keyof typeof ACCESS,
   kind: ConfirmableKind,
   fields: Field[],
-  extra: { guard?: "openingHourExceptions" | "closures"; labels: { singular: string; plural: string }; lifecycle?: boolean },
+  extra: { guard?: "openingHourExceptions" | "closures"; labels: { singular: string; plural: string }; lifecycle?: boolean; validate?: CollectionBeforeChangeHook[] },
 ): CollectionConfig {
   return {
     slug,
@@ -78,7 +79,7 @@ function tracked(
     hooks: {
       // Retired records are history; then provenance (generated verification), then the guard
       // evaluates the record as it will be stored.
-      beforeChange: [...(extra.lifecycle ? [retiredRecordGuard] : []), provenanceHook(kind), ...(extra.guard ? [publishGuardHook(extra.guard)] : [])],
+      beforeChange: [...(extra.lifecycle ? [retiredRecordGuard] : []), ...(extra.validate ?? []), provenanceHook(kind), ...(extra.guard ? [publishGuardHook(extra.guard)] : [])],
       afterChange: [auditHook(slug)],
     },
   };
@@ -233,16 +234,17 @@ export const Announcements = tracked(
   [
     recordId,
     { name: "category", label: "Kategorie", type: "select", required: true, options: opts(["INFO", "IMPORTANT", "URGENT"]) },
-    { name: "title", label: "Titel", type: "text", required: true, maxLength: 80 },
-    { name: "shortText", label: "Kurztext", type: "textarea", required: true, maxLength: 280 },
+    { name: "title", label: "Titel", type: "text", required: true, maxLength: ANNOUNCEMENT_TITLE_MAX },
+    { name: "shortText", label: "Kurztext", type: "textarea", required: true, maxLength: ANNOUNCEMENT_TEXT_MAX },
     localDate("validFrom", "Gültig ab"),
     localDate("validUntil", "Gültig bis", false),
     { name: "openEnded", label: "Ohne Enddatum", type: "checkbox", defaultValue: false },
-    { name: "priority", type: "number", required: true, defaultValue: 10 },
+    { name: "priority", type: "number", required: true, defaultValue: ANNOUNCEMENT_DEFAULT_PRIORITY },
     { name: "homepageHighlight", type: "checkbox", defaultValue: false },
     { name: "published", type: "checkbox", defaultValue: false },
   ],
-  { labels: { singular: "Hinweis", plural: "Hinweise" } },
+  // 09.5D: same ACTIVE / RETIRED lifecycle as closures and exceptions; invariants on every write path.
+  { lifecycle: true, validate: [announcementShapeHook], labels: { singular: "Hinweis", plural: "Hinweise" } },
 );
 
 /** Append-only audit trail. Written only by server hooks (overrideAccess); never updated or deleted. */

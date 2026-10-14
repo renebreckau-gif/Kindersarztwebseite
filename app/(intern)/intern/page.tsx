@@ -1,8 +1,8 @@
 // Real Praxis Cockpit — Übersicht.
 // Every number and status comes from PostgreSQL → Payload → PayloadPracticeRepository → engine.
 // Real operational writes (cockpit database only; the public website stays static): Heute früher
-// schließen, Heute geschlossen (09.5A), Urlaub / Schließzeit (09.5C); "Letzte Änderung" with safe
-// undo (09.5B). "Hinweis veröffentlichen" is still prototype-only.
+// schließen, Heute geschlossen (09.5A), Urlaub / Schließzeit (09.5C), Hinweis veröffentlichen (09.5D);
+// "Letzte Änderung" with safe undo (09.5B). The Akutsprechstunde is not connected.
 
 import config from "@payload-config";
 import Link from "next/link";
@@ -19,13 +19,15 @@ import { CockpitFrame } from "../cockpit-frame";
 import { internSession } from "../session";
 import { Unavailable } from "../unavailable";
 
-// Real workflows write to the cockpit database (09.5A today, 09.5C Urlaub); announcements remain prototype-only.
+// Real workflows write to the cockpit database (09.5A today, 09.5C Urlaub, 09.5D Hinweis).
+// The Akutsprechstunde is not connected and is deliberately not offered here.
 const REAL_ACTIONS = [
   { href: "/intern/heute/frueher-schliessen", label: "Heute früher schließen" },
   { href: "/intern/heute/geschlossen", label: "Heute geschlossen" },
   { href: "/intern/urlaub", label: "Urlaub eintragen" },
+  { href: "/intern/hinweis", label: "Hinweis veröffentlichen" },
 ];
-const PROTOTYPE_ACTIONS = [{ href: "/lab/praxis-cockpit/hinweis", label: "Hinweis veröffentlichen" }];
+const PROTOTYPE_ACTIONS: { href: string; label: string }[] = [];
 
 export default async function Intern() {
   const session = await internSession();
@@ -38,7 +40,7 @@ export default async function Intern() {
   try {
     const reader = (await getPayload({ config })) as unknown as PayloadReader;
     practice = await loadPracticeData(reader);
-    last = await latestChange(reader, practice.data, new Date(), staff.role);
+    last = await latestChange(reader, practice, new Date(), staff.role);
   } catch {
     return <Unavailable />;
   }
@@ -114,18 +116,22 @@ export default async function Intern() {
                 </li>
               ))}
             </ul>
-            <h3 className="cp-h3 cp-quick-later">Später verfügbar</h3>
-            <p className="cp-muted">Dieser Ablauf ist bis dahin nur im Prototyp mit Testdaten zu sehen.</p>
-            <ul className="cp-quick-list">
-              {PROTOTYPE_ACTIONS.map((q) => (
-                <li key={q.href}>
-                  <Link href={q.href} className="cp-quick-link">
-                    <span>{q.label}</span>
-                    <span className="cp-quick-tag">nur im Prototyp ansehen</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            {PROTOTYPE_ACTIONS.length ? (
+              <>
+                <h3 className="cp-h3 cp-quick-later">Später verfügbar</h3>
+                <p className="cp-muted">Diese Abläufe sind bis dahin nur im Prototyp mit Testdaten zu sehen.</p>
+                <ul className="cp-quick-list">
+                  {PROTOTYPE_ACTIONS.map((q) => (
+                    <li key={q.href}>
+                      <Link href={q.href} className="cp-quick-link">
+                        <span>{q.label}</span>
+                        <span className="cp-quick-tag">nur im Prototyp ansehen</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : null}
           </section>
 
           <section className="cp-panel cp-upcoming" aria-labelledby="termine-title">

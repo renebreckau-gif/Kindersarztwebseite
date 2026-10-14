@@ -1099,3 +1099,28 @@ body.intern {
     color: var(--color-text-secondary);
   }
 }
+
+/* ---------------------------------------------------------------- 09.5D Hinweise */
+
+/* One comparison per row: database and current website side by side need the width. */
+.cp-moments-wide {
+  grid-template-columns: minmax(0, 1fr);
+}
+.cp-compare {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  gap: var(--space-4);
+}
+.cp-compare > div {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  min-width: 0;
+}
+.cp-compare h4 {
+  margin: 0;
+}
+.cp-badge-attention {
+  background: color-mix(in srgb, var(--palette-coral) 16%, var(--surface));
+  color: var(--color-text);
+}

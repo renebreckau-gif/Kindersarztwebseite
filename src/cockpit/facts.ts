@@ -4,7 +4,7 @@
 // Status values come from the engine (getPracticeStatus); the planned hours of a day use the same
 // display helper as the cockpit home (dayPlan). Pure — no Payload, no React.
 
-import type { Closure, OpeningHourException } from "../domain/content-types.ts";
+import type { Announcement, Closure, OpeningHourException } from "../domain/content-types.ts";
 import { getPracticeStatus, type PulsData } from "../domain/practice-status.ts";
 import { addDays, compareDates, zonedToInstant, type LocalDate } from "../domain/time.ts";
 import { dayPlan } from "./read-model.ts";
@@ -94,4 +94,26 @@ export function dayDiffs(before: PulsData, after: PulsData, today: LocalDate): D
   return affectedDates(before, after, today)
     .map((date) => ({ date, label: date === today ? `Heute (${dayMonth(date)})` : dayMonth(date), rows: diffDay(before, after, date) }))
     .filter((d) => d.rows.length);
+}
+
+/**
+ * Announcements (09.5D): the days worth comparing when a change set touches notices — for every
+ * notice that differs between the two lists (ignoring provenance), its first remaining day in
+ * either version. Visibility itself is decided by selectPublicAnnouncements on the page.
+ */
+export function announcementDates(before: Announcement[], after: Announcement[], today: LocalDate, max = 3): LocalDate[] {
+  const key = (a: Announcement) => {
+    const { verification: _v, ...rest } = a;
+    return JSON.stringify(rest);
+  };
+  const a = new Map(before.map((x) => [x.id, x]));
+  const b = new Map(after.map((x) => [x.id, x]));
+  const dates = new Set<LocalDate>([today]);
+  for (const id of new Set([...a.keys(), ...b.keys()])) {
+    const x = a.get(id);
+    const y = b.get(id);
+    if (x && y && key(x) === key(y)) continue;
+    for (const v of [x, y]) if (v && compareDates(v.validFrom, today) > 0) dates.add(v.validFrom);
+  }
+  return [...dates].sort(compareDates).slice(0, max);
 }

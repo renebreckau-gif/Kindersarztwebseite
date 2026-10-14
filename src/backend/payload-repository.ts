@@ -60,7 +60,8 @@ export class PayloadPracticeRepository implements PracticeRepository {
     return pulsDataFromDocs({ schedule: schedules[0] ?? null, consultationTypes, exceptions, closures, replacementPractices, holidayCalendar });
   }
 
+  /** Only ACTIVE announcements (09.5D); RETIRED ones stay in PostgreSQL and the audit history. */
   async getAnnouncements(): Promise<Announcement[]> {
-    return (await this.all<AnnouncementDoc>("announcements")).map(announcementFromDoc);
+    return (await this.active<AnnouncementDoc>("announcements")).map(announcementFromDoc);
   }
 }

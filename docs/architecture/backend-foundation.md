@@ -130,6 +130,12 @@ Defined in `src/backend/collections.ts`. **Website operations only.**
 - `closures.publicMessage` allows up to 280 characters (the "Hinweis für die Website" of a planned closure); `openingHourExceptions.publicMessage` stays at 200.
 - `localDate` fields accept only real calendar days (`isLocalDate` round-trip check; e.g. `2026-02-30` is rejected).
 
+**Since 09.5D (announcements):**
+- `announcements` has the same lifecycle fields (`recordState`, `retiredReason`, `retiredAt`, `retiredByChangeSetId`, `supersededByRecordId`), server-controlled exactly like closures / exceptions; migration `20261014_123515_announcement_lifecycle` (CLI-generated, existing rows ACTIVE, applied from zero and on the dev database). `retiredRecordGuard` freezes RETIRED notices.
+- `announcementShapeHook` (beforeChange, before provenance) validates every write with the pure helper `src/domain/announcements.ts` (shared with the cockpit) and stores title / text normalized. Storage mapping unchanged: open-ended = `openEnded: true` + `validUntil: null`; finite = `openEnded: false` + a LocalDate.
+- `PayloadPracticeRepository.getAnnouncements()` returns only ACTIVE records.
+- Undo: `announcements` is a lifecycle collection of the 09.5B change-set undo (audit operations CREATE / UPDATE / REVERT, `revertOf`, new `changeSetId` per revert); provenance of a restored notice is regenerated (`reviewDueFor`: end date, open-ended today + 30).
+
 `Sources` was **not** added. Provenance uses the fixed source id `PRACTICE_COCKPIT`. A source registry follows only if editorial sources move into the backend.
 
 **Storage format:**

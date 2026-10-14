@@ -5,6 +5,7 @@ import type { CollectionAfterChangeHook, CollectionBeforeChangeHook, CollectionB
 import type { ConfirmableKind } from "../domain/governance.ts";
 import type { Closure, OpeningHourException } from "../domain/content-types.ts";
 import { applyChangeSet, introducedUnknown } from "../domain/operations.ts";
+import { announcementShapeProblems, normalizeText } from "../domain/announcements.ts";
 import { closureFromDoc, exceptionFromDoc, verificationToDoc, type ClosureDoc, type ExceptionDoc } from "../data/payload-mapping.ts";
 import { activeRole } from "./access.ts";
 import { actorFromUser, auditForWrite, berlinToday, ProvenanceRejected, reviewDueFor, verificationForWrite, type StaffUserDoc } from "./provenance.ts";
@@ -59,6 +60,24 @@ export const publishGuardHook =
     if (conflict) throw new RejectedError(`Widersprüchliche Angaben am ${conflict.date}: Diese Änderung würde einer bestehenden Änderung widersprechen.`, 409);
     return data;
   };
+
+/**
+ * Announcement invariants for EVERY write path (cockpit, REST, admin UI) — the same pure helper the
+ * cockpit workflow uses: title / text present and within limits, real dates, finite end not before
+ * the start, open-ended without an end date. Lifecycle-only writes (retire / reactivate) change no
+ * business field and are not re-validated.
+ */
+export const announcementShapeHook: CollectionBeforeChangeHook = ({ data, originalDoc, req }) => {
+  if (isLifecycleWrite(req.context)) return data;
+  const merged = { ...(originalDoc ?? {}), ...data } as Record<string, unknown>;
+  const problems = announcementShapeProblems(merged as never);
+  if (problems.length) throw new RejectedError(problems.map((p) => p.message).join(" "), 400);
+  // Stored normalized (no leading/trailing or repeated whitespace).
+  const out: Record<string, unknown> = { ...data };
+  if (typeof data.title === "string") out.title = normalizeText(data.title);
+  if (typeof data.shortText === "string") out.shortText = normalizeText(data.shortText);
+  return out;
+};
 
 /**
  * Retired records are history: ordinary writes (REST, admin UI, cockpit edits) may not change

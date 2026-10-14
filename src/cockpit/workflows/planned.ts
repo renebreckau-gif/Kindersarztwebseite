@@ -118,8 +118,6 @@ export interface PlannedMoment {
   changes: FactRow[];
 }
 
-const MAX_MOMENTS = 8;
-
 function previewMoments(data: PulsData, after: PulsData, record: Closure, gaps: { from: LocalDate; to: LocalDate }[], editing: Closure | undefined, today: LocalDate, nameOf: (id: string) => string): PlannedMoment[] {
   const out: { kind: MomentKind; label: string; date: LocalDate }[] = [];
   const firstDay = maxDate(record.startDate, today);
@@ -149,7 +147,7 @@ function previewMoments(data: PulsData, after: PulsData, record: Closure, gaps: 
   return out
     .filter((m) => (seen.has(m.date) ? false : (seen.add(m.date), true)))
     .sort((a, b) => compareDates(a.date, b.date))
-    .slice(0, MAX_MOMENTS)
+    // No cap: every mandatory moment stays (bounded anyway by MAX_PERIODS and the gaps between them).
     .map((m) => {
       const at = zonedToInstant(m.date, PREVIEW_TIME);
       return { ...m, before: getPracticeStatus(at, data), after: getPracticeStatus(at, after), facts: dayFacts(after, m.date, PREVIEW_TIME), changes: diffDay(data, after, m.date) };

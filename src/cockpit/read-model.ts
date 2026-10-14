@@ -8,6 +8,7 @@ import type { Announcement, Closure, OpeningHourException } from "../domain/cont
 import { getPracticeStatus, type PracticeStatusResult, type PulsData } from "../domain/practice-status.ts";
 import { announcementExpired, blocks, notExpired, rulesSegments, uncoveredDays } from "../domain/operations.ts";
 import { evaluateFreshness } from "../domain/verification.ts";
+import { decideAnnouncement } from "../domain/publication.ts";
 import { shortRange } from "./workflows/wording.ts";
 import { addDays, compareDates, daysBetween, formatGermanDate, weekdayOf, zonedParts, zonedToInstant, formatMinutes, type LocalDate, type LocalTime } from "../domain/time.ts";
 
@@ -141,16 +142,24 @@ export function upcomingItems(data: PulsData, announcements: Announcement[], tod
 
   const notices: UpcomingItem[] = announcements
     .filter((a) => a.published && !announcementExpired(a, today) && inHorizon(a.validFrom))
-    .map((a) => ({
-      id: a.id,
-      kind: "ANNOUNCEMENT",
-      startDate: a.validFrom,
-      endDate: a.validUntil === "OPEN_ENDED" ? undefined : a.validUntil,
-      when: a.validUntil === "OPEN_ENDED" ? `ab ${formatGermanDate(a.validFrom)}` : dateRange(a.validFrom, a.validUntil),
-      title: `Hinweis: ${a.title}`,
-      active: compareDates(a.validFrom, today) <= 0,
-      unconfirmed: !verified(a),
-    }));
+    .map((a) => {
+      // Visibility from the publication rule (decideAnnouncement), not re-derived here.
+      const d = decideAnnouncement(a, today);
+      const future = compareDates(a.validFrom, today) > 0;
+      return {
+        id: a.id,
+        kind: "ANNOUNCEMENT" as const,
+        startDate: a.validFrom,
+        endDate: a.validUntil === "OPEN_ENDED" ? undefined : a.validUntil,
+        when: a.validUntil === "OPEN_ENDED" ? `ab ${formatGermanDate(a.validFrom)} · ohne Enddatum` : dateRange(a.validFrom, a.validUntil),
+        title: `Hinweis: ${a.title}`,
+        detail: d.visible ? (d.mode === "PUBLIC_WITH_WARNING" ? `Sichtbar · ${d.editorMessages[0]}` : "Sichtbar") : future ? `Sichtbar ab ${formatGermanDate(a.validFrom)}` : d.editorMessages[0],
+        active: compareDates(a.validFrom, today) <= 0,
+        unconfirmed: !verified(a),
+        confirmation: verified(a) ? `Bestätigt${a.verification.verifiedBy ? ` von ${a.verification.verifiedBy.split(",")[0]}` : ""}` : undefined,
+        editHref: `/intern/hinweis/${encodeURIComponent(a.id)}`,
+      };
+    });
 
   const order = { CLOSURE: 0, EXCEPTION: 1, ANNOUNCEMENT: 2 } as const;
   return [...closures, ...exceptions, ...notices].sort((a, b) => compareDates(a.startDate, b.startDate) || order[a.kind] - order[b.kind] || a.id.localeCompare(b.id));
@@ -162,7 +171,7 @@ export function upcomingItems(data: PulsData, announcements: Announcement[], tod
  * shown during a coming closure, unconfirmed current/upcoming operational records, and the
  * weekly schedule's verification deadline.
  */
-export function reviewItems(data: PulsData, today: LocalDate): ReviewItem[] {
+export function reviewItems(data: PulsData, today: LocalDate, announcements: Announcement[] = []): ReviewItem[] {
   const items: ReviewItem[] = [];
 
   if (!data.schedule) {
@@ -210,10 +219,24 @@ export function reviewItems(data: PulsData, today: LocalDate): ReviewItem[] {
   for (const x of [...notExpired(data.closures, today), ...notExpired(data.exceptions, today)]) {
     if (!verified(x)) items.push({ id: `unconfirmed-${x.id}`, title: "Eintrag nicht bestätigt", text: `Der Eintrag für ${dateRange(x.startDate, x.endDate)} ist nicht bestätigt und erscheint deshalb nicht auf der Website.` });
   }
+
+  // Published notices that need a person: open-ended ones at / after their review date, and notices
+  // the publication rule no longer shows (or shows with a warning). A future start or a finite end
+  // date is normal and raises nothing.
+  for (const a of announcements) {
+    if (!a.published || announcementExpired(a, today) || compareDates(a.validFrom, today) > 0) continue;
+    const d = decideAnnouncement(a, today);
+    const due = a.verification.reviewDue;
+    if (a.validUntil === "OPEN_ENDED" && due && compareDates(due, today) <= 0) {
+      items.push({ id: `notice-review-${a.id}`, title: `Hinweis „${a.title}“ prüfen`, text: `Der Hinweis hat kein Enddatum. Die vorgesehene Prüfung war am ${formatGermanDate(due)}: bitte bestätigen, ändern oder zurücknehmen.` });
+    } else if (d.mode === "PUBLIC_WITH_WARNING" || (!d.visible && a.verification.status === "VERIFIED_CURRENT")) {
+      items.push({ id: `notice-review-${a.id}`, title: `Hinweis „${a.title}“ prüfen`, text: d.editorMessages[0] ?? "Bitte prüfen." });
+    }
+  }
   return items;
 }
 
 export function cockpitHome(input: CockpitInput): CockpitHome {
   const today = todayView(input.data, input.now);
-  return { today, upcoming: upcomingItems(input.data, input.announcements, today.date), review: reviewItems(input.data, today.date) };
+  return { today, upcoming: upcomingItems(input.data, input.announcements, today.date), review: reviewItems(input.data, today.date, input.announcements) };
 }

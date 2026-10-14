@@ -1,7 +1,7 @@
 // Emergency information and notices — filtered by the domain publication rules.
 
 import type { Announcement, EmergencyInformation } from "../domain/content-types.ts";
-import { decideAnnouncement, selectPublicEmergency } from "../domain/publication.ts";
+import { selectPublicAnnouncements, selectPublicEmergency } from "../domain/publication.ts";
 import { UNCONFIRMED } from "./practice.ts";
 
 const EMERGENCY_112 = {
@@ -72,5 +72,5 @@ export const ANNOUNCEMENTS: Announcement[] = [
   },
 ];
 
-export const activeAnnouncements = (today: string) =>
-  ANNOUNCEMENTS.filter((a) => decideAnnouncement(a, today).visible).sort((a, b) => a.priority - b.priority);
+/** Public website (static): the same selection rule the cockpit preview uses for database notices. */
+export const activeAnnouncements = (today: string) => selectPublicAnnouncements(ANNOUNCEMENTS, today);

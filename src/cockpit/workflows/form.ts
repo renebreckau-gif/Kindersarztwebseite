@@ -1,6 +1,7 @@
 // Parsing of workflow inputs from query strings / form posts (pure). Only the fields a person
 // actually chooses are read — never a date, role, provenance or change-set id.
 
+import type { AnnouncementInput } from "./announcement.ts";
 import { MAX_PERIODS, type ClosedTodayInput, type EarlyCloseInput, type PlannedClosureInput, type PlannedKind, type PublicReason, type ReplacementMode } from "./types.ts";
 
 type Get = (name: string) => string | undefined;
@@ -113,4 +114,31 @@ export function parsePeriodAction(src: { get: Get }): { kind: "SPLIT" } | { kind
   if (a === "teilen") return { kind: "SPLIT" };
   const m = a.match(/^(entfernen|anpassen)-([0-7])$/);
   return m ? { kind: m[1] === "entfernen" ? "REMOVE" : "FIX", index: Number(m[2]) } : undefined;
+}
+
+// ---------------------------------------------------------------- "Hinweis veröffentlichen" (09.5D)
+
+/**
+ * Only the four fields a person chooses: titel, text, ab, ende (datum | offen) + bis. Category,
+ * priority, homepage highlight, published, provenance and lifecycle are never read from a form.
+ */
+export function parseAnnouncement(src: { get: Get }): AnnouncementInput {
+  const eintrag = src.get("eintrag");
+  const ende = src.get("ende");
+  return {
+    ...(eintrag !== undefined ? { recordId: RECORD_ID.test(eintrag) ? eintrag : "" } : {}),
+    title: src.get("titel") ?? "",
+    shortText: src.get("text") ?? "",
+    validFrom: trimmed(src.get("ab")),
+    mode: ende === "offen" ? "OPEN" : ende === "datum" ? "FINITE" : undefined,
+    validUntil: trimmed(src.get("bis")),
+  };
+}
+
+/** Query string that reproduces an announcement input (record id travels in the path). */
+export function announcementQuery(i: AnnouncementInput): string {
+  const p = new URLSearchParams({ titel: i.title, text: i.shortText, ab: i.validFrom });
+  if (i.mode) p.set("ende", i.mode === "OPEN" ? "offen" : "datum");
+  if (i.mode !== "OPEN") p.set("bis", i.validUntil);
+  return p.toString();
 }
