@@ -1,8 +1,9 @@
 // Request gate for the internal backend (Next.js 16 proxy, runs before any route module).
 //
-// /intern, /intern/admin and /api exist only while SITE_STAGE allows staging tools AND this
-// deployment has a configured database. Otherwise they answer 404 — so a deployment without a
-// database (Vercel staging today) or a PRODUCTION stage never exposes or evaluates the backend.
+// /intern, /intern/admin and /api exist only where the real staff portal is available
+// (staffPortalAvailable: database configured AND STAGING, or PRODUCTION with
+// RELEASE.staffPortalProductionEnabled — currently false). Otherwise they answer 404, so a
+// deployment without a database (Vercel staging today) never exposes or evaluates the backend.
 // Public pages are not matched and never depend on the database.
 
 import { NextResponse, type NextRequest } from "next/server";

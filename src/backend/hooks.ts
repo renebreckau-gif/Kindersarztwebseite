@@ -9,7 +9,7 @@ import { closureFromDoc, exceptionFromDoc, verificationToDoc, type ClosureDoc, t
 import { activeRole } from "./access.ts";
 import { actorFromUser, auditForWrite, berlinToday, ProvenanceRejected, reviewDueFor, verificationForWrite, type StaffUserDoc } from "./provenance.ts";
 import { PayloadPracticeRepository, type PayloadReader } from "./payload-repository.ts";
-import { isBootstrap, isTrustedSeed, RejectedError, systemActor } from "./server-context.ts";
+import { changeSetIdOf, isBootstrap, isTrustedSeed, RejectedError, systemActor } from "./server-context.ts";
 
 /**
  * Generate verification from the logged-in account; reject writes the role may not confirm.
@@ -87,6 +87,7 @@ export const auditHook =
       operation: operation === "create" ? "CREATE" : "UPDATE",
       previous: operation === "create" ? null : previousDoc,
       next: doc,
+      changeSetId: changeSetIdOf(req.context),
     });
     const { id: eventId, ...rest } = event;
     await req.payload.create({ collection: "auditEvents", data: { ...rest, eventId }, overrideAccess: true, req });

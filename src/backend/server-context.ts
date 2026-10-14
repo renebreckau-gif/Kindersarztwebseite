@@ -12,7 +12,17 @@ import type { Actor } from "../domain/governance.ts";
 export const SERVER_CONTEXT = {
   BOOTSTRAP: "praxisBootstrapAdmin",
   SEED: "praxisTrustedSeed",
+  /** Server-generated change-set id of one cockpit publish (crypto.randomUUID on the server). */
+  CHANGE_SET: "praxisChangeSetId",
 } as const;
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+
+/** The trusted change-set id, if the server set one (only UUIDs are accepted). */
+export function changeSetIdOf(ctx: Record<string, unknown> | undefined | null): string | undefined {
+  const v = ctx?.[SERVER_CONTEXT.CHANGE_SET];
+  return typeof v === "string" && UUID.test(v) ? v : undefined;
+}
 
 type Ctx = Record<string, unknown> | undefined | null;
 

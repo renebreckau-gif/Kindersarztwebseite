@@ -90,7 +90,7 @@ Enforced by tests in `src/backend/__tests__/backend-foundation.test.ts`:
 - `src/domain/` imports nothing from Payload, React, Next, `src/lab`, `src/backend`, `src/data` or `src/content`.
 - No file outside the backend imports `payload`, `@payloadcms/*` or `src/backend`. That covers `app/(frontend)` (public site, review hub, lab), content, data and lab. The public site cannot accidentally read from the database.
 - Backend users are only `app/(payload)` (Payload admin/REST), `app/(intern)` (staff cockpit) and `src/cockpit/` (cockpit read layer, since 09.4).
-- Inside `src/backend/`, Payload is imported **as types only** (generated migrations excepted). Runtime coupling lives in `payload.config.ts`, the two backend route groups and the scripts.
+- Inside `src/backend/`, Payload is imported **as types only** (generated migrations excepted). Runtime coupling lives in `payload.config.ts`, the two backend route groups, the scripts and — since 09.5A — `src/cockpit/workflows/publish.ts` (transactions for cockpit writes; the only Payload-runtime module in `src/cockpit`).
 - Production code (`src/domain`, `src/data`, `src/backend`, `src/content`, and `app/` outside `app/lab`) does not import the lab cockpit (`src/lab/cockpit`: mock accounts, test clock, scenarios).
 - The lab now **uses** the domain operations (`src/lab/cockpit/model.ts` delegates to `src/domain/operations.ts`), so the prototype and the future publish flow share one implementation.
 
@@ -184,7 +184,7 @@ Server-side rules live in `src/backend/access.ts` (pure functions, tested). Hidi
   - operation (CREATE / UPDATE / REVERT)
   - previous and new version
   - publish state
-  - change-set id and `revertOf`
+  - change-set id (since 09.5A: generated on the server per cockpit publish, passed only via the trusted request context `SERVER_CONTEXT.CHANGE_SET`, UUID-validated; never from the browser) and `revertOf`
 - **Never stored:** password, hash, salt, tokens, reset tokens, API keys, sessions or lockout counters. `stripSecrets` is applied recursively (tested).
 - **Append-only:** create, update and delete are `never` through the API.
 - **Undo:** `buildRevertEvent` creates a **new** REVERT event that restores `previous`. The original event is never changed.
@@ -322,7 +322,7 @@ Helper: `npm run db:dev -- <init|start|stop|status>` (`scripts/db-dev.ps1`).
 - **Route groups:**
   - The public site's root layout moved into `app/(frontend)/`. URLs are unchanged, and the tests follow the new paths.
   - `app/(payload)` and `app/(intern)` each have their own root layout, as required by the [installation docs](https://payloadcms.com/docs/getting-started/installation).
-- **Gate (`proxy.ts`, runs before any route module):** `/intern*` and `/api*` exist only while `SITE_STAGE` allows staging tools **and** `DATABASE_URI` + `PAYLOAD_SECRET` are configured. Otherwise they answer **404**.
+- **Gate (`proxy.ts`, runs before any route module):** `/intern*` and `/api*` exist only where the real staff portal is available — `staffPortalAvailable`: `DATABASE_URI` + `PAYLOAD_SECRET` configured **and** (STAGING, or PRODUCTION with `RELEASE.staffPortalProductionEnabled`, currently `false`; since 09.5A, the same decision as the footer entry `/mitarbeiter`). Otherwise they answer **404**.
   - **PRODUCTION stage:** the internal tools stay blocked until a production security review enables them.
   - **Deployment without a database** (Vercel staging today): there are no broken backend pages. Verified with a build and start without any backend environment: public routes 200, all backend routes 404.
 - **Build without a database:** `next build` evaluates route modules without initialising Payload. Only during the build phase (`NEXT_PHASE`) does `payload.config.ts` accept inert placeholders (an unresolvable `.invalid` host). Everywhere else, a missing `PAYLOAD_SECRET` or `DATABASE_URI` fails loudly.

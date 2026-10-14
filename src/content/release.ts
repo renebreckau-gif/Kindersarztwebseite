@@ -47,7 +47,23 @@ export const RELEASE = {
   indexable: false,
   /** Internal "Freigabe ausstehend" notes are visible in this pre-launch build. */
   showInternalNotes: true,
+  /**
+   * The REAL staff portal (/intern, /intern/admin, /api) in PRODUCTION — a release decision,
+   * not an environment concept. Stays false until the production security review (hosted EU
+   * database, ADMIN MFA, transactional email, backups) is done. On STAGING the portal follows
+   * only "backend configured". The lab prototype and /review are governed separately
+   * (stageAllowsReview) and never appear in PRODUCTION.
+   */
+  staffPortalProductionEnabled: false,
 } as const;
+
+/**
+ * Single decision for the real staff portal — used by BOTH the request gate (proxy.ts via
+ * src/backend/gate.ts) and the footer entry (/mitarbeiter), so the footer can never point to a
+ * route the gate blocks.
+ */
+export const staffPortalAvailable = (stage: SiteStage, backend: boolean, release: { staffPortalProductionEnabled: boolean } = RELEASE): boolean =>
+  backend && (stage === "STAGING" || release.staffPortalProductionEnabled);
 
 /** Review-only query parameters (never linked from the public UI). */
 export type ReviewParams = {

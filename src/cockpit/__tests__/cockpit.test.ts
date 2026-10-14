@@ -171,9 +171,13 @@ const rel = (p: string) => relative(ROOT, p).split(sep).join("/");
 const imports = (p: string) => [...readFileSync(p, "utf8").matchAll(/(?:from|import)\s*\(?\s*["']([^"']+)["']/g)].map((m) => m[1]);
 
 describe("cockpit structure", () => {
-  test("src/cockpit: no React/Next, no lab mocks, Payload types only via the repository", () => {
+  test("src/cockpit: no React/Next, no lab mocks; Payload runtime only in the publish (transaction) module", () => {
     for (const f of files(join(ROOT, "src/cockpit"))) {
-      for (const i of imports(f)) assert.doesNotMatch(i, /^(react|next)(\/|$)|^payload$|^@payloadcms|\/lab\//, `${rel(f)} → ${i}`);
+      const allowPayload = rel(f) === "src/cockpit/workflows/publish.ts";
+      for (const i of imports(f)) {
+        assert.doesNotMatch(i, /^(react|next)(\/|$)|^@payloadcms|\/lab\//, `${rel(f)} → ${i}`);
+        if (!allowPayload) assert.doesNotMatch(i, /^payload$/, `${rel(f)} → ${i}`);
+      }
     }
   });
 

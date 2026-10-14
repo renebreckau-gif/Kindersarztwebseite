@@ -49,6 +49,8 @@ export function auditForWrite(input: {
   operation: AuditOperation;
   previous: unknown;
   next: unknown;
+  /** Server-generated id of one cockpit publish (trusted context only, never from the browser). */
+  changeSetId?: string;
 }): AuditEventRecord {
   return buildAuditEvent({ ...input, at: input.now });
 }

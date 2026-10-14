@@ -16,9 +16,12 @@ import { CockpitFrame } from "../cockpit-frame";
 import { internSession } from "../session";
 import { Unavailable } from "../unavailable";
 
+// Phase 09.5A: the two today workflows write to the cockpit database; the others remain prototype-only.
+const REAL_ACTIONS = [
+  { href: "/intern/heute/frueher-schliessen", label: "Heute früher schließen" },
+  { href: "/intern/heute/geschlossen", label: "Heute geschlossen" },
+];
 const PROTOTYPE_ACTIONS = [
-  { href: "/lab/praxis-cockpit/frueher-schliessen", label: "Heute früher schließen" },
-  { href: "/lab/praxis-cockpit/geschlossen", label: "Heute geschlossen" },
   { href: "/lab/praxis-cockpit/urlaub", label: "Urlaub eintragen" },
   { href: "/lab/praxis-cockpit/hinweis", label: "Hinweis veröffentlichen" },
 ];
@@ -78,13 +81,24 @@ export default async function Intern() {
             <h2 id="quick-title" className="cp-h2">
               Schnellaktionen
             </h2>
-            <p className="cp-muted">Änderungen veröffentlichen Sie hier in einer späteren Ausbaustufe. Bis dahin zeigt der Prototyp mit Testdaten, wie es funktioniert.</p>
+            <ul className="cp-quick-list">
+              {REAL_ACTIONS.map((q) => (
+                <li key={q.href}>
+                  <Link href={q.href} className="cp-quick-link cp-quick-real">
+                    <span>{q.label}</span>
+                    <span className="cp-quick-tag">Testumgebung · Cockpit-Datenbank</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <h3 className="cp-h3 cp-quick-later">Später verfügbar</h3>
+            <p className="cp-muted">Diese Abläufe zeigt bis dahin der Prototyp mit Testdaten.</p>
             <ul className="cp-quick-list">
               {PROTOTYPE_ACTIONS.map((q) => (
                 <li key={q.href}>
                   <Link href={q.href} className="cp-quick-link">
                     <span>{q.label}</span>
-                    <span className="cp-quick-tag">im Prototyp ansehen</span>
+                    <span className="cp-quick-tag">nur im Prototyp ansehen</span>
                   </Link>
                 </li>
               ))}

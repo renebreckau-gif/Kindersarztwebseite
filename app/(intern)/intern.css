@@ -649,3 +649,128 @@ body.intern {
     font-size: 0.9375rem;
   }
 }
+
+/* ================================================================ today workflows (Phase 09.5A) */
+.cp-workflow {
+  max-width: 60rem;
+}
+.cp-back {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  margin-bottom: var(--space-2);
+  color: var(--palette-cobalt-text);
+  font-weight: 600;
+  text-underline-offset: 0.2em;
+}
+.cp-back:focus-visible,
+.cp-choice input:focus-visible,
+.cp-quick-real:focus-visible {
+  outline: 3px solid var(--palette-cobalt);
+  outline-offset: 3px;
+}
+.cp-form {
+  gap: var(--space-5);
+}
+.cp-fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.cp-fieldset legend {
+  padding: 0;
+  margin-bottom: var(--space-2);
+}
+.cp-choice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.cp-choice:hover {
+  background: color-mix(in srgb, var(--palette-cobalt) 6%, transparent);
+}
+.cp-choice input {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--palette-cobalt-text);
+  flex: none;
+}
+.cp-choice-disabled {
+  color: var(--color-text-secondary);
+  cursor: not-allowed;
+}
+.cp-indent {
+  margin-left: calc(22px + var(--space-3) + var(--space-3));
+}
+.cp-input-time {
+  max-width: 10rem;
+}
+.cp-optional {
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+.cp-help {
+  margin: 0;
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+}
+.cp-alert-text {
+  margin: 0 0 var(--space-3);
+}
+.cp-error .cp-btn {
+  margin-top: var(--space-2);
+}
+.cp-panel-after {
+  border-color: color-mix(in srgb, var(--palette-cobalt) 40%, var(--line));
+}
+.cp-publish {
+  justify-items: start;
+}
+.cp-effect {
+  margin: 0;
+  font-size: var(--text-body-l);
+  font-weight: 600;
+}
+.cp-quick-real {
+  border-style: solid;
+}
+.cp-quick-later {
+  margin-top: var(--space-4);
+}
+.cp-done {
+  justify-items: start;
+}
+.cp-done-tag {
+  justify-self: start;
+}
+.cp-website-note {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--palette-yellow) 22%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--palette-yellow) 70%, transparent);
+  font-weight: 600;
+}
+.cp-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+@media (max-width: 30em) {
+  .cp-indent {
+    margin-left: 0;
+  }
+  .cp-publish .cp-btn,
+  .cp-actions-row .cp-btn {
+    width: 100%;
+  }
+}

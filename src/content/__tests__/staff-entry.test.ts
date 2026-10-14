@@ -79,7 +79,9 @@ describe("/mitarbeiter", () => {
       const actions = staffEntryActions("PRODUCTION", backend);
       assert.ok(actions.every((a) => !a.href.startsWith("/lab")), String(backend));
     }
-    assert.deepEqual(staffEntryActions("PRODUCTION", true).map((a) => a.href), ["/intern/anmelden"]);
+    // Phase 09.5A: the real login appears in PRODUCTION only once the staff portal is released.
+    assert.deepEqual(staffEntryActions("PRODUCTION", true), [], "flag off (current) → calm unavailable state");
+    assert.deepEqual(staffEntryActions("PRODUCTION", true, { staffPortalProductionEnabled: true }).map((a) => a.href), ["/intern/anmelden"]);
     assert.deepEqual(staffEntryActions("PRODUCTION", false), []);
     assert.equal(stagingNote("PRODUCTION"), null);
   });

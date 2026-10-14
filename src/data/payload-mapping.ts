@@ -242,7 +242,32 @@ export function pulsDataFromDocs(docs: PracticeDocs): PulsData {
   };
 }
 
-// ---------------------------------------------------------------- to documents (seed / parity)
+// ---------------------------------------------------------------- to documents (seed / parity / cockpit writes)
+
+export const exceptionToDoc = (x: OpeningHourException): ExceptionDoc => ({
+  recordId: x.id,
+  kind: x.kind,
+  startDate: x.startDate,
+  endDate: x.endDate,
+  intervals: x.intervals.map((i) => ({ ...i })),
+  reason: x.reason ?? null,
+  publicMessage: x.publicMessage ?? null,
+  priority: x.priority,
+  verification: verificationToDoc(x.verification),
+});
+
+export const closureToDoc = (c: Closure): ClosureDoc => ({
+  recordId: c.id,
+  kind: c.kind,
+  startDate: c.startDate,
+  endDate: c.endDate,
+  announceFrom: c.announceFrom ?? null,
+  publicMessage: c.publicMessage ?? null,
+  replacements: c.replacements.map((r) => ({ replacementPracticeId: r.replacementPracticeId, from: r.from, until: r.until, note: r.note ?? null })),
+  // Payload writes optional lists as [] (null is not a valid array value); [] maps back to absent.
+  emergencyInformationIds: (c.emergencyInformationIds ?? []).map((emergencyId) => ({ emergencyId })),
+  verification: verificationToDoc(c.verification),
+});
 
 export function docsFromPulsData(data: PulsData, holidayNames: Record<string, string> = {}): PracticeDocs {
   return {
@@ -264,29 +289,8 @@ export function docsFromPulsData(data: PulsData, holidayNames: Record<string, st
         }
       : null,
     consultationTypes: data.consultationTypes.map((t) => ({ code: t.code, label: t.label, explanation: t.explanation ?? null, verification: verificationToDoc(t.verification) })),
-    exceptions: data.exceptions.map((x) => ({
-      recordId: x.id,
-      kind: x.kind,
-      startDate: x.startDate,
-      endDate: x.endDate,
-      intervals: x.intervals.map((i) => ({ ...i })),
-      reason: x.reason ?? null,
-      publicMessage: x.publicMessage ?? null,
-      priority: x.priority,
-      verification: verificationToDoc(x.verification),
-    })),
-    closures: data.closures.map((c) => ({
-      recordId: c.id,
-      kind: c.kind,
-      startDate: c.startDate,
-      endDate: c.endDate,
-      announceFrom: c.announceFrom ?? null,
-      publicMessage: c.publicMessage ?? null,
-      replacements: c.replacements.map((r) => ({ replacementPracticeId: r.replacementPracticeId, from: r.from, until: r.until, note: r.note ?? null })),
-      // Payload writes optional lists as [] (null is not a valid array value); [] maps back to absent.
-      emergencyInformationIds: (c.emergencyInformationIds ?? []).map((emergencyId) => ({ emergencyId })),
-      verification: verificationToDoc(c.verification),
-    })),
+    exceptions: data.exceptions.map(exceptionToDoc),
+    closures: data.closures.map(closureToDoc),
     replacementPractices: data.replacementPractices.map((p) => ({
       recordId: p.id,
       practiceName: p.practiceName,

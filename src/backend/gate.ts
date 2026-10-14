@@ -1,18 +1,22 @@
 // Availability gate for the internal backend routes (/intern, /intern/admin, /api).
 // Pure and edge-safe: used by proxy.ts before any Payload module is evaluated.
 //
-// Internal routes exist only while SITE_STAGE allows staging tools AND a database is
-// configured for this deployment. Without a database (e.g. Vercel staging today) they answer
-// 404 instead of failing — the public website never depends on the backend.
+// Internal routes exist only where the REAL staff portal is available: a database is configured
+// AND (STAGING, or PRODUCTION with RELEASE.staffPortalProductionEnabled). The same decision drives
+// the footer entry /mitarbeiter (staffPortalAvailable), so the two can never contradict each other.
+// Without a database (e.g. Vercel staging today) the routes answer 404 instead of failing — the
+// public website never depends on the backend. The lab prototype and /review are NOT governed here
+// (stageAllowsReview).
 
-import { stageAllowsReview, type SiteStage } from "../content/release.ts";
+import { RELEASE, staffPortalAvailable, type SiteStage } from "../content/release.ts";
 import { backendConfigured } from "../content/staff-entry.ts";
 
 export { backendConfigured };
 
 type Env = Record<string, string | undefined>;
 
-export const internAvailable = (stage: SiteStage, env: Env): boolean => stageAllowsReview(stage) && backendConfigured(env);
+export const internAvailable = (stage: SiteStage, env: Env, release: { staffPortalProductionEnabled: boolean } = RELEASE): boolean =>
+  staffPortalAvailable(stage, backendConfigured(env), release);
 
 /** Paths served by the backend (custom intern shell, Payload admin, Payload REST). */
 export const isBackendPath = (pathname: string): boolean => /^\/(intern|api)(\/|$)/.test(pathname);
