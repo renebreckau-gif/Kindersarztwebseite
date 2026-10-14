@@ -6,8 +6,8 @@ import type { CollectionConfig, Field, GlobalConfig } from "payload";
 import type { ConfirmableKind } from "../domain/governance.ts";
 import { ACCESS, activeRole, adminOnly, signedIn } from "./access.ts";
 import { CONSULTATION_TYPE_OPTIONS, localDate, localTime, recordId, verification } from "./fields.ts";
-import { auditHook, holidayPolicyHook, provenanceHook, publishGuardHook, staffCreateGuard, staffOperationGuard } from "./hooks.ts";
-import { RejectedError } from "./server-context.ts";
+import { auditHook, holidayPolicyHook, provenanceHook, publishGuardHook, retiredRecordGuard, staffCreateGuard, staffOperationGuard } from "./hooks.ts";
+import { isLifecycleWrite, RejectedError } from "./server-context.ts";
 
 const opts = (values: string[]) => values.map((v) => ({ label: v, value: v }));
 const WEEKDAYS = [
@@ -23,22 +23,62 @@ const WEEKDAYS = [
 /** Role and active flag: only ADMIN may change them (no self-promotion). */
 const adminField = { create: adminOnly, update: adminOnly };
 
+/**
+ * Record lifecycle (Phase 09.5B) — separate from fact verification:
+ *   ACTIVE  → part of the practice data the engine sees
+ *   RETIRED → history only (SUPERSEDED by another record, or REVERTED by an undo); never deleted
+ * Only the trusted cockpit lifecycle path (server context, never HTTP) may write these fields;
+ * ordinary client writes to them are silently ignored by field-level access.
+ */
+const lifecycleOnly = { create: ({ req }: { req: { context?: Record<string, unknown> } }) => isLifecycleWrite(req.context), update: ({ req }: { req: { context?: Record<string, unknown> } }) => isLifecycleWrite(req.context) };
+export const LIFECYCLE_FIELDS: Field[] = [
+  {
+    name: "recordState",
+    label: "Status des Eintrags",
+    type: "select",
+    required: true,
+    defaultValue: "ACTIVE",
+    index: true,
+    options: [
+      { label: "aktiv", value: "ACTIVE" },
+      { label: "archiviert", value: "RETIRED" },
+    ],
+    access: lifecycleOnly,
+    admin: { readOnly: true, position: "sidebar" },
+  },
+  {
+    name: "retiredReason",
+    label: "Archiviert, weil",
+    type: "select",
+    options: [
+      { label: "ersetzt", value: "SUPERSEDED" },
+      { label: "zurückgenommen", value: "REVERTED" },
+    ],
+    access: lifecycleOnly,
+    admin: { readOnly: true, position: "sidebar" },
+  },
+  { name: "retiredAt", label: "Archiviert am", type: "text", access: lifecycleOnly, admin: { readOnly: true, position: "sidebar" } },
+  { name: "retiredByChangeSetId", label: "Archiviert durch Vorgang", type: "text", access: lifecycleOnly, admin: { readOnly: true, position: "sidebar" } },
+  { name: "supersededByRecordId", label: "Ersetzt durch Eintrag", type: "text", access: lifecycleOnly, admin: { readOnly: true, position: "sidebar" } },
+];
+
 /** Common wiring of a provenance-tracked operational collection. */
 function tracked(
   slug: keyof typeof ACCESS,
   kind: ConfirmableKind,
   fields: Field[],
-  extra: { guard?: "openingHourExceptions" | "closures"; labels: { singular: string; plural: string } },
+  extra: { guard?: "openingHourExceptions" | "closures"; labels: { singular: string; plural: string }; lifecycle?: boolean },
 ): CollectionConfig {
   return {
     slug,
     labels: extra.labels,
     access: ACCESS[slug],
     admin: { group: "Praxis-Betrieb" },
-    fields: [...fields, verification()],
+    fields: [...fields, verification(), ...(extra.lifecycle ? LIFECYCLE_FIELDS : [])],
     hooks: {
-      // Provenance first (generated verification), then the guard evaluates the record as it will be stored.
-      beforeChange: [provenanceHook(kind), ...(extra.guard ? [publishGuardHook(extra.guard)] : [])],
+      // Retired records are history; then provenance (generated verification), then the guard
+      // evaluates the record as it will be stored.
+      beforeChange: [...(extra.lifecycle ? [retiredRecordGuard] : []), provenanceHook(kind), ...(extra.guard ? [publishGuardHook(extra.guard)] : [])],
       afterChange: [auditHook(slug)],
     },
   };
@@ -139,7 +179,7 @@ export const OpeningHourExceptions = tracked(
     { name: "publicMessage", label: "Öffentlicher Text", type: "text", maxLength: 200 },
     { name: "priority", type: "number", required: true, defaultValue: 10 },
   ],
-  { guard: "openingHourExceptions", labels: { singular: "Geänderte Öffnungszeit", plural: "Geänderte Öffnungszeiten" } },
+  { guard: "openingHourExceptions", lifecycle: true, labels: { singular: "Geänderte Öffnungszeit", plural: "Geänderte Öffnungszeiten" } },
 );
 
 export const Closures = tracked(
@@ -165,7 +205,7 @@ export const Closures = tracked(
     },
     { name: "emergencyInformationIds", type: "array", fields: [{ name: "emergencyId", type: "text", required: true }] },
   ],
-  { guard: "closures", labels: { singular: "Schließung", plural: "Schließungen" } },
+  { guard: "closures", lifecycle: true, labels: { singular: "Schließung", plural: "Schließungen" } },
 );
 
 export const ReplacementPractices = tracked(

@@ -48,3 +48,12 @@ export const STAGING_PUBLISHED = {
   /** Shown BEFORE publishing (future tense: nothing is stored yet). */
   storedNote: "Die Änderung wird in der Cockpit-Datenbank gespeichert. Die öffentliche Website verwendet weiterhin die bisherigen Daten.",
 } as const;
+
+/** Concurrency detector message (09.5A / 09.5B) — the same text for publish and undo. */
+export const STALE_UNDO = "Inzwischen wurde etwas geändert. Bitte prüfen Sie die Vorschau erneut.";
+
+/** Truthful staging wording after an undo (public website still static). */
+export const STAGING_REVERTED = {
+  title: "Die Änderung wurde in der Testumgebung zurückgenommen.",
+  website: "Die öffentliche Website verwendet weiterhin die bisherigen Daten.",
+} as const;

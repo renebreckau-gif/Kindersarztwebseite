@@ -78,7 +78,8 @@ export function buildProvenance(actor: Actor, kind: ConfirmableKind, today: Loca
 
 // ---------------------------------------------------------------- audit (append-only)
 
-export type AuditOperation = "CREATE" | "UPDATE" | "END" | "REVERT" | "VERIFY";
+/** SUPERSEDE (09.5B): a record was retired because another record deliberately replaced it. */
+export type AuditOperation = "CREATE" | "UPDATE" | "END" | "REVERT" | "VERIFY" | "SUPERSEDE";
 export type PublishState = "PUBLISHED" | "REVERTED" | "SUPERSEDED";
 
 export interface AuditEventRecord {

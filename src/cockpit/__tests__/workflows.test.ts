@@ -101,7 +101,9 @@ describe("7.1 Heute früher schließen", () => {
   });
 
   test("a closure covering today blocks early close (no SPECIAL_HOURS + CLOSURE conflict)", () => {
-    blocked(earlyCloseDraft({ ...DATA, closures: [closure("u", "VACATION", "2026-10-12", "2026-10-16")] }, at("09:30"), { time: "11:00" }, FP), "CLOSURE_EXISTS");
+    // 09.5B: a multi-day vacation is never touched by a today workflow.
+    blocked(earlyCloseDraft({ ...DATA, closures: [closure("u", "VACATION", "2026-10-12", "2026-10-16")] }, at("09:30"), { time: "11:00" }, FP), "MULTI_DAY_EXISTS");
+    blocked(earlyCloseDraft({ ...DATA, closures: [closure("f", "TRAINING")] }, at("09:30"), { time: "11:00" }, FP), "CLOSURE_EXISTS");
   });
 
   test("an already UNKNOWN day blocks publication and names the reason", () => {
@@ -171,11 +173,12 @@ describe("7.2 Heute geschlossen", () => {
     const own = { ...DATA, closures: [closure("heute-x", "SHORT_NOTICE")] };
     const d = ready(closedTodayDraft(own, at("09:30"), { mode: "NOW", reason: "TECHNIK", replacementIds: [] }, FP));
     assert.deepEqual([d.mode, d.record.value.id, d.actionLabel], ["EDIT", "heute-x", "Meldung für heute aktualisieren"]);
-    blocked(closedTodayDraft({ ...DATA, closures: [closure("u", "VACATION", "2026-10-12", "2026-10-16")] }, at("09:30"), { mode: "NOW", reason: "KEINER", replacementIds: [] }, FP), "CLOSURE_EXISTS");
+    blocked(closedTodayDraft({ ...DATA, closures: [closure("u", "VACATION", "2026-10-12", "2026-10-16")] }, at("09:30"), { mode: "NOW", reason: "KEINER", replacementIds: [] }, FP), "MULTI_DAY_EXISTS");
+    blocked(closedTodayDraft({ ...DATA, closures: [closure("f", "TRAINING")] }, at("09:30"), { mode: "NOW", reason: "KEINER", replacementIds: [] }, FP), "CLOSURE_EXISTS");
   });
 
-  test("existing special hours today → blocked (no general supersede in 09.5A)", () => {
-    const d = blocked(closedTodayDraft({ ...DATA, exceptions: [sameDay("s", [["08:00", "11:00"]])] }, at("09:30"), { mode: "NOW", reason: "KEINER", replacementIds: [] }, FP), "SPECIAL_HOURS_EXISTS");
+  test("existing special hours today → only an explicit replacement is offered (09.5B)", () => {
+    const d = blocked(closedTodayDraft({ ...DATA, exceptions: [sameDay("s", [["08:00", "11:00"]])] }, at("09:30"), { mode: "NOW", reason: "KEINER", replacementIds: [] }, FP), "SUPERSEDE_AVAILABLE");
     assert.match(!d.ok ? d.blocked.message : "", /08:00–11:00/);
   });
 });

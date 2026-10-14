@@ -9,7 +9,7 @@ import { closureFromDoc, exceptionFromDoc, verificationToDoc, type ClosureDoc, t
 import { activeRole } from "./access.ts";
 import { actorFromUser, auditForWrite, berlinToday, ProvenanceRejected, reviewDueFor, verificationForWrite, type StaffUserDoc } from "./provenance.ts";
 import { PayloadPracticeRepository, type PayloadReader } from "./payload-repository.ts";
-import { changeSetIdOf, isBootstrap, isTrustedSeed, RejectedError, systemActor } from "./server-context.ts";
+import { auditOperationOf, changeSetIdOf, isBootstrap, isLifecycleWrite, isTrustedSeed, RejectedError, revertOfIn, systemActor } from "./server-context.ts";
 
 /**
  * Generate verification from the logged-in account; reject writes the role may not confirm.
@@ -20,6 +20,9 @@ export const provenanceHook =
   (kind: ConfirmableKind): CollectionBeforeChangeHook =>
   ({ data, req, originalDoc }) => {
     if (!req.user && isTrustedSeed(req.context)) return data;
+    // Lifecycle-only writes (retire / reactivate, trusted cockpit path) change no fact: the
+    // record keeps its factual provenance; the audit event records who changed the lifecycle.
+    if (req.user && isLifecycleWrite(req.context)) return data;
     const today = berlinToday();
     const actor = actorFromUser(req.user as StaffUserDoc | null);
     const merged = { ...(originalDoc ?? {}), ...data };
@@ -44,6 +47,9 @@ export const publishGuardHook =
   (collection: "openingHourExceptions" | "closures"): CollectionBeforeChangeHook =>
   async ({ data, req, originalDoc }) => {
     const merged = { ...(originalDoc ?? {}), ...data };
+    // Retiring removes a record from the active set; its domain effect was checked by the cockpit
+    // plan before (no new UNKNOWN). Reactivation and every ordinary write run the full guard.
+    if (isLifecycleWrite(req.context) && merged.recordState === "RETIRED") return data;
     const base = await new PayloadPracticeRepository(req.payload as unknown as PayloadReader, req).getPulsData();
     const change =
       collection === "openingHourExceptions"
@@ -53,6 +59,17 @@ export const publishGuardHook =
     if (conflict) throw new RejectedError(`Widersprüchliche Angaben am ${conflict.date}: Diese Änderung würde einer bestehenden Änderung widersprechen.`, 409);
     return data;
   };
+
+/**
+ * Retired records are history: ordinary writes (REST, admin UI, cockpit edits) may not change
+ * them. Only the trusted lifecycle path (reactivation by an undo) may touch them.
+ */
+export const retiredRecordGuard: CollectionBeforeChangeHook = ({ data, originalDoc, req }) => {
+  if ((originalDoc as { recordState?: string } | undefined)?.recordState === "RETIRED" && !isLifecycleWrite(req.context)) {
+    throw new RejectedError("Archivierte Einträge können nicht geändert werden.", 409);
+  }
+  return data;
+};
 
 /**
  * Staff accounts are created only by an active ADMIN — or once, by the bootstrap script.
@@ -84,7 +101,9 @@ export const auditHook =
       actor,
       entityType,
       entityId: String((doc as { recordId?: string }).recordId ?? doc.id),
-      operation: operation === "create" ? "CREATE" : "UPDATE",
+      // The trusted cockpit path names the semantic operation (SUPERSEDE / REVERT); never inferred from diffs.
+      operation: auditOperationOf(req.context) ?? (operation === "create" ? "CREATE" : "UPDATE"),
+      revertOf: revertOfIn(req.context),
       previous: operation === "create" ? null : previousDoc,
       next: doc,
       changeSetId: changeSetIdOf(req.context),

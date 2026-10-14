@@ -178,9 +178,10 @@ describe("real today workflows", { skip: skipDb }, () => {
       assert.doesNotMatch(pub.body, /wegen Krankheit geschlossen/, "public website stays static");
     });
 
-    test("server revalidation: early close is refused while today is closed", async () => {
+    test("server revalidation: early close is refused while today is closed (replacement only explicitly)", async () => {
+      // 09.5B: the page offers an explicit "Bestehende Änderung ersetzen"; without it the server still refuses.
       const page = await http("/intern/heute/frueher-schliessen?zeit=23:30", { cookie });
-      assert.match(page.body, /Früher schließen ist deshalb nicht möglich/);
+      assert.match(page.body, /Bestehende Änderung ersetzen/);
       const fp = datasetFingerprint(await new PayloadPracticeRepository(reader).getPulsData());
       const res = await post(cookie, { workflow: "EARLY_CLOSE", zeit: "23:30", fingerprint: fp });
       assert.match(res.headers.get("location")!, /status=blockiert/);

@@ -69,6 +69,20 @@ export function PublishForm({ draft, hidden }: { draft: Draft; hidden: ReactNode
   if (!draft.ok) return null;
   return (
     <form method="post" action="/intern/heute/veroeffentlichen" className="cp-panel cp-publish">
+      {draft.mode === "SUPERSEDE" && draft.supersedes?.length ? (
+        <dl className="cp-replace">
+          <div>
+            <dt>Bestehend</dt>
+            <dd>
+              {draft.supersedes.map((s) => s.label).join(", ")} – wird archiviert, nicht gelöscht; im Verlauf bleibt sie erhalten
+            </dd>
+          </div>
+          <div>
+            <dt>Neu</dt>
+            <dd>{draft.kind === "CLOSED_TODAY" ? "Heute geschlossen" : "Verkürzte Sprechzeit für heute"}</dd>
+          </div>
+        </dl>
+      ) : null}
       <p className="cp-effect">{draft.effect}</p>
       <p className="cp-muted">{STAGING_PUBLISHED.storedNote}</p>
       {hidden}

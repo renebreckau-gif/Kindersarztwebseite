@@ -9,6 +9,7 @@ import { getPayload } from "payload";
 import { resolvePuls } from "@/content/puls";
 import { loadPracticeData } from "@/cockpit/queries";
 import { cockpitHome } from "@/cockpit/read-model";
+import { latestChange, relativeTime, type LatestChange } from "@/cockpit/history";
 import { formatGermanDate, parseTime } from "@/domain/time";
 import type { PayloadReader } from "@/backend/payload-repository";
 import { StatusStatement } from "@/site/blocks";
@@ -33,8 +34,11 @@ export default async function Intern() {
   const { staff } = session;
 
   let practice;
+  let last: LatestChange | null = null;
   try {
-    practice = await loadPracticeData((await getPayload({ config })) as unknown as PayloadReader);
+    const reader = (await getPayload({ config })) as unknown as PayloadReader;
+    practice = await loadPracticeData(reader);
+    last = await latestChange(reader, practice.data, new Date(), staff.role);
   } catch {
     return <Unavailable />;
   }
@@ -55,6 +59,25 @@ export default async function Intern() {
           </h1>
           <p className="cp-intro">{formatGermanDate(today.date)}</p>
         </div>
+
+        {last ? (
+          <section className="cp-last" aria-labelledby="letzte-title">
+            <div>
+              <h2 id="letzte-title" className="cp-last-label">
+                Letzte Änderung
+              </h2>
+              <p className="cp-last-title">{last.group.title}</p>
+              <p className="cp-muted">
+                von {last.group.actorName} · {relativeTime(last.group.at, now)}
+              </p>
+            </div>
+            {last.undoable && last.group.changeSetId ? (
+              <Link href={`/intern/verlauf/${last.group.changeSetId}/zuruecknehmen`} className="cp-btn cp-btn-quiet">
+                Änderung zurücknehmen
+              </Link>
+            ) : null}
+          </section>
+        ) : null}
 
         <div className="cp-grid">
           <section className="cp-panel cp-today" aria-labelledby="heute-title">

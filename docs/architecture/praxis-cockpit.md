@@ -1,27 +1,27 @@
 # Praxis Cockpit: Staff Portal Architecture
 
-Current status: Phase 09.5A done: the first REAL operational writes (7.1 Heute früher schließen, 7.2 Heute geschlossen) go into the isolated cockpit database, proven locally. The public website stays static: cockpit publishes do not change it yet. Details in the status table below.
-Last updated: 2026-10-13
+Current status: Phase 09.5B done: the real operational writes of 09.5A (7.1 Heute früher schließen, 7.2 Heute geschlossen) now have an explicit record lifecycle (ACTIVE / RETIRED), explicit supersede and a safe "Änderung zurücknehmen" for the latest change, proven locally against PostgreSQL. The public website stays static: cockpit publishes do not change it yet. Details in the status table below.
+Last updated: 2026-10-14
 Historical baseline of the Phase 09.0 architecture decision (§0–§14): `e589478`
 Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms-comparison.md) · [content-model.md](content-model.md) · [content-governance.md](content-governance.md) · [practice-pulse-logic.md](practice-pulse-logic.md) · [privacy-model.md](privacy-model.md) · [phase-04-decisions.md](phase-04-decisions.md)
 
 > **GLOBAL PROJECT RULE — deployment model:** the current Vercel deployment is the project's **STAGING** environment, not the live practice website. Implemented functionality is normally visible there for review; formal publication gates are kept for the future production launch and do not hide staging content. Single switch: `SITE_STAGE` in `src/content/release.ts`. See [deployment-model.md](deployment-model.md).
 
-## Current status (2026-10-14, after Phase 09.5A)
+## Current status (2026-10-14, after Phase 09.5B)
 
 | | |
 |---|---|
 | **Prototype** | Implemented through Phase 09.1.4 and locked for staff usability testing: `/lab/praxis-cockpit`. Directly reachable on STAGING; not in the patient navigation; `noindex`; mock data only. Blocked (404) once `SITE_STAGE = "PRODUCTION"`. |
-| **Backend** | Runs **locally**: Payload runtime, collections, access rules, provenance, audit and the publish guard, against an isolated PostgreSQL cluster. It is proven by integration tests from an empty database (24 tests). See [backend-foundation.md](backend-foundation.md) §17. Not connected to the public site, and not hosted anywhere yet. |
+| **Backend** | Runs **locally**: Payload runtime, collections, access rules, provenance, audit and the publish guard, against an isolated PostgreSQL cluster. It is proven by integration tests from an empty database (61 tests in 6 steps). See [backend-foundation.md](backend-foundation.md) §17. Not connected to the public site, and not hosted anywhere yet. |
 | **Payload** | 3.90.2 with `@payloadcms/next`/`ui`/`db-postgres` 3.90.2 (no force flags). Admin at **`/intern/admin`** (ADMIN only), REST at `/api`, GraphQL disabled. First-user registration closed; the first ADMIN is created only by `scripts/bootstrap-admin.ts`. |
 | **Database / persistence** | Local only: isolated PostgreSQL 16.2 cluster on 127.0.0.1:5433 (`kinderarzt_app`, not a superuser). Migrations from zero via the Payload CLI. Production provider open. The prototype state still lives in memory; a reload resets it. |
 | **Real authentication** | Payload auth on `staff`, verified: login, generic failures, disabled accounts, lockout, logout with session revocation, cookie `HttpOnly; SameSite=Lax; Secure`. Artificial `.invalid` test accounts only; no real accounts. Still required before production: transactional password reset and ADMIN MFA (backend-foundation §17.9–17.10). The prototype keeps its mock login. |
 | **Public website** | Uses the same Praxis Puls engine. `resolvePuls` still consumes the **static snapshot directly** (`staticPulsData()`, synchronous). It does not load through `PracticeRepository.getPulsData()`; repository-based public loading arrives with the cutover. `DATA_SOURCE = "STATIC"` is a reserved migration-target selector, not yet an active switch. Output unchanged (tested). Release gates are unchanged. |
 | **Staff entry** | Footer link **"Mitarbeiterbereich"** (after Impressum · Datenschutz · Barrierefreiheit; not in the main navigation, dock or hero) → **`/mitarbeiter`**, the stable human entry point. STAGING without backend (Vercel today): prototype only. STAGING with a configured database (local): prototype **and** real login, clearly labelled. PRODUCTION: real login only when `RELEASE.staffPortalProductionEnabled` — the **same** decision as the request gate (`staffPortalAvailable`), so the footer can never lead to a 404; never the lab. The footer placement is a UX choice, **not** security. |
-| **Internal routes** | `/intern/anmelden` (real login); `/intern` (real cockpit: Praxis heute from the database, Nächste Termine, Prüfen); `/intern/heute/frueher-schliessen` and `/intern/heute/geschlossen` (**real writes** to the cockpit database, 09.5A); `/intern/vorschau` (Website-Vorschau + comparison with the static website); `/intern/admin` (ADMIN only). Available where the real staff portal is available: STAGING with a configured database; in PRODUCTION only with `RELEASE.staffPortalProductionEnabled` (currently `false`). On Vercel staging (no database) they answer 404. Urlaub, Hinweise, Sonderöffnungszeiten and Akutsprechstunde remain prototype-only. |
+| **Internal routes** | `/intern/anmelden` (real login); `/intern` (real cockpit: Praxis heute from the database, Nächste Termine, Prüfen); `/intern/heute/frueher-schliessen` and `/intern/heute/geschlossen` (**real writes** to the cockpit database, 09.5A); `/intern/verlauf/[vorgang]/zuruecknehmen` (undo preview; the undo itself is an authenticated POST to `/intern/verlauf/ruecknahme`) and `/intern/verlauf/zurueckgenommen` (09.5B); `/intern/vorschau` (Website-Vorschau + comparison with the static website); `/intern/admin` (ADMIN only). Available where the real staff portal is available: STAGING with a configured database; in PRODUCTION only with `RELEASE.staffPortalProductionEnabled` (currently `false`). On Vercel staging (no database) they answer 404. Urlaub, Hinweise, Sonderöffnungszeiten and Akutsprechstunde remain prototype-only. |
 | **Review hub** | `/review` is **project review tooling** (developers and reviewers): links to the website, the cockpit prototype and Mein Arztbesuch. It is **not** the staff entry; that is `/mitarbeiter`. Available while `SITE_STAGE = "STAGING"`; 404 in PRODUCTION. No `/intern` link, because the deployed staging has no database. |
 | **Mein Arztbesuch** | Visible on STAGING for review (`SITE_STAGE`). Not released for production: `meinArztbesuchPublished = false`, formal approvals open (`meinArztbesuchApproved = false`, records truthful); site stays `noindex` (`indexable = false`). |
-| **Next phase** | 09.5B (not started): supersede lifecycle, create/edit revert semantics and "latest change" undo. Later: further workflows (Sonderöffnungszeiten, Akutsprechstunde, Urlaub, Hinweise) and, separately, the public data cutover. |
+| **Next phase** | 09.5C (not started; scope set by its own brief). Later: further workflows (Sonderöffnungszeiten, Akutsprechstunde, Urlaub, Hinweise) and, separately, the public data cutover. |
 | **Launch blockers** | `LIVE_HOST_ACCESS = OPEN` (existing webhost not accessible), and domain/DNS access unknown (project-blockers LB-13/LB-14). Production backend infrastructure: LB-15. None of these blocks staging or development. |
 
 
@@ -38,7 +38,8 @@ Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms
 | 09.2 | Backend foundation: repository layer (static authoritative), domain operations extracted, Payload + PostgreSQL adapter, collections, access/provenance/audit, parity tests | `8edc9cf` |
 | 09.3 | Isolated PostgreSQL dev cluster, migrations, Payload runtime (`/intern/admin`, `/api`), closed first-user registration + bootstrap script, `/intern` auth shell, integration tests from zero (auth, roles, provenance, audit, transactions, DB parity) | `0e53670` (preparatory work: `3d2c316`) |
 | 09.4 | Staff entry (footer → `/mitarbeiter`), real read-only cockpit from the database (Praxis heute, Nächste Termine, Prüfen), Website-Vorschau with static-vs-database comparison, role-aware navigation | `5b549be` |
-| 09.5A | Real operational writes for 7.1 Heute früher schließen and 7.2 Heute geschlossen (server draft → engine preview → revalidation → one transaction with provenance + audit + changeSetId), dataset fingerprint against stale previews, production staff-portal release gate | this phase: "feat: connect today cockpit workflows to Payload writes" |
+| 09.5A | Real operational writes for 7.1 Heute früher schließen and 7.2 Heute geschlossen (server draft → engine preview → revalidation → one transaction with provenance + audit + changeSetId), dataset fingerprint against stale previews, production staff-portal release gate | `13b62a5` |
+| 09.5B | Record lifecycle (ACTIVE / RETIRED, server-controlled), explicit supersede in both directions, multi-day safety, safe undo of the latest change (CREATE → retire, EDIT → restore, SUPERSEDE → reactivate) with REVERT audit events, "Letzte Änderung" on `/intern` | this commit |
 
 **How to read this document:** §0–§14 are the Phase 09.0 architecture decision and remain valid unless a later phase note says otherwise. The phase notes at the end record what the prototype changed or proved. Statements that became outdated are marked inline ("since 09.1.x").
 
@@ -409,6 +410,8 @@ An append-only collection `audit_events`. There is no update or delete access fo
 `/intern/verlauf` lists events newest first, filterable by date and person, in plain German. ADMIN can export a date range as CSV. Retention period: to define in privacy review ⚖. The proposal is 24 months for content events and 12 months for login events.
 
 ### 9.2 "Änderung zurücknehmen"
+
+> Since 09.5B the real implementation differs in detail; see the Phase 09.5B note (no Payload versions, `auditEvents` is the history, retired records stay in the database).
 
 > Since 09.1.4 (prototype-proven): editing an existing record publishes a **new version of the same record**. Version 1 stays in the audit history and version 2 becomes active. "Änderung zurücknehmen" on an edit restores the previous version; it does not delete the record. Only the latest change can be undone.
 
@@ -928,7 +931,7 @@ publish.ts  (previewWorkflow · publishWorkflow · commitDraft)  → Payload Loc
 - **Optional public reason:** Krankheit, Fortbildung, Technische Störung, Kein Grund anzeigen, or Sonstiges (own text, max. 140 characters).
 - **Privacy hint** under every free-text field: "Keine Namen von Patientinnen und Patienten und keine Diagnosen eintragen."
 - **Replacement:** only practices usable today (the engine's own `isUsable` freshness rule) are selectable; others are shown disabled with a reason. No free text. "No replacement" is valid, and the preview then shows the engine fallback (phone / Notfall).
-- **Conflicts:** an existing same-day SHORT_NOTICE closure is edited. Another closure, or any change already covering today (SPECIAL_HOURS or CLOSED), blocks with an explanation. Never silently overwritten; general supersede follows in 09.5B.
+- **Conflicts:** an existing same-day SHORT_NOTICE closure is edited. Another closure, or any change already covering today (SPECIAL_HOURS or CLOSED), blocks with an explanation. Never silently overwritten. Since 09.5B: an explicit "Bestehende Änderung ersetzen" (see the 09.5B note).
 
 ### Truthful staging wording
 
@@ -943,7 +946,64 @@ publish.ts  (previewWorkflow · publishWorkflow · commitDraft)  → Payload Loc
 - **Real:** "Heute früher schließen", "Heute geschlossen" (Testumgebung · Cockpit-Datenbank).
 - **"Später verfügbar … nur im Prototyp ansehen":** Urlaub eintragen, Hinweis veröffentlichen.
 
-### Undo: deliberately deferred to 09.5B
+### Undo: deliberately deferred to 09.5B (done, see below)
 
 - No "Änderung zurücknehmen" in 09.5A, and no fake undo by deleting records; delete protection is unchanged.
 - **09.5B** will define one lifecycle for supersede, CREATE/EDIT revert semantics and latest-change undo on top of the proven write path.
+
+## Phase 09.5B note: supersede lifecycle and safe undo (2026-10-14)
+
+Baseline `13b62a5`. Only the two real today-workflows (7.1, 7.2) are affected; 7.3–7.7, the full `/intern/verlauf` audit browser, CSV export, MFA, email reset, the public Payload cutover and production hosting are **not** part of this phase.
+
+### History model: no Payload versions
+
+- Payload `versions` are **not enabled** on any collection. Statements in §0–§9.2 that mention Payload versions describe the original plan, not the implementation. Undo does **not** rely on a version history.
+- **`auditEvents` is the authoritative history:** append-only, with the full `previous` / `next` snapshot of every write, `changeSetId` and `revertOf`.
+- Nothing is ever deleted: no delete access on any operational collection (unchanged), and undo never deletes.
+
+### Record lifecycle (`openingHourExceptions`, `closures`)
+
+| Field | Values / meaning |
+|---|---|
+| `recordState` | `ACTIVE` (default) · `RETIRED` |
+| `retiredReason` | `SUPERSEDED` (replaced by another record) · `REVERTED` (its creation was undone) |
+| `retiredAt` | Instant of retirement |
+| `retiredByChangeSetId` | Change set that retired it |
+| `supersededByRecordId` | The replacing record (supersede only) |
+
+- **Server-controlled:** field access allows writes only in a trusted server context (`SERVER_CONTEXT.LIFECYCLE`); values sent by a browser or REST client are ignored (tested). `OUTDATED_DO_NOT_PUBLISH` is not used for this; it stays a verification status.
+- **Retired records are frozen:** any normal write to a `RETIRED` record is refused (409, "Archivierte Einträge können nicht geändert werden.").
+- **Repository:** returns only `ACTIVE` records, so the engine, `/intern` and `/intern/vorschau` reflect the active database state. The domain model is unchanged.
+- **Record ids:** a retired record keeps its `recordId`; a new record on the same day gets a suffix (`…-2`, `…-3`).
+- Migration `20261014_080446_operational_lifecycle`: existing rows become `ACTIVE` (column default). Proven from zero and on the dev database.
+
+### Supersede ("Bestehende Änderung ersetzen")
+
+- Never silent: a conflicting single-day change first shows an explanation with the explicit action **"Bestehende Änderung ersetzen"** (`ersetzen=1`). Without it the server still refuses (revalidated on POST).
+- Both directions: geänderte Sprechzeit (SPECIAL_HOURS) → Heute geschlossen, and Heute geschlossen (SHORT_NOTICE) → Heute früher schließen.
+- The preview shows "Bestehend" (archived, not deleted) and "Neu". On publish: the old record becomes `RETIRED / SUPERSEDED` with `supersededByRecordId`, the new record is created `ACTIVE`. One transaction, one `changeSetId`; audit operations `SUPERSEDE` + `CREATE`.
+- **Multi-day safety:** the today workflows never shorten, modify or retire a multi-day record (vacation, multi-day special hours, …). They block with a message pointing to that record's own workflow.
+- Unchanged: `SAME_DAY_PRIORITY = 100`, and editing the same day's own record stays an edit of that record.
+
+### "Änderung zurücknehmen"
+
+- **Where:** "Letzte Änderung" card on `/intern`, the publish confirmation, and the undo preview `/intern/verlauf/[vorgang]/zuruecknehmen` ("Aktuell in der Cockpit-Datenbank" → "Nach dem Zurücknehmen"). The undo itself is an authenticated, same-origin **POST** (never a GET mutation). The browser sends only the change-set id and the preview fingerprint.
+- **Server-planned** (`src/cockpit/workflows/undo.ts`, pure): the plan is computed from the stored audit group and the current records. No client snapshot, `revertOf`, `changeSetId`, role or supersede metadata is accepted from the browser.
+- **Semantics per audit operation:**
+  - CREATE → the record becomes `RETIRED / REVERTED` (kept in the database; factual provenance unchanged).
+  - UPDATE (edit) → the `previous` content is restored on the **same** record (new update; provenance re-issued for the person undoing).
+  - SUPERSEDE → the replaced record becomes `ACTIVE` again (and the new record is retired as a CREATE).
+  - Order: retire first, then restore / reactivate, so the publish guard sees the final state.
+- **Who / when:** STAFF, DOCTOR, ADMIN (the role may confirm the record type); disabled or signed-out accounts cannot. Only within **24 hours** and only while the effect is still present or in the future.
+- **Latest change only:** if any record of the change set was changed again later, undo is blocked: "Dieser Stand wurde inzwischen erneut geändert. Bitte prüfen Sie den aktuellen Eintrag." A revert itself is not offered for undo. Changes written outside the cockpit (no change set) cannot be undone here.
+- **Safety:** the result is checked with the engine; an undo that would introduce an unknown state is refused. Stale previews are detected with the dataset fingerprint (09.5A). Everything runs in one transaction; audit failures roll back the lifecycle mutation (tested).
+- **Audit:** each undo is a **new** change set; every write gets operation `REVERT` with `revertOf` = the original audit event id. Original events are never changed.
+- **Wording:** "Die Änderung wurde in der Testumgebung zurückgenommen." · "Die öffentliche Website verwendet weiterhin die bisherigen Daten." History labels are plain German ("Heute um 11:00 Uhr schließen", "Praxis heute geschlossen", "Bestehende Änderung ersetzt: …", "Änderung zurückgenommen"); UPDATE / REVERT / SUPERSEDE are never the primary label.
+
+### Public site
+
+Unchanged: `DATA_SOURCE = "STATIC"`, `staticPulsData()`, no revalidation of public pages. Public routes answer 200 with PostgreSQL stopped (checked).
+
+### Ops note before production
+
+`sameOrigin()` (`app/(intern)/same-origin.ts`, shared by publish and undo) refuses posts without `Origin` and compares the `Origin` host with the request `Host` header. Before production, verify how `Host`, `X-Forwarded-Host` and `Origin` arrive in the real hosting topology (custom domain, reverse proxy) and only then adjust the check; never weaken it speculatively.

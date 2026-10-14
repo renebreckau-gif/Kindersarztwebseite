@@ -14,7 +14,26 @@ export const SERVER_CONTEXT = {
   SEED: "praxisTrustedSeed",
   /** Server-generated change-set id of one cockpit publish (crypto.randomUUID on the server). */
   CHANGE_SET: "praxisChangeSetId",
+  /** Phase 09.5B: the trusted cockpit lifecycle path may write lifecycle fields (retire / reactivate). */
+  LIFECYCLE: "praxisLifecycleWrite",
+  /** Phase 09.5B: semantic audit operation for this write ("SUPERSEDE" | "REVERT"); otherwise CREATE/UPDATE. */
+  AUDIT_OPERATION: "praxisAuditOperation",
+  /** Phase 09.5B: id of the audit event a REVERT undoes (server-loaded, never from the browser). */
+  REVERT_OF: "praxisRevertOf",
 } as const;
+
+export const isLifecycleWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.LIFECYCLE] === true;
+
+/** Semantic audit operation set by the trusted server path (validated). */
+export function auditOperationOf(ctx: Record<string, unknown> | undefined | null): "SUPERSEDE" | "REVERT" | undefined {
+  const v = ctx?.[SERVER_CONTEXT.AUDIT_OPERATION];
+  return v === "SUPERSEDE" || v === "REVERT" ? v : undefined;
+}
+
+export function revertOfIn(ctx: Record<string, unknown> | undefined | null): string | undefined {
+  const v = ctx?.[SERVER_CONTEXT.REVERT_OF];
+  return typeof v === "string" && UUID.test(v) ? v : undefined;
+}
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 

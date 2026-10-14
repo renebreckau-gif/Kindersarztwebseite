@@ -19,7 +19,7 @@ import {
 
 /** The subset of Payload's Local API used here. */
 export interface PayloadReader {
-  find(args: { collection: string; limit?: number; pagination?: boolean; depth?: number; sort?: string; overrideAccess?: boolean; req?: unknown }): Promise<{ docs: unknown[] }>;
+  find(args: { collection: string; where?: Record<string, unknown>; limit?: number; pagination?: boolean; depth?: number; sort?: string; overrideAccess?: boolean; req?: unknown }): Promise<{ docs: unknown[] }>;
   findGlobal(args: { slug: string; depth?: number; overrideAccess?: boolean; req?: unknown }): Promise<unknown>;
 }
 
@@ -34,17 +34,26 @@ export class PayloadPracticeRepository implements PracticeRepository {
   }
 
   /** Deterministic order: insertion order (ascending id) unless a sort is given. */
-  private async all<T>(collection: string, sort = "id"): Promise<T[]> {
-    const res = await this.payload.find({ collection, pagination: false, depth: 0, sort, overrideAccess: true, req: this.req });
+  private async all<T>(collection: string, sort = "id", where?: Record<string, unknown>): Promise<T[]> {
+    const res = await this.payload.find({ collection, where, pagination: false, depth: 0, sort, overrideAccess: true, req: this.req });
     return res.docs as T[];
+  }
+
+  /**
+   * Operational records with a lifecycle (Phase 09.5B): only ACTIVE ones reach the domain.
+   * RETIRED records (superseded / reverted) stay in PostgreSQL and the audit history; the pure
+   * engine never needs to know about lifecycle metadata.
+   */
+  private active<T>(collection: string): Promise<T[]> {
+    return this.all<T>(collection, "id", { recordState: { not_equals: "RETIRED" } });
   }
 
   async getPulsData(): Promise<PulsData> {
     // Sequential on purpose: inside a hook all reads share one transaction connection.
     const schedules = await this.all<WeeklyScheduleDoc>("weeklySchedules", "-updatedAt");
     const consultationTypes = await this.all<ConsultationTypeDoc>("consultationTypes");
-    const exceptions = await this.all<ExceptionDoc>("openingHourExceptions");
-    const closures = await this.all<ClosureDoc>("closures");
+    const exceptions = await this.active<ExceptionDoc>("openingHourExceptions");
+    const closures = await this.active<ClosureDoc>("closures");
     const replacementPractices = await this.all<ReplacementPracticeDoc>("replacementPractices");
     const holidayCalendar = (await this.payload.findGlobal({ slug: "holidayCalendar", depth: 0, overrideAccess: true, req: this.req })) as HolidayCalendarDoc | null;
     // One weekly schedule is authoritative: the most recently updated document.

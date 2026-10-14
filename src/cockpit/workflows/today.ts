@@ -12,6 +12,7 @@ import { compareDates, formatMinutes, parseTime, type LocalDate, type LocalTime 
 import { berlinNow, dateRange } from "../read-model.ts";
 import { MAX_PUBLIC_TEXT, type Blocked, type ClosedTodayInput, type Draft, type EarlyCloseInput } from "./types.ts";
 import { PRIVACY_HINT, REASON_TEXT, unknownReason } from "./wording.ts";
+import { closedTodayQuery } from "./form.ts";
 
 /**
  * Priority of same-day cockpit changes. The engine sorts exceptions by HIGHER priority first
@@ -46,6 +47,14 @@ function cleanText(text: string | undefined): { value?: string; error?: string }
 
 const TO_CLOSED_TODAY = { label: "Heute geschlossen", href: "/intern/heute/geschlossen" };
 
+const isSingleDay = (x: { startDate: LocalDate; endDate: LocalDate }, today: LocalDate) => x.startDate === today && x.endDate === today;
+
+/** 09.5B multi-day safety: show the broader entry and refuse — it needs its own workflow. */
+const multiDayBlock = (title: string, x: { startDate: LocalDate; endDate: LocalDate }): Blocked => ({
+  code: "MULTI_DAY_EXISTS",
+  message: `Für ${dateRange(x.startDate, x.endDate)} ist „${title}“ eingetragen. Dieser mehrtägige Eintrag wird hier weder verkürzt noch ersetzt; bitte ändern Sie ihn in seinem eigenen Ablauf.`,
+});
+
 /** Suggested default: the next half hour after now — only if it really shortens today. */
 export function defaultEarlyCloseTime(data: PulsData, now: Date): LocalTime | undefined {
   const { date, time } = berlinNow(now);
@@ -70,8 +79,21 @@ export function earlyCloseDraft(data: PulsData, now: Date, input: EarlyCloseInpu
   if (text.error) return block({ code: "INVALID_INPUT", message: text.error });
 
   const closure = data.closures.find((c) => covers(c, today));
+  let superseded: Closure | undefined;
   if (closure) {
-    return block({ code: "CLOSURE_EXISTS", message: `Für heute ist bereits „${CLOSURE_TITLE[closure.kind]}“ (${dateRange(closure.startDate, closure.endDate)}) eingetragen. Früher schließen ist deshalb nicht möglich.` });
+    // 09.5B multi-day safety: a today workflow never shrinks, edits or retires a broader entry.
+    if (!isSingleDay(closure, today)) return block(multiDayBlock(CLOSURE_TITLE[closure.kind], closure));
+    if (closure.kind !== "SHORT_NOTICE") {
+      return block({ code: "CLOSURE_EXISTS", message: `Für heute ist bereits „${CLOSURE_TITLE[closure.kind]}“ eingetragen. Früher schließen ist deshalb nicht möglich.` });
+    }
+    if (!input.replaceExisting) {
+      return block({
+        code: "SUPERSEDE_AVAILABLE",
+        message: "Für heute ist bereits „Heute geschlossen“ gemeldet. Sie können diese Meldung ausdrücklich durch verkürzte Sprechzeiten ersetzen.",
+        suggestion: { label: "Bestehende Änderung ersetzen", href: `/intern/heute/frueher-schliessen?${new URLSearchParams({ zeit: input.time, ...(text.value ? { hinweis: text.value } : {}), ersetzen: "1" })}` },
+      });
+    }
+    superseded = closure;
   }
   const closedEx = data.exceptions.find((x) => covers(x, today) && x.kind === "CLOSED");
   if (closedEx) return block({ code: "CLOSURE_EXISTS", message: "Die Praxis ist heute laut einer bestehenden Änderung bereits geschlossen." });
@@ -110,9 +132,23 @@ export function earlyCloseDraft(data: PulsData, now: Date, input: EarlyCloseInpu
     priority: existing?.priority ?? SAME_DAY_PRIORITY,
     verification: provisional(today),
   };
-  const changeSet = { upsertExceptions: [record] };
+  const changeSet = { upsertExceptions: [record], ...(superseded ? { removeClosureIds: [superseded.id] } : {}) };
   const cls = classifyChange(data, changeSet, today);
   if (cls.kind === "CONFLICT") return block({ code: "CONFLICT", message: `Diese Änderung würde widersprüchliche Angaben erzeugen: ${unknownReason(cls.conflict!.reason)}` });
+
+  if (superseded) {
+    return {
+      ...base,
+      ok: true,
+      mode: "SUPERSEDE",
+      supersedes: [{ collection: "closures", recordId: superseded.id, label: "Heute geschlossen" }],
+      changeSet,
+      record: { collection: "openingHourExceptions", value: record },
+      after: getPracticeStatus(now, applyChangeSet(data, changeSet)),
+      actionLabel: `Meldung ersetzen: heute bis ${input.time} Uhr geöffnet`,
+      effect: `Die Meldung „Heute geschlossen“ wird archiviert und ersetzt. Neu: heute geöffnet ${span(blocks(effect.segments))} Uhr.`,
+    };
+  }
 
   const removed = effect.removed;
   const afternoon = removed.length > 0 && removed.every((b) => parseTime(b.start) >= parseTime("12:00"));
@@ -183,17 +219,23 @@ export function closedTodayDraft(data: PulsData, now: Date, input: ClosedTodayIn
   const sameKind = covering.find((c) => c.kind === "SHORT_NOTICE" && c.startDate === today && c.endDate === today);
   const other = covering.find((c) => c !== sameKind);
   if (other) {
-    return block({ code: "CLOSURE_EXISTS", message: `Für ${dateRange(other.startDate, other.endDate)} ist bereits „${CLOSURE_TITLE[other.kind]}“ eingetragen. Diese Schließung wird hier nicht überschrieben.` });
+    if (!isSingleDay(other, today)) return block(multiDayBlock(CLOSURE_TITLE[other.kind], other));
+    return block({ code: "CLOSURE_EXISTS", message: `Für heute ist bereits „${CLOSURE_TITLE[other.kind]}“ eingetragen. Diese Schließung wird hier nicht überschrieben.` });
   }
   const ex = data.exceptions.find((x) => covers(x, today));
+  let superseded: OpeningHourException | undefined;
   if (ex) {
-    return block({
-      code: "SPECIAL_HOURS_EXISTS",
-      message:
-        ex.kind === "CLOSED"
-          ? "Die Praxis ist heute laut einer bestehenden Änderung bereits geschlossen."
-          : `Für heute ist bereits eine geänderte Sprechzeit eingetragen (${span(blocks(toSegments(ex)))} Uhr). Eine Schließung würde ihr widersprechen. Das Ersetzen bestehender Änderungen folgt in einer späteren Ausbaustufe.`,
-    });
+    // 09.5B multi-day safety: a today workflow never shrinks, edits or retires a broader entry.
+    if (!isSingleDay(ex, today)) return block(multiDayBlock(ex.kind === "CLOSED" ? "Praxis geschlossen" : "Geänderte Sprechzeiten", ex));
+    if (ex.kind === "CLOSED") return block({ code: "SPECIAL_HOURS_EXISTS", message: "Die Praxis ist heute laut einer bestehenden Änderung bereits geschlossen." });
+    if (!input.replaceExisting) {
+      return block({
+        code: "SUPERSEDE_AVAILABLE",
+        message: `Für heute ist bereits eine geänderte Sprechzeit eingetragen (${span(blocks(toSegments(ex)))} Uhr). Eine Schließung würde ihr widersprechen. Sie können die bestehende Änderung ausdrücklich durch „Heute geschlossen“ ersetzen.`,
+        suggestion: { label: "Bestehende Änderung ersetzen", href: `/intern/heute/geschlossen?${closedTodayQuery({ ...input, mode: "NOW", replaceExisting: true })}` },
+      });
+    }
+    superseded = ex;
   }
 
   const options = replacementOptions(data, today);
@@ -213,20 +255,24 @@ export function closedTodayDraft(data: PulsData, now: Date, input: ClosedTodayIn
   if (sameKind && JSON.stringify({ m: sameKind.publicMessage, r: sameKind.replacements.map((r) => r.replacementPracticeId) }) === JSON.stringify({ m: record.publicMessage, r: ids })) {
     return block({ code: "NO_CHANGE", message: "Genau diese Meldung ist für heute bereits eingetragen. Es wird nichts geändert." });
   }
-  const changeSet = { upsertClosures: [record] };
+  const changeSet = { upsertClosures: [record], ...(superseded ? { removeExceptionIds: [superseded.id] } : {}) };
   const cls = classifyChange(data, changeSet, today);
   if (cls.kind === "CONFLICT") return block({ code: "CONFLICT", message: `Diese Änderung würde widersprüchliche Angaben erzeugen: ${unknownReason(cls.conflict!.reason)}` });
 
   const names = ids.map((id) => options.find((o) => o.id === id)!.name);
+  const replacementSentence = names.length ? ` Vertretung: ${names.join(", ")}.` : " Ohne Vertretung zeigt die Website Telefon und Notfall-Hinweise.";
   return {
     ...base,
     ok: true,
-    mode: sameKind ? "EDIT" : "NEW",
+    mode: superseded ? "SUPERSEDE" : sameKind ? "EDIT" : "NEW",
+    ...(superseded ? { supersedes: [{ collection: "openingHourExceptions" as const, recordId: superseded.id, label: `Geänderte Sprechzeit ${span(blocks(toSegments(superseded)))} Uhr` }] } : {}),
     changeSet,
     record: { collection: "closures", value: record },
     after: getPracticeStatus(now, applyChangeSet(data, changeSet)),
-    actionLabel: sameKind ? "Meldung für heute aktualisieren" : "Heute geschlossen melden",
-    effect: `Die Praxis ist heute ab sofort geschlossen.${names.length ? ` Vertretung: ${names.join(", ")}.` : " Ohne Vertretung zeigt die Website Telefon und Notfall-Hinweise."}`,
+    actionLabel: superseded ? "Änderung ersetzen und heute geschlossen melden" : sameKind ? "Meldung für heute aktualisieren" : "Heute geschlossen melden",
+    effect: superseded
+      ? `Die geänderte Sprechzeit (${span(blocks(toSegments(superseded)))} Uhr) wird archiviert und ersetzt. Neu: Die Praxis ist heute ab sofort geschlossen.${replacementSentence}`
+      : `Die Praxis ist heute ab sofort geschlossen.${replacementSentence}`,
   };
 }
 

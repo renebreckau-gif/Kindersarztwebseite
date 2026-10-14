@@ -19,7 +19,7 @@ export const fromForm = (f: FormData): { get: Get; getAll: GetAll } => ({
 const REASONS: PublicReason[] = ["KRANKHEIT", "FORTBILDUNG", "TECHNIK", "KEINER", "SONSTIGES"];
 
 export function parseEarlyClose(src: { get: Get }): EarlyCloseInput {
-  return { time: (src.get("zeit") ?? "").trim(), message: src.get("hinweis") ?? undefined };
+  return { time: (src.get("zeit") ?? "").trim(), message: src.get("hinweis") ?? undefined, ...(src.get("ersetzen") === "1" ? { replaceExisting: true } : {}) };
 }
 
 export function parseClosedToday(src: { get: Get; getAll: GetAll }): ClosedTodayInput {
@@ -30,6 +30,7 @@ export function parseClosedToday(src: { get: Get; getAll: GetAll }): ClosedToday
     reason: reason && REASONS.includes(reason) ? reason : "KEINER",
     otherText: src.get("sonstiges") ?? undefined,
     replacementIds: src.getAll("vertretung"),
+    ...(src.get("ersetzen") === "1" ? { replaceExisting: true } : {}),
   };
 }
 
@@ -37,6 +38,7 @@ export function parseClosedToday(src: { get: Get; getAll: GetAll }): ClosedToday
 export function earlyCloseQuery(i: EarlyCloseInput): string {
   const p = new URLSearchParams({ zeit: i.time });
   if (i.message) p.set("hinweis", i.message);
+  if (i.replaceExisting) p.set("ersetzen", "1");
   return p.toString();
 }
 
@@ -45,5 +47,6 @@ export function closedTodayQuery(i: ClosedTodayInput): string {
   if (i.time) p.set("zeit", i.time);
   if (i.otherText) p.set("sonstiges", i.otherText);
   for (const id of i.replacementIds) p.append("vertretung", id);
+  if (i.replaceExisting) p.set("ersetzen", "1");
   return p.toString();
 }

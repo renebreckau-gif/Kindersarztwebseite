@@ -8,19 +8,9 @@ import { getPayload } from "payload";
 import { NextResponse, type NextRequest } from "next/server";
 import { closedTodayQuery, earlyCloseQuery, fromForm, parseClosedToday, parseEarlyClose } from "@/cockpit/workflows/form";
 import { publishWorkflow, type WorkflowRequest } from "@/cockpit/workflows/publish";
+import { sameOrigin } from "../../../same-origin";
 
 const to = (req: NextRequest, path: string) => NextResponse.redirect(new URL(path, req.url), 303);
-
-function sameOrigin(req: NextRequest): boolean {
-  const origin = req.headers.get("origin");
-  const host = req.headers.get("host");
-  if (!origin || !host) return false;
-  try {
-    return new URL(origin).host === host;
-  } catch {
-    return false;
-  }
-}
 
 export async function POST(req: NextRequest) {
   if (!sameOrigin(req)) return new NextResponse("Nicht erlaubt", { status: 403 });
@@ -52,7 +42,11 @@ export async function POST(req: NextRequest) {
   }
 
   const result = await publishWorkflow(payload, user as never, request, fingerprint);
-  if (result.ok) return to(req, `/intern/heute/veroeffentlicht?art=${result.kind === "EARLY_CLOSE" ? "frueher" : "geschlossen"}&modus=${result.mode === "EDIT" ? "bearbeitet" : "neu"}`);
+  if (result.ok) {
+    const modus = result.mode === "EDIT" ? "bearbeitet" : result.mode === "SUPERSEDE" ? "ersetzt" : "neu";
+    // vorgang = the server-generated change-set id (used only to look up undo eligibility again on the server).
+    return to(req, `/intern/heute/veroeffentlicht?art=${result.kind === "EARLY_CLOSE" ? "frueher" : "geschlossen"}&modus=${modus}&vorgang=${result.changeSetId}`);
+  }
   if (result.code === "UNAUTHENTICATED") return to(req, "/intern/anmelden");
   const status = result.code === "STALE" ? "veraltet" : result.code === "BLOCKED" ? "blockiert" : "fehlgeschlagen";
   return to(req, `${back}&status=${status}`);

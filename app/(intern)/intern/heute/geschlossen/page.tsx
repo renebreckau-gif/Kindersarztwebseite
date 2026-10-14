@@ -117,6 +117,7 @@ export default async function Geschlossen({ searchParams }: { searchParams: Sear
             <p className="cp-help">Ohne Vertretung zeigt die Website Telefon und Notfall-Hinweise.</p>
           </fieldset>
 
+          {input.replaceExisting ? <input type="hidden" name="ersetzen" value="1" /> : null}
           <button type="submit" className="cp-btn cp-btn-secondary">
             Vorschau aktualisieren
           </button>
@@ -142,6 +143,7 @@ export default async function Geschlossen({ searchParams }: { searchParams: Sear
                     {input.replacementIds.map((id) => (
                       <input key={id} type="hidden" name="vertretung" value={id} />
                     ))}
+                    {input.replaceExisting ? <input type="hidden" name="ersetzen" value="1" /> : null}
                   </>
                 }
               />

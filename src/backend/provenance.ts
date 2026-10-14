@@ -51,6 +51,8 @@ export function auditForWrite(input: {
   next: unknown;
   /** Server-generated id of one cockpit publish (trusted context only, never from the browser). */
   changeSetId?: string;
+  /** For REVERT: the audit event that is undone (server-loaded). */
+  revertOf?: string;
 }): AuditEventRecord {
   return buildAuditEvent({ ...input, at: input.now });
 }

@@ -119,6 +119,13 @@ Defined in `src/backend/collections.ts`. **Website operations only.**
 | `auditEvents` | Append-only audit trail | Written only by server hooks |
 | `holidayCalendar` (global) | Public holidays and holiday policy | The policy always stays `TO_BE_CONFIRMED` in 09.2 (§10) |
 
+**Lifecycle (since 09.5B, `openingHourExceptions` and `closures`):** `recordState` (`ACTIVE` default / `RETIRED`, indexed), `retiredReason` (`SUPERSEDED` / `REVERTED`), `retiredAt`, `retiredByChangeSetId`, `supersededByRecordId`.
+- Field access: create/update only when the trusted request context carries `SERVER_CONTEXT.LIFECYCLE` (`isLifecycleWrite`, strictly `true`). Values from REST or the admin UI are dropped (tested).
+- `retiredRecordGuard` (first `beforeChange` hook): a normal write to a `RETIRED` record fails with 409 "Archivierte Einträge können nicht geändert werden.".
+- In a lifecycle write the provenance hook keeps the record's existing verification, and the publish guard skips a record that is being retired.
+- Payload `versions` are **not** enabled; the history is `auditEvents`. Nothing is deleted (no delete access, unchanged).
+- The repository (`payload-repository.ts`) loads exceptions and closures with `recordState != RETIRED` (`active()`), so the engine only ever sees active records.
+
 `Sources` was **not** added. Provenance uses the fixed source id `PRACTICE_COCKPIT`. A source registry follows only if editorial sources move into the backend.
 
 **Storage format:**
@@ -181,13 +188,13 @@ Server-side rules live in `src/backend/access.ts` (pure functions, tested). Hidi
   - actor id, plus name and role as a snapshot at the time of the action
   - timestamp (ISO UTC; displayed in Europe/Berlin)
   - entity type and id
-  - operation (CREATE / UPDATE / REVERT)
+  - operation (CREATE / UPDATE / SUPERSEDE / REVERT). Since 09.5B `SUPERSEDE` and `REVERT` are set only via the trusted context (`SERVER_CONTEXT.AUDIT_OPERATION`, `auditOperationOf`); otherwise the hook derives CREATE / UPDATE
   - previous and new version
   - publish state
-  - change-set id (since 09.5A: generated on the server per cockpit publish, passed only via the trusted request context `SERVER_CONTEXT.CHANGE_SET`, UUID-validated; never from the browser) and `revertOf`
+  - change-set id (since 09.5A: generated on the server per cockpit publish, passed only via the trusted request context `SERVER_CONTEXT.CHANGE_SET`, UUID-validated; never from the browser) and `revertOf` (since 09.5B: the original audit event id, passed only via `SERVER_CONTEXT.REVERT_OF`, UUID-validated; a revert always has its own new `changeSetId`)
 - **Never stored:** password, hash, salt, tokens, reset tokens, API keys, sessions or lockout counters. `stripSecrets` is applied recursively (tested).
 - **Append-only:** create, update and delete are `never` through the API.
-- **Undo:** `buildRevertEvent` creates a **new** REVERT event that restores `previous`. The original event is never changed.
+- **Undo (since 09.5B):** the cockpit undo writes through the normal hooks with operation `REVERT`; each write gets its own new event linked by `revertOf`. The original event is never changed. Details: [praxis-cockpit.md](praxis-cockpit.md), Phase 09.5B note.
 - Lab-prototype audit entries are not migrated; they are mock data.
 
 ## 10. Provenance
@@ -306,6 +313,7 @@ Helper: `npm run db:dev -- <init|start|stop|status>` (`scripts/db-dev.ps1`).
 - **Workflow** (official Payload CLI, [docs](https://payloadcms.com/docs/database/migrations)):
   - `payload migrate:create initial` generated `src/backend/migrations/20261013_122224_initial.ts`.
   - It covers all eight collections plus the `holidayCalendar` global, including array and `select hasMany` tables, `staff_sessions` and the Payload system tables.
+  - Since 09.5B: `payload migrate:create operational_lifecycle` generated `20261014_080446_operational_lifecycle.ts` (lifecycle enums, columns and indexes on `opening_hour_exceptions` and `closures`; `record_state` is `NOT NULL DEFAULT 'ACTIVE'`, so existing rows become ACTIVE). Same type-import adjustment, SQL unchanged. Applied from zero (tests) and on the dev database.
 - **Commands:** `npm run db:migrate` (`payload migrate`) and `npx payload migrate:status`. `push: false` stays on; there is no automatic schema push anywhere.
 - **One documented adjustment** after generation: the generated file imported the TypeScript types `MigrateUpArgs` / `MigrateDownArgs` as values. They are now `type` imports, so the file also runs under Node's type stripping (integration tests); `index.ts` uses the `.ts` extension. **The generated SQL is unchanged.** No hand-written SQL.
 - **Clean rebuild:** every `npm run test:db:clean` run drops and recreates `kinderarzt_staging_test` and applies the migrations from zero with the CLI (§17.11).

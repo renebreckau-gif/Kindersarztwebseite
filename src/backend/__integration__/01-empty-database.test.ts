@@ -18,10 +18,10 @@ describe("empty database (after migrations, before bootstrap)", { skip: skipDb }
   });
 
   test("migrations applied from zero; every collection empty", async () => {
-    const migrations = await payload.find({ collection: "payload-migrations", overrideAccess: true, limit: 10 });
+    const migrations = await payload.find({ collection: "payload-migrations", overrideAccess: true, limit: 10, sort: "id" });
     assert.deepEqual(
       migrations.docs.map((m) => (m as { name?: string }).name),
-      ["20261013_122224_initial"],
+      ["20261013_122224_initial", "20261014_080446_operational_lifecycle"],
     );
     for (const c of ["staff", "weeklySchedules", "consultationTypes", "openingHourExceptions", "closures", "replacementPractices", "announcements", "auditEvents"] as const) {
       assert.equal((await payload.count({ collection: c, overrideAccess: true })).totalDocs, 0, c);

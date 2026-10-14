@@ -37,7 +37,8 @@ export default async function FrueherSchliessen({ searchParams }: { searchParams
   // Default: the next sensible half hour — only if it really shortens today; never silently outside.
   const time = input.time || defaultEarlyCloseTime(data, now) || "";
   const message = input.message ?? "";
-  const draft = time ? buildDraft({ kind: "EARLY_CLOSE", input: { time, message } }, data, now, datasetFingerprint(data)) : null;
+  const replace = input.replaceExisting === true;
+  const draft = time ? buildDraft({ kind: "EARLY_CLOSE", input: { time, message, replaceExisting: replace } }, data, now, datasetFingerprint(data)) : null;
   const today = berlinNow(now).date;
   const existing = findDaySpecialHours(data.exceptions, today);
 
@@ -76,6 +77,7 @@ export default async function FrueherSchliessen({ searchParams }: { searchParams
               Höchstens {MAX_PUBLIC_TEXT} Zeichen. {PRIVACY_HINT}
             </p>
           </div>
+          {replace ? <input type="hidden" name="ersetzen" value="1" /> : null}
           <button type="submit" className="cp-btn cp-btn-secondary">
             Vorschau aktualisieren
           </button>
@@ -92,6 +94,7 @@ export default async function FrueherSchliessen({ searchParams }: { searchParams
                   <input type="hidden" name="workflow" value="EARLY_CLOSE" />
                   <input type="hidden" name="zeit" value={time} />
                   <input type="hidden" name="hinweis" value={message} />
+                  {replace ? <input type="hidden" name="ersetzen" value="1" /> : null}
                 </>
               }
             />
