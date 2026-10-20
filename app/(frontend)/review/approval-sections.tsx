@@ -1,6 +1,7 @@
-// Shared rendering of the staging approval drafts (10.2A Praxis-App, 10.3A Rezepte): numbered
+// Shared rendering of the staging approval drafts (10.2A Praxis-App, 10.3A Rezepte, 10.4A Kosten): numbered
 // topic sections, each with Bekannt / Unbestätigt / Offene Fragen, plus optional "missing"
-// markers, unselected candidates, "zu klären" items, a channel matrix and boundary notes.
+// markers, unselected candidates, "zu klären" items, practice-team examples, a channel /
+// payment-method matrix and boundary notes.
 // Statuses are always in words; nothing here is a form control.
 
 import type { ApprovalRisk, ApprovalSection } from "@/content/approval-review";
@@ -66,7 +67,9 @@ export function ApprovalSections({
 
                 {section.channels ? (
                   <div className={s.group}>
-                    <h3 className={s.groupTitle}>Kanäle</h3>
+                    <h3 className={s.groupTitle}>
+                      {section.channelsTitle ?? "Kanäle"}
+                    </h3>
                     <ul className={s.channels}>
                       {section.channels.map((c) => (
                         <li key={c.id} className={s.channel}>
@@ -110,6 +113,21 @@ export function ApprovalSections({
                             <span className={s.candidateState}>
                               – nicht bestätigt
                             </span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {section.examples ? (
+                    <ul
+                      className={s.clarify}
+                      aria-label="Beispiele aus dem Praxisteam"
+                    >
+                      {section.examples.map((e) => (
+                        <li key={e}>
+                          {e}{" "}
+                          <span className={s.candidateState}>
+                            – Beispiel aus dem Praxisteam, zu bestätigen
                           </span>
                         </li>
                       ))}

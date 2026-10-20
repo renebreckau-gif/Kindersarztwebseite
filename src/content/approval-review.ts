@@ -1,10 +1,10 @@
-// Shared shape of the staging approval drafts (10.2A Praxis-App, 10.3A Rezepte): per topic what
+// Shared shape of the staging approval drafts (10.2A Praxis-App, 10.3A Rezepte, 10.4A Kosten): per topic what
 // the project actually KNOWS (facts about the request, not about the practice process), what is
 // UNCONFIRMED, and the exact OPEN QUESTIONS. Review tooling only — nothing here is published.
 
 export type ApprovalRisk = "MEDIUM" | "HIGH";
 
-/** A possible contact channel; its status stays UNCONFIRMED until the practice answers. */
+/** A possible contact channel or payment method; its status stays UNCONFIRMED until the practice answers. */
 export interface ApprovalChannel {
   id: string;
   label: string;
@@ -32,8 +32,12 @@ export interface ApprovalSection {
   candidates?: string[];
   /** Items the practice must clarify (labelled "zu klären", never instructions). */
   toClarify?: string[];
-  /** Possible contact channels, all unconfirmed. */
+  /** Examples named by the practice team (labelled "zu bestätigen"; never a public item). */
+  examples?: string[];
+  /** Possible contact channels / payment methods, all unconfirmed. */
   channels?: ApprovalChannel[];
+  /** Heading of the channel matrix (default "Kanäle"). */
+  channelsTitle?: string;
   /** Boundaries and relationships to other work packages / facts. */
   notes?: string[];
 }

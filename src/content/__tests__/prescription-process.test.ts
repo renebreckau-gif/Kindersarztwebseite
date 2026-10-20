@@ -17,7 +17,7 @@ const files = (dir: string): string[] =>
     const rel = `${dir}/${f}`;
     return statSync(join(ROOT, rel)).isDirectory() ? files(rel) : /\.(ts|tsx)$/.test(f) ? [rel] : [];
   });
-const REVIEW_ONLY = ["digital-services.ts", "prescription-process.ts", "approval-review.ts"];
+const REVIEW_ONLY = ["digital-services.ts", "prescription-process.ts", "pricing-review.ts", "approval-review.ts"];
 const PUBLIC = [...files("app/(frontend)/(site)"), ...files("src/site"), ...files("src/content").filter((f) => !f.includes("__tests__") && !REVIEW_ONLY.some((r) => f.endsWith(r)))];
 const FACTS = ["F101", "F102", "F103", "F104", "F105", "F106", "F107", "F108", "F109"];
 
@@ -72,7 +72,7 @@ describe("approval draft is staging-only review tooling (A, B, C, H)", () => {
     assert.deepEqual([card?.title, card?.status, card?.href], ["Rezepte & E-Rezept – Freigabeentwurf", "Freigabeentwurf", "/review/rezepte"]);
   });
   test("H: no form controls on any approval draft", () => {
-    for (const f of [page, shared, read("app/(frontend)/review/praxis-app/page.tsx"), read("app/(frontend)/review/gut-vorbereitet/page.tsx")]) assert.doesNotMatch(f, /<form|<input|<textarea|<select/);
+    for (const f of [page, shared, read("app/(frontend)/review/praxis-app/page.tsx"), read("app/(frontend)/review/gut-vorbereitet/page.tsx"), read("app/(frontend)/review/kosten/page.tsx")]) assert.doesNotMatch(f, /<form|<input|<textarea|<select/);
   });
 });
 

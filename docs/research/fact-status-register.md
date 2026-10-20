@@ -126,8 +126,16 @@ Critical review of the five Phase 00 documents before assigning statuses:
 | F107 | E-Rezept vs. paper / pickup process (10.3A) | TO_BE_CONFIRMED | HIGH |
 | F108 | Information required in a prescription request (10.3A) | TO_BE_CONFIRMED | HIGH |
 | F109 | Patient / guardian eligibility to request (10.3A) | TO_BE_CONFIRMED | HIGH |
+| F110 | Public price list exists / should be shown (10.4A) | TO_BE_CONFIRMED | MEDIUM |
+| F111 | Which fee-based / self-pay services are offered (10.4A) | TO_BE_CONFIRMED | HIGH |
+| F112 | Exact current prices and price form (10.4A) | TO_BE_CONFIRMED | HIGH |
+| F113 | Kita-Tauglichkeit / certificate pricing example (10.4A) | TO_BE_CONFIRMED | HIGH |
+| F114 | Accepted payment methods (10.4A) | TO_BE_CONFIRMED | MEDIUM |
+| F115 | Cash payment not accepted (10.4A) | TO_BE_CONFIRMED | MEDIUM |
+| F116 | Payment timing / process (10.4A) | TO_BE_CONFIRMED | MEDIUM |
+| F117 | Price-list validity / maintenance owner (10.4A) | TO_BE_CONFIRMED | MEDIUM |
 
-Totals (109 facts): VERIFIED_CURRENT 23 · TO_BE_CONFIRMED 77 (incl. 14 missing, F77–F90, 4 staff proposals, F91–F94, 6 app candidates, F95–F100, and 9 prescription-process candidates, F101–F109) · OUTDATED_DO_NOT_PUBLISH 9
+Totals (117 facts): VERIFIED_CURRENT 23 · TO_BE_CONFIRMED 85 (incl. 14 missing, F77–F90, 4 staff proposals, F91–F94, 6 app candidates, F95–F100, 9 prescription-process candidates, F101–F109, and 8 pricing / payment candidates, F110–F117) · OUTDATED_DO_NOT_PUBLISH 9
 
 Of the 23 VERIFIED_CURRENT facts, 12 are HIGH risk; 11 of these (all except 112) still require practice sign-off before launch (LB-00).
 
@@ -855,3 +863,24 @@ Shared fields for F101–F109:
 | F107 | Result: E-Rezept, paper, pickup, notification | HIGH | Families must know where and how to redeem it | — |
 | F108 | Information a request must / must not contain | HIGH | Directly about patient / health data | the project sets no required fields |
 | F109 | Who may request (existing patients, guardians, adolescents, authorisation) | HIGH | Concerns identity and authorisation | no identity data is collected by the website |
+
+## 15. Pricing / payment candidates (Phase 10.4A)
+
+Shared fields for F110–F117:
+- **SOURCE:** practice-staff feedback, October 2026 (a price list for selected services, e.g. Kita-Tauglichkeit / Bescheinigungen; information on payment methods; possibly no cash payment) — an input, not a confirmation
+- **STATUS:** TO_BE_CONFIRMED. The project has no verified price list and infers nothing from other practices, fee schedules, web searches, old competitor sites or generic certificate fees
+- **FEATURES AFFECTED:** future "Kosten & Selbstzahlerleistungen" page in the Praxis area (10.4B), linked from "Wobei können wir helfen?"; never the start page; staging approval draft `/review/kosten`
+- **DEPENDENCY:** a public price item needs a confirmed SERVICE (F66–F74 / F111) AND a confirmed current PRICE (F112). A confirmed price never makes an unconfirmed service public; a confirmed service without a confirmed price may appear later without a price. Verification stays separate per fact
+- **NO CLAIMS:** no VAT, fee-schedule, reimbursement, insurance-coverage or tax statement; a price does not make a service "Selbstzahlerleistung"
+- **NO PAYMENT FUNCTION:** the website never takes payments or card data
+
+| ID | FACT CANDIDATE | RISK | RATIONALE | RELATIONSHIP |
+|---|---|---|---|---|
+| F110 | A current price list exists and should be shown on the website | MEDIUM | Wrong only about whether a list is shown; amounts are covered by F112 | prerequisite for any price display |
+| F111 | Which fee-based / self-pay services the practice offers | HIGH | Implies a service is offered and who pays for it | refines F66–F74 (esp. F69); F69 confirms no specific fee-based service |
+| F112 | Exact current prices and their form (fixed, "ab", by effort, on request) | HIGH | A wrong amount is a concrete, money-relevant promise to families | needs F111 for the same service; stale prices governed by F117 |
+| F113 | Kita-Tauglichkeit / Bescheinigung as a priced service (staff example), incl. exact service name | HIGH | Specific service + price; the old site listed "Kindergartentauglichkeit" (F69, 2020, unconfirmed) | instance of F111 + F112; no amount recorded |
+| F114 | Accepted payment methods (card, credit card, cash, invoice, transfer, other) | MEDIUM | A wrong method is inconvenient at the counter but not care-relevant | cash handled separately in F115 |
+| F115 | Cash payment is not accepted (scope, exceptions, alternative) | MEDIUM | A wrong "no cash" statement turns families away or misleads them | special case of F114; never published before confirmation |
+| F116 | When and where payment happens (before / after / invoice, receipt, front desk) | MEDIUM | Process information; wrong steps confuse but do not endanger care | — |
+| F117 | Price-list validity and who maintains it | MEDIUM | Without an owner prices go stale silently | proposal only: verification + lastVerified + reviewDue per price, review at least annually or on change |

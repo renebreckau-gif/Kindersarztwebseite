@@ -19,7 +19,8 @@ export interface ReviewCard {
     | "website"
     | "gut-vorbereitet"
     | "praxis-app"
-    | "rezepte";
+    | "rezepte"
+    | "kosten";
   title: string;
   text: string;
   status?: string;
@@ -67,6 +68,14 @@ export const REVIEW_CARDS: ReviewCard[] = [
     status: "Freigabeentwurf",
     action: "Freigabeentwurf öffnen",
     href: "/review/rezepte",
+  },
+  {
+    id: "kosten",
+    title: "Kosten & Zahlungsarten – Freigabeentwurf",
+    text: "Welche Leistungen mit Preis erscheinen sollen, ob eine aktuelle Preisliste vorliegt und welche Zahlungsarten gelten. Noch nicht öffentlich.",
+    status: "Freigabeentwurf",
+    action: "Freigabeentwurf öffnen",
+    href: "/review/kosten",
   },
   {
     id: "website",

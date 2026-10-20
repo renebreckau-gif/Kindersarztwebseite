@@ -42,7 +42,7 @@
 }
 @media (min-width: 60em) {
   .cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr)); /* four cards: a calm 2 × 2 */
+    grid-template-columns: repeat(2, minmax(0, 1fr)); /* never more than two readable columns, however many cards */
     align-items: stretch;
   }
 }

@@ -59,9 +59,9 @@ describe("approval draft: staging-only review tooling (A, B, C)", () => {
 describe("public code carries no app content (D, E, F)", () => {
   test("no app wording, store link or placeholder in public pages, site components or public content", () => {
     // Review-draft modules (used only by /review pages) are not public content.
-    const REVIEW_ONLY = ["digital-services.ts", "prescription-process.ts", "approval-review.ts"];
+    const REVIEW_ONLY = ["digital-services.ts", "prescription-process.ts", "pricing-review.ts", "approval-review.ts"];
     const pub = [...files("app/(frontend)/(site)"), ...files("src/site"), ...files("src/content").filter((f) => !f.includes("__tests__") && !REVIEW_ONLY.some((r) => f.endsWith(r)))];
     for (const f of pub) assert.doesNotMatch(read(f), APP_WORDING, f);
-    for (const f of pub) assert.doesNotMatch(read(f), /digital-services|prescription-process/, `${f} imports a review draft`);
+    for (const f of pub) assert.doesNotMatch(read(f), /digital-services|prescription-process|pricing-review/, `${f} imports a review draft`);
   });
 });
