@@ -32,7 +32,7 @@ export default async function Team({ searchParams }: { searchParams: Search }) {
           <p className={u.emptyTitle}>Das Team stellt sich hier vor, sobald die Freigaben vorliegen.</p>
           <CallAction />
           <InternalNote>
-            <p>Fünf Namen sind als Arbeitsdaten bestätigt (F26–F30). Vollständigkeit (F31), Funktionsbezeichnungen (F32) und Einwilligung (F33/LB-09) fehlen. Vorschau: ?vorschau=freigabe</p>
+            <p>Fünf Namen sind als Arbeitsdaten bestätigt (F26–F30). Vollständigkeit (F31), Funktionsbezeichnungen (F32) und Einwilligung (F33/LB-09) fehlen. Staging-Vorschau: ?vorschau=freigabe</p>
           </InternalNote>
         </Section>
       )}

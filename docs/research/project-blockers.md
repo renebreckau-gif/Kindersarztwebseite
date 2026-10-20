@@ -148,3 +148,10 @@ These must not appear as current information anywhere on the new site (content, 
 | Excluded outdated items | 9 |
 
 Most blockers are answered by **one structured interview with the practice** (P). Third-party emergency verification (T) and legal review (L) run in parallel. A question list for that interview exists in [missing-information.md](missing-information.md).
+
+## 6. Closed security findings
+
+| ID | Finding | Found | Resolved | Resolution |
+|---|---|---|---|---|
+| SEC-01 | The public review query `?vorschau=freigabe` (+ `&zeit=`) was not tied to the stage: after a switch to PRODUCTION anyone could have activated the review preview — simulated publication consent (unconsented names on Start, Team, Ärztinnen), a review time for PRAXIS PULS and draft chapters in Entdecken. Never exploitable on the live practice site (not deployed; STAGING only). | 10.5A (2026-10-20) | 10.5A.1 (2026-10-20) — **CLOSED** | One central gate `isPublicReviewPreview(params, stage)` in `src/content/release.ts` (built on `stageAllowsReview`); `resolvePuls`, `discoveryReviewMode` and `chapterView` use it. PRODUCTION ignores the query. Tests: `src/content/__tests__/review-preview-gate.test.ts`, integration step 19. |
+

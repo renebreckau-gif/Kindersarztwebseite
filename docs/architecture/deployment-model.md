@@ -32,7 +32,7 @@ This rule applies to all work in this repository.
 | Mein Arztbesuch | Currently visible for review: chapter 1 on `/entdecken`, all six scenes on `/entdecken/mein-arztbesuch` | Gated: requires the explicit production publication decision (`meinArztbesuchPublished`, currently `false`) plus complete formal practice, content and medical (03–05) approvals, checked in code by `approvalsComplete` (all still open). The AI-child publication decision is also open; it is documented but not yet modelled in code and must be part of the launch review. |
 | `/review` | Convenience overview (normal website, Praxis Cockpit, Mein Arztbesuch); unlocks nothing | 404 |
 | `/lab/praxis-cockpit` (mock login, prototype labelling) | Reachable for testing; never in the patient navigation | 404 (layout guard) |
-| `?vorschau=freigabe` | Still accepted for old links and for the PRAXIS PULS time preview; not needed for any content | Same |
+| `?vorschau=freigabe` (+ `&zeit=`) | Editorial review preview: PRAXIS PULS time preview, simulated publication consent on Start / Team / Ärztinnen (labelled "Vorschau"), draft chapters in Entdecken | **Ignored** (10.5A.1): one central gate `isPublicReviewPreview` (`src/content/release.ts`, via `stageAllowsReview`) — LIVE behaviour, no review time, no consent simulation, no drafts |
 | Indexing | `RELEASE.indexable = false` | Decided at launch |
 
 ## Switching to production (not done)

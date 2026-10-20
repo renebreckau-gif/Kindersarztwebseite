@@ -55,7 +55,7 @@ export default async function MeinArztbesuch({ searchParams }: { searchParams: S
             <InternalNote>
               <p>
                 Freigabe-Gate: RELEASE.meinArztbesuchApproved = {String(RELEASE.meinArztbesuchApproved)}; jede Szene braucht Inhalts-, Praxis- und (bei Messen/Abhören/Ohren) ärztliche Freigabe
-                sowie finale D1-Bilder. Review: ?vorschau=freigabe
+                sowie finale D1-Bilder. Staging-Review: ?vorschau=freigabe
               </p>
             </InternalNote>
           </section>

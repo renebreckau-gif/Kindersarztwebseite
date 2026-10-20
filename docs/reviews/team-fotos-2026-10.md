@@ -74,6 +74,16 @@ Der folgende Stand dient nur der Bestätigung durch die Praxis. Er ist **nicht**
   - Rechteinhaber und schriftliche Einwilligung
   - Zuordnung der Bildbeschreibungen
 
+## Sicherheitsbefund aus 10.5A – RESOLVED (10.5A.1)
+
+- **Befund (10.5A):** Der öffentliche Vorschau-Parameter `?vorschau=freigabe` simulierte auf Startseite, „Team“ und „Ärztinnen“ eine erteilte Einwilligung, unabhängig von der Stufe. Nach einer Umstellung auf PRODUCTION wären Namen ohne Einwilligung sichtbar geworden. Die Prüfung in 10.5A.1 fand denselben ungeprüften Parameter auch bei den Entwurfs-Kapiteln in „Entdecken“ und bei der Prüfzeit `&zeit=` des Praxis Puls.
+- **Behoben (10.5A.1):**
+  - Die öffentliche Vorschau gibt es nur auf STAGING. Es gibt genau eine Prüfung: `isPublicReviewPreview` in `src/content/release.ts`, aufgebaut auf `stageAllowsReview`.
+  - PRODUCTION ignoriert den Parameter. Die Seiten verhalten sich wie ein normaler Aufruf, ohne Prüfzeit und ohne Entwürfe.
+  - Die Einwilligungs-Simulation lässt sich in PRODUCTION nicht aktivieren.
+  - Auf STAGING bleibt die Vorschau für die Layout-Prüfung erhalten.
+- Liste geschlossener Sicherheitsbefunde: `docs/research/project-blockers.md` §6 (SEC-01).
+
 ## Umsetzung 10.5A
 
 - **Inhaltsquelle:** `src/content/team-review.ts` liest Namen und Arbeitsdaten aus `src/content/people.ts`, ohne Kopie.

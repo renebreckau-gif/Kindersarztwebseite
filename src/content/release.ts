@@ -19,6 +19,16 @@ export const SITE_STAGE: SiteStage = "STAGING";
 /** Review tooling (the /review hub and the cockpit prototype under /lab) is reachable on STAGING only. */
 export const stageAllowsReview = (stage: SiteStage = SITE_STAGE) => stage === "STAGING";
 
+/**
+ * THE single gate for the public review preview (`?vorschau=freigabe`, 10.5A.1). It exists only
+ * where review tooling is allowed (stageAllowsReview → STAGING). In PRODUCTION the query is
+ * ignored: no consent simulation (publicPeople), no review time (`zeit`), no schedule sign-off
+ * simulation (PRAXIS PULS), no draft chapters (Entdecken). Every public review behaviour must
+ * derive from this function — never from the raw query.
+ */
+export const isPublicReviewPreview = (params: { vorschau?: unknown } = {}, stage: SiteStage = SITE_STAGE): boolean =>
+  stageAllowsReview(stage) && params.vorschau === "freigabe";
+
 export const RELEASE = {
   /**
    * LB-00 — the practice has signed off the opening hours for PRAXIS PULS.

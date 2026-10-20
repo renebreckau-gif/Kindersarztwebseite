@@ -42,7 +42,7 @@ export default async function Heute({ searchParams }: { searchParams: Search }) 
         <div className={u.noteWrap}>
           <InternalNote>
             <p>
-              Der Live-Status bleibt neutral, bis die Praxis die Sprechzeiten freigegeben hat (LB-00). Vorschau mit Status: ?vorschau=freigabe&amp;zeit=2026-10-06T09:30
+              Der Live-Status bleibt neutral, bis die Praxis die Sprechzeiten freigegeben hat (LB-00). Staging-Vorschau mit Status: ?vorschau=freigabe&amp;zeit=2026-10-06T09:30
             </p>
           </InternalNote>
         </div>

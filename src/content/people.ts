@@ -47,8 +47,10 @@ export const TEAM: TeamMember[] = ["Andrea Zahn", "Steffi Christmann", "Katharin
 }));
 
 /**
- * Public people. With `previewConsent` (review mode "?vorschau=freigabe") consent is
- * simulated as confirmed so the editorial layout can be reviewed — labelled on screen.
+ * Public people. With `previewConsent` consent is simulated as confirmed so the editorial layout
+ * can be reviewed — labelled on screen. Pure: callers pass `puls.mode === "PREVIEW"`, which only
+ * the central stage gate (isPublicReviewPreview, STAGING only) can produce; in PRODUCTION it is
+ * always false.
  */
 export function publicPeople<T extends Doctor | TeamMember>(list: T[], today: string, previewConsent = false): T[] {
   return list

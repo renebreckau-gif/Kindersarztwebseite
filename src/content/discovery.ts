@@ -10,7 +10,7 @@
 import type { FactVerification } from "../domain/verification.ts";
 import type { MediaClass } from "../domain/content-types.ts";
 import type { LocalDate } from "../domain/time.ts";
-import { RELEASE, SITE_STAGE, type SiteStage } from "./release.ts";
+import { RELEASE, SITE_STAGE, isPublicReviewPreview, stageAllowsReview, type SiteStage } from "./release.ts";
 
 /**
  * Formal approvals are still open (docs/reviews/discovery-approval-package.md). The chapter is
@@ -193,23 +193,25 @@ export function approvalsComplete(c: Chapter): boolean {
 
 export type ChapterView = { mode: "PUBLIC" | "PREVIEW"; chapter: Chapter } | { mode: "GATED"; chapter: Omit<Chapter, "scenes"> };
 
-/** What a visitor may see. Preview (?vorschau=freigabe) shows drafts, clearly labelled. */
+/** What a visitor may see. Preview (?vorschau=freigabe, STAGING only) shows drafts, clearly labelled. */
 export function chapterView(c: Chapter, preview: boolean, stage: SiteStage = SITE_STAGE): ChapterView {
   if (chapterPublishable(c, stage)) return { mode: "PUBLIC", chapter: c };
-  if (preview) return { mode: "PREVIEW", chapter: c };
+  // Defence in depth: even a caller passing `true` gets no drafts outside review stages.
+  if (preview && stageAllowsReview(stage)) return { mode: "PREVIEW", chapter: c };
   const { scenes: _scenes, ...meta } = c;
   return { mode: "GATED", chapter: meta };
 }
 
 /**
  * Review mode for chapters that are not published yet: only the explicit ?vorschau=freigabe
- * link (compatibility; on STAGING implemented chapters are visible anyway). Environment
- * variables never publish content — SITE_STAGE and RELEASE do.
+ * link (compatibility; on STAGING implemented chapters are visible anyway), and only through the
+ * central stage gate — in PRODUCTION the query is ignored (10.5A.1). Environment variables never
+ * publish content — SITE_STAGE and RELEASE do.
  */
 export type ReviewMode = "QUERY" | null;
 
-export function discoveryReviewMode(vorschau: unknown): ReviewMode {
-  return vorschau === "freigabe" ? "QUERY" : null;
+export function discoveryReviewMode(vorschau: unknown, stage: SiteStage = SITE_STAGE): ReviewMode {
+  return isPublicReviewPreview({ vorschau }, stage) ? "QUERY" : null;
 }
 
 /** Chapter card on /entdecken: link and optional state chip. Published chapters have no chip. */

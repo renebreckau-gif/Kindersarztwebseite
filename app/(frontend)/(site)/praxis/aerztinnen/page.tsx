@@ -41,7 +41,7 @@ export default async function Aerztinnen({ searchParams }: { searchParams: Searc
           <p className={u.lead}>Bis dahin beantworten wir Ihre Fragen gern telefonisch.</p>
           <CallAction />
           <InternalNote>
-            <p>Nadine Probst (F20/F21) und Dr. med. Elke Böhme (F22) sind bestätigt; die Einwilligung zur Veröffentlichung (LB-09) nicht. Qualifikationen von Dr. Böhme (F23) unbestätigt. Vorschau: ?vorschau=freigabe</p>
+            <p>Nadine Probst (F20/F21) und Dr. med. Elke Böhme (F22) sind bestätigt; die Einwilligung zur Veröffentlichung (LB-09) nicht. Qualifikationen von Dr. Böhme (F23) unbestätigt. Staging-Vorschau: ?vorschau=freigabe</p>
           </InternalNote>
         </Section>
       )}

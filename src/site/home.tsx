@@ -120,7 +120,7 @@ export function HomeChapters({ puls, excludeAnnouncementIds = [] }: { puls: Puls
           </p>
           {!doctors.length ? (
             <InternalNote>
-              <p>Namen (F20, F22) sind bestätigt, die Einwilligung zur Veröffentlichung (F33/LB-09) nicht. Vorschau mit Namen: ?vorschau=freigabe</p>
+              <p>Namen (F20, F22) sind bestätigt, die Einwilligung zur Veröffentlichung (F33/LB-09) nicht. Staging-Vorschau mit Namen: ?vorschau=freigabe</p>
             </InternalNote>
           ) : null}
         </div>

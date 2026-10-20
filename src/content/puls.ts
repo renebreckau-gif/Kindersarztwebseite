@@ -8,7 +8,7 @@ import type { DemoPuls } from "../design-system/demo-fixtures.ts";
 import type { PulsData } from "../domain/practice-status.ts";
 import { CONSULTATION_TYPES } from "./schedule.ts";
 import { staticPulsData } from "../data/static-repository.ts";
-import { RELEASE } from "./release.ts";
+import { RELEASE, SITE_STAGE, isPublicReviewPreview, type SiteStage } from "./release.ts";
 import { UNCONFIRMED } from "./practice.ts";
 
 export type PulsMode = "LIVE" | "PREVIEW";
@@ -36,12 +36,15 @@ function reviewInstant(zeit: string): Date {
 
 /** `now` is injectable for tests only; pages never pass it (live = real time). */
 /** `source` is the repository snapshot (static in 09.2; see docs/architecture/backend-foundation.md). */
+/** `stage` is injectable for tests only; pages never pass it. Review preview (and `zeit`) only via
+ *  the central stage gate — in PRODUCTION the query is ignored and the result is LIVE. */
 export function resolvePuls(
   params: { vorschau?: string | string[]; zeit?: string | string[] } = {},
   now: Date = new Date(),
   source: PulsData = staticPulsData(),
+  stage: SiteStage = SITE_STAGE,
 ): PulsView {
-  const preview = params.vorschau === "freigabe";
+  const preview = isPublicReviewPreview(params, stage);
   const at = preview && typeof params.zeit === "string" ? reviewInstant(params.zeit) : now;
   // Until LB-00 the schedule may be displayed but not used for a live state: the engine
   // receives it as unconfirmed and resolves to UNKNOWN by its own rules.
