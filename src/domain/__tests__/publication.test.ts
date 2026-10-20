@@ -1,9 +1,9 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
-import { acuteEditorMessage, decideAnnouncement, decideEmergency, decidePerson, decidePublication, replacementEditorMessage } from "../publication.ts";
+import { acuteEditorMessage, decideAnnouncement, decideEmergency, decidePerson, decidePersonPhoto, decidePublication, replacementEditorMessage } from "../publication.ts";
 import { evaluateFreshness } from "../verification.ts";
 import { zonedParts, zonedToInstant } from "../time.ts";
-import type { Announcement, Doctor, EmergencyInformation } from "../content-types.ts";
+import type { Announcement, Doctor, EmergencyInformation, MediaAsset } from "../content-types.ts";
 import { ACUTE_TYPE, OUTDATED, UNCONFIRMED, VERIFIED, baseData, rule, withRules } from "./fixtures.ts";
 
 const TODAY = "2026-10-07";
@@ -67,6 +67,40 @@ describe("people", () => {
   test("inactive person is never shown as current staff", () => assert.equal(decidePerson({ ...doc, active: false }, TODAY).visible, false));
   test("missing consent blocks publication", () =>
     assert.equal(decidePerson({ ...doc, publicationConsent: { value: true, verification: UNCONFIRMED } }, TODAY).visible, false));
+
+  // Media policy + 10.5A consent model: name and photo are separate gates.
+  const photo: MediaAsset = {
+    id: "m1",
+    class: "REAL",
+    kind: "IMAGE",
+    purpose: "Porträt",
+    file: "x.jpg",
+    rightsOwner: "Praxis",
+    aiGenerated: false,
+    depictsRealPractice: true,
+    peopleDepicted: [{ name: "Testärztin", consent: "GIVEN" }],
+  };
+  const withPhoto: Doctor = { ...doc, photo: { mediaAssetId: "m1", alt: "Porträt" } };
+  test("photo: REAL + consent + rights + public person → public", () => assert.equal(decidePersonPhoto(withPhoto, photo, TODAY).visible, true));
+  test("photo: a public person without a photo stays public, the photo slot does not", () => {
+    assert.equal(decidePerson(doc, TODAY).visible, true);
+    assert.equal(decidePersonPhoto(doc, undefined, TODAY).visible, false);
+  });
+  test("photo: never without person consent, never for another asset", () => {
+    assert.equal(decidePersonPhoto({ ...withPhoto, publicationConsent: { value: false, verification: UNCONFIRMED } }, photo, TODAY).visible, false);
+    assert.equal(decidePersonPhoto(withPhoto, { ...photo, id: "m2" }, TODAY).visible, false);
+  });
+  test("photo: AI_CONCEPTUAL, PLACEHOLDER, AI-generated or non-practice images never represent a real person", () => {
+    for (const bad of [{ class: "AI_CONCEPTUAL" as const }, { class: "PLACEHOLDER" as const }, { aiGenerated: true }, { depictsRealPractice: false }])
+      assert.equal(decidePersonPhoto(withPhoto, { ...photo, ...bad }, TODAY).visible, false, JSON.stringify(bad));
+  });
+  test("photo: missing / withdrawn image consent, unknown or expired rights block it", () => {
+    assert.equal(decidePersonPhoto(withPhoto, { ...photo, peopleDepicted: [{ consent: "MISSING" }] }, TODAY).visible, false);
+    assert.equal(decidePersonPhoto(withPhoto, { ...photo, peopleDepicted: [] }, TODAY).visible, false);
+    assert.equal(decidePersonPhoto(withPhoto, { ...photo, rightsOwner: " " }, TODAY).visible, false);
+    assert.equal(decidePersonPhoto(withPhoto, { ...photo, rightsUntil: "2026-10-06" }, TODAY).visible, false);
+    assert.equal(decidePersonPhoto(withPhoto, { ...photo, rightsUntil: TODAY }, TODAY).visible, true);
+  });
 });
 
 describe("emergency information", () => {

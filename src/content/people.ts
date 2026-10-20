@@ -2,8 +2,8 @@
 // `decidePerson`: verified + active + verified publication consent. Consent (F33/LB-09)
 // is TO_BE_CONFIRMED, so nobody is shown publicly until the practice confirms it.
 
-import type { Doctor, TeamMember } from "@/domain/content-types.ts";
-import { decidePerson } from "@/domain/publication.ts";
+import type { Doctor, TeamMember } from "../domain/content-types.ts";
+import { decidePerson } from "../domain/publication.ts";
 import { UNCONFIRMED, WORKING } from "./practice.ts";
 
 const PERSON_VERIFIED = { ...WORKING, sourceIds: ["S04"] };

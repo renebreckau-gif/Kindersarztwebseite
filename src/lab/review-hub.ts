@@ -20,7 +20,8 @@ export interface ReviewCard {
     | "gut-vorbereitet"
     | "praxis-app"
     | "rezepte"
-    | "kosten";
+    | "kosten"
+    | "team";
   title: string;
   text: string;
   status?: string;
@@ -76,6 +77,14 @@ export const REVIEW_CARDS: ReviewCard[] = [
     status: "Freigabeentwurf",
     action: "Freigabeentwurf öffnen",
     href: "/review/kosten",
+  },
+  {
+    id: "team",
+    title: "Team & Fotos – Freigabeentwurf",
+    text: "Wer soll wie auf der Website erscheinen? Teamliste, Bezeichnungen, Einwilligung zu Namen und Fotos, Bildrechte. Noch nicht öffentlich.",
+    status: "Freigabeentwurf",
+    action: "Freigabeentwurf öffnen",
+    href: "/review/team",
   },
   {
     id: "website",

@@ -884,3 +884,13 @@ Shared fields for F110–F117:
 | F115 | Cash payment is not accepted (scope, exceptions, alternative) | MEDIUM | A wrong "no cash" statement turns families away or misleads them | special case of F114; never published before confirmation |
 | F116 | When and where payment happens (before / after / invoice, receipt, front desk) | MEDIUM | Process information; wrong steps confuse but do not endanger care | — |
 | F117 | Price-list validity and who maintains it | MEDIUM | Without an owner prices go stale silently | proposal only: verification + lastVerified + reviewDue per price, review at least annually or on change |
+
+## 16. Team & photos approval preparation (Phase 10.5A) — no new facts
+
+The staging draft `/review/team` (content `src/content/team-review.ts`) asks the practice to confirm the existing entries; it creates **no new fact IDs**:
+- **Used:** F11 (photo rights), F20–F23 (physicians, qualifications), F24 (trainee, status open), F26–F30 (staff names), F31 (completeness), F32 (role labels / heading), F33 (consent), F34 (photos / mapping)
+- **Not proposed:** F25 stays OUTDATED_DO_NOT_PUBLISH (historical; not shown as a candidate)
+- **Consent model:** name consent and photo consent are separate (F33). A person may be public without a photo; a photo needs person consent + image consent + confirmed rights (F11) — rule `decidePersonPhoto` in `src/domain/publication.ts`
+- **Not consent:** appearing on the old website, an existing photo, staff feedback, employment, social-media presence
+- **Statuses unchanged:** F23, F24, F31, F32, F33, F34, F11 TO_BE_CONFIRMED; staging visibility of working data is not publication
+

@@ -14,11 +14,14 @@ const RISK_LABEL: Record<ApprovalRisk, string> = {
 
 export function ApprovalSections({
   sections,
+  startAt = 1,
 }: {
   sections: ApprovalSection[];
+  /** Number of the first section (when other numbered sections precede it). */
+  startAt?: number;
 }) {
   return (
-    <ol className={s.items}>
+    <ol className={s.items} start={startAt}>
       {sections.map((section, n) => {
         const headingId = `abschnitt-${section.id}`;
         return (
@@ -26,7 +29,7 @@ export function ApprovalSections({
             <section className={s.item} aria-labelledby={headingId}>
               <div className={s.itemHead}>
                 <h2 id={headingId} className={s.itemTitle}>
-                  {`${n + 1}. ${section.title}`}
+                  {`${n + startAt}. ${section.title}`}
                 </h2>
                 <p className={s.state}>
                   <span className={s.stateMark} aria-hidden="true" />

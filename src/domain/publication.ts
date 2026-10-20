@@ -1,7 +1,7 @@
 // Deterministic publication rules (docs/architecture/content-governance.md §3).
 // Returns what the public may see and what the editor should be told — in German.
 
-import type { Announcement, Doctor, EmergencyInformation, FirstVisitItem, TeamMember } from "./content-types.ts";
+import type { Announcement, Doctor, EmergencyInformation, FirstVisitItem, MediaAsset, TeamMember } from "./content-types.ts";
 import type { FactVerification, FreshnessCategory } from "./verification.ts";
 import { evaluateFreshness } from "./verification.ts";
 import type { LocalDate } from "./time.ts";
@@ -92,6 +92,26 @@ export function decidePerson(p: Doctor | TeamMember, today: LocalDate): Publicat
     return { mode: "BLOCKED", visible: false, editorMessages: ["Einwilligung zur Veröffentlichung fehlt oder ist nicht bestätigt."] };
   }
   return decidePublication(p.verification, "person", today);
+}
+
+/**
+ * A person's photo (media policy §1–2; consent model 10.5A). Name and photo are separate
+ * consents: a person may be public without a photo, but a photo is public only if the PERSON is
+ * public (decidePerson) AND the referenced asset is REAL (not AI-generated, depicting the real
+ * practice), every depicted person has GIVEN consent, the rights owner is known and the rights
+ * have not expired. Withdrawn consent ("MISSING") blocks the photo. No photo → neutral
+ * placeholder without a face, or no image.
+ */
+export function decidePersonPhoto(p: Doctor | TeamMember, asset: MediaAsset | undefined, today: LocalDate): PublicationDecision {
+  const blocked = (msg: string): PublicationDecision => ({ mode: "BLOCKED", visible: false, editorMessages: [msg] });
+  const person = decidePerson(p, today);
+  if (!person.visible) return blocked("Person nicht freigegeben – kein Foto.");
+  if (!p.photo || !asset || asset.id !== p.photo.mediaAssetId) return blocked("Kein freigegebenes Foto – neutraler Platzhalter oder ohne Bild.");
+  if (asset.class !== "REAL" || asset.aiGenerated || !asset.depictsRealPractice) return blocked("Nur echte Fotos dürfen reale Personen zeigen.");
+  if (!asset.peopleDepicted.length || asset.peopleDepicted.some((x) => x.consent !== "GIVEN")) return blocked("Einwilligung zum Foto fehlt oder wurde widerrufen.");
+  if (!asset.rightsOwner.trim()) return blocked("Nutzungsrechte am Foto ungeklärt.");
+  if (asset.rightsUntil && compareDates(today, asset.rightsUntil) > 0) return blocked("Nutzungsrechte am Foto abgelaufen.");
+  return person;
 }
 
 export function decideEmergency(e: EmergencyInformation, today: LocalDate): PublicationDecision {
