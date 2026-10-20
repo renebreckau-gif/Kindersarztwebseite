@@ -1,4 +1,4 @@
-/* "Gut vorbereitet" approval draft (10.1A) — the review hub's quiet Paper / Ink / Cobalt, but
+/* Approval drafts on STAGING ("Gut vorbereitet" 10.1A, "Praxis-App" 10.2A) — the review hub's quiet Paper / Ink / Cobalt, but
    unmistakably a draft: dashed draft label, proposals set as quoted drafts, never as public
    cards. One readable column of stacked cards on every width; no tables. */
 
@@ -189,4 +189,90 @@
 .back:focus-visible {
   outline: 3px solid var(--palette-cobalt);
   outline-offset: 3px;
+}
+
+/* ---- 10.2A: fact sections — Bekannt / Unbestätigt / Offene Fragen ---- */
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+.facts {
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+}
+.groups {
+  display: grid;
+  gap: var(--space-4);
+}
+.group {
+  display: grid;
+  gap: var(--space-2);
+}
+.groupTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.group ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: var(--space-2);
+}
+/* "missing" markers: deliberately not links, not buttons (.group scope beats `.group ul`) */
+.group .missing {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.group .missing li {
+  font-size: var(--text-small);
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 8px;
+  border: 1px dashed color-mix(in srgb, var(--palette-ink) 45%, transparent);
+  color: var(--color-text-secondary);
+}
+/* function candidates: an unticked box drawn in CSS + the words "nicht bestätigt" */
+.checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.checklist li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.box {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid color-mix(in srgb, var(--palette-ink) 55%, transparent);
+  background: #fff;
+}
+.candidateState {
+  font-size: var(--text-small);
+  color: var(--color-text-secondary);
+}
+.notes {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: 12px;
+  background: var(--color-surface-sunken);
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--text-small);
+}
+.notes p {
+  margin: 0;
 }

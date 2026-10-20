@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import "@/design-system/tokens.css";
 import "@/design-system/base.css";
-import s from "./gut-vorbereitet.module.css";
+import s from "../approval.module.css";
 import { isReviewHubEnabled } from "@/lab/review-hub";
 import {
   APPROVER_LABEL,

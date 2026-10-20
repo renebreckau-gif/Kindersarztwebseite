@@ -9,7 +9,7 @@ export const isReviewHubEnabled = (stage?: SiteStage) => stageAllowsReview(stage
 export const REVIEW_TEST_ACCESS = { email: "team@beispiel.test", password: "test1234" } as const;
 
 export interface ReviewCard {
-  id: "cockpit" | "discovery" | "website" | "gut-vorbereitet";
+  id: "cockpit" | "discovery" | "website" | "gut-vorbereitet" | "praxis-app";
   title: string;
   text: string;
   status?: string;
@@ -41,6 +41,14 @@ export const REVIEW_CARDS: ReviewCard[] = [
     status: "Freigabeentwurf",
     action: "Freigabeentwurf öffnen",
     href: "/review/gut-vorbereitet",
+  },
+  {
+    id: "praxis-app",
+    title: "Praxis-App – Freigabeentwurf",
+    text: "Was zur App der Praxis noch bestätigt werden muss: Name, Anbieter, Plattformen, Funktionen, Zugang und Datenverarbeitung. Noch nicht öffentlich.",
+    status: "Freigabeentwurf",
+    action: "Freigabeentwurf öffnen",
+    href: "/review/praxis-app",
   },
   {
     id: "website",

@@ -111,8 +111,14 @@ Critical review of the five Phase 00 documents before assigning statuses:
 | F92 | Vaccination booklet: bring to vaccination appointments (proposal, 10.1A) | TO_BE_CONFIRMED | MEDIUM |
 | F93 | No vaccination without the vaccination booklet (proposal, 10.1A) | TO_BE_CONFIRMED | HIGH |
 | F94 | Mask / infection guidance for visits (proposal, 10.1A) | TO_BE_CONFIRMED | HIGH |
+| F95 | Practice app exists / currently used (10.2A) | TO_BE_CONFIRMED | MEDIUM |
+| F96 | App name / provider (10.2A) | TO_BE_CONFIRMED | MEDIUM |
+| F97 | Supported platforms / download links (10.2A) | TO_BE_CONFIRMED | MEDIUM |
+| F98 | App functions used by the practice (10.2A) | TO_BE_CONFIRMED | HIGH |
+| F99 | App registration / access process (10.2A) | TO_BE_CONFIRMED | HIGH |
+| F100 | App privacy / health-data handling (10.2A) | TO_BE_CONFIRMED | HIGH |
 
-Totals (94 facts): VERIFIED_CURRENT 23 · TO_BE_CONFIRMED 62 (incl. 14 missing, F77–F90, and 4 staff proposals, F91–F94) · OUTDATED_DO_NOT_PUBLISH 9
+Totals (100 facts): VERIFIED_CURRENT 23 · TO_BE_CONFIRMED 68 (incl. 14 missing, F77–F90, 4 staff proposals, F91–F94, and 6 app candidates, F95–F100) · OUTDATED_DO_NOT_PUBLISH 9
 
 Of the 23 VERIFIED_CURRENT facts, 12 are HIGH risk; 11 of these (all except 112) still require practice sign-off before launch (LB-00).
 
@@ -802,3 +808,20 @@ Shared fields for F91–F94:
 | F92 | Bring the vaccination booklet to vaccination appointments | MEDIUM | Practice (organisational) | Refines F78. Kept separate from F93. |
 | F93 | No vaccination without the vaccination booklet | HIGH | Physician | Stronger claim; never merged with F92; not published on staff feedback alone. |
 | F94 | Mask / infection guidance for visits | HIGH | Physician | Same question as F47 (existing website: "Kinder über 6 Jahre … Mundschutz", unconfirmed). Open: required or recommended, for whom, when, wording. |
+
+## 13. Practice app / digital services candidates (Phase 10.2A)
+
+Shared fields for F95–F100:
+- **SOURCE:** practice-staff feedback, October 2026 (the website should mention the practice's app) — an input, not a confirmation of any app fact
+- **STATUS:** TO_BE_CONFIRMED; nothing is inferred from "an app exists" (no name, vendor, platform, link or function is assumed; other practices and common apps are not sources — source-policy)
+- **FEATURES AFFECTED:** future "Praxis-App" page in the Praxis area and a small card on "Praxis" (10.2B); never the start page, PRAXIS PULS or the mobile dock; staging approval draft `/review/praxis-app`
+- **BOUNDARIES:** prescriptions / E-Rezept are a separate work package (10.3), even if the app turns out to support requests; the e-mail usage question (F18) stays separate
+
+| ID | FACT CANDIDATE | RISK IF INCORRECT | REQUIRED CONFIRMATION | NOTES |
+|---|---|---|---|---|
+| F95 | The practice currently uses an app for families | MEDIUM | Practice | Still actively used? |
+| F96 | Exact public app name and provider | MEDIUM | Practice | No name is published or inferred before confirmation |
+| F97 | Platforms (iOS / Android / web) and exact store links | MEDIUM | Practice (+ link check) | No store badge or dummy link before verified URLs |
+| F98 | Functions the practice actually uses (appointments, messages, prescriptions, documents, reminders, video consultation, other) | HIGH | Practice | Affects families' contact expectations; none pre-selected |
+| F99 | Registration / access (account, practice code, invitation, QR code) | HIGH | Practice | A wrong setup instruction blocks families |
+| F100 | Processing of personal / health data, operator, provider privacy notice, existing agreements | HIGH | Practice (+ legal review before launch) | Factual questions only; no compliance claim |
