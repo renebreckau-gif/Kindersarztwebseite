@@ -117,8 +117,17 @@ Critical review of the five Phase 00 documents before assigning statuses:
 | F98 | App functions used by the practice (10.2A) | TO_BE_CONFIRMED | HIGH |
 | F99 | App registration / access process (10.2A) | TO_BE_CONFIRMED | HIGH |
 | F100 | App privacy / health-data handling (10.2A) | TO_BE_CONFIRMED | HIGH |
+| F101 | Prescription requests offered remotely (10.3A) | TO_BE_CONFIRMED | MEDIUM |
+| F102 | Prescription types eligible for remote request (10.3A) | TO_BE_CONFIRMED | HIGH |
+| F103 | Prescription request channels: phone / e-mail / app / in person (10.3A) | TO_BE_CONFIRMED | HIGH |
+| F104 | E-mail use for prescription requests (10.3A) | TO_BE_CONFIRMED | HIGH |
+| F105 | Health-card prerequisite for prescription processing (10.3A) | TO_BE_CONFIRMED | HIGH |
+| F106 | Prescription processing / turnaround expectation (10.3A) | TO_BE_CONFIRMED | HIGH |
+| F107 | E-Rezept vs. paper / pickup process (10.3A) | TO_BE_CONFIRMED | HIGH |
+| F108 | Information required in a prescription request (10.3A) | TO_BE_CONFIRMED | HIGH |
+| F109 | Patient / guardian eligibility to request (10.3A) | TO_BE_CONFIRMED | HIGH |
 
-Totals (100 facts): VERIFIED_CURRENT 23 · TO_BE_CONFIRMED 68 (incl. 14 missing, F77–F90, 4 staff proposals, F91–F94, and 6 app candidates, F95–F100) · OUTDATED_DO_NOT_PUBLISH 9
+Totals (109 facts): VERIFIED_CURRENT 23 · TO_BE_CONFIRMED 77 (incl. 14 missing, F77–F90, 4 staff proposals, F91–F94, 6 app candidates, F95–F100, and 9 prescription-process candidates, F101–F109) · OUTDATED_DO_NOT_PUBLISH 9
 
 Of the 23 VERIFIED_CURRENT facts, 12 are HIGH risk; 11 of these (all except 112) still require practice sign-off before launch (LB-00).
 
@@ -825,3 +834,24 @@ Shared fields for F95–F100:
 | F98 | Functions the practice actually uses (appointments, messages, prescriptions, documents, reminders, video consultation, other) | HIGH | Practice | Affects families' contact expectations; none pre-selected |
 | F99 | Registration / access (account, practice code, invitation, QR code) | HIGH | Practice | A wrong setup instruction blocks families |
 | F100 | Processing of personal / health data, operator, provider privacy notice, existing agreements | HIGH | Practice (+ legal review before launch) | Factual questions only; no compliance claim |
+
+## 14. Prescription / E-Rezept process candidates (Phase 10.3A)
+
+Shared fields for F101–F109:
+- **SOURCE:** practice-staff feedback, October 2026 (prescription / E-Rezept requests occur regularly, possibly by e-mail; the practice already mentions something in e-mail replies / signature; the health card may matter) — an input, not a confirmation
+- **STATUS:** TO_BE_CONFIRMED. The project does not know the practice's prescription process and infers nothing from general German E-Rezept practice (remote repeat prescriptions, quarterly card reading, immediate availability, app channel, controlled or private prescriptions, e-mail with medical details — none assumed)
+- **FEATURES AFFECTED:** future "Rezepte" page in the Praxis area (10.3B); never the start page; staging approval draft `/review/rezepte`
+- **WORDING PRINCIPLE:** a request ("Rezept anfragen") is not an issuance; the physician / practice decides whether a prescription is issued
+- **NO FORM:** the website never collects prescription requests or patient data
+
+| ID | FACT CANDIDATE | RISK | RATIONALE | RELATIONSHIP |
+|---|---|---|---|---|
+| F101 | Prescription requests are offered without a personal doctor contact | MEDIUM | A wrong yes/no sends families down a wrong path, but the care-relevant detail sits in F102–F108 | refines F80 |
+| F102 | Which prescription types may be requested that way (repeat, first prescription, E-Rezept, paper, other) | HIGH | Implies which medication can be obtained without a consultation | refines F80; no list made by the project |
+| F103 | Channels for requests: phone / e-mail / app / in person | HIGH | A wrong channel leaves a request unseen and a child without medication | app channel depends on F98 but the process is confirmed here |
+| F104 | E-mail as an accepted use for prescription requests (incl. what to send / not send, response) | HIGH | Health data by e-mail; same concern as F18 | refines F18 for prescriptions only; F18 stays open otherwise |
+| F105 | Health card must be read before a prescription is issued (rule, frequency, what if not) | HIGH | A wrong prerequisite blocks or delays medication | prescription-specific; does not confirm F91 (bring the card to every visit), nor vice versa |
+| F106 | Processing time / when a prescription can be used | HIGH | A promised time that is not met can leave a child without medication | no time is published before confirmation |
+| F107 | Result: E-Rezept, paper, pickup, notification | HIGH | Families must know where and how to redeem it | — |
+| F108 | Information a request must / must not contain | HIGH | Directly about patient / health data | the project sets no required fields |
+| F109 | Who may request (existing patients, guardians, adolescents, authorisation) | HIGH | Concerns identity and authorisation | no identity data is collected by the website |

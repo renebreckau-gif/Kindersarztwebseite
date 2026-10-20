@@ -7,6 +7,7 @@
 // vendors or common pediatric apps. Prescriptions / E-Rezept are a separate work package (10.3).
 
 import type { Verified } from "../domain/content-types.ts";
+import type { ApprovalRisk, ApprovalSection } from "./approval-review.ts";
 
 /**
  * The future public shape (10.2B, only after confirmation) — intentionally minimal. A record is
@@ -22,9 +23,9 @@ export interface DigitalService extends Verified {
   links: { platform: "IOS" | "ANDROID" | "WEB"; url: string }[];
 }
 
-export type AppRisk = "MEDIUM" | "HIGH";
+export type AppRisk = ApprovalRisk;
 
-export interface AppReviewSection {
+export interface AppReviewSection extends ApprovalSection {
   id:
     | "identitaet"
     | "plattformen"
@@ -32,22 +33,6 @@ export interface AppReviewSection {
     | "zugang"
     | "datenschutz"
     | "platzierung";
-  title: string;
-  /** Fact register ids (docs/research/fact-status-register.md). */
-  factIds: string[];
-  risk?: AppRisk;
-  /** What the project actually knows (facts about the request, not about the app). */
-  known: string[];
-  /** Statements that must NOT be treated as facts until confirmed. */
-  unconfirmed: string[];
-  /** Exact questions for the practice. */
-  questions: string[];
-  /** Visible "missing" markers — never working dummy links. */
-  missing?: string[];
-  /** Function candidates: questions only, none pre-selected. */
-  candidates?: string[];
-  /** Boundaries to other work packages. */
-  notes?: string[];
 }
 
 const REQUEST =
@@ -117,7 +102,7 @@ export const APP_REVIEW: AppReviewSection[] = [
       "Sonstige Funktionen",
     ],
     notes: [
-      "Rezepte / E-Rezept sind ein eigenes Arbeitspaket (10.3). Auch die Bestätigung „Rezepte können über die App angefragt werden“ reicht nicht für eine Anleitung auf der Website: welche Rezepte, Folgerezepte, Gesundheitskarte als Voraussetzung, Bearbeitungszeit, Abholung bzw. E-Rezept und mögliche Einschränkungen klärt 10.3.",
+      "Rezepte / E-Rezept sind ein eigenes Arbeitspaket (10.3). Auch die Bestätigung „Rezepte können über die App angefragt werden“ reicht nicht für eine Anleitung auf der Website: welche Rezepte, Folgerezepte, Gesundheitskarte als Voraussetzung, Bearbeitungszeit, Abholung bzw. E-Rezept und mögliche Einschränkungen klärt 10.3. Der Rezeptablauf wird separat im Freigabeentwurf „Rezepte & E-Rezept“ geklärt.",
       "Die E-Mail-Nutzung für Patientenanliegen (F18) bleibt davon getrennt. Die Website sagt nicht „alternativ per App oder E-Mail“, solange beide Wege nicht bestätigt sind.",
     ],
   },

@@ -3,13 +3,23 @@
 
 import { stageAllowsReview, type SiteStage } from "../content/release.ts";
 
-export const isReviewHubEnabled = (stage?: SiteStage) => stageAllowsReview(stage);
+export const isReviewHubEnabled = (stage?: SiteStage) =>
+  stageAllowsReview(stage);
 
 /** Mock test account shown on the hub (lab prototype only, no real account). */
-export const REVIEW_TEST_ACCESS = { email: "team@beispiel.test", password: "test1234" } as const;
+export const REVIEW_TEST_ACCESS = {
+  email: "team@beispiel.test",
+  password: "test1234",
+} as const;
 
 export interface ReviewCard {
-  id: "cockpit" | "discovery" | "website" | "gut-vorbereitet" | "praxis-app";
+  id:
+    | "cockpit"
+    | "discovery"
+    | "website"
+    | "gut-vorbereitet"
+    | "praxis-app"
+    | "rezepte";
   title: string;
   text: string;
   status?: string;
@@ -49,6 +59,14 @@ export const REVIEW_CARDS: ReviewCard[] = [
     status: "Freigabeentwurf",
     action: "Freigabeentwurf öffnen",
     href: "/review/praxis-app",
+  },
+  {
+    id: "rezepte",
+    title: "Rezepte & E-Rezept – Freigabeentwurf",
+    text: "Wie läuft eine Rezeptanfrage in der Praxis ab? Welche Rezepte, über welche Wege, Gesundheitskarte, Bearbeitung, E-Rezept und nötige Angaben. Noch nicht öffentlich.",
+    status: "Freigabeentwurf",
+    action: "Freigabeentwurf öffnen",
+    href: "/review/rezepte",
   },
   {
     id: "website",

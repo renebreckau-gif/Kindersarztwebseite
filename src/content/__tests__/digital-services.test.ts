@@ -41,7 +41,8 @@ describe("app content: questions, not claims", () => {
 });
 
 describe("approval draft: staging-only review tooling (A, B, C)", () => {
-  const page = read("app/(frontend)/review/praxis-app/page.tsx");
+  // 10.3A: the section rendering moved into the shared approval component.
+  const page = read("app/(frontend)/review/praxis-app/page.tsx") + read("app/(frontend)/review/approval-sections.tsx");
   test("A: 404 outside STAGING, noindex, not in the patient navigation", () => {
     assert.match(page, /if \(!isReviewHubEnabled\(\)\) notFound\(\);/);
     assert.match(page, /robots: \{ index: false, follow: false \}/);
@@ -57,8 +58,10 @@ describe("approval draft: staging-only review tooling (A, B, C)", () => {
 
 describe("public code carries no app content (D, E, F)", () => {
   test("no app wording, store link or placeholder in public pages, site components or public content", () => {
-    const pub = [...files("app/(frontend)/(site)"), ...files("src/site"), ...files("src/content").filter((f) => !f.includes("__tests__") && !f.endsWith("digital-services.ts"))];
+    // Review-draft modules (used only by /review pages) are not public content.
+    const REVIEW_ONLY = ["digital-services.ts", "prescription-process.ts", "approval-review.ts"];
+    const pub = [...files("app/(frontend)/(site)"), ...files("src/site"), ...files("src/content").filter((f) => !f.includes("__tests__") && !REVIEW_ONLY.some((r) => f.endsWith(r)))];
     for (const f of pub) assert.doesNotMatch(read(f), APP_WORDING, f);
-    for (const f of pub) assert.doesNotMatch(read(f), /digital-services/, `${f} imports the app draft`);
+    for (const f of pub) assert.doesNotMatch(read(f), /digital-services|prescription-process/, `${f} imports a review draft`);
   });
 });
