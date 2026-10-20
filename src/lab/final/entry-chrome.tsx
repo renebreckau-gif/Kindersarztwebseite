@@ -47,8 +47,25 @@ const FOLLOW_UP: Partial<Record<DemoPuls["action"]["kind"], string>> = {
   details: "#sprechzeiten",
 };
 
-/** PRAXIS PULS as typography on the sunlit wall: a statement, not a widget. */
-export function PulsStatement({ puls, hoursHref, emergencyHref = "#notfall", tag = "Demo" }: { puls: DemoPuls; hoursHref?: string; emergencyHref?: string; tag?: string | null }) {
+/**
+ * PRAXIS PULS as typography on the sunlit wall: a statement, not a widget.
+ * `email` (10.0A, public start page only): a SECONDARY contact action. Absent by default, so
+ * the lab renders exactly as before. Hierarchy: Anrufen (primary) · Notfall (safety) ·
+ * then a quiet row with the state's follow-up and "E-Mail schreiben".
+ */
+export function PulsStatement({
+  puls,
+  hoursHref,
+  emergencyHref = "#notfall",
+  tag = "Demo",
+  email,
+}: {
+  puls: DemoPuls;
+  hoursHref?: string;
+  emergencyHref?: string;
+  tag?: string | null;
+  email?: { href: string; label: string };
+}) {
   const unknown = puls.indicator === "NONE";
   const follow = [puls.action, puls.secondary].find((a) => a && FOLLOW_UP[a.kind]);
   return (
@@ -81,12 +98,25 @@ export function PulsStatement({ puls, hoursHref, emergencyHref = "#notfall", tag
           <span>Notfall</span>
         </a>
         {/* the state's follow-up sits beside Notfall when there is room */}
-        {follow ? (
+        {follow && !email ? (
           <a className={s.follow} href={hoursHref ?? FOLLOW_UP[follow.kind]}>
             {follow.label}
           </a>
         ) : null}
       </div>
+      {email ? (
+        <div className={s.secondary}>
+          {follow ? (
+            <a className={s.follow} href={hoursHref ?? FOLLOW_UP[follow.kind]}>
+              {follow.label}
+            </a>
+          ) : null}
+          <a className={s.mail} href={email.href} aria-label={email.label}>
+            <Icon name="mail" size={18} />
+            <span>E-Mail schreiben</span>
+          </a>
+        </div>
+      ) : null}
     </section>
   );
 }

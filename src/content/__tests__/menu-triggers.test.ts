@@ -40,7 +40,8 @@ test("dock Menü is the shared button, placed first", () => {
 });
 
 test("start page hero header uses the same menu button and mounts the overlay", () => {
-  const start = read("app/(frontend)/(site)/page.tsx");
+  // 10.0A: the start-page composition lives in src/site/start-page.tsx (shared with the review view).
+const start = read("src/site/start-page.tsx");
   assert.match(start, /menu=\{\(className\) => \(\s*<MenuButton/);
   assert.match(start, /<SiteMenu \/>/);
   assert.match(read("src/site/chrome.tsx"), /<SiteMenu \/>/); // every other public page (PageFrame)

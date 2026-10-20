@@ -41,7 +41,7 @@ Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms
 | 09.5A | Real operational writes for 7.1 Heute früher schließen and 7.2 Heute geschlossen (server draft → engine preview → revalidation → one transaction with provenance + audit + changeSetId), dataset fingerprint against stale previews, production staff-portal release gate | `13b62a5` |
 | 09.5B | Record lifecycle (ACTIVE / RETIRED, server-controlled), explicit supersede in both directions, multi-day safety, safe undo of the latest change (CREATE → retire, EDIT → restore, SUPERSEDE → reactivate) with REVERT audit events, "Letzte Änderung" on `/intern` | `8c33fe7` |
 | 09.5C | Real 7.5 Urlaub / geplante Schließzeit (VACATION / TRAINING / OTHER): Zeitraum, Ankündigen ab, replacement periods from the verified directory with explicit gaps, multi-date engine preview, edit of the same record, overlap blocks, undo via the 09.5B lifecycle; undo preview shows structured differences; strict calendar-date validation | `47a1fb3` |
-| 09.5D | Real "Hinweis veröffentlichen" (finite / open-ended, create and edit), announcement lifecycle (ACTIVE / RETIRED) and change-set undo, `selectPublicAnnouncements` shared by the static site and the cockpit preview, shared public notice renderer, collection-level announcement invariants, operational fingerprint for undo; 09.5C follow-ups (preview moments uncapped) | this commit |
+| 09.5D | Real "Hinweis veröffentlichen" (finite / open-ended, create and edit), announcement lifecycle (ACTIVE / RETIRED) and change-set undo, `selectPublicAnnouncements` shared by the static site and the cockpit preview, shared public notice renderer, collection-level announcement invariants, operational fingerprint for undo; 09.5C follow-ups (preview moments uncapped) | `8a0404c` |
 
 **How to read this document:** §0–§14 are the Phase 09.0 architecture decision and remain valid unless a later phase note says otherwise. The phase notes at the end record what the prototype changed or proved. Statements that became outdated are marked inline ("since 09.1.x").
 
@@ -1115,3 +1115,12 @@ Baseline `47a1fb3`. One workflow family: announcements. Not part of this phase: 
 ### Public website
 
 Unchanged and STATIC: `/heute` and `/heute/aktuelles` read the static `ANNOUNCEMENTS`; a database notice does not appear publicly (tested); public routes answer 200 with PostgreSQL stopped.
+
+## Phase 10.0A note: staff area never prerendered (2026-10-20)
+
+Phase 10.0A was a public start-page change (customer decision Variant B, see [homepage-feedback-2026-10.md](../reviews/homepage-feedback-2026-10.md)). Its validation uncovered one latent cockpit bug, fixed at the root:
+
+- **Symptom:** after a production build made while PostgreSQL was unreachable, every `/intern` page showed "Der interne Bereich ist gerade nicht erreichbar", even once the database was running again.
+- **Cause:** `internSession()` probes the database first. Without a database at build time it returned "unavailable" before using any dynamic API, so Next.js prerendered that page as static HTML.
+- **Fix:** `app/(intern)/layout.tsx` declares `dynamic = "force-dynamic"`: the staff area is always rendered per request.
+- **Verification:** a regression test (`src/backend/__tests__/intern-dynamic.test.ts`); a clean build with the database stopped no longer emits `intern.html`; afterwards the full clean-database proof passes (13 steps).

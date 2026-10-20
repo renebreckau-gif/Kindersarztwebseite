@@ -29,7 +29,8 @@ test("the label is a paragraph, not a heading, and no status is computed in the 
 });
 
 test("the public homepage uses this PulsStatement with the live engine view", () => {
-  const home = read("app/(frontend)/(site)/page.tsx");
+  // 10.0A: the start-page composition lives in src/site/start-page.tsx (shared with the review view).
+const home = read("src/site/start-page.tsx");
   assert.match(home, /import \{[^}]*PulsStatement[^}]*\} from "@\/lab\/final\/entry-chrome"/);
   assert.match(home, /<PulsStatement puls=\{puls\.view\}/);
 });

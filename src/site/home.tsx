@@ -9,17 +9,18 @@ import { InternalNote } from "./chrome";
 import { NEEDS } from "@/content/site";
 import { PRACTICE, publicAddress } from "@/content/practice";
 import { WEEKDAYS, blocksFor } from "@/content/schedule";
-import { activeAnnouncements } from "@/content/notices";
+import { homeChapterAnnouncements } from "@/content/notices";
 import { DOCTORS, publicPeople } from "@/content/people";
 import { formatGermanDate, weekdayOf } from "@/domain/time.ts";
 import type { PulsView } from "@/content/puls";
 import type { IsoWeekday } from "@/domain/time.ts";
 
-export function HomeChapters({ puls }: { puls: PulsView }) {
+/** `excludeAnnouncementIds`: the notice already highlighted in the hero is not repeated here (10.0A). */
+export function HomeChapters({ puls, excludeAnnouncementIds = [] }: { puls: PulsView; excludeAnnouncementIds?: readonly string[] }) {
   const today = puls.result.evaluatedAt.localDate;
   const wd = weekdayOf(today);
   const minutes = Number(puls.result.evaluatedAt.localTime.slice(0, 2)) * 60 + Number(puls.result.evaluatedAt.localTime.slice(3, 5));
-  const notices = activeAnnouncements(today);
+  const notices = homeChapterAnnouncements(today, excludeAnnouncementIds);
   const doctors = publicPeople(DOCTORS, today, puls.mode === "PREVIEW");
   const addr = publicAddress();
   const weekday = WEEKDAYS.find((d) => d.id === wd);

@@ -120,6 +120,24 @@ export function formatGermanDate(date: LocalDate): string {
   return DE_DATE.format(new Date(`${date}T00:00:00Z`));
 }
 
+const DE_MONTHS = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+
+/** "22. Oktober" (with the year when asked) — a local calendar date, no weekday. */
+export function formatDayMonth(date: LocalDate, withYear = false): string {
+  const [y, m, d] = date.split("-").map(Number);
+  return `${d}. ${DE_MONTHS[m - 1]}${withYear ? ` ${y}` : ""}`;
+}
+
+/** Compact range: "22. Oktober" · "19.–23. Oktober" · "30. Oktober – 2. November" · across years with years. */
+export function formatShortRange(from: LocalDate, to: LocalDate): string {
+  if (from === to) return formatDayMonth(from);
+  const [fy, fm, fd] = from.split("-").map(Number);
+  const [ty, tm] = to.split("-").map(Number);
+  if (fy !== ty) return `${formatDayMonth(from, true)} – ${formatDayMonth(to, true)}`;
+  if (fm === tm) return `${fd}.–${formatDayMonth(to)}`;
+  return `${formatDayMonth(from)} – ${formatDayMonth(to)}`;
+}
+
 export function inRange(date: LocalDate, from?: LocalDate, until?: LocalDate): boolean {
   return (!from || compareDates(date, from) >= 0) && (!until || compareDates(date, until) <= 0);
 }

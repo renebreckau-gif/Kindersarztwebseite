@@ -1,7 +1,7 @@
 // Functional pictograms only (no medical/cute icon library).
 // 24-unit grid, 1.6 stroke, round caps and joins, drawn at 20–22 px.
 
-export type IconName = "phone" | "today" | "alert" | "menu" | "close" | "route" | "back";
+export type IconName = "phone" | "today" | "alert" | "menu" | "close" | "route" | "back" | "mail" | "calendar" | "info";
 
 export function Icon({ name, size = 22 }: { name: IconName; size?: number }) {
   const p = {
@@ -35,6 +35,27 @@ export function Icon({ name, size = 22 }: { name: IconName; size?: number }) {
         <svg {...p}>
           <path d="M12 3.5 21 19.5H3Z" />
           <path d="M12 10v4.2M12 17.1v.1" />
+        </svg>
+      );
+    case "mail":
+      return (
+        <svg {...p}>
+          <rect x="3.5" y="5.5" width="17" height="13" rx="2" />
+          <path d="m4 7 8 6 8-6" />
+        </svg>
+      );
+    case "calendar":
+      return (
+        <svg {...p}>
+          <rect x="3.5" y="5" width="17" height="15" rx="2" />
+          <path d="M3.5 9.5h17M8 3v4M16 3v4" />
+        </svg>
+      );
+    case "info":
+      return (
+        <svg {...p}>
+          <circle cx="12" cy="12" r="8.5" />
+          <path d="M12 11v5.2M12 7.9v.1" />
         </svg>
       );
     case "menu":

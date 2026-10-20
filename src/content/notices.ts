@@ -74,3 +74,7 @@ export const ANNOUNCEMENTS: Announcement[] = [
 
 /** Public website (static): the same selection rule the cockpit preview uses for database notices. */
 export const activeAnnouncements = (today: string) => selectPublicAnnouncements(ANNOUNCEMENTS, today);
+
+/** The start page's "Heute" chapter: public notices minus the one already highlighted in the hero (10.0A). */
+export const homeChapterAnnouncements = (today: string, excludeIds: readonly string[] = [], list: Announcement[] = ANNOUNCEMENTS) =>
+  selectPublicAnnouncements(list, today).filter((a) => !excludeIds.includes(a.id));

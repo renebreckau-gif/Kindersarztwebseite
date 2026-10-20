@@ -40,24 +40,8 @@ export const REASON_LABEL: Record<PublicReason, string> = {
 
 export const PRIVACY_HINT = "Keine Namen von Patientinnen und Patienten und keine Diagnosen eintragen.";
 
-const MONTHS = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
-const parts = (d: string) => d.split("-").map(Number) as [number, number, number];
-
-/** "22. Oktober" (with the year when asked). */
-export function dayMonth(d: string, withYear = false): string {
-  const [y, m, day] = parts(d);
-  return `${day}. ${MONTHS[m - 1]}${withYear ? ` ${y}` : ""}`;
-}
-
-/** Compact range: "22. Oktober" · "19.–23. Oktober" · "30. Oktober – 2. November" · across years with years. */
-export function shortRange(from: string, to: string): string {
-  if (from === to) return dayMonth(from);
-  const [fy, fm, fd] = parts(from);
-  const [ty, tm] = parts(to);
-  if (fy !== ty) return `${dayMonth(from, true)} – ${dayMonth(to, true)}`;
-  if (fm === tm) return `${fd}.–${dayMonth(to)}`;
-  return `${dayMonth(from)} – ${dayMonth(to)}`;
-}
+// Date wording lives in the domain (shared with the public site, 10.0A); re-exported for the cockpit.
+export { formatDayMonth as dayMonth, formatShortRange as shortRange } from "../../domain/time.ts";
 
 /** Title of a closure kind in sentences ("Urlaub 19.–23. Oktober"). */
 export const CLOSURE_KIND_TITLE = { VACATION: "Urlaub", TRAINING: "Fortbildung", OTHER: "Schließung", SHORT_NOTICE: "Kurzfristige Schließung" } as const;

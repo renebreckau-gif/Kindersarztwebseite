@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
-import s from "@/lab/final/signature.module.css";
-import { EntryHeader, PulsStatement } from "@/lab/final/entry-chrome";
-import { HeroStage } from "@/lab/final/hero-stage";
-import { SiteDock, SiteFooter, SiteMenu, PreviewBanner } from "@/site/chrome";
-import { MenuButton } from "@/site/mobile-menu";
-import { Icon } from "@/design-system/icons";
-import { HomeChapters } from "@/site/home";
+import { StartPage } from "@/site/start-page";
 import { resolvePuls } from "@/content/puls";
-import { PRIMARY } from "@/content/site";
-import { artworkForDate } from "@/content/artworks";
+import { ANNOUNCEMENTS } from "@/content/notices";
+import { selectHomepageHighlight } from "@/content/homepage-highlight";
 
 export const metadata: Metadata = {
   title: { absolute: "Kinderarztpraxis Probst & Böhme – Kinderarzt in Hettstedt" },
@@ -17,40 +11,12 @@ export const metadata: Metadata = {
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
-const ROUTES = { heute: "/heute", "mein-kind": "/mein-kind", praxis: "/praxis", entdecken: "/entdecken" } as const;
-
-/** Start page: the approved Phase 06.2 hero (locked), connected to real routes and PRAXIS PULS. */
+/** Start page: the approved Phase 06.2 hero (locked), connected to real routes and PRAXIS PULS.
+ *  STATIC data only (DATA_SOURCE = "STATIC"): the highlight comes from the engine's
+ *  upcomingClosure and the static announcements — never from the database. */
 export default async function Start({ searchParams }: { searchParams: Search }) {
   const q = await searchParams;
   const puls = resolvePuls({ vorschau: q.vorschau, zeit: q.zeit });
-  return (
-    <div className={s.page}>
-      <a className={s.skip} href="#inhalt">
-        Zum Inhalt springen
-      </a>
-      <EntryHeader links={[{ id: "start", label: "Start", href: "/", current: true }, ...PRIMARY.map((p) => ({ id: p.id, label: p.label, href: p.href }))]}
-        homeHref="/"
-        menu={(className) => (
-          <MenuButton className={className}>
-            <Icon name="menu" size={20} />
-          </MenuButton>
-        )}
-      />
-      <SiteDock puls={puls} />
-      <main id="inhalt">
-        {/* one practice painting per Europe/Berlin day — the engine's date, so server and client agree */}
-        <HeroStage initial={null} routes={ROUTES} artwork={artworkForDate(puls.result.evaluatedAt.localDate)}>
-          <div className={s.headline}>
-            <h1>Gesund groß werden.</h1>
-            <p>Alles für heute auf einen Blick. Und Begleitung, die mit Ihrem Kind mitwächst.</p>
-          </div>
-          <PulsStatement puls={puls.view} hoursHref="/heute/sprechzeiten" emergencyHref="/notfall" tag={puls.mode === "PREVIEW" ? "Vorschau" : null} />
-        </HeroStage>
-        <PreviewBanner puls={puls} />
-        <HomeChapters puls={puls} />
-      </main>
-      <SiteFooter />
-      <SiteMenu />
-    </div>
-  );
+  const highlight = selectHomepageHighlight({ result: puls.result, announcements: ANNOUNCEMENTS, today: puls.result.evaluatedAt.localDate });
+  return <StartPage puls={puls} highlight={highlight} />;
 }

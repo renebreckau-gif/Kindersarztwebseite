@@ -433,9 +433,40 @@
   color: #2a39c8;
   text-underline-offset: 4px;
 }
+/* 10.0A public start page: the quiet second row under the two pill actions — the state's
+   follow-up and "E-Mail schreiben" as text actions (44 px targets), never a third pill. */
+.secondary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-5);
+  width: 100%;
+  margin-top: calc(var(--space-2) - var(--space-4));
+}
+.secondary .follow {
+  padding: 0;
+}
+.mail {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: #2a39c8;
+  text-underline-offset: 4px;
+}
+.mail span {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+}
+.mail:hover span {
+  text-decoration-thickness: 2px;
+}
 .call:focus-visible,
 .emergency:focus-visible,
 .follow:focus-visible,
+.mail:focus-visible,
 .path:focus-visible,
 .back:focus-visible,
 .menuButton:focus-visible,

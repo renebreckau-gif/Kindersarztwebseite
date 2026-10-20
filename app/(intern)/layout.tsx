@@ -17,6 +17,11 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#F3EFE7" };
 
+// Always rendered per request. Without this, a build without database access prerendered the
+// "nicht erreichbar" page as static HTML (internSession returned before any dynamic API), and the
+// staff area stayed unavailable until the next build (found in Phase 10.0A).
+export const dynamic = "force-dynamic";
+
 export default function InternLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="de" className={`${serif.variable} ${sans.variable}`}>

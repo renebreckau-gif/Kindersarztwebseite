@@ -1,0 +1,145 @@
+/* The one optional homepage notice (Phase 10.0A, Variant B). It sits in the same left column
+   as PRAXIS PULS and shares its material — a softly frosted panel on the wall — but lighter, so
+   the status keeps the lead. "Currently relevant", never "emergency": no red, no alert colours,
+   no thick accent bar; the tone lives in the icon plate and a faint tint. */
+
+.card {
+  --tint: rgb(255 252 247 / 0.56);
+  --plate: rgb(52 70 232 / 0.1);
+  --plate-ink: #2a39c8;
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 30rem;
+  padding: var(--space-4) var(--space-5);
+  border-radius: 18px;
+  background: linear-gradient(160deg, var(--tint), rgb(253 246 237 / 0.36));
+  border: 1px solid rgb(255 255 255 / 0.55);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.55),
+    0 14px 30px -26px rgb(120 84 56 / 0.35);
+  -webkit-backdrop-filter: blur(16px) saturate(1.08);
+  backdrop-filter: blur(16px) saturate(1.08);
+}
+/* planned closure: warm sunlight on paper */
+.card[data-tone="closure"] {
+  --tint: rgb(255 240 208 / 0.66);
+  --plate: rgb(214 160 64 / 0.2);
+  --plate-ink: #6f4a12;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .card {
+    background: #fbf3e8;
+  }
+  .card[data-tone="closure"] {
+    background: #fbefd6;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .card {
+    background: #fbf3e8;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .card[data-tone="closure"] {
+    background: #fbefd6;
+  }
+}
+
+.icon {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--plate);
+  color: var(--plate-ink);
+}
+
+.body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+/* the kind of notice, quieter than its title (sentence case, not a tracked caps label) */
+.eyebrow {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--plate-ink);
+}
+.title {
+  margin: 0;
+  font-size: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+.detail {
+  margin: 0;
+  font-size: var(--text-small);
+  line-height: 1.45;
+  color: #33373b;
+  /* an entry point, not the full text: two lines, the link leads on */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+.link {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  margin-bottom: calc(-1 * var(--space-2));
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: #2a39c8;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+/* the whole card is the link's target */
+.link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.card:hover .link {
+  text-decoration-thickness: 2px;
+}
+.card:has(.link:focus-visible) {
+  outline: var(--border-focus) solid var(--color-focus);
+  outline-offset: 3px;
+}
+.link:focus-visible {
+  outline: none;
+}
+/* browsers without :has() keep a visible ring on the link itself */
+@supports not selector(:has(*)) {
+  .link:focus-visible {
+    outline: var(--border-focus) solid var(--color-focus);
+    outline-offset: 3px;
+  }
+}
+
+@media (min-width: 64em) {
+  .card {
+    padding: var(--space-4) var(--space-6);
+  }
+}
+
+@media (forced-colors: active) {
+  .card {
+    border: 1px solid CanvasText;
+  }
+}
