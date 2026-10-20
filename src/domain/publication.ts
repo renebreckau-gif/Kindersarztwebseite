@@ -1,7 +1,7 @@
 // Deterministic publication rules (docs/architecture/content-governance.md §3).
 // Returns what the public may see and what the editor should be told — in German.
 
-import type { Announcement, Doctor, EmergencyInformation, TeamMember } from "./content-types.ts";
+import type { Announcement, Doctor, EmergencyInformation, FirstVisitItem, TeamMember } from "./content-types.ts";
 import type { FactVerification, FreshnessCategory } from "./verification.ts";
 import { evaluateFreshness } from "./verification.ts";
 import type { LocalDate } from "./time.ts";
@@ -74,6 +74,15 @@ export function decideAnnouncement(a: Announcement, today: LocalDate): Publicati
  */
 export function selectPublicAnnouncements(list: Announcement[], today: LocalDate): Announcement[] {
   return list.filter((a) => decideAnnouncement(a, today).visible).sort((a, b) => a.priority - b.priority);
+}
+
+/**
+ * "Gut vorbereitet" / first-visit guidance (10.1A): the generic rule, nothing new — only verified
+ * and fresh items are public (TO_BE_CONFIRMED and OUTDATED never). Practice-operational
+ * information uses the "practiceContact" freshness policy (dates required).
+ */
+export function selectPublicFirstVisitItems(list: FirstVisitItem[], today: LocalDate): FirstVisitItem[] {
+  return list.filter((i) => decidePublication(i.verification, "practiceContact", today).visible).sort((a, b) => a.displayOrder - b.displayOrder);
 }
 
 export function decidePerson(p: Doctor | TeamMember, today: LocalDate): PublicationDecision {

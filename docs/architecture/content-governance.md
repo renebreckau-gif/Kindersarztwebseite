@@ -20,6 +20,8 @@ Principle: **do not rely on one person remembering things.** The system expires,
 
 Who holds each role and the review intervals are open decisions (FB-09).
 
+> Since 10.1A (first-visit items, "Gut vorbereitet"): practice staff can confirm **organisational** first-visit items (e.g. what to bring). Items that are a **vaccination or infection-control rule** (e.g. "no vaccination without the booklet", mask guidance) additionally need **Ärztliche Freigabe (Ä)**. The required approver per item is recorded in `src/content/first-visit.ts` and the fact register (F91–F94).
+
 ## 2. Responsibility matrix
 
 | Activity | E | Ä | PT | L |

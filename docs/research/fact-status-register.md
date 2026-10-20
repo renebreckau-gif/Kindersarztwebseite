@@ -107,8 +107,12 @@ Critical review of the five Phase 00 documents before assigning statuses:
 | F75 | "Hello world!" post | OUTDATED_DO_NOT_PUBLISH | LOW |
 | F76 | Empty "Praxis" page | OUTDATED_DO_NOT_PUBLISH | LOW |
 | F77–F90 | Facts missing from the existing site | TO_BE_CONFIRMED | see §9 |
+| F91 | Health insurance card: bring to visits (proposal, 10.1A) | TO_BE_CONFIRMED | MEDIUM |
+| F92 | Vaccination booklet: bring to vaccination appointments (proposal, 10.1A) | TO_BE_CONFIRMED | MEDIUM |
+| F93 | No vaccination without the vaccination booklet (proposal, 10.1A) | TO_BE_CONFIRMED | HIGH |
+| F94 | Mask / infection guidance for visits (proposal, 10.1A) | TO_BE_CONFIRMED | HIGH |
 
-Totals (90 facts): VERIFIED_CURRENT 23 · TO_BE_CONFIRMED 58 (incl. 14 missing, F77–F90) · OUTDATED_DO_NOT_PUBLISH 9
+Totals (94 facts): VERIFIED_CURRENT 23 · TO_BE_CONFIRMED 62 (incl. 14 missing, F77–F90, and 4 staff proposals, F91–F94) · OUTDATED_DO_NOT_PUBLISH 9
 
 Of the 23 VERIFIED_CURRENT facts, 12 are HIGH risk; 11 of these (all except 112) still require practice sign-off before launch (LB-00).
 
@@ -783,3 +787,18 @@ All `TO_BE_CONFIRMED`. Source: none (absence confirmed on all pages, S01–S10).
 | F88 | Public transport | LOW | Practice / transport operator | Anfahrt |
 | F89 | Languages spoken | LOW | Practice | Team, Kontakt |
 | F90 | Content for "Praxis" (philosophy, rooms, bios) | LOW | Practice | Praxis |
+
+## 12. Practice-staff proposals (Phase 10.1A, "Gut vorbereitet")
+
+Shared fields for F91–F94:
+- **SOURCE:** practice-staff feedback (voice message to the project), October 2026 — an input, **not** a formal physician approval
+- **STATUS:** TO_BE_CONFIRMED (no rule is inferred from the suggestion alone)
+- **FEATURES AFFECTED:** "Gut vorbereitet" (future `/praxis/gut-vorbereitet`, linked from "Neu bei uns?"); staging approval draft `/review/gut-vorbereitet`
+- **RECORDS:** `src/content/first-visit.ts` (`FirstVisitItem`), approvers and open questions alongside
+
+| ID | PROPOSED CLAIM | RISK IF INCORRECT | REQUIRED CONFIRMATION | NOTES |
+|---|---|---|---|---|
+| F91 | Bring the child's health insurance card to visits | MEDIUM | Practice (organisational) | Refines F78. Open: every visit? without card? preferred term ("Gesundheitskarte" / "Versichertenkarte")? |
+| F92 | Bring the vaccination booklet to vaccination appointments | MEDIUM | Practice (organisational) | Refines F78. Kept separate from F93. |
+| F93 | No vaccination without the vaccination booklet | HIGH | Physician | Stronger claim; never merged with F92; not published on staff feedback alone. |
+| F94 | Mask / infection guidance for visits | HIGH | Physician | Same question as F47 (existing website: "Kinder über 6 Jahre … Mundschutz", unconfirmed). Open: required or recommended, for whom, when, wording. |

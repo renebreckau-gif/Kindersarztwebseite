@@ -9,7 +9,7 @@ export const isReviewHubEnabled = (stage?: SiteStage) => stageAllowsReview(stage
 export const REVIEW_TEST_ACCESS = { email: "team@beispiel.test", password: "test1234" } as const;
 
 export interface ReviewCard {
-  id: "cockpit" | "discovery" | "website";
+  id: "cockpit" | "discovery" | "website" | "gut-vorbereitet";
   title: string;
   text: string;
   status?: string;
@@ -33,6 +33,14 @@ export const REVIEW_CARDS: ReviewCard[] = [
     status: "Veröffentlicht",
     action: "Mein Arztbesuch öffnen",
     href: "/entdecken/mein-arztbesuch",
+  },
+  {
+    id: "gut-vorbereitet",
+    title: "Gut vorbereitet – Freigabeentwurf",
+    text: "Vorschläge aus dem Praxisteam (Gesundheitskarte, Impfpass, Mundschutz bei Infekt) mit den offenen Fragen zur Freigabe. Noch nicht öffentlich.",
+    status: "Freigabeentwurf",
+    action: "Freigabeentwurf öffnen",
+    href: "/review/gut-vorbereitet",
   },
   {
     id: "website",
