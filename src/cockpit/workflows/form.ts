@@ -2,6 +2,7 @@
 // actually chooses are read — never a date, role, provenance or change-set id.
 
 import type { AnnouncementInput } from "./announcement.ts";
+import type { AcuteBaselineInput, AcuteTodayInput } from "./acute.ts";
 import { MAX_PERIODS, type ClosedTodayInput, type EarlyCloseInput, type PlannedClosureInput, type PlannedKind, type PublicReason, type ReplacementMode } from "./types.ts";
 
 type Get = (name: string) => string | undefined;
@@ -141,4 +142,38 @@ export function announcementQuery(i: AnnouncementInput): string {
   if (i.mode) p.set("ende", i.mode === "OPEN" ? "offen" : "datum");
   if (i.mode !== "OPEN") p.set("bis", i.validUntil);
   return p.toString();
+}
+
+// ---------------------------------------------------------------- Akutsprechstunde (09.5E)
+
+/** Editor rows of the physician baseline (z0_tag / z0_von / z0_bis …). */
+export const MAX_ACUTE_ROWS = 14;
+
+export function parseAcuteBaseline(src: { get: Get }): AcuteBaselineInput {
+  const rows: AcuteBaselineInput["rows"] = [];
+  for (let i = 0; i < MAX_ACUTE_ROWS; i++) {
+    const row = [src.get(`z${i}_tag`), src.get(`z${i}_von`), src.get(`z${i}_bis`)];
+    if (row.every((v) => v === undefined)) continue;
+    rows.push({ weekday: trimmed(row[0]), start: trimmed(row[1]), end: trimmed(row[2]) });
+  }
+  return { confirmed: src.get("bestaetigt") === "1", rows };
+}
+
+export function acuteBaselineQuery(i: AcuteBaselineInput): string {
+  const p = new URLSearchParams();
+  i.rows.forEach((r, n) => {
+    p.set(`z${n}_tag`, r.weekday);
+    p.set(`z${n}_von`, r.start);
+    p.set(`z${n}_bis`, r.end);
+  });
+  return p.toString();
+}
+
+export function parseAcuteToday(src: { get: Get }): AcuteTodayInput {
+  return src.get("modus") === "entfaellt" ? { mode: "CANCEL" } : { mode: "CHANGE", start: trimmed(src.get("von")), end: trimmed(src.get("bis")) };
+}
+
+export function acuteTodayQuery(i: AcuteTodayInput): string {
+  if (i.mode === "CANCEL") return "modus=entfaellt";
+  return new URLSearchParams({ modus: "aendern", von: i.start ?? "", bis: i.end ?? "" }).toString();
 }

@@ -24,7 +24,7 @@ export default async function Veroeffentlicht({ searchParams }: { searchParams: 
   if (session.state === "UNAVAILABLE") return <Unavailable />;
   if (session.state === "SIGNED_OUT") redirect("/intern/anmelden");
   const q = await searchParams;
-  const what = q.art === "geschlossen" ? "Heute geschlossen" : "Heute früher schließen";
+  const what = q.art === "geschlossen" ? "Heute geschlossen" : q.art === "akut" ? "Akutsprechstunde heute" : "Heute früher schließen";
   const edited = q.modus === "bearbeitet";
   const replaced = q.modus === "ersetzt";
   const vorgang = typeof q.vorgang === "string" && /^[0-9a-f-]{36}$/.test(q.vorgang) ? q.vorgang : undefined;

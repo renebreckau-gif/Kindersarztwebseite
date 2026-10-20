@@ -280,7 +280,9 @@ describe("Hinweis veröffentlichen against PostgreSQL", { skip: skipDb }, () => 
       const home = await http("/intern", { cookie });
       assert.ok(home.body.includes('href="/intern/hinweis"'), "Hinweis veröffentlichen is real");
       assert.ok(!home.body.includes("/lab/praxis-cockpit/hinweis"), "no prototype link for notices");
-      assert.ok(!home.body.includes("Akutsprechstunde ändern"), "acute workflow not offered as connected");
+      // 09.5E: the Akutsprechstunde entry exists, but without a physician baseline it says so.
+      assert.ok(!home.body.includes("Akutsprechstunde heute ändern"), "no operational acute change without a baseline");
+      assert.ok(home.body.includes('href="/intern/akutsprechstunde"') && home.body.includes("Noch nicht ärztlich bestätigt"));
       assert.ok(home.body.includes(`Hinweis: ${TITLE}`));
       assert.ok(home.body.includes(`href="/intern/hinweis/${id}"`));
       assert.match(home.body, /„Telefon am Freitag eingeschränkt \(HTTP-Test\)“ veröffentlicht/);

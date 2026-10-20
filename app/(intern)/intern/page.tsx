@@ -2,7 +2,7 @@
 // Every number and status comes from PostgreSQL → Payload → PayloadPracticeRepository → engine.
 // Real operational writes (cockpit database only; the public website stays static): Heute früher
 // schließen, Heute geschlossen (09.5A), Urlaub / Schließzeit (09.5C), Hinweis veröffentlichen (09.5D);
-// "Letzte Änderung" with safe undo (09.5B). The Akutsprechstunde is not connected.
+// "Letzte Änderung" with safe undo (09.5B). Akutsprechstunde (09.5E): state-aware entry.
 
 import config from "@payload-config";
 import Link from "next/link";
@@ -13,14 +13,15 @@ import { loadPracticeData } from "@/cockpit/queries";
 import { cockpitHome } from "@/cockpit/read-model";
 import { latestChange, relativeTime, type LatestChange } from "@/cockpit/history";
 import { formatGermanDate, parseTime } from "@/domain/time";
+import { acuteBaselineStatus } from "@/domain/acute";
 import type { PayloadReader } from "@/backend/payload-repository";
 import { StatusStatement } from "@/site/blocks";
 import { CockpitFrame } from "../cockpit-frame";
 import { internSession } from "../session";
 import { Unavailable } from "../unavailable";
 
-// Real workflows write to the cockpit database (09.5A today, 09.5C Urlaub, 09.5D Hinweis).
-// The Akutsprechstunde is not connected and is deliberately not offered here.
+// Real workflows write to the cockpit database (09.5A today, 09.5C Urlaub, 09.5D Hinweis,
+// 09.5E Akutsprechstunde — its tag says whether the physician baseline is confirmed).
 const REAL_ACTIONS = [
   { href: "/intern/heute/frueher-schliessen", label: "Heute früher schließen" },
   { href: "/intern/heute/geschlossen", label: "Heute geschlossen" },
@@ -48,6 +49,12 @@ export default async function Intern() {
   const { today, upcoming, review } = cockpitHome({ ...practice, now });
   // Same mapping as the public Heute page (resolvePuls) — only the data source differs: database.
   const dbPuls = resolvePuls({}, now, practice.data);
+  // A missing baseline is a practice decision still open — not a software failure.
+  const acuteReady = acuteBaselineStatus(practice.data, today.date).state === "READY";
+  const actions = [
+    ...REAL_ACTIONS,
+    { href: "/intern/akutsprechstunde", label: "Akutsprechstunde", tag: acuteReady ? undefined : staff.role === "DOCTOR" ? "Noch nicht ärztlich bestätigt · bitte bestätigen" : "Noch nicht ärztlich bestätigt" },
+  ];
   const minutes = parseTime(today.time);
   const greeting = minutes < parseTime("11:00") ? "Guten Morgen" : minutes < parseTime("18:00") ? "Guten Tag" : "Guten Abend";
   const firstName = staff.name.split(/[\s(]/)[0];
@@ -107,11 +114,11 @@ export default async function Intern() {
               Schnellaktionen
             </h2>
             <ul className="cp-quick-list">
-              {REAL_ACTIONS.map((q) => (
+              {actions.map((q) => (
                 <li key={q.href}>
                   <Link href={q.href} className="cp-quick-link cp-quick-real">
                     <span>{q.label}</span>
-                    <span className="cp-quick-tag">Testumgebung · Cockpit-Datenbank</span>
+                    <span className="cp-quick-tag">{"tag" in q && q.tag ? q.tag : "Testumgebung · Cockpit-Datenbank"}</span>
                   </Link>
                 </li>
               ))}

@@ -1033,10 +1033,12 @@ body.intern {
     width: 100%;
   }
 }
-/* Date inputs focus an internal field, so :focus-visible never matches the input itself —
-   show the same ring whenever focus is inside (keyboard and pointer alike). */
+/* Date and time inputs focus an internal field, so :focus-visible never matches the input itself —
+   show the same ring whenever focus is inside (keyboard and pointer alike). Time: 09.5E. */
 .cp-input[type="date"]:focus,
-.cp-input[type="date"]:focus-within {
+.cp-input[type="date"]:focus-within,
+.cp-input[type="time"]:focus,
+.cp-input[type="time"]:focus-within {
   outline: 3px solid var(--palette-cobalt);
   outline-offset: 3px;
 }
@@ -1123,4 +1125,35 @@ body.intern {
 .cp-badge-attention {
   background: color-mix(in srgb, var(--palette-coral) 16%, var(--surface));
   color: var(--color-text);
+}
+
+/* ---- 09.5E Akutsprechstunde: slot rows (Wochentag · von · bis) and engine check points ---- */
+.cp-acute-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 12rem) repeat(2, minmax(0, 9rem));
+  gap: var(--space-3);
+  align-items: end;
+}
+.cp-acute-points {
+  margin: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.cp-acute-points div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-3);
+}
+.cp-acute-points dt {
+  color: var(--color-text-secondary);
+}
+.cp-acute-points dd {
+  margin: 0;
+  font-weight: 600;
+}
+@media (max-width: 30em) {
+  .cp-acute-fields,
+  .cp-acute-points div {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

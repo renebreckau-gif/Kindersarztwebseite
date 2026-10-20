@@ -20,14 +20,24 @@ export const SERVER_CONTEXT = {
   AUDIT_OPERATION: "praxisAuditOperation",
   /** Phase 09.5B: id of the audit event a REVERT undoes (server-loaded, never from the browser). */
   REVERT_OF: "praxisRevertOf",
+  /**
+   * Phase 09.5E: the physician acute-baseline workflow. The weekly-schedule write may change ONLY
+   * the ACUTE rules; non-ACUTE rules, the schedule's own verification and the closed weekdays keep
+   * their stored values and provenance. Set by the server workflow only — never by HTTP input.
+   */
+  ACUTE_BASELINE: "praxisAcuteBaselineWrite",
+  /** Phase 09.5E: the acute-today workflow may write the internal acute-today marker. */
+  ACUTE_TODAY: "praxisAcuteTodayWrite",
 } as const;
 
 export const isLifecycleWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.LIFECYCLE] === true;
+export const isAcuteBaselineWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.ACUTE_BASELINE] === true;
+export const isAcuteTodayWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.ACUTE_TODAY] === true;
 
-/** Semantic audit operation set by the trusted server path (validated). */
-export function auditOperationOf(ctx: Record<string, unknown> | undefined | null): "SUPERSEDE" | "REVERT" | undefined {
+/** Semantic audit operation set by the trusted server path (validated). VERIFY: first physician confirmation (09.5E). */
+export function auditOperationOf(ctx: Record<string, unknown> | undefined | null): "SUPERSEDE" | "REVERT" | "VERIFY" | undefined {
   const v = ctx?.[SERVER_CONTEXT.AUDIT_OPERATION];
-  return v === "SUPERSEDE" || v === "REVERT" ? v : undefined;
+  return v === "SUPERSEDE" || v === "REVERT" || v === "VERIFY" ? v : undefined;
 }
 
 export function revertOfIn(ctx: Record<string, unknown> | undefined | null): string | undefined {

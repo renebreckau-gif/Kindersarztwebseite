@@ -6,7 +6,8 @@ import type { PracticeStatusResult } from "../../domain/practice-status.ts";
 import type { ChangeSet } from "../../domain/operations.ts";
 import type { LocalDate, LocalTime } from "../../domain/time.ts";
 
-export type WorkflowKind = "EARLY_CLOSE" | "CLOSED_TODAY" | "PLANNED_CLOSURE";
+/** ACUTE_TODAY (09.5E-2): a one-day acute change on top of the physician baseline. */
+export type WorkflowKind = "EARLY_CLOSE" | "CLOSED_TODAY" | "PLANNED_CLOSURE" | "ACUTE_TODAY";
 
 /** Why a draft cannot be published (shown in plain German, never a raw code). */
 export type BlockCode =
@@ -29,7 +30,9 @@ export type BlockCode =
   | "OVERLAP_SPECIAL_HOURS"
   | "REPLACEMENT_PERIODS"
   | "REPLACEMENT_EXPIRES"
-  | "GAP_NOT_CONFIRMED";
+  | "GAP_NOT_CONFIRMED"
+  /** 09.5E: no READY physician acute baseline. */
+  | "BASELINE_NOT_READY";
 
 /** Form sections of the planned-closure workflow (errors are shown in their section). */
 export type PlannedSection = "art" | "zeitraum" | "ankuendigung" | "vertretung" | "hinweis";

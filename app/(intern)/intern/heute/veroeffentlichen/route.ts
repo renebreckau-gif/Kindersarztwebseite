@@ -6,7 +6,7 @@
 import config from "@payload-config";
 import { getPayload } from "payload";
 import { NextResponse, type NextRequest } from "next/server";
-import { closedTodayQuery, earlyCloseQuery, fromForm, parseClosedToday, parseEarlyClose } from "@/cockpit/workflows/form";
+import { acuteTodayQuery, closedTodayQuery, earlyCloseQuery, fromForm, parseAcuteToday, parseClosedToday, parseEarlyClose } from "@/cockpit/workflows/form";
 import { publishWorkflow, type WorkflowRequest } from "@/cockpit/workflows/publish";
 import { sameOrigin } from "../../../same-origin";
 
@@ -37,6 +37,11 @@ export async function POST(req: NextRequest) {
     const input = { ...parseClosedToday(form), mode: "NOW" as const };
     request = { kind: "CLOSED_TODAY", input };
     back = `/intern/heute/geschlossen?${closedTodayQuery(input)}`;
+  } else if (workflow === "ACUTE_TODAY") {
+    // 09.5E-2: one-day acute change; the server re-checks the physician baseline (draft + collection guard).
+    const input = parseAcuteToday(form);
+    request = { kind: "ACUTE_TODAY", input };
+    back = `/intern/akutsprechstunde/heute?${acuteTodayQuery(input)}`;
   } else {
     return new NextResponse("Unbekannter Vorgang", { status: 400 });
   }
@@ -45,7 +50,8 @@ export async function POST(req: NextRequest) {
   if (result.ok) {
     const modus = result.mode === "EDIT" ? "bearbeitet" : result.mode === "SUPERSEDE" ? "ersetzt" : "neu";
     // vorgang = the server-generated change-set id (used only to look up undo eligibility again on the server).
-    return to(req, `/intern/heute/veroeffentlicht?art=${result.kind === "EARLY_CLOSE" ? "frueher" : "geschlossen"}&modus=${modus}&vorgang=${result.changeSetId}`);
+    const art = result.kind === "EARLY_CLOSE" ? "frueher" : result.kind === "ACUTE_TODAY" ? "akut" : "geschlossen";
+    return to(req, `/intern/heute/veroeffentlicht?art=${art}&modus=${modus}&vorgang=${result.changeSetId}`);
   }
   if (result.code === "UNAUTHENTICATED") return to(req, "/intern/anmelden");
   const status = result.code === "STALE" ? "veraltet" : result.code === "BLOCKED" ? "blockiert" : "fehlgeschlagen";

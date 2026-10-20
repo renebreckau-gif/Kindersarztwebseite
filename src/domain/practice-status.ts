@@ -110,8 +110,10 @@ export interface PracticeStatusResult {
   replacementPractices: PublicReplacement[];
   /** True when a closure is active but no verified, fresh replacement can be shown. */
   replacementFallback: boolean;
-  /** Acute rules exist but are not usable: the acute state is suppressed, never inferred. */
+  /** Acute rules / acute exception intervals exist but are not usable: the acute state is suppressed, never inferred. */
   acuteSuppressed: boolean;
+  /** Usable acute intervals of the evaluation day (data-driven; empty when none or suppressed). */
+  acuteToday: { start: LocalTime; end: LocalTime }[];
   dataConfidence: "VERIFIED" | "REVIEW_DUE" | "UNKNOWN";
   /** Internal diagnostic code — not for public display. */
   reason: ReasonCode;
@@ -156,7 +158,7 @@ type DayPlan =
   | { kind: "UNKNOWN"; reason: ReasonCode; records: string[] }
   | { kind: "CLOSURE"; closure: Closure; records: string[]; worst: Freshness }
   | { kind: "CLOSED"; message?: string; exception?: OpeningHourException; records: string[]; worst: Freshness }
-  | { kind: "SPECIAL"; exception: OpeningHourException; intervals: Interval[]; records: string[]; worst: Freshness }
+  | { kind: "SPECIAL"; exception: OpeningHourException; intervals: Interval[]; acuteSuppressed: boolean; records: string[]; worst: Freshness }
   | { kind: "REGULAR"; intervals: Interval[]; acute: Interval[]; acuteSuppressed: boolean; records: string[]; worst: Freshness };
 
 const CLOSURE_RANK: Record<ClosureKind, number> = { SHORT_NOTICE: 3, TRAINING: 2, OTHER: 2, VACATION: 1 };
@@ -204,6 +206,16 @@ function blocks(list: Interval[]): { start: number; end: number }[] {
   return out;
 }
 
+/**
+ * Is the ACUTE consultation type usable on `today` (verified, fresh)? The ONE check behind every
+ * acute statement — weekly acute rules AND acute intervals of SPECIAL_HOURS exceptions (09.5E) —
+ * using the established freshness semantics (category "consultationType").
+ */
+export function acuteTypeUsable(data: Pick<PulsData, "consultationTypes">, today: LocalDate): boolean {
+  const t = data.consultationTypes.find((x) => x.code === "ACUTE");
+  return !!t && isUsable(fresh(t.verification, today, "consultationType"));
+}
+
 function sameException(a: OpeningHourException, b: OpeningHourException) {
   return a.kind === b.kind && JSON.stringify(a.intervals) === JSON.stringify(b.intervals);
 }
@@ -244,7 +256,13 @@ function resolveDay(date: LocalDate, today: LocalDate, data: PulsData): DayPlan 
     if (exception.kind === "CLOSED") return { kind: "CLOSED", exception, message: exception.publicMessage, records: [exception.id], worst: w };
     const iv = toIntervals(exception.intervals, exception.id);
     if (!iv || iv.length === 0 || overlaps(iv)) return { kind: "UNKNOWN", reason: "INVALID_DATA", records: [exception.id] };
-    return { kind: "SPECIAL", exception, intervals: iv, records: [exception.id], worst: w };
+    // 09.5E: an ACUTE interval in changed hours needs the same confirmation as a weekly acute rule.
+    // Unusable type → the opening interval itself stays (the exception is verified), only the acute
+    // designation is dropped (neutral GENERAL) — never a public acute claim, never a whole-day UNKNOWN.
+    const hasAcute = iv.some((i) => i.type === "ACUTE");
+    const acuteOk = hasAcute && acuteTypeUsable(data, today);
+    const intervals = hasAcute && !acuteOk ? iv.map((i) => (i.type === "ACUTE" ? { ...i, type: "GENERAL" as const } : i)) : iv;
+    return { kind: "SPECIAL", exception, intervals, acuteSuppressed: hasAcute && !acuteOk, records: [exception.id], worst: w };
   }
 
   // 3. Public holidays: never assume closed without an explicit, verified rule.
@@ -296,12 +314,11 @@ function resolveDay(date: LocalDate, today: LocalDate, data: PulsData): DayPlan 
   if (overlaps(deduped)) return { kind: "UNKNOWN", reason: "RULE_CONFLICT", records: deduped.map((i) => i.id) };
 
   // Acute overlay: used only if both the rule and the ACUTE consultation type are verified.
-  const acuteType = data.consultationTypes.find((t) => t.code === "ACUTE");
-  const acuteTypeUsable = !!acuteType && isUsable(fresh(acuteType.verification, today, "consultationType"));
+  const typeOk = acuteTypeUsable(data, today);
   const acute: Interval[] = [];
   let acuteSuppressed = false;
   for (const r of acuteRules) {
-    const usable = acuteTypeUsable && isUsable(fresh(r.verification, today, "openingHours"));
+    const usable = typeOk && isUsable(fresh(r.verification, today, "openingHours"));
     if (!usable) {
       acuteSuppressed = true;
       continue;
@@ -394,7 +411,8 @@ export function getPracticeStatus(now: Date, data: PulsData, options: PulsOption
   const base = {
     replacementPractices: [] as PublicReplacement[],
     replacementFallback: false,
-    acuteSuppressed: plan.kind === "REGULAR" ? plan.acuteSuppressed : false,
+    acuteSuppressed: plan.kind === "REGULAR" || plan.kind === "SPECIAL" ? plan.acuteSuppressed : false,
+    acuteToday: acuteIntervalsOf(plan),
     dataConfidence: confidence as PracticeStatusResult["dataConfidence"],
     reason: "OK" as ReasonCode,
     sourceRecordIds: plan.records,
@@ -459,6 +477,20 @@ export function getPracticeStatus(now: Date, data: PulsData, options: PulsOption
       status: "SPECIAL_HOURS" as const,
       activeException: { id: ex.id, kind: ex.kind, message: ex.publicMessage, intervals: list },
     };
+    // 09.5E: a usable acute interval of the changed hours (suppressed ones are GENERAL by now).
+    if (current && block && current.type === "ACUTE") {
+      return {
+        ...special,
+        status: "ACUTE_CONSULTATION",
+        indicator: "OPEN",
+        headline: "Akutsprechstunde",
+        detail: `Heute bis ${formatMinutes(current.end)} Uhr`,
+        primaryAction: A.call,
+        secondaryActions: [A.hours],
+        currentInterval: { start: formatMinutes(current.start), end: formatMinutes(current.end), consultationType: "ACUTE" },
+        consultationType: "ACUTE",
+      };
+    }
     if (current && block) {
       return {
         ...special,
@@ -546,6 +578,12 @@ export function getPracticeStatus(now: Date, data: PulsData, options: PulsOption
 
 // ---------------------------------------------------------------- helpers
 
+/** Usable acute intervals of a resolved day (weekly overlay or changed hours). */
+function acuteIntervalsOf(plan: DayPlan): { start: LocalTime; end: LocalTime }[] {
+  const list = plan.kind === "REGULAR" ? plan.acute : plan.kind === "SPECIAL" ? plan.intervals.filter((i) => i.type === "ACUTE") : [];
+  return list.map((i) => ({ start: formatMinutes(i.start), end: formatMinutes(i.end) }));
+}
+
 function evalStamp(now: Date, local: { date: LocalDate; minutes: number }) {
   return { instant: now.toISOString(), localDate: local.date, localTime: formatMinutes(local.minutes), timeZone: PRACTICE_TIME_ZONE };
 }
@@ -569,6 +607,7 @@ function unknown(
     replacementPractices: [],
     replacementFallback: false,
     acuteSuppressed: false,
+    acuteToday: [],
     dataConfidence: "UNKNOWN",
     reason,
     sourceRecordIds: records,

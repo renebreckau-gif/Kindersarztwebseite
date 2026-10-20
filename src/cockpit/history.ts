@@ -10,6 +10,7 @@ import { blocks } from "../domain/operations.ts";
 import type { PayloadReader } from "../backend/payload-repository.ts";
 import { entityKey, planUndo, type HistoryEvent, type LifecycleCollection, type OperationalState, type StoredRecord, type UndoPlan } from "./workflows/undo.ts";
 import { CLOSURE_KIND_TITLE, shortRange } from "./workflows/wording.ts";
+import { ACUTE_TODAY_MARKER } from "../domain/acute.ts";
 
 /** 09.5C planned closures in history sentences. */
 const PLANNED = new Set(["VACATION", "TRAINING", "OTHER"]);
@@ -53,8 +54,14 @@ export function describeEvent(e: HistoryEvent, today: LocalDate): string {
     const title = ((e.next ?? e.previous ?? {}) as { title?: string }).title ?? "Hinweis";
     return `„${title}“ ${e.operation === "CREATE" ? "veröffentlicht" : "geändert"}`;
   }
-  const snap = (e.next ?? e.previous ?? {}) as { kind?: string; startDate?: string; endDate?: string; intervals?: { start: string; end: string; consultationType: string }[] };
+  const snap = (e.next ?? e.previous ?? {}) as { kind?: string; startDate?: string; endDate?: string; reason?: string; intervals?: { start: string; end: string; consultationType: string }[] };
   const day = snap.startDate === today && snap.endDate === today ? "Heute" : snap.startDate ? formatGermanDate(snap.startDate) : "";
+  if (e.entityType === "openingHourExceptions" && snap.reason === ACUTE_TODAY_MARKER) {
+    // 09.5E: never the raw marker — "Akutsprechstunde heute 10:00–11:00 Uhr geändert" / "… entfällt".
+    const acute = (snap.intervals ?? []).filter((i) => i.consultationType === "ACUTE");
+    const when = day === "Heute" ? "heute" : `am ${day}`;
+    return acute.length ? `Akutsprechstunde ${when} ${acute.map((i) => `${i.start}–${i.end}`).join(" und ")} Uhr geändert` : `Akutsprechstunde ${when} entfällt`;
+  }
   if (e.entityType === "openingHourExceptions") {
     if (snap.kind === "CLOSED") return `${day}: Praxis geschlossen`;
     const b = blocks((snap.intervals ?? []).map((i) => ({ start: i.start, end: i.end, type: i.consultationType as never })));
@@ -71,6 +78,7 @@ export function describeEvent(e: HistoryEvent, today: LocalDate): string {
 
 /** A revert of a planned closure: its creation ("Urlaub … zurückgenommen") or an edit ("Änderung am Urlaub …"). */
 function describeRevert(events: HistoryEvent[]): string {
+  if (events.some((x) => x.entityType === "openingHourExceptions" && (x.next as { reason?: string } | null)?.reason === ACUTE_TODAY_MARKER)) return "Änderung an der Akutsprechstunde zurückgenommen";
   const notice = events.find((x) => x.entityType === "announcements");
   if (notice) {
     const snap = (notice.next ?? {}) as { title?: string; recordState?: string };

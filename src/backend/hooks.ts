@@ -5,12 +5,38 @@ import type { CollectionAfterChangeHook, CollectionBeforeChangeHook, CollectionB
 import type { ConfirmableKind } from "../domain/governance.ts";
 import type { Closure, OpeningHourException } from "../domain/content-types.ts";
 import { applyChangeSet, introducedUnknown } from "../domain/operations.ts";
+import { ACUTE_TODAY_MARKER, acuteExceptionProblem } from "../domain/acute.ts";
 import { announcementShapeProblems, normalizeText } from "../domain/announcements.ts";
 import { closureFromDoc, exceptionFromDoc, verificationToDoc, type ClosureDoc, type ExceptionDoc } from "../data/payload-mapping.ts";
 import { activeRole } from "./access.ts";
 import { actorFromUser, auditForWrite, berlinToday, ProvenanceRejected, reviewDueFor, verificationForWrite, type StaffUserDoc } from "./provenance.ts";
 import { PayloadPracticeRepository, type PayloadReader } from "./payload-repository.ts";
-import { auditOperationOf, changeSetIdOf, isBootstrap, isLifecycleWrite, isTrustedSeed, RejectedError, revertOfIn, systemActor } from "./server-context.ts";
+import { auditOperationOf, changeSetIdOf, isAcuteBaselineWrite, isAcuteTodayWrite, isBootstrap, isLifecycleWrite, isTrustedSeed, RejectedError, revertOfIn, systemActor } from "./server-context.ts";
+
+type RuleRow = { ruleId?: string; weekday?: string; start?: string; end?: string; consultationType?: string; validFrom?: string | null; validUntil?: string | null; publicNote?: string | null; verification?: unknown };
+const ruleShape = (r: RuleRow) => JSON.stringify([String(r.weekday), r.start, r.end, r.consultationType, r.validFrom ?? null, r.validUntil ?? null, r.publicNote ?? null]);
+
+/**
+ * 09.5E acute-baseline write (trusted server context only): ACUTE rules get fresh physician
+ * provenance (ACUTE_RULE — DOCTOR only); every non-ACUTE rule must be present and unchanged and
+ * keeps its STORED verification; the schedule's own verification and closed weekdays stay as stored.
+ * Nothing about the rest of the schedule becomes "newly confirmed".
+ */
+function acuteBaselineRules(data: Record<string, unknown>, originalDoc: Record<string, unknown>, generated: ReturnType<typeof verificationToDoc>): Record<string, unknown> {
+  const original = (originalDoc.rules as RuleRow[] | undefined) ?? [];
+  const incoming = (data.rules as RuleRow[] | undefined) ?? [];
+  const keep = new Map(original.filter((r) => r.consultationType !== "ACUTE").map((r) => [String(r.ruleId), r]));
+  const seen = new Set<string>();
+  const rules = incoming.map((r) => {
+    if (r.consultationType === "ACUTE") return { ...r, verification: generated };
+    const o = keep.get(String(r.ruleId));
+    if (!o || ruleShape(o) !== ruleShape(r)) throw new RejectedError("Hier darf nur die Akutsprechstunde geändert werden.", 400);
+    seen.add(String(r.ruleId));
+    return { ...r, verification: o.verification };
+  });
+  if (seen.size !== keep.size) throw new RejectedError("Hier darf nur die Akutsprechstunde geändert werden.", 400);
+  return { ...data, rules, verification: originalDoc.verification, confirmedClosedWeekdays: originalDoc.confirmedClosedWeekdays };
+}
 
 /**
  * Generate verification from the logged-in account; reject writes the role may not confirm.
@@ -33,6 +59,18 @@ export const provenanceHook =
     } catch (e) {
       if (e instanceof ProvenanceRejected) throw new RejectedError(e.message, actor ? 403 : 401);
       throw e;
+    }
+    // 09.5E: only the trusted acute-baseline workflow (server context) may change the ACUTE subset alone.
+    if (isAcuteBaselineWrite(req.context) && kind === "WEEKLY_SCHEDULE") {
+      if (!originalDoc) throw new RejectedError("Die Akutsprechstunde braucht einen bestätigten Wochenplan.", 409);
+      let acute;
+      try {
+        acute = verificationForWrite(actor, "ACUTE_RULE", reviewDueFor("ACUTE_RULE", merged, today), today);
+      } catch (e) {
+        if (e instanceof ProvenanceRejected) throw new RejectedError(e.message, actor ? 403 : 401);
+        throw e;
+      }
+      return acuteBaselineRules(data, originalDoc, verificationToDoc(acute));
     }
     const out: Record<string, unknown> = { ...data, verification: verificationToDoc(generated) };
     // Nested rule verifications (weekly schedule) are generated too — never taken from the client.
@@ -60,6 +98,24 @@ export const publishGuardHook =
     if (conflict) throw new RejectedError(`Widersprüchliche Angaben am ${conflict.date}: Diese Änderung würde einer bestehenden Änderung widersprechen.`, 409);
     return data;
   };
+
+/**
+ * 09.5E collection guard for EVERY exception write (cockpit, REST, admin UI): SPECIAL_HOURS with an
+ * ACUTE interval needs a READY physician baseline (same pure helper as the cockpit workflow). The
+ * internal acute-today marker may be written only by the trusted acute-today workflow (or by the
+ * server's undo of it). Retiring a record (lifecycle) is not re-checked.
+ */
+export const acuteExceptionHook: CollectionBeforeChangeHook = async ({ data, req, originalDoc }) => {
+  const merged = { ...(originalDoc ?? {}), ...data } as ExceptionDoc & { recordState?: string };
+  if (isLifecycleWrite(req.context) && merged.recordState === "RETIRED") return data;
+  const trusted = isAcuteTodayWrite(req.context) || isLifecycleWrite(req.context) || auditOperationOf(req.context) === "REVERT";
+  if (merged.reason === ACUTE_TODAY_MARKER && !trusted) throw new RejectedError("Diese geänderte Sprechzeit wird über „Akutsprechstunde“ im Praxis Cockpit verwaltet.", 403);
+  if (!(merged.intervals ?? []).some((i) => i.consultationType === "ACUTE")) return data;
+  const base = await new PayloadPracticeRepository(req.payload as unknown as PayloadReader, req).getPulsData();
+  const problem = acuteExceptionProblem(base, exceptionFromDoc(merged as ExceptionDoc), berlinToday());
+  if (problem) throw new RejectedError(problem, 409);
+  return data;
+};
 
 /**
  * Announcement invariants for EVERY write path (cockpit, REST, admin UI) — the same pure helper the

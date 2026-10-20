@@ -12,7 +12,8 @@
 import { randomUUID } from "node:crypto";
 import { commitTransaction, createLocalReq, initTransaction, killTransaction, type Payload, type PayloadRequest } from "payload";
 import type { PulsData } from "../../domain/practice-status.ts";
-import { announcementToDoc, closureToDoc, exceptionToDoc } from "../../data/payload-mapping.ts";
+import { announcementToDoc, closureToDoc, exceptionToDoc, verificationToDoc, type RuleDoc, type WeeklyScheduleDoc } from "../../data/payload-mapping.ts";
+import { ACUTE_LABEL, previewVerification } from "../../domain/acute.ts";
 import type { Announcement } from "../../domain/content-types.ts";
 import { activeRole, type StaffUserLike } from "../../backend/access.ts";
 import { PayloadPracticeRepository, type PayloadReader } from "../../backend/payload-repository.ts";
@@ -23,12 +24,14 @@ import { announcementFingerprint, datasetFingerprint, operationalFingerprint } f
 import { announcementDraft, type AnnouncementInput } from "./announcement.ts";
 import { closedTodayDraft, earlyCloseDraft } from "./today.ts";
 import { plannedClosureDraft } from "./planned.ts";
+import { acuteBaselineDraft, acuteTodayDraft, type AcuteBaselineInput, type AcuteTodayInput, type BaselineDraft } from "./acute.ts";
 import type { Blocked, ClosedTodayInput, Draft, EarlyCloseInput, PlannedClosureInput, ReadyDraft, WorkflowKind } from "./types.ts";
 
 export type WorkflowRequest =
   | { kind: "EARLY_CLOSE"; input: EarlyCloseInput }
   | { kind: "CLOSED_TODAY"; input: ClosedTodayInput }
-  | { kind: "PLANNED_CLOSURE"; input: PlannedClosureInput };
+  | { kind: "PLANNED_CLOSURE"; input: PlannedClosureInput }
+  | { kind: "ACUTE_TODAY"; input: AcuteTodayInput };
 
 export type PublishResult =
   | { ok: true; changeSetId: string; mode: "NEW" | "EDIT" | "SUPERSEDE"; recordId: string; kind: WorkflowKind }
@@ -39,6 +42,7 @@ export const STALE_MESSAGE = "Inzwischen wurde etwas geändert. Bitte prüfen Si
 export function buildDraft(request: WorkflowRequest, data: PulsData, now: Date, fingerprint: string): Draft {
   if (request.kind === "EARLY_CLOSE") return earlyCloseDraft(data, now, request.input, fingerprint);
   if (request.kind === "CLOSED_TODAY") return closedTodayDraft(data, now, request.input, fingerprint);
+  if (request.kind === "ACUTE_TODAY") return acuteTodayDraft(data, now, request.input, fingerprint);
   return plannedClosureDraft(data, now, request.input, fingerprint).draft;
 }
 
@@ -75,6 +79,12 @@ async function withContext<T>(req: PayloadRequest, extra: Record<string, unknown
  * (audit SUPERSEDE, same changeSetId), then the new record is created. Exported for the tests.
  */
 export async function commitDraft(payload: Payload, req: PayloadRequest, draft: ReadyDraft): Promise<string> {
+  // 09.5E: the acute-today record carries the internal marker — only this trusted path may write it.
+  if (draft.kind === "ACUTE_TODAY") return withContext(req, { [SERVER_CONTEXT.ACUTE_TODAY]: true }, () => commitRecord(payload, req, draft));
+  return commitRecord(payload, req, draft);
+}
+
+async function commitRecord(payload: Payload, req: PayloadRequest, draft: ReadyDraft): Promise<string> {
   const { collection, value } = draft.record;
   const common = { req, user: req.user, overrideAccess: false as const, depth: 0 };
   const findActive = async (c: "openingHourExceptions" | "closures", recordId: string) =>
@@ -228,6 +238,85 @@ export async function publishWorkflow(
   }
 }
 
+
+// ---------------------------------------------------------------- Akutsprechstunde: physician baseline (09.5E-1)
+
+export type BaselinePublishResult =
+  | { ok: true; changeSetId: string; first: boolean }
+  | { ok: false; code: "UNAUTHENTICATED" | "NOT_ALLOWED" | "STALE" | "BLOCKED" | "FAILED"; message: string };
+
+export const DOCTOR_ONLY_MESSAGE = "Die Akutsprechstunde kann nur eine Ärztin oder ein Arzt bestätigen.";
+
+/**
+ * Write one ready baseline draft inside the given transaction: the ACUTE consultation type (the same
+ * logical record, or exactly one new one) and the weekly schedule's ACUTE subset (trusted context:
+ * non-ACUTE rules keep their stored content and provenance — enforced by the provenance hook).
+ * First confirmation is audited as VERIFY, later changes as UPDATE; both writes share the changeSetId.
+ */
+export async function commitAcuteBaseline(payload: Payload, req: PayloadRequest, draft: Extract<BaselineDraft, { ok: true }>): Promise<void> {
+  const common = { req, user: req.user, overrideAccess: false as const, depth: 0 };
+  const op = draft.first ? { [SERVER_CONTEXT.AUDIT_OPERATION]: "VERIFY" } : {};
+  const found = (await payload.find({ collection: "consultationTypes", where: { code: { equals: "ACUTE" } }, limit: 2, depth: 0, overrideAccess: true, req })).docs as { id: number | string }[];
+  if (found.length > 1) throw new Error("Die Sprechstundenart „Akutsprechstunde“ ist mehrfach angelegt.");
+  await withContext(req, op, () =>
+    found[0]
+      ? payload.update({ collection: "consultationTypes", id: found[0].id, data: { label: ACUTE_LABEL } as never, ...common, context: req.context })
+      : payload.create({ collection: "consultationTypes", data: { code: "ACUTE", label: ACUTE_LABEL, verification: verificationToDoc(previewVerification(draft.today)) } as never, ...common, context: req.context }),
+  );
+  const schedule = (await payload.find({ collection: "weeklySchedules", sort: "-updatedAt", limit: 1, depth: 0, overrideAccess: true, req })).docs[0] as (WeeklyScheduleDoc & { id: number | string }) | undefined;
+  if (!schedule) throw new Error("Es ist kein Wochenplan hinterlegt.");
+  const placeholder = verificationToDoc(previewVerification(draft.today));
+  const acuteRows: RuleDoc[] = draft.proposed.schedule!.rules
+    .filter((r) => r.consultationType === "ACUTE")
+    .map((r) => ({ ruleId: r.id, weekday: String(r.weekday), start: r.start, end: r.end, consultationType: "ACUTE", validFrom: null, validUntil: null, publicNote: null, verification: placeholder }));
+  const rules = [...schedule.rules.filter((r) => r.consultationType !== "ACUTE"), ...acuteRows];
+  await withContext(req, { ...op, [SERVER_CONTEXT.ACUTE_BASELINE]: true }, () =>
+    payload.update({ collection: "weeklySchedules", id: schedule.id, data: { rules } as never, ...common, context: req.context }),
+  );
+}
+
+/**
+ * DOCTOR only (checked here AND by the provenance hook): session account → server changeSetId →
+ * transaction → re-read → fingerprint → rebuilt draft (server clock) → write type + ACUTE rules →
+ * commit. Nothing from the browser but the editor rows and the confirmation checkbox. No quick undo:
+ * correction happens by another physician edit; the audit stays append-only.
+ */
+export async function publishAcuteBaseline(
+  payload: Payload,
+  user: (StaffUserLike & Record<string, unknown>) | null | undefined,
+  input: AcuteBaselineInput,
+  previewFingerprint: string,
+  now: Date = new Date(),
+): Promise<BaselinePublishResult> {
+  const role = activeRole(user);
+  if (!user || !role) return { ok: false, code: "UNAUTHENTICATED", message: "Bitte melden Sie sich erneut an." };
+  if (role !== "DOCTOR") return { ok: false, code: "NOT_ALLOWED", message: DOCTOR_ONLY_MESSAGE };
+  if (!input.confirmed) return { ok: false, code: "BLOCKED", message: "Bitte bestätigen Sie, dass die Praxis eine regelmäßige Akutsprechstunde hat." };
+  const changeSetId = randomUUID();
+  const req = await createLocalReq({ user: user as never, context: { [SERVER_CONTEXT.CHANGE_SET]: changeSetId } }, payload);
+  await initTransaction(req);
+  try {
+    const data = await new PayloadPracticeRepository(payload as unknown as PayloadReader, req).getPulsData();
+    const fingerprint = datasetFingerprint(data);
+    if (fingerprint !== previewFingerprint) {
+      await killTransaction(req);
+      return { ok: false, code: "STALE", message: STALE_MESSAGE };
+    }
+    const draft = acuteBaselineDraft(data, now, input, fingerprint);
+    if (!draft.ok) {
+      await killTransaction(req);
+      return { ok: false, code: "BLOCKED", message: draft.message };
+    }
+    await commitAcuteBaseline(payload, req, draft);
+    await commitTransaction(req);
+    return { ok: true, changeSetId, first: draft.first };
+  } catch (e) {
+    await killTransaction(req);
+    const err = e as { isPublic?: boolean; message?: string } | null;
+    const publicMessage = err && typeof err === "object" && err.isPublic && typeof err.message === "string" ? err.message : undefined;
+    return { ok: false, code: "FAILED", message: publicMessage ?? "Die Akutsprechstunde konnte nicht gespeichert werden. Es wurde nichts verändert." };
+  }
+}
 
 // ---------------------------------------------------------------- "Hinweis veröffentlichen" (09.5D)
 

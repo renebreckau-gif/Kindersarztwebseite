@@ -9,6 +9,7 @@ import { getPracticeStatus, type PracticeStatusResult, type PulsData } from "../
 import { announcementExpired, blocks, notExpired, rulesSegments, uncoveredDays } from "../domain/operations.ts";
 import { evaluateFreshness } from "../domain/verification.ts";
 import { decideAnnouncement } from "../domain/publication.ts";
+import { acuteBaselineStatus } from "../domain/acute.ts";
 import { shortRange } from "./workflows/wording.ts";
 import { addDays, compareDates, daysBetween, formatGermanDate, weekdayOf, zonedParts, zonedToInstant, formatMinutes, type LocalDate, type LocalTime } from "../domain/time.ts";
 
@@ -187,6 +188,21 @@ export function reviewItems(data: PulsData, today: LocalDate, announcements: Ann
         title: "Wochenplan erneut bestätigen",
         text: compareDates(due, today) < 0 ? `Die Bestätigung der Sprechzeiten ist seit ${formatGermanDate(due)} abgelaufen.` : `Die Bestätigung der Sprechzeiten läuft am ${formatGermanDate(due)} ab.`,
       });
+    }
+  }
+
+  // 09.5E: only EXISTING acute data can need attention — no warning merely because no baseline exists
+  // (the old acute information is unconfirmed; it does not prove the practice has one).
+  const acute = acuteBaselineStatus(data, today);
+  if (acute.state === "INVALID") {
+    items.push({ id: "acute-invalid", title: "Akutsprechstunde prüfen", text: `${acute.reasons.join(" ")} Die Website zeigt deshalb keine Akutsprechstunde.` });
+  } else if (acute.type || acute.rules.length) {
+    const typeDue = acute.type?.verification.reviewDue;
+    const expiredRule = acute.rules.some((r) => evaluateFreshness(r.verification, today, "openingHours") === "REVIEW_EXPIRED");
+    if (acute.typeFreshness === "REVIEW_EXPIRED" || expiredRule) {
+      items.push({ id: "acute-review-expired", title: "Akutsprechstunde erneut ärztlich bestätigen", text: "Die ärztliche Bestätigung der Akutsprechstunde ist abgelaufen. Die Website zeigt deshalb keine Akutsprechstunde." });
+    } else if (acute.state === "READY" && typeDue && daysBetween(today, typeDue) <= SCHEDULE_REVIEW_WARN_DAYS) {
+      items.push({ id: "acute-review", title: "Akutsprechstunde erneut ärztlich bestätigen", text: `Die ärztliche Bestätigung der Akutsprechstunde läuft am ${formatGermanDate(typeDue)} ab.` });
     }
   }
 

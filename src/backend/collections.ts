@@ -6,7 +6,7 @@ import type { CollectionBeforeChangeHook, CollectionConfig, Field, GlobalConfig 
 import type { ConfirmableKind } from "../domain/governance.ts";
 import { ACCESS, activeRole, adminOnly, signedIn } from "./access.ts";
 import { CONSULTATION_TYPE_OPTIONS, localDate, localTime, recordId, verification } from "./fields.ts";
-import { announcementShapeHook, auditHook, holidayPolicyHook, provenanceHook, publishGuardHook, retiredRecordGuard, staffCreateGuard, staffOperationGuard } from "./hooks.ts";
+import { acuteExceptionHook, announcementShapeHook, auditHook, holidayPolicyHook, provenanceHook, publishGuardHook, retiredRecordGuard, staffCreateGuard, staffOperationGuard } from "./hooks.ts";
 import { ANNOUNCEMENT_DEFAULT_PRIORITY, ANNOUNCEMENT_TEXT_MAX, ANNOUNCEMENT_TITLE_MAX } from "../domain/announcements.ts";
 import { isLifecycleWrite, RejectedError } from "./server-context.ts";
 
@@ -180,7 +180,8 @@ export const OpeningHourExceptions = tracked(
     { name: "publicMessage", label: "Öffentlicher Text", type: "text", maxLength: 200 },
     { name: "priority", type: "number", required: true, defaultValue: 10 },
   ],
-  { guard: "openingHourExceptions", lifecycle: true, labels: { singular: "Geänderte Öffnungszeit", plural: "Geänderte Öffnungszeiten" } },
+  // 09.5E: ACUTE intervals need a READY physician baseline on every write path.
+  { guard: "openingHourExceptions", lifecycle: true, validate: [acuteExceptionHook], labels: { singular: "Geänderte Öffnungszeit", plural: "Geänderte Öffnungszeiten" } },
 );
 
 export const Closures = tracked(

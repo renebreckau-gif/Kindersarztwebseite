@@ -6,7 +6,6 @@ import { getPracticeStatus, type PracticeStatusResult } from "../domain/practice
 import { zonedToInstant } from "../domain/time.ts";
 import type { DemoPuls } from "../design-system/demo-fixtures.ts";
 import type { PulsData } from "../domain/practice-status.ts";
-import { CONSULTATION_TYPES } from "./schedule.ts";
 import { staticPulsData } from "../data/static-repository.ts";
 import { RELEASE, SITE_STAGE, isPublicReviewPreview, type SiteStage } from "./release.ts";
 import { UNCONFIRMED } from "./practice.ts";
@@ -53,9 +52,15 @@ export function resolvePuls(
   const result = getPracticeStatus(at, data);
   const [secondary] = result.secondaryActions;
   // Current consultation type (verified data, e.g. F41 "bitte nur gesunde Kinder") — the engine
-  // reports it; we only put it into words. No new status logic.
+  // reports it; we only put it into words. No new status logic. Labels come from the SAME source the
+  // engine evaluated (static snapshot publicly, the database in the cockpit preview — 09.5E).
+  const labelOf = (code: string) => source.consultationTypes.find((t) => t.code === code)?.label;
   const iv = result.currentInterval;
-  const typeLabel = iv && iv.consultationType !== "GENERAL" ? CONSULTATION_TYPES.find((t) => t.code === iv.consultationType)?.label : undefined;
+  const acuteNow = result.status === "ACUTE_CONSULTATION";
+  const typeLabel = iv && iv.consultationType !== "GENERAL" && !acuteNow ? labelOf(iv.consultationType) : undefined;
+  // A usable acute interval later today (weekly or changed hours), worded from the actual data.
+  const laterAcute = acuteNow ? [] : result.acuteToday.filter((a) => a.start > result.evaluatedAt.localTime);
+  const acuteHint = laterAcute.length ? `${labelOf("ACUTE") ?? "Akutsprechstunde"} heute ${laterAcute.map((a) => `${a.start}–${a.end}`).join(" und ")} Uhr` : "";
   const view: DemoPuls = {
     state: result.indicator === "OPEN" ? "open" : result.indicator === "NONE" ? "unknown" : result.indicator === "CLOSURE" ? "closure" : result.indicator === "ATTENTION" ? "special" : "closed",
     indicator: result.indicator,
@@ -63,7 +68,7 @@ export function resolvePuls(
     headline: result.headline,
     detail: result.detail,
     // Special hours stay visible, but subordinate to the open/closed headline.
-    reason: [result.status === "SPECIAL_HOURS" ? "Geänderte Sprechzeit heute" : "", typeLabel && iv ? `Jetzt bis ${iv.end} Uhr: ${typeLabel}` : ""].filter(Boolean).join(" · ") || undefined,
+    reason: [result.activeException?.kind === "SPECIAL_HOURS" ? "Geänderte Sprechzeit heute" : "", typeLabel && iv ? `Jetzt bis ${iv.end} Uhr: ${typeLabel}` : "", acuteHint].filter(Boolean).join(" · ") || undefined,
     action: { label: result.primaryAction.label, kind: ACTION_KIND[result.primaryAction.id] ?? "hours" },
     secondary: secondary ? { label: secondary.label, kind: (ACTION_KIND[secondary.id] ?? "hours") as "call" | "hours" | "emergency" } : undefined,
   };

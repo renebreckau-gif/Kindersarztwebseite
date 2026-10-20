@@ -493,6 +493,12 @@ Safety and seeding:
 - Accounts use `@integration-test.invalid`, and passwords are generated per run.
 - `npm run db:seed-dev` fills the **dev** database with artificial accounts (`@praxis-test.invalid`; generated passwords only in `.env.local`) and invented operational data, written *through* those accounts so that provenance and audit are real.
 
+### 17.11a Akutsprechstunde (Phase 09.5E, 2026-10-20)
+
+- **Trusted acute write context** (`SERVER_CONTEXT.ACUTE_BASELINE`, server code only — Payload `req.context` is not reachable over HTTP): on a weekly-schedule write the provenance hook re-stamps ONLY the ACUTE rules (kind `ACUTE_RULE`, DOCTOR only); every non-ACUTE rule must be present and unchanged and keeps its STORED verification; the schedule's verification and closed weekdays are taken from the stored document. ADMIN / STAFF cannot use it (collection access + `canConfirm`).
+- **Collection ACUTE guard** (`acuteExceptionHook`, every write path incl. REST / admin UI): a SPECIAL_HOURS exception with an ACUTE interval needs a READY physician baseline (`acuteBaselineStatus`) and a usable ACUTE type on every affected day — the same pure helper the cockpit uses. The internal marker `COCKPIT_ACUTE_TODAY` may only be written by the acute-today workflow (`SERVER_CONTEXT.ACUTE_TODAY`) or by the server's undo; client writes carrying it are refused.
+- **Transaction / audit:** the baseline writes type + schedule in one transaction with one server `changeSetId`; `VERIFY` (first confirmation) is now an accepted trusted audit operation next to `SUPERSEDE` / `REVERT`. Rollback leaves no half state (integration-tested by failing the second write).
+
 ### 17.12 npm audit (2026-10-13): 16 findings, none fixed by force
 
 | Package (path) | Severity | Reachable here? | Fix |
