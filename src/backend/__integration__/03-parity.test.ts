@@ -9,7 +9,11 @@ import type { Payload } from "payload";
 import { getPracticeStatus, type PulsData } from "../../domain/practice-status.ts";
 import { addDays, zonedToInstant } from "../../domain/time.ts";
 import { PULS_DATA } from "../../content/schedule.ts";
-import { docsFromPulsData } from "../../data/payload-mapping.ts";
+import { announcementToDoc, docsFromPulsData } from "../../data/payload-mapping.ts";
+import type { Announcement } from "../../domain/content-types.ts";
+import { selectPublicAnnouncements } from "../../domain/publication.ts";
+import { ANNOUNCEMENTS } from "../../content/notices.ts";
+import { selectHomepageHighlight } from "../../content/homepage-highlight.ts";
 import { PayloadPracticeRepository, type PayloadReader } from "../payload-repository.ts";
 import { SERVER_CONTEXT } from "../server-context.ts";
 import { initialState, pulsDataOf } from "../../lab/cockpit/model.ts";
@@ -86,6 +90,27 @@ describe("parity: static → PostgreSQL → PayloadPracticeRepository", { skip: 
     assert.ok(statuses.has("UNKNOWN"), "unresolved weekday holiday stays UNKNOWN (fail-safe)");
     assert.ok(statuses.has("CLOSED"));
     assert.ok([...statuses].some((s) => ["OPEN", "CLOSING_SOON", "OPENING_SOON", "ACUTE_CONSULTATION"].includes(s)), "an opening case is covered");
+  });
+
+  // 09.6A: announcements were covered only by the fake-reader unit test — now also through PostgreSQL,
+  // including the public selection and the homepage highlight (same snapshot as the Puls result).
+  test("announcements: static + artificial → PostgreSQL → repository; identical public selection and homepage highlight", async () => {
+    const fromDb = await persist(PULS_DATA);
+    const V = { status: "VERIFIED_CURRENT" as const, lastVerified: "2026-10-12", reviewDue: "2026-10-30", verifiedBy: "Seed (künstlich)", sourceIds: ["TEST"] };
+    const artificial: Announcement[] = [
+      { id: "it-hinweis-a", category: "IMPORTANT", title: "Testhinweis A (künstlich)", shortText: "Künstlicher Hinweis für den Paritätstest.", validFrom: "2026-10-12", validUntil: "2026-10-30", priority: 2, homepageHighlight: true, published: true, verification: V },
+      { id: "it-hinweis-b", category: "IMPORTANT", title: "Testhinweis B (künstlich, unbestätigt)", shortText: "Darf nie erscheinen.", validFrom: "2026-10-12", validUntil: "2026-10-30", priority: 1, homepageHighlight: true, published: true, verification: { status: "TO_BE_CONFIRMED", sourceIds: [] } },
+    ];
+    const source = [...ANNOUNCEMENTS, ...artificial];
+    for (const a of source) await payload.create({ collection: "announcements", data: announcementToDoc(a) as never, ...seed });
+    const read = await new PayloadPracticeRepository(payload as unknown as PayloadReader).getAnnouncements();
+    assert.deepEqual(read, source, "domain data equality");
+    for (const date of ["2026-07-15", "2026-10-13", "2026-10-30", "2026-10-31"]) {
+      assert.deepEqual(selectPublicAnnouncements(read, date), selectPublicAnnouncements(source, date), `selection ${date}`);
+      const result = getPracticeStatus(at(date, "10:00"), fromDb);
+      assert.deepEqual(selectHomepageHighlight({ result, announcements: read, today: date }), selectHomepageHighlight({ result: getPracticeStatus(at(date, "10:00"), PULS_DATA), announcements: source, today: date }), `highlight ${date}`);
+    }
+    assert.deepEqual(selectPublicAnnouncements(read, "2026-10-13").map((a) => a.id), ["it-hinweis-a"], "unverified and outdated notices never public");
   });
 
   test("artificial dataset (special hours, vacation with replacement, expiry): identical results", async () => {

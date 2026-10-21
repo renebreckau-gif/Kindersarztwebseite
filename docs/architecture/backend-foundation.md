@@ -536,3 +536,5 @@ Safety and seeding:
 | `payload`, `@payloadcms/*`, `drizzle-kit`, `@esbuild-kit/*`, `chokidar`, `sass`, `monaco-editor` | (inherited) | — | npm suggests `3.85.1`, a **downgrade** of the framework. Rejected |
 
 `npm audit fix --force` was **not** run. Before production: re-check on every Payload update and decide on the two patch-level overrides (`undici`, `dompurify`) together with a full test run.
+
+**Re-check 2026-10-21 (09.6A):** still 16 findings (2 low, 9 moderate, 5 high, 0 critical). npm now resolves them via **Payload 3.91.0** (`latest`, 2026-10-15; bumps `undici` to 7.29.1, minimum Node 20.18.1) instead of a downgrade. Not applied (audit-only phase); follow-up before 09.6D: upgrade evaluation with a full test run. See [public-data-cutover-readiness.md](public-data-cutover-readiness.md) §15.

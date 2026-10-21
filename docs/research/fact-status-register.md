@@ -135,9 +135,9 @@ Critical review of the five Phase 00 documents before assigning statuses:
 | F116 | Payment timing / process (10.4A) | TO_BE_CONFIRMED | MEDIUM |
 | F117 | Price-list validity / maintenance owner (10.4A) | TO_BE_CONFIRMED | MEDIUM |
 
-Totals (117 facts): VERIFIED_CURRENT 23 · TO_BE_CONFIRMED 85 (incl. 14 missing, F77–F90, 4 staff proposals, F91–F94, 6 app candidates, F95–F100, 9 prescription-process candidates, F101–F109, and 8 pricing / payment candidates, F110–F117) · OUTDATED_DO_NOT_PUBLISH 9
+Totals (117 facts; recounted 2026-10-21, 09.6A — F40 (practice, 2026-10-11) and F57 (external, 2026-10-07) had been promoted without updating this line): VERIFIED_CURRENT 25 · TO_BE_CONFIRMED 83 (incl. 14 missing, F77–F90, 4 staff proposals, F91–F94, 6 app candidates, F95–F100, 9 prescription-process candidates, F101–F109, and 8 pricing / payment candidates, F110–F117) · OUTDATED_DO_NOT_PUBLISH 9
 
-Of the 23 VERIFIED_CURRENT facts, 12 are HIGH risk; 11 of these (all except 112) still require practice sign-off before launch (LB-00).
+Of the 23 VERIFIED_CURRENT facts, 12 are HIGH risk; 11 of these (all except 112) still require practice sign-off before launch (LB-00). *(Historical count from 2026-10-07; F40 carries its own practice confirmation, F57 an external one. The LB-00 set is unchanged — see project-blockers LB-00.)*
 
 ---
 

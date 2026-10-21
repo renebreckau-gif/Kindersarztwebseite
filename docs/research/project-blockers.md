@@ -1,7 +1,7 @@
 # Project Blockers
 
 Phase: 00.5 — Research Acceptance Gate
-Date: 2026-10-07
+Date: 2026-10-07 · **last reconciled 2026-10-21 (Phase 09.6A)** — current readiness matrix: [public-data-cutover-readiness.md](../architecture/public-data-cutover-readiness.md) §11; practice questions: [practice-confirmation-backlog.md](../reviews/practice-confirmation-backlog.md).
 Fact IDs (F01 …) refer to [fact-status-register.md](fact-status-register.md). Rules: [source-policy.md](source-policy.md).
 
 > **Clarification (Phase 01.5):** blockers gate *public release of a claim or feature*, not design or development. Work continues with safe fallbacks, marked mock data, disabled states and `TO_BE_CONFIRMED` markers. See [strategy-lock.md](../product/strategy-lock.md).
@@ -21,7 +21,7 @@ Owner abbreviations: **P** = practice · **L** = legal reviewer · **T** = proje
 
 | ID | Blocker | Facts | Owner | Notes |
 |---|---|---|---|---|
-| LB-00 | **Practice sign-off of all HIGH-risk VERIFIED_CURRENT facts** (postcode/city, phone, physicians, regular hours, healthy-only window, Tuesday appointment session) | F14, F15, F20, F22, F35–F39, F41, F43 | P | Working data is likely correct, but high-risk facts go live only with a recorded confirmation (source-policy §6). |
+| LB-00 | **Practice sign-off of all HIGH-risk VERIFIED_CURRENT facts** (postcode/city, phone, physicians, regular hours, healthy-only window, Tuesday appointment session) | F14, F15, F20, F22, F35–F39, F41, F43 | P | Working data is likely correct, but high-risk facts go live only with a recorded confirmation (source-policy §6). **Reconciled 09.6A — still OPEN.** Recorded evidence: 2026-10-07 a *project-level human decision* (phase-07 review addendum) released the hours for the PRAXIS PULS live state (`RELEASE.pulsPracticeSignOff = true`); the data itself still carries `WORKING` provenance "Praxisfreigabe LB-00 ausstehend" (`src/content/practice.ts`), and no named practice confirmation (person + date, like F40 on 2026-10-11) exists for F14, F15, F20, F22, F35–F39, F41, F43. Needed before the public launch; the `WORKING` reviewDue 2027-01-07 (+60 days grace) also bounds the current static PULS. |
 | LB-01 | Official public practice name | F01 | P | Two variants in use. |
 | LB-02 | Legal name and legal form (BAG, partners) | F02 | P, L | Required for Impressum and privacy controller. |
 | LB-03 | Correct street spelling | F13 | P | "Bahnhofstraße" vs. "Bahnhofsstraße". |
@@ -51,7 +51,7 @@ Owner abbreviations: **P** = practice · **L** = legal reviewer · **T** = proje
 | FB-03 | Thursday afternoon consultation type | F46 | P |
 | FB-04 | Meaning of "nur gesunde Patienten" window | F42 | P |
 | ~~FB-05~~ | ~~Weekend closed confirmed~~ — **closed 2026-10-11** (practice: Nadine Probst) | F40 | P |
-| FB-06 | Public holidays / bridge days rule | F49 | P |
+| FB-06 | Public holidays / bridge days rule (09.5H: physician workflow exists technically; the practice's rule is still unconfirmed — OPEN) | F49 | P |
 | FB-07 | Upcoming closures 2026/2027 entered | F54 | P |
 | FB-08 | Telephone hours (for "telefonisch erreichbar" status) | F19 | P |
 | FB-09 | Defined owner and update routine for closures and notices | — | P |
@@ -62,7 +62,7 @@ Until FB-01…FB-07 are resolved, PRAXIS PULS must not display any live status. 
 
 | ID | Blocker | Facts | Owner |
 |---|---|---|---|
-| FB-10 | Verified replacement practice directory (Kreuter/Fuchs relationship, Reich address, all phones/emails) | F53 | P, T |
+| FB-10 | Verified replacement practice directory (Kreuter/Fuchs relationship, Reich address, all phones/emails) (09.5G: directory workflow exists technically; no real entry — OPEN) | F53 | P, T |
 
 Fallback: closure shown without replacement + "Bitte informieren Sie sich telefonisch." + emergency guidance.
 
@@ -142,8 +142,8 @@ These must not appear as current information anywhere on the new site (content, 
 
 | Class | Count |
 |---|---|
-| Launch blockers | 13 (LB-00 … LB-12) |
-| Feature blockers | 18 (FB-01 … FB-18) |
+| Launch blockers | 16 open (LB-00 … LB-15; LB-13–LB-15 added 2026-10-13 for host, registrar/DNS and production backend) |
+| Feature blockers | 17 open (FB-01 … FB-18; FB-05 closed 2026-10-11) |
 | Nice to have | 13 |
 | Excluded outdated items | 9 |
 
@@ -154,4 +154,11 @@ Most blockers are answered by **one structured interview with the practice** (P)
 | ID | Finding | Found | Resolved | Resolution |
 |---|---|---|---|---|
 | SEC-01 | The public review query `?vorschau=freigabe` (+ `&zeit=`) was not tied to the stage: after a switch to PRODUCTION anyone could have activated the review preview — simulated publication consent (unconsented names on Start, Team, Ärztinnen), a review time for PRAXIS PULS and draft chapters in Entdecken. Never exploitable on the live practice site (not deployed; STAGING only). | 10.5A (2026-10-20) | 10.5A.1 (2026-10-20) — **CLOSED** | One central gate `isPublicReviewPreview(params, stage)` in `src/content/release.ts` (built on `stageAllowsReview`); `resolvePuls`, `discoveryReviewMode` and `chapterView` use it. PRODUCTION ignores the query. Tests: `src/content/__tests__/review-preview-gate.test.ts`, integration step 19. |
+
+## 7. Reconciliation note (09.6A, 2026-10-21)
+
+- A technical cockpit workflow **does not close** a blocker. F44–F46 (09.5E), F49 (09.5H), F53 (09.5G), F54 (09.5C) and F35–F43 (09.5I) all have working physician / staff workflows, but the practice's real facts are still unconfirmed and the cockpit database holds artificial data only.
+- Resolved since 2026-10-07: FB-05 (weekend, F40) and SEC-01 (§6). Nothing else was closed by evidence.
+- New pre-cutover technical items (not practice blockers): GAP-1 physician workflow for non-ACUTE consultation types; GAP-2 emergency information stays static (no Payload collection / workflow). See the readiness document §9.
+- Separation: *technical cutover readiness* (operational data from Payload) is not *site launch readiness* (LB-00 … LB-15 plus Phase 10.1B–10.5B content).
 
