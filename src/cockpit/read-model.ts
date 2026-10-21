@@ -10,6 +10,7 @@ import { announcementExpired, blocks, notExpired, rulesSegments, SPECIAL_DAY_MAR
 import { evaluateFreshness } from "../domain/verification.ts";
 import { decideAnnouncement } from "../domain/publication.ts";
 import { acuteBaselineStatus } from "../domain/acute.ts";
+import { holidayPolicyStatus } from "../domain/holiday-policy.ts";
 import { shortRange } from "./workflows/wording.ts";
 import { addDays, compareDates, daysBetween, formatGermanDate, weekdayOf, zonedParts, zonedToInstant, formatMinutes, type LocalDate, type LocalTime } from "../domain/time.ts";
 
@@ -210,11 +211,25 @@ export function reviewItems(data: PulsData, today: LocalDate, announcements: Ann
     }
   }
 
+  // 09.5H: an EXPIRED physician confirmation of the holiday rule → ONE item; the holidays it leaves
+  // unresolved are covered by it (no extra item per holiday). An unconfirmed rule raises nothing by
+  // itself — unresolved holidays below are actionable enough.
+  const policy = holidayPolicyStatus(data.holidayPolicy, today);
+  if (policy.state === "EXPIRED") {
+    items.push({
+      id: "holiday-policy-expired",
+      title: "Feiertagsregel erneut ärztlich bestätigen",
+      text: "Die ärztliche Bestätigung der allgemeinen Feiertagsregel ist abgelaufen. Bis zur erneuten Bestätigung kann die Website Feiertage ohne eigenen Eintrag nicht sicher anzeigen.",
+      action: { label: "Feiertagsregel prüfen", href: "/intern/feiertage" },
+    });
+  }
+
   // Weekday holidays the engine cannot resolve → website would show "Aktuelle Sprechzeiten" (UNKNOWN).
   const until = addDays(today, HOLIDAY_CHECK_DAYS);
   for (const h of [...data.publicHolidays].sort(compareDates)) {
     if (compareDates(h, today) < 0 || compareDates(h, until) > 0 || weekdayOf(h) > 5) continue;
     const r = getPracticeStatus(zonedToInstant(h, "12:00"), data);
+    if (r.reason === "HOLIDAY_POLICY_UNVERIFIED" && policy.state === "EXPIRED") continue;
     if (r.reason === "HOLIDAY_WITHOUT_RULE" || r.reason === "HOLIDAY_POLICY_UNVERIFIED") {
       // PulsData carries holiday DATES only — no name is invented.
       items.push({

@@ -25,6 +25,7 @@
 #  20. integration step 16: Akutsprechstunde - physician baseline + today override (09.5E)
 #  21. integration step 17: Sonderoeffnungszeiten / Feiertag klaeren (09.5F)
 #  22. integration step 18: Vertretungspraxen - ADMIN data, DOCTOR verification (09.5G)
+#  23. integration step 19: Feiertagsregel - physician-confirmed holiday policy (09.5H)
 # Secrets are read from the git-ignored .env.local and never printed.
 
 $ErrorActionPreference = "Stop"
@@ -50,7 +51,7 @@ function Invoke-Super([string]$sql, [string]$database = "postgres") {
   finally { Remove-Item Env:PGPASSWORD -ErrorAction SilentlyContinue }
 }
 
-Write-Host "1/22 fresh empty database $db"
+Write-Host "1/23 fresh empty database $db"
 Invoke-Super "DROP DATABASE IF EXISTS $db WITH (FORCE);"
 Invoke-Super "CREATE DATABASE $db OWNER $appUser ENCODING 'UTF8';"
 Invoke-Super "ALTER SCHEMA public OWNER TO $appUser; REVOKE ALL ON DATABASE $db FROM PUBLIC;" $db
@@ -62,23 +63,23 @@ $env:PAYLOAD_SECRET = $vals.PAYLOAD_SECRET
 $server = $null
 $failed = 0
 try {
-  Write-Host "2/22 migrations (Payload CLI)"
+  Write-Host "2/23 migrations (Payload CLI)"
   & npx payload migrate 2>&1 | Where-Object { "$_" -match "Migrat|Done|Error" } | ForEach-Object { "   $_" }
   if ($LASTEXITCODE -ne 0) { throw "migrate failed" }
   & npx payload migrate:status 2>&1 | Where-Object { "$_" -match "initial|Error" } | ForEach-Object { "   $_" }
 
-  Write-Host "3/22 start app on $Base against $db"
+  Write-Host "3/23 start app on $Base against $db"
   $log = Join-Path $env:TEMP "kinderarzt-test-server.log"
   $server = Start-Process -FilePath "node" -ArgumentList "node_modules/next/dist/bin/next", "start", "-p", "$Port" -WorkingDirectory $Root -RedirectStandardOutput $log -RedirectStandardError "$log.err" -WindowStyle Hidden -PassThru
   $ready = $false
   for ($i = 0; $i -lt 60 -and -not $ready; $i++) { Start-Sleep -Milliseconds 500; try { $ready = (Invoke-WebRequest -UseBasicParsing "$Base/review" -TimeoutSec 5).StatusCode -eq 200 } catch { } }
   if (-not $ready) { throw "server did not start (see $log)" }
 
-  Write-Host "4/22 integration: empty database"
+  Write-Host "4/23 integration: empty database"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/01-empty-database.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "5/22 bootstrap first ADMIN (real script, generated password)"
+  Write-Host "5/23 bootstrap first ADMIN (real script, generated password)"
   $bytes = New-Object byte[] 24; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
   $env:BOOTSTRAP_ADMIN_EMAIL = "verwaltung@integration-test.invalid"
   $env:BOOTSTRAP_ADMIN_NAME = "Test Verwaltung (künstlich)"
@@ -89,72 +90,76 @@ try {
   $env:E2E_ADMIN_PASSWORD = $env:BOOTSTRAP_ADMIN_PASSWORD
   Remove-Item Env:BOOTSTRAP_ADMIN_EMAIL, Env:BOOTSTRAP_ADMIN_NAME, Env:BOOTSTRAP_ADMIN_PASSWORD
 
-  Write-Host "6/22 integration: runtime, auth, roles, provenance, audit, transactions"
+  Write-Host "6/23 integration: runtime, auth, roles, provenance, audit, transactions"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/02-runtime.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "7/22 integration: static -> PostgreSQL -> repository parity"
+  Write-Host "7/23 integration: static -> PostgreSQL -> repository parity"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/03-parity.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "8/22 integration: real cockpit read experience"
+  Write-Host "8/23 integration: real cockpit read experience"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/04-cockpit.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "9/22 integration: real operational writes (today workflows)"
+  Write-Host "9/23 integration: real operational writes (today workflows)"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/05-workflows.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "10/22 integration: lifecycle, supersede and safe undo"
+  Write-Host "10/23 integration: lifecycle, supersede and safe undo"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/06-lifecycle.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "11/22 integration: Urlaub / geplante Schliesszeit"
+  Write-Host "11/23 integration: Urlaub / geplante Schliesszeit"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/07-planned.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "12/22 integration: Hinweis veroeffentlichen"
+  Write-Host "12/23 integration: Hinweis veroeffentlichen"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/08-announcements.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "13/22 integration: start page (Variant B)"
+  Write-Host "13/23 integration: start page (Variant B)"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/09-homepage.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "14/22 integration: Gut vorbereitet (approval draft)"
+  Write-Host "14/23 integration: Gut vorbereitet (approval draft)"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/10-first-visit.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "15/22 integration: Praxis-App (approval draft)"
+  Write-Host "15/23 integration: Praxis-App (approval draft)"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/11-praxis-app.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "16/22 integration: Rezepte & E-Rezept (approval draft)"
+  Write-Host "16/23 integration: Rezepte & E-Rezept (approval draft)"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/12-rezepte.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "17/22 integration: Kosten & Zahlungsarten (approval draft)"
+  Write-Host "17/23 integration: Kosten & Zahlungsarten (approval draft)"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/13-kosten.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "18/22 integration: Team & Fotos (approval draft)"
+  Write-Host "18/23 integration: Team & Fotos (approval draft)"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/14-team.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "19/22 integration: public review preview (staging only)"
+  Write-Host "19/23 integration: public review preview (staging only)"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/15-preview-gate.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "20/22 integration: Akutsprechstunde (physician baseline + today)"
+  Write-Host "20/23 integration: Akutsprechstunde (physician baseline + today)"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/16-acute.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "21/22 integration: Sonderoeffnungszeiten / Feiertag klaeren"
+  Write-Host "21/23 integration: Sonderoeffnungszeiten / Feiertag klaeren"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/17-special-day.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 
-  Write-Host "22/22 integration: Vertretungspraxen (directory + physician verification)"
+  Write-Host "22/23 integration: Vertretungspraxen (directory + physician verification)"
   & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/18-replacement.test.ts"
+  if ($LASTEXITCODE -ne 0) { $failed++ }
+
+  Write-Host "23/23 integration: Feiertagsregel (physician-confirmed holiday policy)"
+  & node --test --test-force-exit --test-concurrency=1 "src/backend/__integration__/19-holiday-policy.test.ts"
   if ($LASTEXITCODE -ne 0) { $failed++ }
 }
 finally {

@@ -509,6 +509,14 @@ Safety and seeding:
 - **`replacementGuardHook`** (every write path): in the physician context only a DOCTOR, only on an existing record, and no structural change (the STORED values are written back; a differing value is refused); otherwise server validation + normalisation, after which the provenance hook makes ADMIN writes TO_BE_CONFIRMED.
 - **Provenance / audit:** VERIFY → VERIFIED_CURRENT generated from the DOCTOR session (reviewDue + 182 days); WITHDRAW → OUTDATED_DO_NOT_PUBLISH; audit operations VERIFY / END are accepted trusted operations. No schema change.
 
+### 17.11d Feiertagsregel (Phase 09.5H, 2026-10-21)
+
+- **Trusted context** `SERVER_CONTEXT.HOLIDAY_POLICY` (server code only — never HTTP). Global access split: `holidayCalendar.update` = ADMIN, or DOCTOR **only** with that context (`adminOrDoctorHolidayPolicy`). Simply widening the access to DOCTOR was deliberately not done.
+- **`holidayPolicyHook`:** seed writes untouched; validates the policy value; in the physician context only a DOCTOR, and the holiday list must equal the stored one (stored list written back) — provenance generated via `verificationForWrite(actor, "HOLIDAY_POLICY", …)`; otherwise an unchanged policy keeps its stored verification (date maintenance) and a changed policy becomes `TO_BE_CONFIRMED`.
+- **Global audit / transaction:** new `globalAuditHook` (afterChange) writes `auditEvents` in the same `req` transaction — entityType `holidayCalendar`, entityId `holidayPolicy` (physician context) or `holidayCalendar`; operation from the trusted `AUDIT_OPERATION` (VERIFY) else UPDATE. Rollback integration-tested (forced audit failure).
+- **Freshness mapping:** policy freshness reuses category `openingHours` (60-day grace). The mapping keeps a dated confirmation of an explicit-entry policy (so "physician-confirmed" is visible) and drops the default unconfirmed group (static ↔ DB parity). No schema change, no migration.
+- Clean proof: step 23/23 `19-holiday-policy.test.ts`.
+
 ### 17.12 npm audit (2026-10-13): 16 findings, none fixed by force
 
 | Package (path) | Severity | Reachable here? | Fix |

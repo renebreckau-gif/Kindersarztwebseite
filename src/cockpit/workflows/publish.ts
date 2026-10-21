@@ -16,6 +16,10 @@ import { announcementToDoc, closureToDoc, exceptionToDoc, replacementPracticeFro
 import type { ReplacementInput } from "../../domain/replacement.ts";
 import { berlinToday } from "../../backend/provenance.ts";
 import { REPLACEMENT_STALE, replacementDraft, replacementFingerprint, replacementRecordId } from "./replacement.ts";
+import type { HolidayCalendarDoc } from "../../data/payload-mapping.ts";
+import { holidayPolicyStatus, type HolidayPolicyMode } from "../../domain/holiday-policy.ts";
+import { holidayPolicyFromDoc } from "../../data/payload-mapping.ts";
+import { POLICY_STALE, calendarFingerprint } from "./holiday-policy.ts";
 import { ACUTE_LABEL, previewVerification } from "../../domain/acute.ts";
 import type { Announcement } from "../../domain/content-types.ts";
 import { activeRole, type StaffUserLike } from "../../backend/access.ts";
@@ -440,6 +444,59 @@ export async function verifyReplacement(
 export async function commitVerification(payload: Payload, req: PayloadRequest, id: number | string, mode: "VERIFY" | "WITHDRAW"): Promise<void> {
   await withContext(req, { [SERVER_CONTEXT.REPLACEMENT_VERIFY]: mode, [SERVER_CONTEXT.AUDIT_OPERATION]: mode === "VERIFY" ? "VERIFY" : "END" }, () =>
     payload.update({ collection: "replacementPractices", id, data: {} as never, req, user: req.user, overrideAccess: false, depth: 0, context: req.context }),
+  );
+}
+
+// ---------------------------------------------------------------- Feiertagsregel (09.5H)
+
+export type PolicyResult =
+  | { ok: true; changeSetId: string; first: boolean; mode: HolidayPolicyMode }
+  | { ok: false; code: "UNAUTHENTICATED" | "NOT_ALLOWED" | "STALE" | "BLOCKED" | "FAILED"; message: string };
+
+/**
+ * DOCTOR only: confirm one holiday policy for the practice. Session account → server changeSetId →
+ * transaction → re-read the global → calendar fingerprint (policy + verification + dates) → write
+ * the policy through the trusted context (the hook keeps the stored dates and generates the
+ * verification) → audit (global hook, same transaction) → commit. First confirmation VERIFY, later
+ * UPDATE. No quick undo: correction = another physician confirmation.
+ */
+export async function confirmHolidayPolicy(
+  payload: Payload,
+  user: (StaffUserLike & Record<string, unknown>) | null | undefined,
+  mode: HolidayPolicyMode | undefined,
+  fingerprint: string,
+  confirmed: boolean,
+): Promise<PolicyResult> {
+  const role = activeRole(user);
+  if (!user || !role) return { ok: false, code: "UNAUTHENTICATED", message: "Bitte melden Sie sich erneut an." };
+  if (role !== "DOCTOR") return { ok: false, code: "NOT_ALLOWED", message: "Die Feiertagsregel kann nur eine Ärztin oder ein Arzt bestätigen." };
+  if (!mode) return { ok: false, code: "BLOCKED", message: "Bitte wählen Sie eine Regel." };
+  if (!confirmed) return { ok: false, code: "BLOCKED", message: "Bitte bestätigen Sie die Regel ausdrücklich." };
+  const changeSetId = randomUUID();
+  const req = await createLocalReq({ user: user as never, context: { [SERVER_CONTEXT.CHANGE_SET]: changeSetId } }, payload);
+  await initTransaction(req);
+  try {
+    const doc = (await payload.findGlobal({ slug: "holidayCalendar", depth: 0, overrideAccess: true, req })) as unknown as HolidayCalendarDoc | null;
+    if (calendarFingerprint(doc) !== fingerprint) {
+      await killTransaction(req);
+      return { ok: false, code: "STALE", message: POLICY_STALE };
+    }
+    const status = holidayPolicyStatus(holidayPolicyFromDoc(doc), berlinToday());
+    const first = !status.confirmed && status.state !== "EXPIRED";
+    await commitHolidayPolicy(payload, req, mode, first);
+    await commitTransaction(req);
+    return { ok: true, changeSetId, first, mode };
+  } catch (e) {
+    await killTransaction(req);
+    const err = e as { isPublic?: boolean; message?: string } | null;
+    return { ok: false, code: "FAILED", message: err && typeof err === "object" && err.isPublic && typeof err.message === "string" ? err.message : "Die Feiertagsregel konnte nicht gespeichert werden. Es wurde nichts verändert." };
+  }
+}
+
+/** The physician policy write inside the given transaction (exported for the rollback tests). */
+export async function commitHolidayPolicy(payload: Payload, req: PayloadRequest, mode: HolidayPolicyMode, first: boolean): Promise<void> {
+  await withContext(req, { [SERVER_CONTEXT.HOLIDAY_POLICY]: true, ...(first ? { [SERVER_CONTEXT.AUDIT_OPERATION]: "VERIFY" } : {}) }, () =>
+    payload.updateGlobal({ slug: "holidayCalendar", data: { policy: mode } as never, req, user: req.user, overrideAccess: false, depth: 0, context: req.context }),
   );
 }
 

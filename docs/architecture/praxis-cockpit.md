@@ -18,10 +18,10 @@ Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms
 | **Real authentication** | Payload auth on `staff`, verified: login, generic failures, disabled accounts, lockout, logout with session revocation, cookie `HttpOnly; SameSite=Lax; Secure`. Artificial `.invalid` test accounts only; no real accounts. Still required before production: transactional password reset and ADMIN MFA (backend-foundation §17.9–17.10). The prototype keeps its mock login. |
 | **Public website** | Uses the same Praxis Puls engine. `resolvePuls` still consumes the **static snapshot directly** (`staticPulsData()`, synchronous). It does not load through `PracticeRepository.getPulsData()`; repository-based public loading arrives with the cutover. `DATA_SOURCE = "STATIC"` is a reserved migration-target selector, not yet an active switch. Output unchanged (tested). Release gates are unchanged. |
 | **Staff entry** | Footer link **"Mitarbeiterbereich"** (after Impressum · Datenschutz · Barrierefreiheit; not in the main navigation, dock or hero) → **`/mitarbeiter`**, the stable human entry point. STAGING without backend (Vercel today): prototype only. STAGING with a configured database (local): prototype **and** real login, clearly labelled. PRODUCTION: real login only when `RELEASE.staffPortalProductionEnabled` — the **same** decision as the request gate (`staffPortalAvailable`), so the footer can never lead to a 404; never the lab. The footer placement is a UX choice, **not** security. |
-| **Internal routes** | `/intern/anmelden` (real login); `/intern` (real cockpit: Praxis heute from the database, Nächste Termine, Prüfen); `/intern/heute/frueher-schliessen` and `/intern/heute/geschlossen` (**real writes** to the cockpit database, 09.5A); `/intern/urlaub` and `/intern/urlaub/[eintrag]` (**real** Urlaub / Schließzeit, create and edit, 09.5C; write entry POST `/intern/urlaub/veroeffentlichen`, confirmation `/intern/urlaub/veroeffentlicht`); `/intern/hinweis` and `/intern/hinweis/[eintrag]` (**real** "Hinweis veröffentlichen", 09.5D; write entry POST `/intern/hinweis/veroeffentlichen`, confirmation `/intern/hinweis/veroeffentlicht`); `/intern/verlauf/[vorgang]/zuruecknehmen` (undo preview; the undo itself is an authenticated POST to `/intern/verlauf/ruecknahme`) and `/intern/verlauf/zurueckgenommen` (09.5B); `/intern/vorschau` (Website-Vorschau + comparison with the static website); `/intern/admin` (ADMIN only). Available where the real staff portal is available: STAGING with a configured database; in PRODUCTION only with `RELEASE.staffPortalProductionEnabled` (currently `false`). On Vercel staging (no database) they answer 404. `/intern/akutsprechstunde` (**real** Akutsprechstunde, 09.5E: physician baseline `/einrichten` → POST `/bestaetigen` → `/bestaetigt`, DOCTOR only; today change `/heute` → POST `/intern/heute/veroeffentlichen`, every operational role on a READY baseline). `/intern/sonderzeiten` and `/intern/sonderzeiten/[eintrag]` (**real** Sonderöffnungszeiten / Feiertag klären, 09.5F; optional `?datum=`; write entry POST `/intern/sonderzeiten/veroeffentlichen`, confirmation `/intern/sonderzeiten/veroeffentlicht`). |
+| **Internal routes** | `/intern/anmelden` (real login); `/intern` (real cockpit: Praxis heute from the database, Nächste Termine, Prüfen); `/intern/heute/frueher-schliessen` and `/intern/heute/geschlossen` (**real writes** to the cockpit database, 09.5A); `/intern/urlaub` and `/intern/urlaub/[eintrag]` (**real** Urlaub / Schließzeit, create and edit, 09.5C; write entry POST `/intern/urlaub/veroeffentlichen`, confirmation `/intern/urlaub/veroeffentlicht`); `/intern/hinweis` and `/intern/hinweis/[eintrag]` (**real** "Hinweis veröffentlichen", 09.5D; write entry POST `/intern/hinweis/veroeffentlichen`, confirmation `/intern/hinweis/veroeffentlicht`); `/intern/verlauf/[vorgang]/zuruecknehmen` (undo preview; the undo itself is an authenticated POST to `/intern/verlauf/ruecknahme`) and `/intern/verlauf/zurueckgenommen` (09.5B); `/intern/vorschau` (Website-Vorschau + comparison with the static website); `/intern/admin` (ADMIN only). Available where the real staff portal is available: STAGING with a configured database; in PRODUCTION only with `RELEASE.staffPortalProductionEnabled` (currently `false`). On Vercel staging (no database) they answer 404. `/intern/akutsprechstunde` (**real** Akutsprechstunde, 09.5E: physician baseline `/einrichten` → POST `/bestaetigen` → `/bestaetigt`, DOCTOR only; today change `/heute` → POST `/intern/heute/veroeffentlichen`, every operational role on a READY baseline). `/intern/sonderzeiten` and `/intern/sonderzeiten/[eintrag]` (**real** Sonderöffnungszeiten / Feiertag klären, 09.5F; optional `?datum=`; write entry POST `/intern/sonderzeiten/veroeffentlichen`, confirmation `/intern/sonderzeiten/veroeffentlicht`). `/intern/feiertage` (**real** Feiertagsregel, 09.5H: every role reads; DOCTOR chooses + previews `?regel=` → POST `/intern/feiertage/bestaetigen` → `/intern/feiertage/bestaetigt`). |
 | **Review hub** | `/review` is **project review tooling** (developers and reviewers): links to the website, the cockpit prototype and Mein Arztbesuch. It is **not** the staff entry; that is `/mitarbeiter`. Available while `SITE_STAGE = "STAGING"`; 404 in PRODUCTION. No `/intern` link, because the deployed staging has no database. |
 | **Mein Arztbesuch** | Visible on STAGING for review (`SITE_STAGE`). Not released for production: `meinArztbesuchPublished = false`, formal approvals open (`meinArztbesuchApproved = false`, records truthful); site stays `noindex` (`indexable = false`). |
-| **Next phase** | Not started; scope set by the next brief. Done: Akutsprechstunde (09.5E, `98d5b41`), date-specific Sonderöffnungszeiten / holiday resolution (09.5F, `58d4529`), replacement-practice directory + physician verification (09.5G). Separate later decisions: a global holiday policy, a physician-governed weekly-schedule editor, the public data cutover. |
+| **Next phase** | Not started; scope set by the next brief. Done: Akutsprechstunde (09.5E, `98d5b41`), date-specific Sonderöffnungszeiten / holiday resolution (09.5F, `58d4529`), replacement-practice directory + physician verification (09.5G, `8c3c3ec`), physician-confirmed global holiday policy (09.5H). Separate later decisions: a physician-governed weekly-schedule editor, the public data cutover. |
 | **Launch blockers** | `LIVE_HOST_ACCESS = OPEN` (existing webhost not accessible), and domain/DNS access unknown (project-blockers LB-13/LB-14). Production backend infrastructure: LB-15. None of these blocks staging or development. |
 
 
@@ -1206,7 +1206,7 @@ Still `DATA_SOURCE = "STATIC"`: a database special day or holiday resolution app
 
 ## Phase 09.5G note: Vertretungspraxen — directory management + physician verification (2026-10-21)
 
-Baseline `58d4529` (09.5F complete). Task-oriented lifecycle of the replacement-practice directory. **No real directory was imported or seeded** (F53 stays `TO_BE_CONFIRMED`); every fixture is artificial ("Praxis Beispiel …", `example.invalid`).
+Complete, commit `8c3c3ec`. Baseline `58d4529` (09.5F complete). Task-oriented lifecycle of the replacement-practice directory. **No real directory was imported or seeded** (F53 stays `TO_BE_CONFIRMED`); every fixture is artificial ("Praxis Beispiel …", `example.invalid`).
 
 ### Audit (before)
 
@@ -1239,4 +1239,45 @@ Baseline `58d4529` (09.5F complete). Task-oriented lifecycle of the replacement-
 ### Public website
 
 Still `DATA_SOURCE = "STATIC"`; directory data from the database never reaches the public site.
+
+## Phase 09.5H note: Globale Feiertagsregel — physician confirmation + safe holiday-calendar boundary (2026-10-21)
+
+Baseline `8c3c3ec` (09.5G complete). A DOCTOR can confirm the practice-wide holiday rule in the cockpit database. **No real policy was chosen, seeded or confirmed**: F49 stays `TO_BE_CONFIRMED`; every test uses artificial holiday dates ("Testfeiertag … (künstlich)") in the isolated test database.
+
+### Audit (before)
+
+- Engine precedence was already correct: closures → date-specific exceptions → confirmed closed weekday → holiday policy → weekly schedule. `CLOSED_ON_PUBLIC_HOLIDAYS` closes a holiday only while its verification is usable (`evaluateFreshness(…, "openingHours")`); unconfirmed / expired → UNKNOWN `HOLIDAY_POLICY_UNVERIFIED` (fail-safe, per day).
+- `HolidayCalendar` was ADMIN-only; the hook reset the policy verification on **every** write (a date edit invalidated a confirmation); the mapping dropped the verification of an explicit-entry policy; globals wrote **no audit**.
+
+### Choices (no default)
+
+- A — "Jeder Feiertag wird einzeln geklärt" (`REQUIRE_EXPLICIT_ENTRY`): every weekday holiday stays UNKNOWN until a single-date entry (09.5F) resolves it.
+- B — "An gesetzlichen Feiertagen grundsätzlich geschlossen" (`CLOSED_ON_PUBLIC_HOLIDAYS`): calendar holidays resolve CLOSED.
+- Bridge days are **not** holidays and are not covered by either rule ("Brückentage sind keine Feiertage …"); they stay single-date closures. Explicit Sonderöffnungszeiten / closures for a concrete date always override the rule.
+- Unconfirmed: no radio is preselected; the overview says "Noch nicht ärztlich bestätigt" and the engine behaves like A.
+
+### Authority (server-enforced)
+
+| Role | Holiday calendar |
+|---|---|
+| STAFF | read |
+| ADMIN | maintains holiday dates / names (generic admin); a **policy change** by ADMIN is stored `TO_BE_CONFIRMED`; a pure date edit keeps the physician confirmation |
+| DOCTOR | confirms the rule only via the trusted server context `HOLIDAY_POLICY`; cannot change dates (the hook compares the submitted list with the stored one → 400); generic REST update → 403 |
+
+### Workflow
+
+- `/intern/feiertage`: status panel, DOCTOR choice form (GET `?regel=`), preview of the next 8 holidays with the real engine ("Aktuell in der Cockpit-Datenbank" / "Mit dieser Regel"), explicit checkbox "Ich bestätige diese Regel für die Praxis.", button "Feiertagsregel ärztlich bestätigen"; list "Kommende Feiertage" with the resolution in words and links "Feiertag klären" / "Sonderöffnungszeit eintragen" (→ `/intern/sonderzeiten?datum=`).
+- POST `/intern/feiertage/bestaetigen` (same-origin, DOCTOR only); the browser sends only `regel`, `fingerprint`, `bestaetigt`. Provenance (verifiedBy, lastVerified, reviewDue = today + 182) is generated from the session.
+- Concurrency: calendar fingerprint (policy + verification + dates) re-read inside the transaction → "Die Feiertagsangaben wurden inzwischen geändert. Bitte prüfen Sie die Regel erneut."
+- Audit: entityType `holidayCalendar`, entityId `holidayPolicy`; VERIFY on the first confirmation, UPDATE on later changes; ADMIN calendar edits are audited as entityId `holidayCalendar`. One transaction; a failing audit write rolls back. **No quick undo** — a correction is another physician confirmation.
+- Confirmation page: "Feiertagsregel in der Testumgebung ärztlich bestätigt." + "Die öffentliche Website verwendet weiterhin die bisherigen Daten."
+
+### Cockpit / Prüfen
+
+- No new primary navigation item; a secondary link "Feiertage und Feiertagsregel" under Prüfen.
+- Unconfirmed → no policy warning (per-holiday items as before). Expired confirmation → one item "Feiertagsregel erneut ärztlich bestätigen" (→ `/intern/feiertage`) instead of per-holiday noise. Confirmed B → holiday items resolved (derived from the engine). Confirmed A → per-holiday items stay.
+
+### Public website
+
+Still `DATA_SOURCE = "STATIC"`; `PULS_DATA` unchanged (`REQUIRE_EXPLICIT_ENTRY`, unconfirmed). Database holiday decisions never reach the public site.
 

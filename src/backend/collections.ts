@@ -4,9 +4,9 @@
 
 import type { CollectionBeforeChangeHook, CollectionConfig, Field, GlobalConfig } from "payload";
 import type { ConfirmableKind } from "../domain/governance.ts";
-import { ACCESS, activeRole, adminOnly, signedIn } from "./access.ts";
+import { ACCESS, activeRole, adminOnly, adminOrDoctorHolidayPolicy, signedIn } from "./access.ts";
 import { CONSULTATION_TYPE_OPTIONS, localDate, localTime, recordId, verification } from "./fields.ts";
-import { acuteExceptionHook, announcementShapeHook, auditHook, holidayPolicyHook, provenanceHook, publishGuardHook, replacementGuardHook, retiredRecordGuard, staffCreateGuard, staffOperationGuard } from "./hooks.ts";
+import { acuteExceptionHook, announcementShapeHook, auditHook, globalAuditHook, holidayPolicyHook, provenanceHook, publishGuardHook, replacementGuardHook, retiredRecordGuard, staffCreateGuard, staffOperationGuard } from "./hooks.ts";
 import { ANNOUNCEMENT_DEFAULT_PRIORITY, ANNOUNCEMENT_TEXT_MAX, ANNOUNCEMENT_TITLE_MAX } from "../domain/announcements.ts";
 import { isLifecycleWrite, RejectedError } from "./server-context.ts";
 
@@ -275,9 +275,10 @@ export const AuditEvents: CollectionConfig = {
 export const HolidayCalendar: GlobalConfig = {
   slug: "holidayCalendar",
   label: "Feiertagskalender",
-  access: { read: signedIn, update: adminOnly },
+  // 09.5H: ADMIN maintains the calendar; a DOCTOR only via the trusted physician policy workflow.
+  access: { read: signedIn, update: adminOrDoctorHolidayPolicy },
   admin: { group: "Verwaltung" },
-  hooks: { beforeChange: [holidayPolicyHook] },
+  hooks: { beforeChange: [holidayPolicyHook], afterChange: [globalAuditHook] },
   fields: [
     { name: "holidays", label: "Feiertage", type: "array", fields: [localDate("date", "Datum"), { name: "name", type: "text" }] },
     {
@@ -287,8 +288,8 @@ export const HolidayCalendar: GlobalConfig = {
       required: true,
       defaultValue: "REQUIRE_EXPLICIT_ENTRY",
       options: opts(["REQUIRE_EXPLICIT_ENTRY", "CLOSED_ON_PUBLIC_HOLIDAYS"]),
-      // The holiday policy is physician-confirmed data (decision in praxis-cockpit.md); until a
-      // DOCTOR confirms it in 09.3, the mapping treats it as REQUIRE_EXPLICIT_ENTRY (fail-safe).
+      // The holiday policy is physician-confirmed data (09.5H: /intern/feiertage). Unconfirmed or
+      // expired, the engine never treats a holiday as closed (fail-safe).
     },
     verification("policyVerification", "Bestätigung der Regel"),
   ],

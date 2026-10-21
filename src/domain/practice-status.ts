@@ -123,8 +123,15 @@ export interface PracticeStatusResult {
   evaluatedAt: { instant: string; localDate: LocalDate; localTime: LocalTime; timeZone: string };
 }
 
+/**
+ * Holiday policy (09.5H): REQUIRE_EXPLICIT_ENTRY is a real, physician-confirmable choice ("jeder
+ * Feiertag einzeln") — its optional verification only distinguishes "confirmed" from the unconfirmed
+ * fallback; the engine behaves identically (weekday holiday without an entry → UNKNOWN).
+ * CLOSED_ON_PUBLIC_HOLIDAYS closes a holiday only while its verification is usable — otherwise UNKNOWN,
+ * never "closed". Applies only to dates in the holiday calendar (bridge days are ordinary weekdays).
+ */
 export type HolidayPolicy =
-  | { mode: "REQUIRE_EXPLICIT_ENTRY" }
+  | { mode: "REQUIRE_EXPLICIT_ENTRY"; verification?: FactVerification }
   | { mode: "CLOSED_ON_PUBLIC_HOLIDAYS"; verification: FactVerification };
 
 export interface PulsData {

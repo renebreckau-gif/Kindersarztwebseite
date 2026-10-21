@@ -224,8 +224,13 @@ export const announcementFromDoc = (d: AnnouncementDoc): Announcement =>
   });
 
 export function holidayPolicyFromDoc(d: HolidayCalendarDoc | null): HolidayPolicy {
+  // "Closed" carries its verification; the ENGINE closes a holiday only while it is usable (fresh,
+  // verified) — an unconfirmed or expired one resolves UNKNOWN, never "closed" (fail-safe per day).
   if (d?.policy === "CLOSED_ON_PUBLIC_HOLIDAYS" && d.policyVerification) return { mode: "CLOSED_ON_PUBLIC_HOLIDAYS", verification: verificationFromDoc(d.policyVerification) };
-  // An unverified or missing policy never becomes "closed on holidays" (fail-safe).
+  // An unverified or missing policy never becomes "closed on holidays" (fail-safe). 09.5H: a stored
+  // explicit-entry policy keeps a REAL confirmation (one with a date), so "physician-confirmed" is
+  // distinguishable; the default unconfirmed group adds nothing and keeps static ↔ DB parity.
+  if (d?.policy === "REQUIRE_EXPLICIT_ENTRY" && d.policyVerification?.lastVerified) return { mode: "REQUIRE_EXPLICIT_ENTRY", verification: verificationFromDoc(d.policyVerification) };
   return { mode: "REQUIRE_EXPLICIT_ENTRY" };
 }
 
@@ -308,7 +313,7 @@ export function docsFromPulsData(data: PulsData, holidayNames: Record<string, st
       holidays: data.publicHolidays.map((date) => ({ date, name: holidayNames[date] ?? null })),
       policy: data.holidayPolicy.mode,
       // An optional group is omitted, never null (Payload validates groups as objects).
-      ...(data.holidayPolicy.mode === "CLOSED_ON_PUBLIC_HOLIDAYS" ? { policyVerification: verificationToDoc(data.holidayPolicy.verification) } : {}),
+      ...(data.holidayPolicy.verification ? { policyVerification: verificationToDoc(data.holidayPolicy.verification) } : {}),
     },
   };
 }

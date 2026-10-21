@@ -870,6 +870,12 @@ body.intern {
   flex-wrap: wrap;
   gap: var(--space-2) var(--space-4);
 }
+/* 09.5H: long rule labels wrap beside their radio instead of dropping below it on phones. */
+.cp-policy-form .cp-choice > span {
+  flex: 1 1 0;
+  min-width: 0;
+  padding-block: var(--space-2);
+}
 .cp-input-date {
   max-width: 14rem;
 }

@@ -1,7 +1,7 @@
 // Payload hooks — thin wrappers around the tested pure logic (provenance.ts, domain/operations.ts).
 // Type-only Payload import: this module carries no Payload runtime code.
 
-import type { CollectionAfterChangeHook, CollectionBeforeChangeHook, CollectionBeforeOperationHook, GlobalBeforeChangeHook } from "payload";
+import type { CollectionAfterChangeHook, CollectionBeforeChangeHook, CollectionBeforeOperationHook, GlobalAfterChangeHook, GlobalBeforeChangeHook } from "payload";
 import type { ConfirmableKind } from "../domain/governance.ts";
 import type { Closure, OpeningHourException } from "../domain/content-types.ts";
 import { applyChangeSet, introducedUnknown, SPECIAL_DAY_MARKER } from "../domain/operations.ts";
@@ -12,7 +12,7 @@ import { activeRole } from "./access.ts";
 import { actorFromUser, auditForWrite, berlinToday, ProvenanceRejected, reviewDueFor, verificationForWrite, withdrawnProvenance, type StaffUserDoc } from "./provenance.ts";
 import { normalizeReplacement, replacementProblems, STRUCTURAL_FIELDS, structuralKey } from "../domain/replacement.ts";
 import { PayloadPracticeRepository, type PayloadReader } from "./payload-repository.ts";
-import { auditOperationOf, changeSetIdOf, isAcuteBaselineWrite, isAcuteTodayWrite, isBootstrap, isLifecycleWrite, isSpecialDayWrite, isTrustedSeed, RejectedError, replacementVerifyMode, revertOfIn, systemActor } from "./server-context.ts";
+import { auditOperationOf, changeSetIdOf, isAcuteBaselineWrite, isAcuteTodayWrite, isBootstrap, isHolidayPolicyWrite, isLifecycleWrite, isSpecialDayWrite, isTrustedSeed, RejectedError, replacementVerifyMode, revertOfIn, systemActor } from "./server-context.ts";
 
 type RuleRow = { ruleId?: string; weekday?: string; start?: string; end?: string; consultationType?: string; validFrom?: string | null; validUntil?: string | null; publicNote?: string | null; verification?: unknown };
 const ruleShape = (r: RuleRow) => JSON.stringify([String(r.weekday), r.start, r.end, r.consultationType, r.validFrom ?? null, r.validUntil ?? null, r.publicNote ?? null]);
@@ -88,8 +88,59 @@ export const provenanceHook =
     return out;
   };
 
-/** Holiday policy: ADMIN maintains the calendar, but the policy stays unconfirmed until a physician flow exists. */
-export const holidayPolicyHook: GlobalBeforeChangeHook = ({ data }) => ({ ...data, policyVerification: { status: "TO_BE_CONFIRMED", sourceIds: [] } });
+type HolidayRow = { date?: string; name?: string | null };
+const holidayKey = (list: unknown) => JSON.stringify(((list as HolidayRow[] | undefined) ?? []).map((h) => [h.date ?? null, h.name ?? null]));
+const POLICIES = ["REQUIRE_EXPLICIT_ENTRY", "CLOSED_ON_PUBLIC_HOLIDAYS"];
+
+/**
+ * Holiday calendar (09.5H), every write path:
+ * A. physician policy workflow (trusted context, DOCTOR only): ONLY `policy` may change — the stored
+ *    holiday dates / names must stay identical (a differing list is refused; the stored one is written
+ *    back); the verification is GENERATED from the session (kind HOLIDAY_POLICY, ~6 months).
+ * B. any other write (ADMIN structural maintenance): dates may change; a changed policy value always
+ *    becomes TO_BE_CONFIRMED; an unchanged policy keeps its stored verification. Client-sent
+ *    policyVerification is never trusted.
+ * The trusted seed (no account) keeps its documented provenance.
+ */
+export const holidayPolicyHook: GlobalBeforeChangeHook = ({ data, req, originalDoc }) => {
+  if (!req.user && isTrustedSeed(req.context)) return data;
+  const stored = (originalDoc ?? {}) as { holidays?: unknown; policy?: string; policyVerification?: unknown };
+  const policy = data.policy ?? stored.policy ?? "REQUIRE_EXPLICIT_ENTRY";
+  if (!POLICIES.includes(policy)) throw new RejectedError("Unbekannte Feiertagsregel.", 400);
+  if (isHolidayPolicyWrite(req.context)) {
+    const actor = actorFromUser(req.user as StaffUserDoc | null);
+    if (!actor || actor.role !== "DOCTOR") throw new RejectedError("Die Feiertagsregel kann nur eine Ärztin oder ein Arzt bestätigen.", 403);
+    if (data.holidays !== undefined && holidayKey(data.holidays) !== holidayKey(stored.holidays)) throw new RejectedError("Bei der ärztlichen Bestätigung der Feiertagsregel können die Feiertage nicht geändert werden.", 400);
+    const today = berlinToday();
+    const v = verificationForWrite(actor, "HOLIDAY_POLICY", reviewDueFor("HOLIDAY_POLICY", {}, today), today);
+    return { ...data, holidays: stored.holidays ?? [], policy, policyVerification: verificationToDoc(v) };
+  }
+  const keep = policy === stored.policy && stored.policyVerification;
+  return { ...data, policy, policyVerification: keep ? stored.policyVerification : { status: "TO_BE_CONFIRMED", sourceIds: [] } };
+};
+
+/**
+ * Append-only audit for the holiday-calendar GLOBAL (globals have no collection audit hook): same
+ * transaction via `req`. A physician policy write is entity "holidayPolicy"; structural maintenance
+ * "holidayCalendar".
+ */
+export const globalAuditHook: GlobalAfterChangeHook = async ({ doc, previousDoc, req }) => {
+  const actor = actorFromUser(req.user as StaffUserDoc | null) ?? systemActor(req.context) ?? { id: "system:internal", name: "Systemvorgang (ohne Konto)", role: "ADMIN" as const };
+  const event = auditForWrite({
+    id: crypto.randomUUID(),
+    now: new Date(),
+    actor,
+    entityType: "holidayCalendar",
+    entityId: isHolidayPolicyWrite(req.context) ? "holidayPolicy" : "holidayCalendar",
+    operation: auditOperationOf(req.context) ?? "UPDATE",
+    previous: previousDoc ?? null,
+    next: doc,
+    changeSetId: changeSetIdOf(req.context),
+  });
+  const { id: eventId, ...rest } = event;
+  await req.payload.create({ collection: "auditEvents", data: { ...rest, eventId }, overrideAccess: true, req });
+  return doc;
+};
 
 /** Publish guard: a change must not introduce a contradiction (new UNKNOWN day) — same engine as the preview. */
 export const publishGuardHook =

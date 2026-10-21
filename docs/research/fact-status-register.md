@@ -574,7 +574,7 @@ Shared fields for F35–F39:
 - **RISK IF INCORRECT:** HIGH
 - **REQUIRED CONFIRMATION:** Practice: closed on Sachsen-Anhalt public holidays? bridge days?
 - **FEATURES AFFECTED:** PRAXIS PULS
-- **NOTES:** PRAXIS PULS must not show "open" on a public holiday without confirmed data.
+- **NOTES:** PRAXIS PULS must not show "open" on a public holiday without confirmed data. Since Phase 09.5H a technical physician-confirmation workflow exists in the staff cockpit (`/intern/feiertage`); it does **not** change this status — the practice's actual rule has not been confirmed.
 
 ## 7. Closures, replacements, notices
 

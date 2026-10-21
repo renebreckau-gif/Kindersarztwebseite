@@ -117,9 +117,29 @@ describe("provenance: generated from the account, never typed in", () => {
     assert.equal(reviewDueFor("WEEKLY_SCHEDULE", {}, "2026-10-13"), "2027-04-13");
   });
 
-  test("holiday policy saved by ADMIN stays unconfirmed (fail-safe until a physician flow exists)", () => {
-    const out = call(holidayPolicyHook, { data: { policy: "CLOSED_ON_PUBLIC_HOLIDAYS", policyVerification: { status: "VERIFIED_CURRENT" } } }) as { policyVerification: { status: string } };
+  // 09.5H: ADMIN maintains dates; a changed policy is unconfirmed; only the trusted physician path confirms.
+  const STORED = { holidays: [{ date: "2026-12-25", name: "Test" }], policy: "CLOSED_ON_PUBLIC_HOLIDAYS", policyVerification: { status: "VERIFIED_CURRENT", verifiedBy: "Dr. Test" } };
+  const holiday = (user: StaffUserLike | null, data: Record<string, unknown>, context: Record<string, unknown> = {}) =>
+    call(holidayPolicyHook, { data, originalDoc: STORED, req: { user, context } }) as { policy: string; holidays: unknown; policyVerification: { status: string; verifiedBy?: string } };
+  test("holiday policy: ADMIN policy change → TO_BE_CONFIRMED; client verification ignored", () => {
+    const out = holiday(ADMIN, { policy: "REQUIRE_EXPLICIT_ENTRY", policyVerification: { status: "VERIFIED_CURRENT" } });
     assert.equal(out.policyVerification.status, "TO_BE_CONFIRMED");
+  });
+  test("holiday policy: ADMIN date maintenance keeps the stored physician verification", () => {
+    const out = holiday(ADMIN, { holidays: [{ date: "2026-12-26", name: "Neu" }], policyVerification: { status: "TO_BE_CONFIRMED" } });
+    assert.deepEqual(out.policyVerification, STORED.policyVerification);
+  });
+  test("holiday policy: DOCTOR via the trusted context — generated verification, stored dates kept; no date change; no STAFF", () => {
+    const ctx = { praxisHolidayPolicyWrite: true };
+    const out = holiday(DOCTOR, { policy: "REQUIRE_EXPLICIT_ENTRY", policyVerification: { status: "OUTDATED_DO_NOT_PUBLISH" } }, ctx);
+    assert.equal(out.policy, "REQUIRE_EXPLICIT_ENTRY");
+    assert.equal(out.policyVerification.status, "VERIFIED_CURRENT");
+    assert.match(String(out.policyVerification.verifiedBy), /Test Ärztin, Ärztin \/ Arzt/);
+    assert.deepEqual(out.holidays, STORED.holidays);
+    assert.throws(() => holiday(DOCTOR, { policy: "CLOSED_ON_PUBLIC_HOLIDAYS", holidays: [{ date: "2027-01-01", name: "X" }] }, ctx));
+    assert.throws(() => holiday({ id: 9, name: "Team", role: "STAFF", active: true } as StaffUserLike, { policy: "CLOSED_ON_PUBLIC_HOLIDAYS" }, ctx));
+    assert.throws(() => holiday(ADMIN, { policy: "CLOSED_ON_PUBLIC_HOLIDAYS" }, ctx), "ADMIN cannot use the physician path");
+    assert.throws(() => holiday(ADMIN, { policy: "IMMER_OFFEN" }));
   });
 });
 

@@ -2,7 +2,7 @@
 // UI hiding is never the only protection. No role gets a bypass around server validation.
 
 import { STAFF_ROLES, type StaffRole } from "../domain/governance.ts";
-import { replacementVerifyMode } from "./server-context.ts";
+import { isHolidayPolicyWrite, replacementVerifyMode } from "./server-context.ts";
 
 /** Minimal shape of the authenticated Payload user (the `staff` auth collection). */
 export interface StaffUserLike {
@@ -27,6 +27,15 @@ export const adminOnly = ({ req }: ArgsLike) => activeRole(req.user) === "ADMIN"
  * trusted server verification workflow (server context, never reachable over HTTP) — so a generic
  * REST write by a DOCTOR can never create verified data with browser-chosen content.
  */
+/**
+ * 09.5H holiday calendar (global): ADMIN maintains the calendar structurally; a DOCTOR may write ONLY
+ * through the trusted physician policy workflow (server context) — never a generic REST update.
+ */
+export const adminOrDoctorHolidayPolicy = ({ req }: ArgsLike) => {
+  const role = activeRole(req.user);
+  return role === "ADMIN" || (role === "DOCTOR" && isHolidayPolicyWrite(req.context));
+};
+
 export const adminOrDoctorVerification = ({ req }: ArgsLike) => {
   const role = activeRole(req.user);
   return role === "ADMIN" || (role === "DOCTOR" && replacementVerifyMode(req.context) !== undefined);

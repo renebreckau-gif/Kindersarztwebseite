@@ -35,12 +35,15 @@ export const SERVER_CONTEXT = {
    * "WITHDRAW" = "Nicht mehr als Vertretung verwenden"). Server code only — never HTTP input.
    */
   REPLACEMENT_VERIFY: "praxisReplacementVerify",
+  /** Phase 09.5H: the physician holiday-policy workflow (policy only — never the holiday dates). */
+  HOLIDAY_POLICY: "praxisHolidayPolicyWrite",
 } as const;
 
 export const isLifecycleWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.LIFECYCLE] === true;
 export const isAcuteBaselineWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.ACUTE_BASELINE] === true;
 export const isAcuteTodayWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.ACUTE_TODAY] === true;
 export const isSpecialDayWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.SPECIAL_DAY] === true;
+export const isHolidayPolicyWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.HOLIDAY_POLICY] === true;
 /** The physician replacement action of this write, if the trusted server workflow set one. */
 export function replacementVerifyMode(ctx: Record<string, unknown> | undefined | null): "VERIFY" | "WITHDRAW" | undefined {
   const v = ctx?.[SERVER_CONTEXT.REPLACEMENT_VERIFY];
