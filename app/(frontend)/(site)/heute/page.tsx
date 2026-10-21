@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PageFrame, InternalNote } from "@/site/chrome";
 import { PageIntro, Section, StatusStatement, CallAction, EmergencyLink, DayRuler, BigLinks } from "@/site/blocks";
 import u from "@/site/pages.module.css";
-import { resolvePuls } from "@/content/puls";
+import { loadPublicPage } from "@/site/operational";
 import { activeAnnouncements } from "@/content/notices";
 import { NoticeList } from "@/site/notice-list";
 import { publicAddress } from "@/content/practice";
@@ -19,13 +19,13 @@ export const metadata: Metadata = {
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function Heute({ searchParams }: { searchParams: Search }) {
-  const puls = resolvePuls(await searchParams);
+  const { snapshot, puls } = await loadPublicPage(await searchParams);
   const r = puls.result;
   const today = r.evaluatedAt.localDate;
   const wd = weekdayOf(today) as IsoWeekday;
   const day = WEEKDAYS.find((d) => d.id === wd);
   const minutes = Number(r.evaluatedAt.localTime.slice(0, 2)) * 60 + Number(r.evaluatedAt.localTime.slice(3, 5));
-  const notices = activeAnnouncements(today);
+  const notices = activeAnnouncements(today, snapshot.announcements);
   const addr = publicAddress();
 
   return (
@@ -49,7 +49,7 @@ export default async function Heute({ searchParams }: { searchParams: Search }) 
       ) : null}
 
       <Section id="heute-zeiten" title={day ? `Sprechzeiten am ${day.name}` : "Sprechzeiten"} tone="paper">
-        {day ? <DayRuler weekday={wd} nowMinutes={minutes} /> : <p className={u.lead}>Die regulären Sprechzeiten finden Sie in der Wochenübersicht.</p>}
+        {day ? <DayRuler weekday={wd} nowMinutes={minutes} schedule={snapshot.puls} /> : <p className={u.lead}>Die regulären Sprechzeiten finden Sie in der Wochenübersicht.</p>}
         <p className={u.fine}>
           Das sind die regulären Zeiten. An Feiertagen und bei kurzfristigen Änderungen gilt der Status oben. <Link href="/heute/sprechzeiten">Wochenübersicht</Link>
         </p>

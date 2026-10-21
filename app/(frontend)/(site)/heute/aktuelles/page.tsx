@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageFrame } from "@/site/chrome";
 import { PageIntro, Section, CallAction } from "@/site/blocks";
 import u from "@/site/pages.module.css";
-import { resolvePuls } from "@/content/puls";
+import { loadPublicPage } from "@/site/operational";
 import { activeAnnouncements } from "@/content/notices";
 import { NoticeList } from "@/site/notice-list";
 
@@ -14,8 +14,8 @@ export const metadata: Metadata = {
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function Aktuelles({ searchParams }: { searchParams: Search }) {
-  const puls = resolvePuls(await searchParams);
-  const notices = activeAnnouncements(puls.result.evaluatedAt.localDate);
+  const { snapshot, puls } = await loadPublicPage(await searchParams);
+  const notices = activeAnnouncements(puls.result.evaluatedAt.localDate, snapshot.announcements);
   return (
     <PageFrame current="heute" puls={puls}>
       <PageIntro variant="utility" title="Aktuelles" back={{ href: "/heute", label: "Heute" }} lede="Hier steht nur, was heute gilt. Abgelaufene Hinweise verschwinden automatisch." />

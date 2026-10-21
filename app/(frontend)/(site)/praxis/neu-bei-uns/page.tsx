@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PageFrame, InternalNote } from "@/site/chrome";
 import { PageIntro, Section, Steps, CallAction } from "@/site/blocks";
 import u from "@/site/pages.module.css";
-import { resolvePuls } from "@/content/puls";
+import { loadPublicPage } from "@/site/operational";
 import { PRACTICE, publicAddress } from "@/content/practice";
 import { typeSummary } from "@/content/schedule";
 
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function NeuBeiUns({ searchParams }: { searchParams: Search }) {
-  const puls = resolvePuls(await searchParams);
+  const { snapshot, puls } = await loadPublicPage(await searchParams);
   const addr = publicAddress();
   return (
     <PageFrame current="praxis" puls={puls}>
@@ -37,7 +37,7 @@ export default async function NeuBeiUns({ searchParams }: { searchParams: Search
               body: (
                 <>
                   <p>
-                    Bitte nur mit gesunden Kindern: {typeSummary("HEALTHY_ONLY").join("; ")}. Nur Terminsprechstunde: {typeSummary("APPOINTMENT").join("; ")}.
+                    Bitte nur mit gesunden Kindern: {typeSummary("HEALTHY_ONLY", snapshot.puls).join("; ")}. Nur Terminsprechstunde: {typeSummary("APPOINTMENT", snapshot.puls).join("; ")}.
                   </p>
                   <p>
                     <Link href="/heute/sprechzeiten">Alle Sprechzeiten</Link>

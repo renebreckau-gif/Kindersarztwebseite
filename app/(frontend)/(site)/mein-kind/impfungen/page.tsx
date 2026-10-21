@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageFrame, InternalNote } from "@/site/chrome";
 import { PageIntro, Section, SourceList, CallAction, Prose } from "@/site/blocks";
 import u from "@/site/pages.module.css";
-import { resolvePuls } from "@/content/puls";
+import { loadPublicPage } from "@/site/operational";
 import { AGE_PARAM, ageFromQuery, topicBack, ageContextLine } from "@/content/site";
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
@@ -16,7 +16,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Search 
 
 export default async function Impfungen({ searchParams }: { searchParams: Search }) {
   const q = await searchParams;
-  const puls = resolvePuls(q);
+  const { puls } = await loadPublicPage(q);
   // navigation context only: the age range never selects vaccinations or recommendations
   const age = ageFromQuery(q[AGE_PARAM]);
   return (

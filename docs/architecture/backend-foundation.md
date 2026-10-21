@@ -525,6 +525,14 @@ Safety and seeding:
 - **Provenance / audit / transaction:** fresh WEEKLY_SCHEDULE provenance (DOCTOR only) for non-ACUTE rules + aggregate; audit via the collection hook in the same `req` transaction (VERIFY through the trusted `AUDIT_OPERATION`, else UPDATE); rollback integration-tested. No schema change, no migration.
 - Clean proof: step 24/24 `20-weekly-plan.test.ts`; step 6 now asserts that a generic DOCTOR schedule POST is refused.
 
+### 17.11f Payload shadow read (Phase 09.6B, 2026-10-21)
+
+- `src/backend/public-operational-snapshot.ts` reads the complete operational snapshot (PulsData + announcements) in **one** transaction: `payload.db.beginTransaction({ isolationLevel: "repeatable read", accessMode: "read only" })`, with the id on `req.transactionID` for every Local API read through `PayloadPracticeRepository(payload, req)`, then commit / rollback. Only the public adapter method and the documented `req.transactionID` binding are used. Write transactions keep the adapter default (READ COMMITTED); `transactionOptions` is not configured.
+- Proven against PostgreSQL in step 3: a concurrent commit never mixes into the snapshot (with a READ COMMITTED control showing the mix), writes inside the snapshot are refused, and shadow reads change nothing.
+- Fail closed (`FAILED` = fail-safe PulsData + no announcements), no cached failure.
+- Tests / diagnostics only; the public site stays STATIC.
+- Finding: a pg pool connection terminated by a DB shutdown raises an unhandled `error` event. Plain Node processes crash; the Next.js server logs it and survives. This must be handled deliberately before public Payload reads.
+
 ### 17.12 npm audit (2026-10-13): 16 findings, none fixed by force
 
 | Package (path) | Severity | Reachable here? | Fix |

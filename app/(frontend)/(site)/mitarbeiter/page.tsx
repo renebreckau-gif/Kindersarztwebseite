@@ -4,7 +4,7 @@
 
 import type { Metadata } from "next";
 import { connection } from "next/server";
-import { resolvePuls } from "@/content/puls";
+import { loadPublicPage } from "@/site/operational";
 import { SITE_STAGE } from "@/content/release";
 import { backendConfigured, stagingNote, staffEntryActions } from "@/content/staff-entry";
 import { StaffEntry } from "@/site/staff-entry";
@@ -16,5 +16,5 @@ type Search = Promise<Record<string, string | string[] | undefined>>;
 export default async function Mitarbeiter({ searchParams }: { searchParams: Search }) {
   await connection();
   const actions = staffEntryActions(SITE_STAGE, backendConfigured(process.env));
-  return <StaffEntry puls={resolvePuls(await searchParams)} actions={actions} note={stagingNote(SITE_STAGE)} back={{ href: "/", label: "Start" }} />;
+  return <StaffEntry puls={(await loadPublicPage(await searchParams)).puls} actions={actions} note={stagingNote(SITE_STAGE)} back={{ href: "/", label: "Start" }} />;
 }

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PageFrame, InternalNote } from "@/site/chrome";
 import { Section, CallAction, PageBackNav } from "@/site/blocks";
 import u from "@/site/pages.module.css";
-import { resolvePuls } from "@/content/puls";
+import { loadPublicPage } from "@/site/operational";
 import { publicEmergency } from "@/content/notices";
 import { SOURCES } from "@/content/sources";
 
@@ -17,7 +17,7 @@ type Search = Promise<Record<string, string | string[] | undefined>>;
 const deDate = (d: string) => `${d.slice(8, 10)}.${d.slice(5, 7)}.${d.slice(0, 4)}`;
 
 export default async function Notfall({ searchParams }: { searchParams: Search }) {
-  const puls = resolvePuls(await searchParams);
+  const { puls } = await loadPublicPage(await searchParams);
   const today = puls.result.evaluatedAt.localDate;
   const list = publicEmergency(today);
   const immediate = list.find((e) => e.type === "IMMEDIATE_EMERGENCY");

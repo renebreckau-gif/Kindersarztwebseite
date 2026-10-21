@@ -1,6 +1,6 @@
 # Public data cutover — readiness gate (Phase 09.6A)
 
-Date: 2026-10-21 · Baseline `4becaa6` (09.5I) · **Audit only — no cutover.**
+Date: 2026-10-21 · Baseline `4becaa6` (09.5I) · **Audit only — no cutover.** · 09.6B (shadow read) implemented — see §18.
 
 > **Decision**
 > - **Next technical phase: `READY_FOR_09_6B_SHADOW_READ`.** The repository, mapping and parity proof are complete for every field the engine and the notice / homepage selection use. The shadow-read harness can be built and proven with artificial fixtures and a migrated copy of the static data.
@@ -276,3 +276,72 @@ Never convert `TO_BE_CONFIRMED` to `VERIFIED_CURRENT` during an import because a
 | 09.6C | Staging public operational read from Payload — only with real staging data and explicit approval; outage + consistency acceptance (§14) | PAYLOAD on staging only |
 | 09.6D | Production infrastructure + auth-security gate (§10, §12), GAP-1 resolved, dependency update decision | — |
 | 09.6E | Final production cutover — only after the launch blockers, domain / DNS and a rehearsed rollback (§13) | PAYLOAD |
+
+## 18. Phase 09.6B — implemented: static public snapshot + Payload shadow read (2026-10-21)
+
+Baseline `2e0e487` (09.6A). **STATIC stays authoritative; no parent-visible change; `DATA_SOURCE = "STATIC"`.**
+
+**Result: `SHADOW_READ: PASS` · `READY_FOR_09_6C: NO` · `PUBLIC_CUTOVER: NO-GO`.**
+- 09.6C needs a real staging operational dataset, explicit practice approval to use it and a deliberate scope decision.
+- GAP-1 (non-ACUTE consultation types) is still open and makes a maintained Payload week impractical.
+- The pg-pool hardening below is also needed first.
+
+### Public side (STATIC)
+
+- **`PublicOperationalSnapshot`** (`src/data/public-operational.ts`) carries `puls` + `announcements` + `meta { source, state, readAt }`.
+  - `meta` is diagnostics only and never rendered.
+  - `readAt` is the server read time, not a verification date.
+- **`loadPublicOperationalData()`** is async and STATIC only: `StaticPracticeRepository`, i.e. exactly `PULS_DATA` + `ANNOUNCEMENTS`. It never inspects `DATA_SOURCE`, env, Payload or PostgreSQL, and has no dynamic import (guarded). `failedOperationalSnapshot()` = `FAIL_SAFE_PULS_DATA` + `[]`.
+- **One snapshot per page:** `loadPublicPage(params)` (`src/site/operational.ts`) loads once and calls the pure `resolvePuls(params, now, snapshot.puls)`. `resolvePuls` stays synchronous and storage-free. All 21 public pages use it. The start page (Variant B), `/heute`, `/heute/sprechzeiten`, `/heute/aktuelles` and `/praxis/neu-bei-uns` pass `snapshot.puls` / `snapshot.announcements` down: hero, highlight, "Heute" chapter, `DayRuler`, `WeekHours`, notices, type summary. `/review/startseite` keeps its fixtures on top of the same static snapshot.
+- **`WeekHours` / `DayRuler` gap closed:**
+  - `slotsFor`, `blocksFor`, `typeSummary` and the new `weekHoursView` take a `ScheduleSource` (schedule + consultation types of the snapshot). They no longer read the module-global `RULES`.
+  - Labels come from the snapshot's own types; slots are ordered by start time (no visible change for static).
+  - Guards: public code imports no `RULES` / `PULS_DATA` / `ANNOUNCEMENTS` / `staticPulsData`, never calls `resolvePuls` directly, and always passes `schedule={snapshot.puls}` and the snapshot's notice list.
+- **Visual regression:** baseline `2e0e487` vs 09.6B at a fixed review time on `/`, `/heute`, `/heute/sprechzeiten` (+ live), `/heute/aktuelles` at 390 / 768 / 1440. 15/15 screenshots are **pixel-identical**, and the visible text is identical.
+- With PostgreSQL stopped, all 23 public routes return 200.
+
+### Payload shadow read (backend, tests / diagnostics only)
+
+- `src/backend/public-operational-snapshot.ts` provides `withConsistentRead`, `readPayloadOperationalSnapshot` and `readPayloadOperationalDataSafely`. No public import; no route, no `/debug`, no `/api/shadow`.
+- **Consistent read — verified API:**
+  - `payload.db.beginTransaction(options)` is the public adapter method (`BeginTransaction(options?)`; documented in the Payload transactions docs, without isolation details).
+  - In the installed `@payloadcms/drizzle` 3.90.2, `options` is passed to drizzle `transaction(fn, config)`. drizzle then issues `begin isolation level repeatable read read only`.
+  - The id is carried on `req.transactionID` (documented); Payload's `createLocalReq` completes the partial `req`.
+  - The transaction ends with `commitTransaction` (success) or `rollbackTransaction` (any failure); no transaction id → refused. The adapter's global `transactionOptions` (all cockpit writes) is unchanged.
+  - All seven reads (6 PulsData + announcements) run on that one transaction.
+- **Concurrency proof** (integration step 3, real PostgreSQL):
+  - Dataset A = static week + notice A, no closure. Dataset B = closure B + notice B2, committed in ONE separate transaction *after* the shadow transaction's first reads.
+  - The shadow snapshot stays entirely A: no closure, notice A only. A fresh read sees all of B.
+  - Control: the same sequence in a default READ COMMITTED transaction **does** mix (old PulsData + notice B2), so the test is sensitive.
+- **Read-only proof:**
+  - Three shadow reads leave ids / `updatedAt` / audit unchanged.
+  - A write attempted inside the snapshot transaction is refused by PostgreSQL.
+- **Failure:** any failing part → the whole snapshot is `FAILED` (`FAIL_SAFE_PULS_DATA` → engine UNKNOWN, no announcements, no highlight); never `PULS_DATA` / `ANNOUNCEMENTS`. The safe reader keeps no state.
+- **Real outage proof** (manual script, test DB, one process): DB up → `OK`; DB stopped → `FAILED` (fail-safe, 0 notices, no static); DB started → `OK` again without a restart.
+
+### Shadow comparison (`src/data/shadow-compare.ts`, pure)
+
+- Kinds: `PULS_DATA`, `ANNOUNCEMENTS`, `STATUS`, `PUBLIC_ANNOUNCEMENTS`, `HOMEPAGE_HIGHLIGHT`, `WEEK_HOURS` (all seven weekdays), `DAY_RULER`, `READ_STATE`.
+- The derived views use the same helpers as the site: engine, `selectPublicAnnouncements`, `selectHomepageHighlight`, `weekHoursView`, `slotsFor`.
+- Set-like data is canonicalised (records by id, keys sorted, since storage builds objects in a different key order); presentation lists keep their real order.
+- Window: the 17 representative instants of the parity proof plus every hour for four weeks.
+- **Static copy → PostgreSQL:** `equal: true, differences: []`, for the current static data (+ artificial notices) and for the artificial special-hours / vacation / replacement dataset. **Technical parity only — no practice approval.**
+- **Deliberate divergence:** Monday shorter, an extra verified notice and a closure are detected as exactly `ANNOUNCEMENTS, DAY_RULER, HOMEPAGE_HIGHLIGHT, PUBLIC_ANNOUNCEMENTS, PULS_DATA, STATUS, WEEK_HOURS`. A consultation-label change is detected as `DAY_RULER, PULS_DATA, WEEK_HOURS`.
+
+### New finding: database outage vs. process (before 09.6C/D)
+
+- A plain Node process that used Payload crashes when PostgreSQL stops: pg emits an unhandled `error` event ("Connection terminated unexpectedly") on an idle pooled connection.
+  - `@payloadcms/db-postgres` 3.90.2 adds an error listener only to its own held client (reconnect on `ECONNRESET`).
+  - This is existing Payload / pg behaviour, also without any shadow code (control experiment).
+- The **Next.js server survives** (it logs `uncaughtException: terminating connection due to administrator command`) and keeps serving: `/`, `/heute` and `/intern/anmelden` returned 200 before, during and after an outage.
+- Before public Payload reads (09.6C), handle pool errors deliberately (a supported pool error handler / adapter option, verified then) rather than relying on the framework's last-resort handler.
+
+### Still open
+
+- GAP-1 consultation-type workflow (pre-cutover blocker).
+- GAP-2 emergency information stays static, outside the snapshot.
+- No real staging dataset.
+- No caching / revalidation (pages stay per-request).
+- WeekHours renders Monday–Friday only, as before. A weekend opening in a future Payload week would appear in PULS but not in that table, so the presentation must be revisited at 09.6C (the comparison already covers all seven days).
+- The static `WORKING` reviewDue risk (2027-03-09) is unchanged.
+

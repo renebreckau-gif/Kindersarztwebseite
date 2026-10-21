@@ -40,13 +40,36 @@ describe("09.6A: no public data cutover has happened", () => {
     }
   });
 
-  test("public pages read operational data only through the static path (no injected source, no database module)", () => {
+  test("09.6B: public code takes operational data from ONE snapshot (no direct static operational imports, no database module)", () => {
     for (const f of PUBLIC) {
       const src = read(f);
-      // resolvePuls(params) only — a third argument would inject another data source.
-      assert.doesNotMatch(src, /resolvePuls\([^()]*(\([^()]*\))?[^()]*,[^()]*,/, f);
-      assert.doesNotMatch(src, /payload-repository|PayloadPracticeRepository|@\/cockpit\/|readPulsDataSafely|getPayload/, f);
+      assert.doesNotMatch(src, /payload-repository|PayloadPracticeRepository|public-operational-snapshot|shadow-compare|@\/cockpit\/|@\/backend\/|readPulsDataSafely|getPayload/, f);
+      // operational facts never imported directly (the static repository owns them)
+      assert.doesNotMatch(src, /(RULES|PULS_DATA|ANNOUNCEMENTS|staticPulsData)/, f);
+      // resolvePuls only in the one page helper, always with the snapshot's PulsData
+      if (f !== "src/site/operational.ts") assert.doesNotMatch(src, /resolvePuls\(/, f);
+      // notice helpers always receive the snapshot's list
+      for (const m of src.matchAll(/(activeAnnouncements|homeChapterAnnouncements)\(([^)]*)\)/g)) assert.match(m[2], /snapshot\.announcements/, `${f}: ${m[0]}`);
     }
+    assert.match(read("src/site/operational.ts"), /loadPublicOperationalData\(\);[\s\S]*resolvePuls\(params, new Date\(\), snapshot\.puls\)/);
+  });
+
+  test("09.6B: the public loader is STATIC-only — no Payload, no backend, no source switch, no dynamic import", () => {
+    const src = read("src/data/public-operational.ts").replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, ""); // code only, not comments
+    assert.doesNotMatch(src, /backend|payload["'/]|@payloadcms|DATA_SOURCE|process\.env|import\(/);
+    assert.match(src, /new StaticPracticeRepository\(\)/);
+  });
+
+  test("09.6B: WeekHours / DayRuler / slotsFor / blocksFor take the schedule as input — never the global RULES", () => {
+    const schedule = read("src/content/schedule.ts");
+    const helpers = schedule.slice(schedule.indexOf("export type ScheduleSource"));
+    assert.doesNotMatch(helpers, /RULES|CONSULTATION_TYPES|PULS_DATA/, "helpers read only their `src` argument");
+    assert.match(helpers, /export function slotsFor\(weekday: IsoWeekday, src: ScheduleSource\)/);
+    assert.match(helpers, /export function blocksFor\(weekday: IsoWeekday, src: ScheduleSource\)/);
+    const blocks = read("src/site/blocks.tsx");
+    assert.match(blocks, /export function DayRuler\(\{[^}]*schedule \}: \{[^}]*schedule: ScheduleSource \}\)/);
+    assert.match(blocks, /export function WeekHours\(\{ today, schedule \}: \{ today\?: IsoWeekday; schedule: ScheduleSource \}\)/);
+    for (const f of PUBLIC) for (const m of read(f).matchAll(/<(DayRuler|WeekHours)[^>]*>/g)) assert.match(m[0], /schedule=\{snapshot\.puls\}/, `${f}: ${m[0]}`);
   });
 
   test("deployment stage, data authority, indexing and staff portal stay separate and unchanged", () => {

@@ -7,13 +7,14 @@ import { isReviewHubEnabled } from "@/lab/review-hub";
 import { exampleAnnouncements, exampleClosures, HIGHLIGHT_EXAMPLES, type HighlightExample } from "@/lab/homepage-fixtures";
 import { StartPage } from "@/site/start-page";
 import { resolvePuls } from "@/content/puls";
-import { staticPulsData } from "@/data/static-repository";
+import { loadPublicOperationalData } from "@/data/public-operational";
 import { selectHomepageHighlight } from "@/content/homepage-highlight";
 import { zonedParts } from "@/domain/time";
 
 // Staging-only review view (Phase 10.0A): the REAL start page composition with ARTIFICIAL
 // highlight data (src/lab/homepage-fixtures.ts) passed through the real engine and the real
-// selector. Never touches the public content source; 404 in PRODUCTION; noindex.
+// selector. Never touches the public content source; 404 in PRODUCTION; noindex. 09.6B: the base is the
+// same static operational snapshot as `/`; only the fixture closures / notices are added for the hero.
 
 export const metadata: Metadata = {
   title: "Prüfansicht Startseite (Testdaten)",
@@ -27,12 +28,13 @@ export default async function StartseitePruefansicht({ searchParams }: { searchP
   const q = await searchParams;
   const example: HighlightExample = HIGHLIGHT_EXAMPLES.includes(q.beispiel as HighlightExample) ? (q.beispiel as HighlightExample) : "urlaub";
   const today = zonedParts(new Date()).date;
-  const base = staticPulsData();
+  const snapshot = await loadPublicOperationalData();
+  const base = snapshot.puls;
   const puls = resolvePuls({}, new Date(), { ...base, closures: [...base.closures, ...exampleClosures(example, today)] });
   const highlight = selectHomepageHighlight({ result: puls.result, announcements: exampleAnnouncements(example, today), today });
   return (
     <div className="ds-root">
-      <StartPage puls={puls} highlight={highlight} tag="Testdaten" />
+      <StartPage puls={puls} snapshot={snapshot} highlight={highlight} tag="Testdaten" />
     </div>
   );
 }

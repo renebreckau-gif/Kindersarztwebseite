@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageFrame } from "@/site/chrome";
 import { PageIntro, Section, GrowthScale, BigLinks } from "@/site/blocks";
 import u from "@/site/pages.module.css";
-import { resolvePuls } from "@/content/puls";
+import { loadPublicPage } from "@/site/operational";
 
 export const metadata: Metadata = {
   title: "Mein Kind",
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function MeinKind({ searchParams }: { searchParams: Search }) {
-  const puls = resolvePuls(await searchParams);
+  const { puls } = await loadPublicPage(await searchParams);
   return (
     <PageFrame current="mein-kind" puls={puls}>
       <PageIntro variant="growth" title="Mein Kind" back={{ href: "/", label: "Start" }} lede="Wählen Sie das Alter Ihres Kindes. Sie geben dabei nichts preis: kein Geburtsdatum, kein Konto, keine gespeicherten Daten." />

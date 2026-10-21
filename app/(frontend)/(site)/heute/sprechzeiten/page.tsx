@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PageFrame, InternalNote } from "@/site/chrome";
 import { PageIntro, Section, WeekHours, CallAction } from "@/site/blocks";
 import u from "@/site/pages.module.css";
-import { resolvePuls } from "@/content/puls";
+import { loadPublicPage } from "@/site/operational";
 import { weekdayOf, type IsoWeekday } from "@/domain/time.ts";
 
 export const metadata: Metadata = {
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function Sprechzeiten({ searchParams }: { searchParams: Search }) {
-  const puls = resolvePuls(await searchParams);
+  const { snapshot, puls } = await loadPublicPage(await searchParams);
   const wd = weekdayOf(puls.result.evaluatedAt.localDate) as IsoWeekday;
 
   return (
@@ -22,7 +22,7 @@ export default async function Sprechzeiten({ searchParams }: { searchParams: Sea
       <PageIntro variant="utility" title="Sprechzeiten" back={{ href: "/heute", label: "Heute" }} lede="Die regulären Zeiten der Woche. Ob die Praxis gerade geöffnet ist, sehen Sie unter Heute." />
 
       <Section id="woche" tone="paper" wide>
-        <WeekHours today={wd} />
+        <WeekHours today={wd} schedule={snapshot.puls} />
         <dl className={u.legend}>
           <div>
             <dt>

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { PageFrame } from "@/site/chrome";
 import { PageIntro, Section, GrowthScale, BigLinks, CallAction } from "@/site/blocks";
 import u from "@/site/pages.module.css";
-import { resolvePuls } from "@/content/puls";
+import { loadPublicPage } from "@/site/operational";
 import { AGES, ageTopics, ageSectionTitle } from "@/content/site";
 
 type Params = Promise<{ alter: string }>;
@@ -23,7 +23,7 @@ export default async function Altersstufe({ params, searchParams }: { params: Pa
   const { alter } = await params;
   const age = AGES.find((x) => x.slug === alter);
   if (!age) notFound();
-  const puls = resolvePuls(await searchParams);
+  const { puls } = await loadPublicPage(await searchParams);
   return (
     <PageFrame current="mein-kind" puls={puls}>
       <PageIntro variant="growth" title={`${age.label} Jahre`} context={age.name} back={{ href: "/mein-kind", label: "Mein Kind" }} lede={age.intro} />

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PageFrame, InternalNote } from "@/site/chrome";
 import { PageIntro, Section, CallAction } from "@/site/blocks";
 import u from "@/site/pages.module.css";
-import { resolvePuls } from "@/content/puls";
+import { loadPublicPage } from "@/site/operational";
 import { PRACTICE, publicAddress } from "@/content/practice";
 
 export const metadata: Metadata = {
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function Kontakt({ searchParams }: { searchParams: Search }) {
-  const puls = resolvePuls(await searchParams);
+  const { puls } = await loadPublicPage(await searchParams);
   const addr = publicAddress();
   return (
     <PageFrame current="praxis" puls={puls}>

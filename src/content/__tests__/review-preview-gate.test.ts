@@ -115,8 +115,11 @@ describe("architecture: one policy, one gate", () => {
     const pages = calls.filter(([f]) => !f.endsWith("people.ts"));
     assert.deepEqual(pages.map(([f]) => f).sort(), ["app/(frontend)/(site)/praxis/aerztinnen/page.tsx", "app/(frontend)/(site)/praxis/team/page.tsx", "src/site/home.tsx"]);
     for (const [f, args] of pages) assert.match(args, /, puls\.mode === "PREVIEW"$/, f);
-    for (const f of ["app/(frontend)/(site)/praxis/aerztinnen/page.tsx", "app/(frontend)/(site)/praxis/team/page.tsx"]) assert.match(read(f), /const puls = resolvePuls\(await searchParams\);/, f);
-    assert.match(read("app/(frontend)/(site)/page.tsx"), /resolvePuls\(\{ vorschau: q\.vorschau, zeit: q\.zeit \}\)/);
+    // 09.6B: pages get `puls` from the one operational snapshot helper; it calls resolvePuls with the
+    // request params, the server clock and the snapshot — never a stage (the gate stays central).
+    for (const f of ["app/(frontend)/(site)/praxis/aerztinnen/page.tsx", "app/(frontend)/(site)/praxis/team/page.tsx"]) assert.match(read(f), /const \{ puls \} = await loadPublicPage\(await searchParams\);/, f);
+    assert.match(read("app/(frontend)/(site)/page.tsx"), /loadPublicPage\(\{ vorschau: q\.vorschau, zeit: q\.zeit \}\)/);
+    assert.match(read("src/site/operational.ts"), /resolvePuls\(params, new Date\(\), snapshot\.puls\)/);
   });
   test("pages never inject a stage (the stage argument is for tests only)", () => {
     for (const f of [...files("app"), ...files("src/site")]) assert.doesNotMatch(read(f), /resolvePuls\([^)]*["'](PRODUCTION|STAGING)["']|discoveryReviewMode\([^)]*,/, f);

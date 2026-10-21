@@ -9,7 +9,7 @@ import { StatusMark } from "@/design-system/components/primitives";
 import { PRACTICE } from "@/content/practice";
 import { SOURCES, OFFICIAL_SOURCES_CHECKED, type SourceId } from "@/content/sources";
 import { AGES, type AgeRange } from "@/content/site";
-import { WEEKDAYS, slotsFor, blocksFor, type DaySlot } from "@/content/schedule";
+import { WEEKDAYS, slotsFor, weekHoursView, type DaySlot, type ScheduleSource } from "@/content/schedule";
 import type { PulsView } from "@/content/puls";
 import type { IsoWeekday } from "@/domain/time.ts";
 
@@ -136,9 +136,10 @@ const pos = (t: string) => {
   return (((h + m / 60 - AXIS.from) / (AXIS.to - AXIS.from)) * 100).toFixed(2);
 };
 
-/** Day ruler: one weekday's verified hours on a 07–18 measuring axis, plus readable text. */
-export function DayRuler({ weekday, caption, nowMinutes }: { weekday: IsoWeekday; caption?: string; nowMinutes?: number }) {
-  const slots = slotsFor(weekday);
+/** Day ruler: one weekday's verified hours on a 07–18 measuring axis, plus readable text. `schedule` = the
+ *  page's operational snapshot (09.6B) — never a module constant. */
+export function DayRuler({ weekday, caption, nowMinutes, schedule }: { weekday: IsoWeekday; caption?: string; nowMinutes?: number; schedule: ScheduleSource }) {
+  const slots = slotsFor(weekday, schedule);
   return (
     <figure className={s.ruler}>
       {caption ? <figcaption className={s.rulerCaption}>{caption}</figcaption> : null}
@@ -175,27 +176,28 @@ function SlotList({ slots }: { slots: DaySlot[] }) {
   );
 }
 
-/** Week view: verified Monday–Friday hours. Days without verified data are not listed (absence is not a claim). */
-export function WeekHours({ today }: { today?: IsoWeekday }) {
+/** Week view: verified Monday–Friday hours. Days without verified data are not listed (absence is not a claim).
+ *  `schedule` = the page's operational snapshot (09.6B); the rows come from `weekHoursView` (also used by
+ *  the shadow comparison). */
+export function WeekHours({ today, schedule }: { today?: IsoWeekday; schedule: ScheduleSource }) {
+  const view = weekHoursView(schedule);
   return (
     <div className={s.week}>
-      {WEEKDAYS.map((d) => (
+      {WEEKDAYS.map((d, i) => (
         <div key={d.id} className={s.weekRow} data-today={today === d.id ? "" : undefined}>
           <p className={s.weekDay}>
             {d.name}
             {today === d.id ? <span className={s.todayTag}>heute</span> : null}
           </p>
           <p className={s.weekBlocks}>
-            {blocksFor(d.id).map((b) => (
+            {view[i].blocks.map((b) => (
               <span key={b.start} className={s.time}>
                 {b.start}–{b.end}
               </span>
             ))}
           </p>
           <ul className={s.weekNotes}>
-            {slotsFor(d.id)
-              .filter((x) => x.type !== "GENERAL")
-              .map((x) => (
+            {view[i].notes.map((x) => (
                 <li key={x.start}>
                   <span className={`${s.typeTag} ${TYPE_CLASS[x.type] ?? ""}`}>{x.label}</span> {x.start}–{x.end}
                 </li>

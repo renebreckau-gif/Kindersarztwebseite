@@ -5,7 +5,7 @@ import { Story } from "@/site/discovery/story";
 import { PageBackNav } from "@/site/blocks";
 import u from "@/site/pages.module.css";
 import d from "@/site/discovery/chapter.module.css";
-import { resolvePuls } from "@/content/puls";
+import { loadPublicPage } from "@/site/operational";
 import { MEIN_ARZTBESUCH, chapterView, discoveryReviewMode } from "@/content/discovery";
 import { RELEASE } from "@/content/release";
 
@@ -23,7 +23,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Search 
 
 export default async function MeinArztbesuch({ searchParams }: { searchParams: Search }) {
   const q = await searchParams;
-  const puls = resolvePuls(q);
+  const { puls } = await loadPublicPage(q);
   const mode = discoveryReviewMode(q.vorschau);
   const view = chapterView(MEIN_ARZTBESUCH, mode !== null);
   const c = view.chapter;

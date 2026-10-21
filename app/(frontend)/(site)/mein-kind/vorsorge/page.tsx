@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageFrame, InternalNote } from "@/site/chrome";
 import { PageIntro, Section, SourceList, CallAction, Prose } from "@/site/blocks";
 import u from "@/site/pages.module.css";
-import { resolvePuls } from "@/content/puls";
+import { loadPublicPage } from "@/site/operational";
 import { EXAMINATIONS, AGE_PARAM, ageFromQuery, topicBack, ageContextLine } from "@/content/site";
 import { U10, publicDecisionStatement } from "@/content/examinations";
 
@@ -18,7 +18,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Search 
 
 export default async function Vorsorge({ searchParams }: { searchParams: Search }) {
   const q = await searchParams;
-  const puls = resolvePuls(q);
+  const { puls } = await loadPublicPage(q);
   // valid ?alter= only; anything else falls back to the generic page (never displayed)
   const age = ageFromQuery(q[AGE_PARAM]);
   return (

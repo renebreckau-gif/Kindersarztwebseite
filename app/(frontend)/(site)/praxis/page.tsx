@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageFrame } from "@/site/chrome";
 import { PageIntro, Section, BigLinks, PlaceholderFrame, CallAction } from "@/site/blocks";
 import u from "@/site/pages.module.css";
-import { resolvePuls } from "@/content/puls";
+import { loadPublicPage } from "@/site/operational";
 import { publicAddress } from "@/content/practice";
 
 export const metadata: Metadata = {
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function Praxis({ searchParams }: { searchParams: Search }) {
-  const puls = resolvePuls(await searchParams);
+  const { puls } = await loadPublicPage(await searchParams);
   const addr = publicAddress();
   return (
     <PageFrame current="praxis" puls={puls}>

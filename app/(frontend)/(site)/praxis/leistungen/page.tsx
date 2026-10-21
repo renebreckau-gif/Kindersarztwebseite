@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageFrame, InternalNote } from "@/site/chrome";
 import { PageIntro, Section, BigLinks, CallAction } from "@/site/blocks";
 import u from "@/site/pages.module.css";
-import { resolvePuls } from "@/content/puls";
+import { loadPublicPage } from "@/site/operational";
 import { NEEDS } from "@/content/site";
 
 export const metadata: Metadata = {
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function Leistungen({ searchParams }: { searchParams: Search }) {
-  const puls = resolvePuls(await searchParams);
+  const { puls } = await loadPublicPage(await searchParams);
   return (
     <PageFrame current="praxis" puls={puls}>
       <PageIntro

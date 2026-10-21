@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PageFrame } from "@/site/chrome";
 import { PageIntro } from "@/site/blocks";
 import u from "@/site/pages.module.css";
-import { resolvePuls } from "@/content/puls";
+import { loadPublicPage } from "@/site/operational";
 import { CHAPTERS, chapterCard, discoveryReviewMode } from "@/content/discovery";
 
 export const metadata: Metadata = {
@@ -15,7 +15,7 @@ type Search = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function Entdecken({ searchParams }: { searchParams: Search }) {
   const q = await searchParams;
-  const puls = resolvePuls(q);
+  const { puls } = await loadPublicPage(q);
   const mode = discoveryReviewMode(q.vorschau);
   const preview = mode === "QUERY";
   return (

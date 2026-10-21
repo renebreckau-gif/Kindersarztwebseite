@@ -9,18 +9,20 @@ import { InternalNote } from "./chrome";
 import { NEEDS } from "@/content/site";
 import { PRACTICE, publicAddress } from "@/content/practice";
 import { WEEKDAYS, blocksFor } from "@/content/schedule";
+import type { PublicOperationalSnapshot } from "@/data/public-operational";
 import { homeChapterAnnouncements } from "@/content/notices";
 import { DOCTORS, publicPeople } from "@/content/people";
 import { formatGermanDate, weekdayOf } from "@/domain/time.ts";
 import type { PulsView } from "@/content/puls";
 import type { IsoWeekday } from "@/domain/time.ts";
 
-/** `excludeAnnouncementIds`: the notice already highlighted in the hero is not repeated here (10.0A). */
-export function HomeChapters({ puls, excludeAnnouncementIds = [] }: { puls: PulsView; excludeAnnouncementIds?: readonly string[] }) {
+/** `excludeAnnouncementIds`: the notice already highlighted in the hero is not repeated here (10.0A).
+ *  `snapshot`: the page's ONE operational snapshot (09.6B) — schedule and notices come from it. */
+export function HomeChapters({ puls, snapshot, excludeAnnouncementIds = [] }: { puls: PulsView; snapshot: PublicOperationalSnapshot; excludeAnnouncementIds?: readonly string[] }) {
   const today = puls.result.evaluatedAt.localDate;
   const wd = weekdayOf(today);
   const minutes = Number(puls.result.evaluatedAt.localTime.slice(0, 2)) * 60 + Number(puls.result.evaluatedAt.localTime.slice(3, 5));
-  const notices = homeChapterAnnouncements(today, excludeAnnouncementIds);
+  const notices = homeChapterAnnouncements(today, excludeAnnouncementIds, snapshot.announcements);
   const doctors = publicPeople(DOCTORS, today, puls.mode === "PREVIEW");
   const addr = publicAddress();
   const weekday = WEEKDAYS.find((d) => d.id === wd);
@@ -43,7 +45,7 @@ export function HomeChapters({ puls, excludeAnnouncementIds = [] }: { puls: Puls
         </div>
         <div className={s.todayHours}>
           {weekday ? (
-            <DayRuler weekday={wd as IsoWeekday} caption={`Reguläre Sprechzeiten am ${weekday.name}`} nowMinutes={minutes} />
+            <DayRuler weekday={wd as IsoWeekday} caption={`Reguläre Sprechzeiten am ${weekday.name}`} nowMinutes={minutes} schedule={snapshot.puls} />
           ) : (
             <p className={s.todayNote}>Die regulären Sprechzeiten finden Sie in der Wochenübersicht.</p>
           )}
@@ -51,7 +53,7 @@ export function HomeChapters({ puls, excludeAnnouncementIds = [] }: { puls: Puls
             {WEEKDAYS.map((d) => (
               <li key={d.id} data-today={d.id === wd ? "" : undefined}>
                 <span className={s.stripDay}>{d.short}</span>
-                <span className={s.stripTimes}>{blocksFor(d.id).map((b) => `${b.start}–${b.end}`).join(" · ")}</span>
+                <span className={s.stripTimes}>{blocksFor(d.id, snapshot.puls).map((b) => `${b.start}–${b.end}`).join(" · ")}</span>
               </li>
             ))}
           </ol>

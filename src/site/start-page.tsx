@@ -1,6 +1,6 @@
 // The start page composition (approved Phase 06.2 hero, locked) — shared by the public route `/`
 // and the staging-only review view `/review/startseite` (10.0A), so a review screenshot shows the
-// REAL page. Data is passed in: the public route gives static content only.
+// REAL page. Data is passed in: the public route gives ONE operational snapshot (static in 09.6B).
 //
 // Hierarchy (customer decision Variant B, docs/reviews/homepage-feedback-2026-10.md):
 //   1. PRAXIS PULS (status)  2. contact — Anrufen, Notfall, then E-Mail as a quiet secondary
@@ -16,6 +16,7 @@ import { HomeChapters } from "@/site/home";
 import { HomepageHighlightCard } from "@/site/homepage-highlight";
 import { highlightedAnnouncementIds, type HomepageHighlight } from "@/content/homepage-highlight";
 import type { PulsView } from "@/content/puls";
+import type { PublicOperationalSnapshot } from "@/data/public-operational";
 import { PRIMARY } from "@/content/site";
 import { PRACTICE } from "@/content/practice";
 import { artworkForDate } from "@/content/artworks";
@@ -25,7 +26,7 @@ const ROUTES = { heute: "/heute", "mein-kind": "/mein-kind", praxis: "/praxis", 
 /** Secondary contact from the practice master data (F17) — never hard-coded, never pre-filled. */
 const EMAIL = { href: `mailto:${PRACTICE.email.value}`, label: "E-Mail schreiben an die Kinderarztpraxis" };
 
-export function StartPage({ puls, highlight, tag }: { puls: PulsView; highlight: HomepageHighlight | null; tag?: string | null }) {
+export function StartPage({ puls, snapshot, highlight, tag }: { puls: PulsView; snapshot: PublicOperationalSnapshot; highlight: HomepageHighlight | null; tag?: string | null }) {
   return (
     <div className={s.page}>
       <a className={s.skip} href="#inhalt">
@@ -52,7 +53,7 @@ export function StartPage({ puls, highlight, tag }: { puls: PulsView; highlight:
           <HomepageHighlightCard highlight={highlight} />
         </HeroStage>
         <PreviewBanner puls={puls} />
-        <HomeChapters puls={puls} excludeAnnouncementIds={highlightedAnnouncementIds(highlight)} />
+        <HomeChapters puls={puls} snapshot={snapshot} excludeAnnouncementIds={highlightedAnnouncementIds(highlight)} />
       </main>
       <SiteFooter />
       <SiteMenu />

@@ -79,21 +79,33 @@ export interface DaySlot {
   label: string;
 }
 
-/** Verified weekly hours for one weekday, with consultation-type labels. */
-export function slotsFor(weekday: IsoWeekday): DaySlot[] {
-  return RULES.filter((x) => x.weekday === weekday && x.verification.status === "VERIFIED_CURRENT").map((x) => ({
-    start: x.start,
-    end: x.end,
-    type: x.consultationType,
-    label: CONSULTATION_TYPES.find((t) => t.code === x.consultationType)?.label ?? "",
-  }));
+/**
+ * The schedule part of an operational snapshot (09.6B): the weekly-hours views never read a module
+ * constant — the caller supplies the snapshot's schedule + consultation types (static today; the
+ * same helpers serve the Payload shadow comparison).
+ */
+export type ScheduleSource = Pick<PulsData, "schedule" | "consultationTypes">;
+
+const minutes = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
+
+/** Verified weekly hours for one weekday, with consultation-type labels from the SAME snapshot. */
+export function slotsFor(weekday: IsoWeekday, src: ScheduleSource): DaySlot[] {
+  return (src.schedule?.rules ?? [])
+    .filter((x) => x.weekday === weekday && x.verification.status === "VERIFIED_CURRENT")
+    .sort((a, b) => minutes(a.start) - minutes(b.start))
+    .map((x) => ({
+      start: x.start,
+      end: x.end,
+      type: x.consultationType,
+      label: src.consultationTypes.find((t) => t.code === x.consultationType)?.label ?? "",
+    }));
 }
 
 /** "Di, Mi, Do, Fr 08:00–10:00" — one line per non-general consultation type, from the data. */
-export function typeSummary(type: ConsultationTypeCode): string[] {
+export function typeSummary(type: ConsultationTypeCode, src: ScheduleSource): string[] {
   const byTime = new Map<string, string[]>();
   for (const d of WEEKDAYS) {
-    for (const x of slotsFor(d.id).filter((s) => s.type === type)) {
+    for (const x of slotsFor(d.id, src).filter((s) => s.type === type)) {
       const k = `${x.start}–${x.end}`;
       byTime.set(k, [...(byTime.get(k) ?? []), d.short]);
     }
@@ -102,12 +114,22 @@ export function typeSummary(type: ConsultationTypeCode): string[] {
 }
 
 /** Merged opening blocks (e.g. 08:00–10:00 + 10:00–11:00 → 08:00–11:00). */
-export function blocksFor(weekday: IsoWeekday): { start: string; end: string }[] {
+export function blocksFor(weekday: IsoWeekday, src: ScheduleSource): { start: string; end: string }[] {
   const out: { start: string; end: string }[] = [];
-  for (const s of slotsFor(weekday)) {
+  for (const s of slotsFor(weekday, src)) {
     const last = out.at(-1);
     if (last && last.end === s.start) last.end = s.end;
     else out.push({ start: s.start, end: s.end });
   }
   return out;
+}
+
+/** What WeekHours renders per weekday (also the shadow comparison's week representation). */
+export interface WeekHoursDay {
+  weekday: IsoWeekday;
+  blocks: { start: string; end: string }[];
+  notes: DaySlot[];
+}
+export function weekHoursView(src: ScheduleSource, days: readonly { id: IsoWeekday }[] = WEEKDAYS): WeekHoursDay[] {
+  return days.map((d) => ({ weekday: d.id, blocks: blocksFor(d.id, src), notes: slotsFor(d.id, src).filter((x) => x.type !== "GENERAL") }));
 }
