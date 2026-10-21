@@ -33,6 +33,8 @@ import { closedTodayDraft, earlyCloseDraft } from "./today.ts";
 import { plannedClosureDraft } from "./planned.ts";
 import { acuteBaselineDraft, acuteTodayDraft, type AcuteBaselineInput, type AcuteTodayInput, type BaselineDraft } from "./acute.ts";
 import { specialDayDraft, type SpecialDayInput } from "./special-day.ts";
+import { PLAN_STALE, weeklyPlanDraft, type WeeklyDraft, type WeeklyPlanInput } from "./weekly-plan.ts";
+import { newRuleId } from "../../domain/weekly-plan.ts";
 import type { Blocked, ClosedTodayInput, Draft, EarlyCloseInput, PlannedClosureInput, ReadyDraft, WorkflowKind } from "./types.ts";
 
 export type WorkflowRequest =
@@ -497,6 +499,82 @@ export async function confirmHolidayPolicy(
 export async function commitHolidayPolicy(payload: Payload, req: PayloadRequest, mode: HolidayPolicyMode, first: boolean): Promise<void> {
   await withContext(req, { [SERVER_CONTEXT.HOLIDAY_POLICY]: true, ...(first ? { [SERVER_CONTEXT.AUDIT_OPERATION]: "VERIFY" } : {}) }, () =>
     payload.updateGlobal({ slug: "holidayCalendar", data: { policy: mode } as never, req, user: req.user, overrideAccess: false, depth: 0, context: req.context }),
+  );
+}
+
+// ---------------------------------------------------------------- Regelmäßige Sprechzeiten (09.5I)
+
+export type WeeklyPlanResult =
+  | { ok: true; changeSetId: string; mode: Extract<WeeklyDraft, { ok: true }>["mode"] }
+  | { ok: false; code: "UNAUTHENTICATED" | "NOT_ALLOWED" | "STALE" | "BLOCKED" | "FAILED"; message: string };
+
+export const WEEKLY_DOCTOR_ONLY = "Regelmäßige Sprechzeiten können nur ärztlich geändert werden.";
+
+/**
+ * DOCTOR only (checked here, by the collection access AND by the guard hook): session account →
+ * server changeSetId → transaction → re-read the COMPLETE dataset → dataset fingerprint (schedule,
+ * consultation types, holidays + policy, exceptions, closures — the ACUTE baseline is part of the
+ * schedule) → rebuilt draft (server date) → one schedule write through the trusted context → audit
+ * (same transaction) → commit. First / renewed confirmation VERIFY, change of a confirmed week UPDATE.
+ * No quick undo: correction = another physician edit; the audit stays append-only.
+ */
+export async function confirmWeeklyPlan(
+  payload: Payload,
+  user: (StaffUserLike & Record<string, unknown>) | null | undefined,
+  input: WeeklyPlanInput,
+  previewFingerprint: string,
+  confirmed: boolean,
+  now: Date = new Date(),
+): Promise<WeeklyPlanResult> {
+  const role = activeRole(user);
+  if (!user || !role) return { ok: false, code: "UNAUTHENTICATED", message: "Bitte melden Sie sich erneut an." };
+  if (role !== "DOCTOR") return { ok: false, code: "NOT_ALLOWED", message: WEEKLY_DOCTOR_ONLY };
+  if (!confirmed) return { ok: false, code: "BLOCKED", message: "Bitte bestätigen Sie den Wochenplan ausdrücklich." };
+  const changeSetId = randomUUID();
+  const req = await createLocalReq({ user: user as never, context: { [SERVER_CONTEXT.CHANGE_SET]: changeSetId } }, payload);
+  await initTransaction(req);
+  try {
+    const data = await new PayloadPracticeRepository(payload as unknown as PayloadReader, req).getPulsData();
+    const fingerprint = datasetFingerprint(data);
+    if (fingerprint !== previewFingerprint) {
+      await killTransaction(req);
+      return { ok: false, code: "STALE", message: PLAN_STALE };
+    }
+    const draft = weeklyPlanDraft(data, berlinToday(now), input, fingerprint);
+    if (!draft.ok) {
+      await killTransaction(req);
+      return { ok: false, code: "BLOCKED", message: draft.message };
+    }
+    await commitWeeklyPlan(payload, req, draft);
+    await commitTransaction(req);
+    return { ok: true, changeSetId, mode: draft.mode };
+  } catch (e) {
+    await killTransaction(req);
+    const err = e as { isPublic?: boolean; message?: string } | null;
+    return { ok: false, code: "FAILED", message: err && typeof err === "object" && err.isPublic && typeof err.message === "string" ? err.message : "Der Wochenplan konnte nicht gespeichert werden. Es wurde nichts verändert." };
+  }
+}
+
+/**
+ * The physician weekly-plan write inside the given transaction (exported for the rollback tests).
+ * Stored rows are carried over EXACTLY (ACUTE rows and unchanged regular rows, by rule id); new or
+ * changed regular rows get a server-generated id (weekly-<weekday>-<random>), never one in use.
+ */
+export async function commitWeeklyPlan(payload: Payload, req: PayloadRequest, draft: Extract<WeeklyDraft, { ok: true }>): Promise<void> {
+  const schedule = (await payload.find({ collection: "weeklySchedules", sort: "-updatedAt", limit: 1, depth: 0, overrideAccess: true, req })).docs[0] as (WeeklyScheduleDoc & { id: number | string }) | undefined;
+  if (!schedule) throw new Error("Es ist kein Wochenplan hinterlegt.");
+  const byId = new Map(schedule.rules.map((r) => [r.ruleId, r]));
+  const taken = new Set(schedule.rules.map((r) => r.ruleId));
+  const placeholder = verificationToDoc(previewVerification(draft.today));
+  const regular: RuleDoc[] = draft.regular.map(({ rule, keep }) =>
+    keep
+      ? byId.get(rule.id)!
+      : { ruleId: newRuleId(rule.weekday, taken, () => randomUUID().slice(0, 8)), weekday: String(rule.weekday), start: rule.start, end: rule.end, consultationType: rule.consultationType, validFrom: null, validUntil: null, publicNote: null, verification: placeholder },
+  );
+  const rules = [...regular, ...schedule.rules.filter((r) => r.consultationType === "ACUTE")];
+  const context = { [SERVER_CONTEXT.WEEKLY_SCHEDULE]: true, ...(draft.audit === "VERIFY" ? { [SERVER_CONTEXT.AUDIT_OPERATION]: "VERIFY" } : {}) };
+  await withContext(req, context, () =>
+    payload.update({ collection: "weeklySchedules", id: schedule.id, data: { rules, confirmedClosedWeekdays: draft.closed.map(String) } as never, req, user: req.user, overrideAccess: false, depth: 0, context: req.context }),
   );
 }
 

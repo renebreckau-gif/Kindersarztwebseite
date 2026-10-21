@@ -466,7 +466,7 @@ Shared fields for F35–F39:
 - **RISK IF INCORRECT:** HIGH — families arrive at a closed practice
 - **REQUIRED CONFIRMATION:** Practice sign-off before launch (LB-00) and before PRAXIS PULS uses them
 - **FEATURES AFFECTED:** Sprechzeiten, PRAXIS PULS, structured data
-- **NOTES:** Single source, internally consistent, actively maintained page, no contradiction.
+- **NOTES:** Single source, internally consistent, actively maintained page, no contradiction. Since Phase 09.5I a technical physician weekly-schedule workflow exists in the staff cockpit (`/intern/sprechzeiten`); it changes none of the statuses of F35–F43 — real hours stay governed by their existing confirmation.
 
 | ID | Day | CURRENT VALUE / CLAIM |
 |---|---|---|

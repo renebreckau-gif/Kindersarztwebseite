@@ -215,11 +215,10 @@ describe("runtime after bootstrap", { skip: skipDb }, () => {
     const cal = await http("/api/globals/holidayCalendar", { method: "POST", cookie: admin, body: { policy: "CLOSED_ON_PUBLIC_HOLIDAYS", policyVerification: FAKE } });
     assert.equal(cal.status, 200, cal.body);
     assert.equal(doc<{ result: { policyVerification: { status: string } } }>(cal.json).result.policyVerification.status, "TO_BE_CONFIRMED");
-    const ds = await http("/api/weeklySchedules", { method: "POST", cookie: doctor, body: schedule });
-    assert.equal(ds.status, 201, ds.body);
-    const s = doc<{ doc: { verification: { verifiedBy: string }; rules: { verification: { verifiedBy: string } }[] } }>(ds.json).doc;
-    assert.equal(s.verification.verifiedBy, "Test DOCTOR (künstlich), Ärztin / Arzt (Praxis Cockpit)");
-    assert.equal(s.rules[0].verification.verifiedBy, s.verification.verifiedBy);
+    // 09.5I: no generic weekly-plan write, not even by a DOCTOR — only the trusted physician workflows
+    // (step 24 proves the generated provenance of the weekly-plan workflow).
+    assert.equal((await http("/api/weeklySchedules", { method: "POST", cookie: doctor, body: schedule })).status, 403, "DOCTOR generic schedule");
+    assert.equal((await http("/api/weeklySchedules", { method: "POST", cookie: doctor, body: { ...schedule, praxisWeeklyScheduleWrite: true, context: { praxisWeeklyScheduleWrite: true } } })).status, 403, "context cannot be sent");
     const id = doc<{ id: number }>((await payload.find({ collection: "closures", where: { recordId: { equals: "it-urlaub" } }, overrideAccess: true })).docs[0]).id;
     assert.equal((await http(`/api/closures/${id}`, { method: "DELETE", cookie: admin })).status, 403, "nothing deletable, not even by ADMIN");
     assert.equal(await count("closures", { recordId: { equals: "it-urlaub" } }), 1);

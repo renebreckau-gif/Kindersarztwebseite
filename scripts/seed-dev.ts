@@ -15,6 +15,7 @@ import { randomBytes } from "node:crypto";
 import path from "node:path";
 import { getPayload, type Payload } from "payload";
 import { createFirstAdmin } from "../src/backend/bootstrap.ts";
+import { SERVER_CONTEXT } from "../src/backend/server-context.ts";
 import { docsFromPulsData, announcementToDoc } from "../src/data/payload-mapping.ts";
 import { initialState, pulsDataOf } from "../src/lab/cockpit/model.ts";
 
@@ -65,7 +66,9 @@ try {
     const data = initialState().data;
     const docs = docsFromPulsData(pulsDataOf(data));
     const as = (user: typeof admin) => ({ user, overrideAccess: false as const });
-    await payload.create({ collection: "weeklySchedules", data: docs.schedule!, ...as(doctor) });
+    // 09.5I: the weekly plan is written only by the physician workflows (no generic create) — the
+    // artificial lab week is imported as a trusted seed with its documented (lab) provenance.
+    await payload.create({ collection: "weeklySchedules", data: docs.schedule!, overrideAccess: true, context: { [SERVER_CONTEXT.SEED]: true } });
     for (const t of docs.consultationTypes) await payload.create({ collection: "consultationTypes", data: t, ...as(doctor) });
     for (const p of docs.replacementPractices) await payload.create({ collection: "replacementPractices", data: p, ...as(doctor) });
     for (const x of docs.exceptions) await payload.create({ collection: "openingHourExceptions", data: x, ...as(staff) });

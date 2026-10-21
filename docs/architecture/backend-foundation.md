@@ -517,6 +517,14 @@ Safety and seeding:
 - **Freshness mapping:** policy freshness reuses category `openingHours` (60-day grace). The mapping keeps a dated confirmation of an explicit-entry policy (so "physician-confirmed" is visible) and drops the default unconfirmed group (static ↔ DB parity). No schema change, no migration.
 - Clean proof: step 23/23 `19-holiday-policy.test.ts`.
 
+### 17.11e Regelmäßige Sprechzeiten (Phase 09.5I, 2026-10-21)
+
+- **Trusted context** `SERVER_CONTEXT.WEEKLY_SCHEDULE` (server code only — never HTTP): replaces the NON-ACUTE rules + closed weekdays; every stored ACUTE rule must be carried over unchanged (same id / shape) and keeps its STORED provenance. The opposite of `ACUTE_BASELINE`; both at once → 400.
+- **REST hardening:** `weeklySchedules` create / update = DOCTOR **and** one of the two trusted workflow contexts (`doctorScheduleWorkflow`). Generic REST / admin-UI writes are refused for every role (403) — previously a DOCTOR could drop ACUTE rules or re-stamp their provenance. The dev seed (`scripts/seed-dev.ts`) imports its artificial week as a trusted seed.
+- **Collection invariant guard** `weeklyScheduleGuardHook` (every write path, before provenance): the SAME pure validator the cockpit uses — `weeklyScheduleProblems` (every weekday resolved, valid non-overlapping intervals, usable non-ACUTE types, unique ids, ACUTE inside the hours and never on a closed day) for the weekly path; `acuteBoundaryProblems` for an acute-baseline write.
+- **Provenance / audit / transaction:** fresh WEEKLY_SCHEDULE provenance (DOCTOR only) for non-ACUTE rules + aggregate; audit via the collection hook in the same `req` transaction (VERIFY through the trusted `AUDIT_OPERATION`, else UPDATE); rollback integration-tested. No schema change, no migration.
+- Clean proof: step 24/24 `20-weekly-plan.test.ts`; step 6 now asserts that a generic DOCTOR schedule POST is refused.
+
 ### 17.12 npm audit (2026-10-13): 16 findings, none fixed by force
 
 | Package (path) | Severity | Reachable here? | Fix |

@@ -4,6 +4,7 @@
 import type { AnnouncementInput } from "./announcement.ts";
 import type { AcuteBaselineInput, AcuteTodayInput } from "./acute.ts";
 import { MAX_SPECIAL_ROWS, type SpecialDayInput } from "./special-day.ts";
+import { MAX_WEEK_ROWS, type WeeklyPlanInput } from "./weekly-plan.ts";
 import { MAX_PERIODS, type ClosedTodayInput, type EarlyCloseInput, type PlannedClosureInput, type PlannedKind, type PublicReason, type ReplacementMode } from "./types.ts";
 
 type Get = (name: string) => string | undefined;
@@ -230,3 +231,38 @@ export function parseReplacement(src: { get: Get }): { practiceName?: string; st
 
 export const REPLACEMENT_PARAM = { practiceName: "name", street: "strasse", postalCode: "plz", city: "ort", phone: "telefon", email: "email", website: "webseite", publicNote: "hinweis" } as const;
 
+
+// ---------------------------------------------------------------- Regelmäßige Sprechzeiten (09.5I)
+
+const WEEK = [1, 2, 3, 4, 5, 6, 7] as const;
+
+/** Seven weekdays: `t<wd>` = offen | geschlossen; rows `w<wd>_<i>_von|_bis|_art`. Nothing else is read. */
+export function parseWeeklyPlan(src: { get: Get }): WeeklyPlanInput {
+  const out = {} as WeeklyPlanInput;
+  for (const wd of WEEK) {
+    const t = src.get(`t${wd}`);
+    const rows: WeeklyPlanInput[1]["rows"] = [];
+    for (let i = 0; i < MAX_WEEK_ROWS; i++) {
+      const row = [src.get(`w${wd}_${i}_von`), src.get(`w${wd}_${i}_bis`), src.get(`w${wd}_${i}_art`)];
+      if (row.every((v) => v === undefined)) continue;
+      rows.push({ start: trimmed(row[0]), end: trimmed(row[1]), type: trimmed(row[2]) });
+    }
+    out[wd] = { state: t === "offen" ? "OPEN" : t === "geschlossen" ? "CLOSED" : undefined, rows };
+  }
+  return out;
+}
+
+export function weeklyPlanQuery(i: WeeklyPlanInput): URLSearchParams {
+  const p = new URLSearchParams();
+  for (const wd of WEEK) {
+    const d = i[wd];
+    if (d.state) p.set(`t${wd}`, d.state === "OPEN" ? "offen" : "geschlossen");
+    if (d.state !== "OPEN") continue;
+    d.rows.forEach((r, n) => {
+      p.set(`w${wd}_${n}_von`, r.start);
+      p.set(`w${wd}_${n}_bis`, r.end);
+      p.set(`w${wd}_${n}_art`, r.type);
+    });
+  }
+  return p;
+}

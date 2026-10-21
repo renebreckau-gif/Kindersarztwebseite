@@ -6,7 +6,7 @@ import type { CollectionBeforeChangeHook, CollectionConfig, Field, GlobalConfig 
 import type { ConfirmableKind } from "../domain/governance.ts";
 import { ACCESS, activeRole, adminOnly, adminOrDoctorHolidayPolicy, signedIn } from "./access.ts";
 import { CONSULTATION_TYPE_OPTIONS, localDate, localTime, recordId, verification } from "./fields.ts";
-import { acuteExceptionHook, announcementShapeHook, auditHook, globalAuditHook, holidayPolicyHook, provenanceHook, publishGuardHook, replacementGuardHook, retiredRecordGuard, staffCreateGuard, staffOperationGuard } from "./hooks.ts";
+import { acuteExceptionHook, announcementShapeHook, auditHook, globalAuditHook, holidayPolicyHook, provenanceHook, weeklyScheduleGuardHook, publishGuardHook, replacementGuardHook, retiredRecordGuard, staffCreateGuard, staffOperationGuard } from "./hooks.ts";
 import { ANNOUNCEMENT_DEFAULT_PRIORITY, ANNOUNCEMENT_TEXT_MAX, ANNOUNCEMENT_TITLE_MAX } from "../domain/announcements.ts";
 import { isLifecycleWrite, RejectedError } from "./server-context.ts";
 
@@ -148,7 +148,8 @@ export const WeeklySchedules = tracked(
     },
     { name: "confirmedClosedWeekdays", label: "Bestätigt geschlossene Wochentage", type: "select", hasMany: true, options: WEEKDAYS },
   ],
-  { labels: { singular: "Wochenplan", plural: "Wochenpläne" } },
+  // 09.5I: written ONLY by the trusted physician workflows (acute baseline / regular week) — guard first.
+  { labels: { singular: "Wochenplan", plural: "Wochenpläne" }, validate: [weeklyScheduleGuardHook] },
 );
 
 export const ConsultationTypes = tracked(

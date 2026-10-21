@@ -2,7 +2,7 @@
 // UI hiding is never the only protection. No role gets a bypass around server validation.
 
 import { STAFF_ROLES, type StaffRole } from "../domain/governance.ts";
-import { isHolidayPolicyWrite, replacementVerifyMode } from "./server-context.ts";
+import { isAcuteBaselineWrite, isHolidayPolicyWrite, isWeeklyScheduleWrite, replacementVerifyMode } from "./server-context.ts";
 
 /** Minimal shape of the authenticated Payload user (the `staff` auth collection). */
 export interface StaffUserLike {
@@ -36,6 +36,13 @@ export const adminOrDoctorHolidayPolicy = ({ req }: ArgsLike) => {
   return role === "ADMIN" || (role === "DOCTOR" && isHolidayPolicyWrite(req.context));
 };
 
+/**
+ * 09.5I weekly schedule: DOCTOR only, and only through one of the two trusted physician workflows
+ * (server context, never reachable over HTTP) — 09.5E acute baseline or 09.5I regular week. A generic
+ * REST / admin-UI write is refused for every role (it could remove ACUTE rules or re-stamp them).
+ */
+export const doctorScheduleWorkflow = ({ req }: ArgsLike) => activeRole(req.user) === "DOCTOR" && (isAcuteBaselineWrite(req.context) || isWeeklyScheduleWrite(req.context));
+
 export const adminOrDoctorVerification = ({ req }: ArgsLike) => {
   const role = activeRole(req.user);
   return role === "ADMIN" || (role === "DOCTOR" && replacementVerifyMode(req.context) !== undefined);
@@ -56,7 +63,7 @@ export const adminOrSelf = ({ req, id }: ArgsLike & { id?: string | number }) =>
  */
 export const ACCESS = {
   staff: { read: adminOrSelf, create: adminOnly, update: adminOrSelf, delete: never },
-  weeklySchedules: { read: signedIn, create: doctorOnly, update: doctorOnly, delete: never },
+  weeklySchedules: { read: signedIn, create: doctorScheduleWorkflow, update: doctorScheduleWorkflow, delete: never },
   consultationTypes: { read: signedIn, create: doctorOnly, update: doctorOnly, delete: never },
   openingHourExceptions: { read: signedIn, create: signedIn, update: signedIn, delete: never },
   closures: { read: signedIn, create: signedIn, update: signedIn, delete: never },

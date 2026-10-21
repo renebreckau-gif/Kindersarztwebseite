@@ -1269,3 +1269,52 @@ body.intern {
   }
 }
 
+/* ---- 09.5I Regelmäßige Sprechzeiten: one weekday per card; rows hidden while "Geschlossen" is chosen ---- */
+.cp-practice-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.cp-week-form {
+  display: grid;
+  gap: var(--space-4);
+}
+.cp-week-edit {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.cp-week-rows {
+  display: grid;
+  gap: var(--space-3);
+}
+.cp-week-edit:has(input[value="geschlossen"]:checked) .cp-week-rows {
+  display: none;
+}
+.cp-week-remove,
+.cp-week-add {
+  justify-self: start;
+}
+.cp-week-badge {
+  margin-left: var(--space-2);
+  vertical-align: middle;
+}
+.cp-week-day .cp-hours {
+  display: grid;
+  gap: var(--space-1, 0.25rem);
+  font-size: 1rem;
+}
+.cp-week-flag {
+  font-weight: 600;
+}
+.cp-week-line {
+  display: inline;
+}
+@media (max-width: 30em) {
+  .cp-week-remove,
+  .cp-week-add {
+    width: 100%;
+  }
+}

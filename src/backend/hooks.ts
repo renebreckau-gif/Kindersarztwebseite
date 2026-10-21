@@ -7,12 +7,13 @@ import type { Closure, OpeningHourException } from "../domain/content-types.ts";
 import { applyChangeSet, introducedUnknown, SPECIAL_DAY_MARKER } from "../domain/operations.ts";
 import { ACUTE_TODAY_MARKER, acuteExceptionProblem } from "../domain/acute.ts";
 import { announcementShapeProblems, normalizeText } from "../domain/announcements.ts";
-import { closureFromDoc, exceptionFromDoc, verificationToDoc, type ClosureDoc, type ExceptionDoc } from "../data/payload-mapping.ts";
+import { closureFromDoc, exceptionFromDoc, scheduleFromDoc, verificationToDoc, type ClosureDoc, type ExceptionDoc, type RuleDoc, type WeeklyScheduleDoc } from "../data/payload-mapping.ts";
+import { acuteBoundaryProblems, weeklyScheduleProblems } from "../domain/weekly-plan.ts";
 import { activeRole } from "./access.ts";
 import { actorFromUser, auditForWrite, berlinToday, ProvenanceRejected, reviewDueFor, verificationForWrite, withdrawnProvenance, type StaffUserDoc } from "./provenance.ts";
 import { normalizeReplacement, replacementProblems, STRUCTURAL_FIELDS, structuralKey } from "../domain/replacement.ts";
 import { PayloadPracticeRepository, type PayloadReader } from "./payload-repository.ts";
-import { auditOperationOf, changeSetIdOf, isAcuteBaselineWrite, isAcuteTodayWrite, isBootstrap, isHolidayPolicyWrite, isLifecycleWrite, isSpecialDayWrite, isTrustedSeed, RejectedError, replacementVerifyMode, revertOfIn, systemActor } from "./server-context.ts";
+import { auditOperationOf, changeSetIdOf, isAcuteBaselineWrite, isAcuteTodayWrite, isBootstrap, isHolidayPolicyWrite, isLifecycleWrite, isSpecialDayWrite, isTrustedSeed, isWeeklyScheduleWrite, RejectedError, replacementVerifyMode, revertOfIn, systemActor } from "./server-context.ts";
 
 type RuleRow = { ruleId?: string; weekday?: string; start?: string; end?: string; consultationType?: string; validFrom?: string | null; validUntil?: string | null; publicNote?: string | null; verification?: unknown };
 const ruleShape = (r: RuleRow) => JSON.stringify([String(r.weekday), r.start, r.end, r.consultationType, r.validFrom ?? null, r.validUntil ?? null, r.publicNote ?? null]);
@@ -37,6 +38,28 @@ function acuteBaselineRules(data: Record<string, unknown>, originalDoc: Record<s
   });
   if (seen.size !== keep.size) throw new RejectedError("Hier darf nur die Akutsprechstunde geändert werden.", 400);
   return { ...data, rules, verification: originalDoc.verification, confirmedClosedWeekdays: originalDoc.confirmedClosedWeekdays };
+}
+
+/**
+ * 09.5I regular weekly plan (trusted server context only): the NON-ACUTE rules and the closed weekdays
+ * are the physician's new standing week — fresh provenance (WEEKLY_SCHEDULE, the same kind the schedule
+ * aggregate uses) for every regular rule and the aggregate. Every stored ACUTE rule must be carried
+ * over unchanged and keeps its STORED (09.5E) provenance; none may be added, moved or dropped.
+ */
+function weeklyPlanRules(data: Record<string, unknown>, originalDoc: Record<string, unknown> | undefined, generated: ReturnType<typeof verificationToDoc>): Record<string, unknown> {
+  const KEEP_ACUTE = "Die Akutsprechstunde wird hier nicht geändert. Bitte ändern Sie diese im Bereich Akutsprechstunde.";
+  if (!Array.isArray(data.rules) || !Array.isArray(data.confirmedClosedWeekdays)) throw new RejectedError("Der Wochenplan ist unvollständig.", 400);
+  const stored = new Map(((originalDoc?.rules as RuleRow[] | undefined) ?? []).filter((r) => r.consultationType === "ACUTE").map((r) => [String(r.ruleId), r]));
+  const seen = new Set<string>();
+  const rules = (data.rules as RuleRow[]).map((r) => {
+    if (r.consultationType !== "ACUTE") return { ...r, verification: generated };
+    const o = stored.get(String(r.ruleId));
+    if (!o || seen.has(String(r.ruleId)) || ruleShape(o) !== ruleShape(r)) throw new RejectedError(KEEP_ACUTE, 400);
+    seen.add(String(r.ruleId));
+    return { ...r, verification: o.verification };
+  });
+  if (seen.size !== stored.size) throw new RejectedError(KEEP_ACUTE, 400);
+  return { ...data, rules, verification: generated };
 }
 
 /**
@@ -70,6 +93,8 @@ export const provenanceHook =
         throw e;
       }
     }
+    // 09.5I: the trusted regular-week workflow replaces the NON-ACUTE subset (ACUTE kept as stored).
+    if (isWeeklyScheduleWrite(req.context) && kind === "WEEKLY_SCHEDULE") return weeklyPlanRules(data, originalDoc, verificationToDoc(generated));
     // 09.5E: only the trusted acute-baseline workflow (server context) may change the ACUTE subset alone.
     if (isAcuteBaselineWrite(req.context) && kind === "WEEKLY_SCHEDULE") {
       if (!originalDoc) throw new RejectedError("Die Akutsprechstunde braucht einen bestätigten Wochenplan.", 409);
@@ -87,6 +112,35 @@ export const provenanceHook =
     if (Array.isArray(data.rules)) out.rules = data.rules.map((r: Record<string, unknown>) => ({ ...r, verification: verificationToDoc(generated) }));
     return out;
   };
+
+const UNCONFIRMED_DOC = { status: "TO_BE_CONFIRMED" as const, sourceIds: [] };
+
+/**
+ * 09.5I weekly schedule, EVERY write path (cockpit, REST, admin UI): only the two trusted physician
+ * workflows may write it — 09.5E acute baseline (ACUTE subset) or 09.5I regular week (NON-ACUTE
+ * subset), never both at once, DOCTOR only. The stored-to-be document is checked with the SAME pure
+ * validator the cockpit uses: the regular week by `weeklyScheduleProblems` (every weekday resolved,
+ * valid non-overlapping intervals, usable consultation types, ACUTE inside the hours), an acute-baseline
+ * write by the ACUTE boundary. The trusted seed (no account) imports documented data unchanged.
+ */
+export const weeklyScheduleGuardHook: CollectionBeforeChangeHook = async ({ data, req, originalDoc }) => {
+  if (!req.user && isTrustedSeed(req.context)) return data;
+  const weekly = isWeeklyScheduleWrite(req.context);
+  const acute = isAcuteBaselineWrite(req.context);
+  if (weekly && acute) throw new RejectedError("Akutsprechstunde und regelmäßige Sprechzeiten werden getrennt bestätigt.", 400);
+  if (!weekly && !acute) throw new RejectedError("Der Wochenplan wird im Praxis Cockpit unter „Sprechzeiten“ ärztlich bestätigt.", 403);
+  if (activeRole(req.user) !== "DOCTOR") throw new RejectedError("Diese Angabe kann nur eine Ärztin oder ein Arzt bestätigen.", 403);
+  const merged = { ...(originalDoc ?? {}), ...data } as Partial<WeeklyScheduleDoc>;
+  const schedule = scheduleFromDoc({
+    rules: ((merged.rules ?? []) as RuleDoc[]).map((r) => ({ ...r, verification: r.verification ?? UNCONFIRMED_DOC })),
+    confirmedClosedWeekdays: (merged.confirmedClosedWeekdays ?? []).map(String),
+    verification: merged.verification ?? UNCONFIRMED_DOC,
+  });
+  const types = weekly ? (await new PayloadPracticeRepository(req.payload as unknown as PayloadReader, req).getPulsData()).consultationTypes : [];
+  const problems = weekly ? weeklyScheduleProblems(schedule, types, berlinToday()) : acuteBoundaryProblems(schedule);
+  if (problems.length) throw new RejectedError(problems[0].message, 409);
+  return data;
+};
 
 type HolidayRow = { date?: string; name?: string | null };
 const holidayKey = (list: unknown) => JSON.stringify(((list as HolidayRow[] | undefined) ?? []).map((h) => [h.date ?? null, h.name ?? null]));

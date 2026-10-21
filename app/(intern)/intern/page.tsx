@@ -198,12 +198,19 @@ export default async function Intern() {
             ) : (
               <p className="cp-muted">Alles geklärt.</p>
             )}
-            {/* 09.5H: standing practice data — a quiet secondary link, not a daily quick action. */}
-            <p>
-              <Link href="/intern/feiertage" className="cp-text-link">
-                Feiertage und Feiertagsregel
-              </Link>
-            </p>
+            {/* 09.5H / 09.5I: standing practice data — quiet secondary links, not daily quick actions. */}
+            <ul className="cp-practice-links" aria-label="Praxisdaten">
+              <li>
+                <Link href="/intern/sprechzeiten" className="cp-text-link">
+                  Regelmäßige Sprechzeiten
+                </Link>
+              </li>
+              <li>
+                <Link href="/intern/feiertage" className="cp-text-link">
+                  Feiertage und Feiertagsregel
+                </Link>
+              </li>
+            </ul>
           </section>
         </div>
       </div>

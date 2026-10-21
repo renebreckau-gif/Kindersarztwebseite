@@ -65,6 +65,7 @@ export interface CockpitHome {
 export const HORIZON_DAYS = 90;
 export const HOLIDAY_CHECK_DAYS = 60;
 export const SCHEDULE_REVIEW_WARN_DAYS = 30;
+const SCHEDULE_ACTION = { label: "Sprechzeiten prüfen", href: "/intern/sprechzeiten" };
 
 const CLOSURE_TITLE: Record<Closure["kind"], string> = {
   VACATION: "Urlaub",
@@ -186,12 +187,14 @@ export function reviewItems(data: PulsData, today: LocalDate, announcements: Ann
     const due = data.schedule.verification.reviewDue;
     const fresh = evaluateFreshness(data.schedule.verification, today, "openingHours");
     if (fresh === "UNVERIFIED" || fresh === "OUTDATED") {
-      items.push({ id: "schedule-unverified", title: "Wochenplan nicht bestätigt", text: "Die regulären Sprechzeiten sind nicht ärztlich bestätigt. Die Website zeigt deshalb keinen sicheren Status." });
+      items.push({ id: "schedule-unverified", title: "Wochenplan nicht bestätigt", text: "Die regulären Sprechzeiten sind nicht ärztlich bestätigt. Die Website zeigt deshalb keinen sicheren Status.", action: SCHEDULE_ACTION });
     } else if (due && daysBetween(today, due) <= SCHEDULE_REVIEW_WARN_DAYS) {
+      // 09.5I: ONE item for the whole week (never one per weekday), leading to the physician workflow.
       items.push({
         id: "schedule-review",
-        title: "Wochenplan erneut bestätigen",
+        title: "Regelmäßige Sprechzeiten erneut ärztlich bestätigen",
         text: compareDates(due, today) < 0 ? `Die Bestätigung der Sprechzeiten ist seit ${formatGermanDate(due)} abgelaufen.` : `Die Bestätigung der Sprechzeiten läuft am ${formatGermanDate(due)} ab.`,
+        action: SCHEDULE_ACTION,
       });
     }
   }

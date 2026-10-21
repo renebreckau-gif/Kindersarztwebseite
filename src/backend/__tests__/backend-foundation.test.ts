@@ -11,7 +11,7 @@ import { auditHook, holidayPolicyHook, provenanceHook, publishGuardHook } from "
 import { assertNoPatientFields, patientLikeFields } from "../privacy.ts";
 import { actorFromUser, ProvenanceRejected, reviewDueFor, verificationForWrite } from "../provenance.ts";
 import { docsFromPulsData } from "../../data/payload-mapping.ts";
-import { RejectedError } from "../server-context.ts";
+import { RejectedError, SERVER_CONTEXT } from "../server-context.ts";
 import { PULS_DATA } from "../../content/schedule.ts";
 
 const STAFF = { id: 1, name: "Test Team", role: "STAFF", active: true };
@@ -46,7 +46,15 @@ describe("server-side access matrix", () => {
     for (const slug of ["weeklySchedules", "consultationTypes"] as const) {
       assert.equal(ACCESS[slug].update(req(STAFF)), false);
       assert.equal(ACCESS[slug].update(req(ADMIN)), false);
-      assert.equal(ACCESS[slug].update(req(DOCTOR)), true);
+    }
+    assert.equal(ACCESS.consultationTypes.update(req(DOCTOR)), true);
+    // 09.5I: the weekly plan only through a trusted physician workflow — no generic DOCTOR write.
+    const ctx = (k: string) => ({ context: { [k]: true } });
+    for (const op of ["create", "update"] as const) {
+      assert.equal(ACCESS.weeklySchedules[op](req(DOCTOR)), false, `${op} generic`);
+      assert.equal(ACCESS.weeklySchedules[op](req(DOCTOR, ctx(SERVER_CONTEXT.WEEKLY_SCHEDULE))), true, `${op} weekly`);
+      assert.equal(ACCESS.weeklySchedules[op](req(DOCTOR, ctx(SERVER_CONTEXT.ACUTE_BASELINE))), true, `${op} acute`);
+      for (const u of [STAFF, ADMIN]) assert.equal(ACCESS.weeklySchedules[op](req(u, ctx(SERVER_CONTEXT.WEEKLY_SCHEDULE))), false, `${op} ${u.role}`);
     }
     for (const slug of ["openingHourExceptions", "closures", "announcements"] as const) for (const u of [STAFF, DOCTOR, ADMIN]) assert.equal(ACCESS[slug].create(req(u)), true);
     assert.equal(ACCESS.replacementPractices.create(req(STAFF)), false);

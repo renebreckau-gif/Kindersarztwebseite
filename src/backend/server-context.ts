@@ -37,6 +37,12 @@ export const SERVER_CONTEXT = {
   REPLACEMENT_VERIFY: "praxisReplacementVerify",
   /** Phase 09.5H: the physician holiday-policy workflow (policy only — never the holiday dates). */
   HOLIDAY_POLICY: "praxisHolidayPolicyWrite",
+  /**
+   * Phase 09.5I: the physician weekly-plan workflow. The weekly-schedule write replaces the NON-ACUTE
+   * rules and the closed weekdays (fresh physician provenance); every ACUTE rule must be carried over
+   * unchanged and keeps its stored provenance. The opposite of ACUTE_BASELINE — never both at once.
+   */
+  WEEKLY_SCHEDULE: "praxisWeeklyScheduleWrite",
 } as const;
 
 export const isLifecycleWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.LIFECYCLE] === true;
@@ -44,6 +50,7 @@ export const isAcuteBaselineWrite = (ctx: Record<string, unknown> | undefined | 
 export const isAcuteTodayWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.ACUTE_TODAY] === true;
 export const isSpecialDayWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.SPECIAL_DAY] === true;
 export const isHolidayPolicyWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.HOLIDAY_POLICY] === true;
+export const isWeeklyScheduleWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.WEEKLY_SCHEDULE] === true;
 /** The physician replacement action of this write, if the trusted server workflow set one. */
 export function replacementVerifyMode(ctx: Record<string, unknown> | undefined | null): "VERIFY" | "WITHDRAW" | undefined {
   const v = ctx?.[SERVER_CONTEXT.REPLACEMENT_VERIFY];
