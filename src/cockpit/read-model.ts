@@ -6,7 +6,7 @@
 
 import type { Announcement, Closure, OpeningHourException } from "../domain/content-types.ts";
 import { getPracticeStatus, type PracticeStatusResult, type PulsData } from "../domain/practice-status.ts";
-import { announcementExpired, blocks, notExpired, rulesSegments, uncoveredDays } from "../domain/operations.ts";
+import { announcementExpired, blocks, notExpired, rulesSegments, SPECIAL_DAY_MARKER, uncoveredDays } from "../domain/operations.ts";
 import { evaluateFreshness } from "../domain/verification.ts";
 import { decideAnnouncement } from "../domain/publication.ts";
 import { acuteBaselineStatus } from "../domain/acute.ts";
@@ -50,6 +50,8 @@ export interface ReviewItem {
   id: string;
   title: string;
   text: string;
+  /** 09.5F: the workflow that resolves the item (e.g. "Feiertag klären"). */
+  action?: { label: string; href: string };
 }
 
 export interface CockpitHome {
@@ -139,6 +141,8 @@ export function upcomingItems(data: PulsData, announcements: Announcement[], tod
       detail: x.kind === "CLOSED" ? x.publicMessage : blocks(x.intervals.map((i) => ({ start: i.start, end: i.end, type: i.consultationType }))).map((b) => `${b.start}–${b.end}`).join(" und ") + " Uhr",
       active: compareDates(x.startDate, today) <= 0,
       unconfirmed: !verified(x),
+      // 09.5F: only single-date records of the special-day workflow, and only future ones, are editable here.
+      ...(x.reason === SPECIAL_DAY_MARKER && x.startDate === x.endDate && compareDates(x.startDate, today) > 0 ? { editHref: `/intern/sonderzeiten/${encodeURIComponent(x.id)}` } : {}),
     }));
 
   const notices: UpcomingItem[] = announcements
@@ -212,7 +216,14 @@ export function reviewItems(data: PulsData, today: LocalDate, announcements: Ann
     if (compareDates(h, today) < 0 || compareDates(h, until) > 0 || weekdayOf(h) > 5) continue;
     const r = getPracticeStatus(zonedToInstant(h, "12:00"), data);
     if (r.reason === "HOLIDAY_WITHOUT_RULE" || r.reason === "HOLIDAY_POLICY_UNVERIFIED") {
-      items.push({ id: `holiday-${h}`, title: `Feiertag ${formatGermanDate(h)} ungeklärt`, text: "Für diesen Feiertag ist nicht eingetragen, ob die Praxis geschlossen ist. Die Website kann an diesem Tag keinen klaren Status anzeigen." });
+      // PulsData carries holiday DATES only — no name is invented.
+      items.push({
+        id: `holiday-${h}`,
+        title: `Feiertag ${formatGermanDate(h)} ungeklärt`,
+        text: "Für diesen Feiertag ist nicht eingetragen, ob die Praxis geschlossen ist. Die Website kann an diesem Tag keinen klaren Status anzeigen.",
+        // Today is not planned here (09.5F); "Heute geschlossen" covers it.
+        ...(compareDates(h, today) > 0 ? { action: { label: "Feiertag klären", href: `/intern/sonderzeiten?datum=${h}` } } : {}),
+      });
     }
   }
 

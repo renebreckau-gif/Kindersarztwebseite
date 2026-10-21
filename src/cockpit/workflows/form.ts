@@ -3,6 +3,7 @@
 
 import type { AnnouncementInput } from "./announcement.ts";
 import type { AcuteBaselineInput, AcuteTodayInput } from "./acute.ts";
+import { MAX_SPECIAL_ROWS, type SpecialDayInput } from "./special-day.ts";
 import { MAX_PERIODS, type ClosedTodayInput, type EarlyCloseInput, type PlannedClosureInput, type PlannedKind, type PublicReason, type ReplacementMode } from "./types.ts";
 
 type Get = (name: string) => string | undefined;
@@ -176,4 +177,37 @@ export function parseAcuteToday(src: { get: Get }): AcuteTodayInput {
 export function acuteTodayQuery(i: AcuteTodayInput): string {
   if (i.mode === "CANCEL") return "modus=entfaellt";
   return new URLSearchParams({ modus: "aendern", von: i.start ?? "", bis: i.end ?? "" }).toString();
+}
+
+// ---------------------------------------------------------------- Sonderöffnungszeiten (09.5F)
+
+/** Date, mode, interval rows (z0_von / z0_bis / z0_art …) and the optional note — nothing else. */
+export function parseSpecialDay(src: { get: Get }): SpecialDayInput {
+  const rows: SpecialDayInput["rows"] = [];
+  for (let i = 0; i < MAX_SPECIAL_ROWS; i++) {
+    const row = [src.get(`z${i}_von`), src.get(`z${i}_bis`), src.get(`z${i}_art`)];
+    if (row.every((v) => v === undefined)) continue;
+    rows.push({ start: trimmed(row[0]), end: trimmed(row[1]), type: trimmed(row[2]) });
+  }
+  const art = src.get("art");
+  const eintrag = src.get("eintrag");
+  return {
+    ...(eintrag !== undefined ? { recordId: RECORD_ID.test(eintrag) ? eintrag : "" } : {}),
+    date: trimmed(src.get("datum")),
+    mode: art === "geschlossen" ? "CLOSED" : art === "geaendert" ? "SPECIAL" : undefined,
+    rows,
+    message: src.get("hinweis") ?? undefined,
+  };
+}
+
+export function specialDayQuery(i: SpecialDayInput): string {
+  const p = new URLSearchParams({ datum: i.date });
+  if (i.mode) p.set("art", i.mode === "CLOSED" ? "geschlossen" : "geaendert");
+  i.rows.forEach((r, n) => {
+    p.set(`z${n}_von`, r.start);
+    p.set(`z${n}_bis`, r.end);
+    p.set(`z${n}_art`, r.type);
+  });
+  if (i.message) p.set("hinweis", i.message);
+  return p.toString();
 }

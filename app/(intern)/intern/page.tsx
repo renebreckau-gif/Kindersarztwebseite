@@ -27,6 +27,7 @@ const REAL_ACTIONS = [
   { href: "/intern/heute/geschlossen", label: "Heute geschlossen" },
   { href: "/intern/urlaub", label: "Urlaub eintragen" },
   { href: "/intern/hinweis", label: "Hinweis veröffentlichen" },
+  { href: "/intern/sonderzeiten", label: "Sonderöffnungszeiten" },
 ];
 const PROTOTYPE_ACTIONS: { href: string; label: string }[] = [];
 
@@ -185,6 +186,11 @@ export default async function Intern() {
                     <li key={c.id} className="cp-check-item">
                       <h3 className="cp-h3">{c.title}</h3>
                       <p>{c.text}</p>
+                      {c.action ? (
+                        <Link href={c.action.href} className="cp-btn cp-btn-secondary">
+                          {c.action.label}
+                        </Link>
+                      ) : null}
                     </li>
                   ))}
                 </ul>

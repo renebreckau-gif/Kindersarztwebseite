@@ -25,13 +25,15 @@ import { announcementDraft, type AnnouncementInput } from "./announcement.ts";
 import { closedTodayDraft, earlyCloseDraft } from "./today.ts";
 import { plannedClosureDraft } from "./planned.ts";
 import { acuteBaselineDraft, acuteTodayDraft, type AcuteBaselineInput, type AcuteTodayInput, type BaselineDraft } from "./acute.ts";
+import { specialDayDraft, type SpecialDayInput } from "./special-day.ts";
 import type { Blocked, ClosedTodayInput, Draft, EarlyCloseInput, PlannedClosureInput, ReadyDraft, WorkflowKind } from "./types.ts";
 
 export type WorkflowRequest =
   | { kind: "EARLY_CLOSE"; input: EarlyCloseInput }
   | { kind: "CLOSED_TODAY"; input: ClosedTodayInput }
   | { kind: "PLANNED_CLOSURE"; input: PlannedClosureInput }
-  | { kind: "ACUTE_TODAY"; input: AcuteTodayInput };
+  | { kind: "ACUTE_TODAY"; input: AcuteTodayInput }
+  | { kind: "SPECIAL_DAY"; input: SpecialDayInput };
 
 export type PublishResult =
   | { ok: true; changeSetId: string; mode: "NEW" | "EDIT" | "SUPERSEDE"; recordId: string; kind: WorkflowKind }
@@ -43,6 +45,7 @@ export function buildDraft(request: WorkflowRequest, data: PulsData, now: Date, 
   if (request.kind === "EARLY_CLOSE") return earlyCloseDraft(data, now, request.input, fingerprint);
   if (request.kind === "CLOSED_TODAY") return closedTodayDraft(data, now, request.input, fingerprint);
   if (request.kind === "ACUTE_TODAY") return acuteTodayDraft(data, now, request.input, fingerprint);
+  if (request.kind === "SPECIAL_DAY") return specialDayDraft(data, now, request.input, fingerprint);
   return plannedClosureDraft(data, now, request.input, fingerprint).draft;
 }
 
@@ -81,6 +84,8 @@ async function withContext<T>(req: PayloadRequest, extra: Record<string, unknown
 export async function commitDraft(payload: Payload, req: PayloadRequest, draft: ReadyDraft): Promise<string> {
   // 09.5E: the acute-today record carries the internal marker — only this trusted path may write it.
   if (draft.kind === "ACUTE_TODAY") return withContext(req, { [SERVER_CONTEXT.ACUTE_TODAY]: true }, () => commitRecord(payload, req, draft));
+  // 09.5F: the special-day marker likewise — only this trusted path may write it.
+  if (draft.kind === "SPECIAL_DAY") return withContext(req, { [SERVER_CONTEXT.SPECIAL_DAY]: true }, () => commitRecord(payload, req, draft));
   return commitRecord(payload, req, draft);
 }
 

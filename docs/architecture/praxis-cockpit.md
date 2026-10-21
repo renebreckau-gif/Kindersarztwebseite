@@ -18,10 +18,10 @@ Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms
 | **Real authentication** | Payload auth on `staff`, verified: login, generic failures, disabled accounts, lockout, logout with session revocation, cookie `HttpOnly; SameSite=Lax; Secure`. Artificial `.invalid` test accounts only; no real accounts. Still required before production: transactional password reset and ADMIN MFA (backend-foundation §17.9–17.10). The prototype keeps its mock login. |
 | **Public website** | Uses the same Praxis Puls engine. `resolvePuls` still consumes the **static snapshot directly** (`staticPulsData()`, synchronous). It does not load through `PracticeRepository.getPulsData()`; repository-based public loading arrives with the cutover. `DATA_SOURCE = "STATIC"` is a reserved migration-target selector, not yet an active switch. Output unchanged (tested). Release gates are unchanged. |
 | **Staff entry** | Footer link **"Mitarbeiterbereich"** (after Impressum · Datenschutz · Barrierefreiheit; not in the main navigation, dock or hero) → **`/mitarbeiter`**, the stable human entry point. STAGING without backend (Vercel today): prototype only. STAGING with a configured database (local): prototype **and** real login, clearly labelled. PRODUCTION: real login only when `RELEASE.staffPortalProductionEnabled` — the **same** decision as the request gate (`staffPortalAvailable`), so the footer can never lead to a 404; never the lab. The footer placement is a UX choice, **not** security. |
-| **Internal routes** | `/intern/anmelden` (real login); `/intern` (real cockpit: Praxis heute from the database, Nächste Termine, Prüfen); `/intern/heute/frueher-schliessen` and `/intern/heute/geschlossen` (**real writes** to the cockpit database, 09.5A); `/intern/urlaub` and `/intern/urlaub/[eintrag]` (**real** Urlaub / Schließzeit, create and edit, 09.5C; write entry POST `/intern/urlaub/veroeffentlichen`, confirmation `/intern/urlaub/veroeffentlicht`); `/intern/hinweis` and `/intern/hinweis/[eintrag]` (**real** "Hinweis veröffentlichen", 09.5D; write entry POST `/intern/hinweis/veroeffentlichen`, confirmation `/intern/hinweis/veroeffentlicht`); `/intern/verlauf/[vorgang]/zuruecknehmen` (undo preview; the undo itself is an authenticated POST to `/intern/verlauf/ruecknahme`) and `/intern/verlauf/zurueckgenommen` (09.5B); `/intern/vorschau` (Website-Vorschau + comparison with the static website); `/intern/admin` (ADMIN only). Available where the real staff portal is available: STAGING with a configured database; in PRODUCTION only with `RELEASE.staffPortalProductionEnabled` (currently `false`). On Vercel staging (no database) they answer 404. `/intern/akutsprechstunde` (**real** Akutsprechstunde, 09.5E: physician baseline `/einrichten` → POST `/bestaetigen` → `/bestaetigt`, DOCTOR only; today change `/heute` → POST `/intern/heute/veroeffentlichen`, every operational role on a READY baseline). Sonderöffnungszeiten remain prototype-only. |
+| **Internal routes** | `/intern/anmelden` (real login); `/intern` (real cockpit: Praxis heute from the database, Nächste Termine, Prüfen); `/intern/heute/frueher-schliessen` and `/intern/heute/geschlossen` (**real writes** to the cockpit database, 09.5A); `/intern/urlaub` and `/intern/urlaub/[eintrag]` (**real** Urlaub / Schließzeit, create and edit, 09.5C; write entry POST `/intern/urlaub/veroeffentlichen`, confirmation `/intern/urlaub/veroeffentlicht`); `/intern/hinweis` and `/intern/hinweis/[eintrag]` (**real** "Hinweis veröffentlichen", 09.5D; write entry POST `/intern/hinweis/veroeffentlichen`, confirmation `/intern/hinweis/veroeffentlicht`); `/intern/verlauf/[vorgang]/zuruecknehmen` (undo preview; the undo itself is an authenticated POST to `/intern/verlauf/ruecknahme`) and `/intern/verlauf/zurueckgenommen` (09.5B); `/intern/vorschau` (Website-Vorschau + comparison with the static website); `/intern/admin` (ADMIN only). Available where the real staff portal is available: STAGING with a configured database; in PRODUCTION only with `RELEASE.staffPortalProductionEnabled` (currently `false`). On Vercel staging (no database) they answer 404. `/intern/akutsprechstunde` (**real** Akutsprechstunde, 09.5E: physician baseline `/einrichten` → POST `/bestaetigen` → `/bestaetigt`, DOCTOR only; today change `/heute` → POST `/intern/heute/veroeffentlichen`, every operational role on a READY baseline). `/intern/sonderzeiten` and `/intern/sonderzeiten/[eintrag]` (**real** Sonderöffnungszeiten / Feiertag klären, 09.5F; optional `?datum=`; write entry POST `/intern/sonderzeiten/veroeffentlichen`, confirmation `/intern/sonderzeiten/veroeffentlicht`). |
 | **Review hub** | `/review` is **project review tooling** (developers and reviewers): links to the website, the cockpit prototype and Mein Arztbesuch. It is **not** the staff entry; that is `/mitarbeiter`. Available while `SITE_STAGE = "STAGING"`; 404 in PRODUCTION. No `/intern` link, because the deployed staging has no database. |
 | **Mein Arztbesuch** | Visible on STAGING for review (`SITE_STAGE`). Not released for production: `meinArztbesuchPublished = false`, formal approvals open (`meinArztbesuchApproved = false`, records truthful); site stays `noindex` (`indexable = false`). |
-| **Next phase** | Not started; scope set by the next brief. Akutsprechstunde done in 09.5E (physician baseline + today override). Later: Sonderöffnungszeiten and, separately, the public data cutover. |
+| **Next phase** | Not started; scope set by the next brief. Done: Akutsprechstunde (09.5E, `98d5b41`), date-specific Sonderöffnungszeiten / holiday resolution (09.5F). Separate later decisions: replacement-directory verification, a global holiday policy, a physician-governed weekly-schedule editor, the public data cutover. |
 | **Launch blockers** | `LIVE_HOST_ACCESS = OPEN` (existing webhost not accessible), and domain/DNS access unknown (project-blockers LB-13/LB-14). Production backend infrastructure: LB-15. None of these blocks staging or development. |
 
 
@@ -1127,7 +1127,7 @@ Phase 10.0A was a public start-page change (customer decision Variant B, see [ho
 
 ## Phase 09.5E note: Akutsprechstunde — physician baseline + real today override (2026-10-20)
 
-Baseline `df5a05c`. Two checkpoints, two authorities. **No acute time of the practice exists in the project** (F44–F46 stay `TO_BE_CONFIRMED`); nothing is prefilled except acute times already stored in the cockpit database, and the real local working database is not seeded with a baseline. Every test uses artificial schedules.
+Baseline `df5a05c` · **complete, commit `98d5b41`**. Two checkpoints, two authorities. **No acute time of the practice exists in the project** (F44–F46 stay `TO_BE_CONFIRMED`); nothing is prefilled except acute times already stored in the cockpit database, and the real local working database is not seeded with a baseline. Every test uses artificial schedules.
 
 ### Audit (before the change)
 
@@ -1167,4 +1167,40 @@ Baseline `df5a05c`. Two checkpoints, two authorities. **No acute time of the pra
 ### Public website
 
 Still `DATA_SOURCE = "STATIC"`: `/heute` keeps the static acute fallback ("Aktuelle Informationen zur Akutsprechstunde werden geprüft."). A database acute baseline or today override shows only in `/intern/vorschau` — the difference is a staging diagnostic. The public review gate of 10.5A.1 is unchanged.
+
+## Phase 09.5F note: date-specific Sonderöffnungszeiten + Feiertag klären (2026-10-21)
+
+Baseline `98d5b41` (09.5E complete). One workflow for "geänderte Sprechzeiten an einem bestimmten Tag", also used to resolve an unresolved public holiday. A DATE-SPECIFIC operational exception — not a weekly-schedule editor, not recurring rules, not a global holiday policy, not a bulk editor.
+
+### Model and routes
+
+- Reuses `OpeningHourException`, one date (`startDate === endDate`): `CLOSED` (no intervals) or `SPECIAL_HOURS` = the **complete** opening of that day (what is not entered is closed — the editor and preview say so; omitted intervals are never added back).
+- `/intern/sonderzeiten` (optional `?datum=YYYY-MM-DD`, the deep link of "Prüfen → Feiertag klären"), `/intern/sonderzeiten/[eintrag]` (edit), POST `/intern/sonderzeiten/veroeffentlichen`, `/intern/sonderzeiten/veroeffentlicht`. One implementation for ordinary days and holidays.
+- Roles: STAFF / DOCTOR / ADMIN (operational `EXCEPTION` governance). No authority over the weekly schedule, recurring rules, the ACUTE baseline or the holiday policy.
+
+### Rules
+
+- **Today rule (final):** 09.5F plans dates **after today**. Today belongs to the dedicated quick actions ("Änderungen für heute nehmen Sie bitte über die Schnellaktionen vor.") — no competing records. Past dates are refused; strict date validation.
+- The date of an existing record is not moved in an edit (undo + new entry instead).
+- Intervals: valid times, start < end, no midnight crossing, no overlap, no duplicates; sorted; touching rows of the SAME type are merged, different types stay separate. At least one interval.
+- Consultation types only from `data.consultationTypes`, verified and fresh; unverified ones are shown disabled. ACUTE only with the READY physician baseline (`acuteExceptionProblem` — the 09.5E guard, not duplicated); the collection hook stays authoritative.
+- "Reguläre Sprechzeit dieses Tages übernehmen" (holiday: "… dieses Wochentags …") copies the confirmed weekly plan into the EDITOR only — never inferred, never published by itself.
+- Optional public note ≤ 280 characters; nothing is prefilled.
+- Record: server id `sonderzeit-YYYY-MM-DD` / `feiertag-YYYY-MM-DD` (collision-safe `-2`, `-3` next to RETIRED history), marker `reason = COCKPIT_SPECIAL_DAY` (server context `SPECIAL_DAY` only; REST writes carrying it — or editing such a record — are refused), priority **10** = the collection's default for planned exceptions, deliberately below the same-day priority 100.
+
+### Conflicts (never merged, never superseded)
+
+Closure on the date → blocked with "Schließung bearbeiten" (planned closures); own record → "Bestehenden Eintrag bearbeiten" (edit = same record, CLOSED ↔ SPECIAL_HOURS allowed, audit UPDATE); acute-today record → Akutsprechstunde; early-close record → quick actions; any other / multi-day exception → blocked.
+
+### Holidays
+
+Unresolved weekday holiday (engine `HOLIDAY_WITHOUT_RULE`) → explicit CLOSED → CLOSED; explicit changed hours → those intervals. The "Feiertag … ungeklärt" item in Prüfen carries the action "Feiertag klären" and disappears by itself once the engine resolves the date. The holiday calendar and `holidayPolicy = REQUIRE_EXPLICIT_ENTRY` stay untouched; confirmed closed weekdays (weekends) keep resolving as before (no Prüfen item). PulsData carries holiday dates only — no holiday name is invented.
+
+### Pipeline, audit, undo, home
+
+Same pipeline as 09.5A–E (server draft → engine preview with useful moments: before / each interval / gaps / after, or 10:00 for a closed day → fingerprint → POST → session → re-read → rebuild → validate → transaction → generated EXCEPTION provenance → audit → confirmation). Audit CREATE / UPDATE / REVERT; wording "Sonderöffnungszeit für 31. Oktober eingetragen / geändert", "31. Oktober als geschlossen eingetragen", "Änderung am 31. Oktober zurückgenommen". Undo via the existing lifecycle (CREATE → RETIRED, EDIT → previous content). Home: real quick action "Sonderöffnungszeiten"; Prüfen deep link; "Nächste Termine" offers "Bearbeiten" only for future records of this workflow.
+
+### Public website
+
+Still `DATA_SOURCE = "STATIC"`: a database special day or holiday resolution appears only in `/intern` and `/intern/vorschau`. Confirmation: "In der Testumgebung veröffentlicht." / "Die öffentliche Website verwendet weiterhin die bisherigen Daten." The public review gate (10.5A.1) is unchanged.
 

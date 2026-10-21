@@ -5,8 +5,8 @@
 import type { StaffRole } from "../domain/governance.ts";
 import type { Announcement } from "../domain/content-types.ts";
 import type { PulsData } from "../domain/practice-status.ts";
-import { formatGermanDate, zonedParts, type LocalDate } from "../domain/time.ts";
-import { blocks } from "../domain/operations.ts";
+import { formatDayMonth, formatGermanDate, zonedParts, type LocalDate } from "../domain/time.ts";
+import { blocks, SPECIAL_DAY_MARKER } from "../domain/operations.ts";
 import type { PayloadReader } from "../backend/payload-repository.ts";
 import { entityKey, planUndo, type HistoryEvent, type LifecycleCollection, type OperationalState, type StoredRecord, type UndoPlan } from "./workflows/undo.ts";
 import { CLOSURE_KIND_TITLE, shortRange } from "./workflows/wording.ts";
@@ -56,6 +56,12 @@ export function describeEvent(e: HistoryEvent, today: LocalDate): string {
   }
   const snap = (e.next ?? e.previous ?? {}) as { kind?: string; startDate?: string; endDate?: string; reason?: string; intervals?: { start: string; end: string; consultationType: string }[] };
   const day = snap.startDate === today && snap.endDate === today ? "Heute" : snap.startDate ? formatGermanDate(snap.startDate) : "";
+  if (e.entityType === "openingHourExceptions" && snap.reason === SPECIAL_DAY_MARKER && snap.startDate) {
+    // 09.5F: "Sonderöffnungszeit für 31. Oktober eingetragen" / "31. Oktober als geschlossen eingetragen"
+    const d = formatDayMonth(snap.startDate);
+    if (snap.kind === "CLOSED") return `${d} als geschlossen eingetragen`;
+    return `Sonderöffnungszeit für ${d} ${e.operation === "CREATE" ? "eingetragen" : "geändert"}`;
+  }
   if (e.entityType === "openingHourExceptions" && snap.reason === ACUTE_TODAY_MARKER) {
     // 09.5E: never the raw marker — "Akutsprechstunde heute 10:00–11:00 Uhr geändert" / "… entfällt".
     const acute = (snap.intervals ?? []).filter((i) => i.consultationType === "ACUTE");
@@ -79,6 +85,8 @@ export function describeEvent(e: HistoryEvent, today: LocalDate): string {
 /** A revert of a planned closure: its creation ("Urlaub … zurückgenommen") or an edit ("Änderung am Urlaub …"). */
 function describeRevert(events: HistoryEvent[]): string {
   if (events.some((x) => x.entityType === "openingHourExceptions" && (x.next as { reason?: string } | null)?.reason === ACUTE_TODAY_MARKER)) return "Änderung an der Akutsprechstunde zurückgenommen";
+  const special = events.find((x) => x.entityType === "openingHourExceptions" && (x.next as { reason?: string } | null)?.reason === SPECIAL_DAY_MARKER);
+  if (special) return `Änderung am ${formatDayMonth(String((special.next as { startDate?: string }).startDate))} zurückgenommen`;
   const notice = events.find((x) => x.entityType === "announcements");
   if (notice) {
     const snap = (notice.next ?? {}) as { title?: string; recordState?: string };

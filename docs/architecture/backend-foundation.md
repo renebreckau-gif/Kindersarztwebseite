@@ -499,6 +499,10 @@ Safety and seeding:
 - **Collection ACUTE guard** (`acuteExceptionHook`, every write path incl. REST / admin UI): a SPECIAL_HOURS exception with an ACUTE interval needs a READY physician baseline (`acuteBaselineStatus`) and a usable ACUTE type on every affected day — the same pure helper the cockpit uses. The internal marker `COCKPIT_ACUTE_TODAY` may only be written by the acute-today workflow (`SERVER_CONTEXT.ACUTE_TODAY`) or by the server's undo; client writes carrying it are refused.
 - **Transaction / audit:** the baseline writes type + schedule in one transaction with one server `changeSetId`; `VERIFY` (first confirmation) is now an accepted trusted audit operation next to `SUPERSEDE` / `REVERT`. Rollback leaves no half state (integration-tested by failing the second write).
 
+### 17.11b Sonderöffnungszeiten (Phase 09.5F, 2026-10-21)
+
+- No schema change, no new collection. The exception guard hook (`acuteExceptionHook`) now protects a second server-only marker, `COCKPIT_SPECIAL_DAY` (context `SERVER_CONTEXT.SPECIAL_DAY`, set only by the cockpit publish path); client writes that carry it, or that edit a record carrying it, are refused (403). Lifecycle and REVERT writes of the server's undo remain allowed.
+
 ### 17.12 npm audit (2026-10-13): 16 findings, none fixed by force
 
 | Package (path) | Severity | Reachable here? | Fix |

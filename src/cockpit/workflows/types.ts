@@ -7,7 +7,8 @@ import type { ChangeSet } from "../../domain/operations.ts";
 import type { LocalDate, LocalTime } from "../../domain/time.ts";
 
 /** ACUTE_TODAY (09.5E-2): a one-day acute change on top of the physician baseline. */
-export type WorkflowKind = "EARLY_CLOSE" | "CLOSED_TODAY" | "PLANNED_CLOSURE" | "ACUTE_TODAY";
+/** SPECIAL_DAY (09.5F): one future date — closed or complete changed hours (also resolves a holiday). */
+export type WorkflowKind = "EARLY_CLOSE" | "CLOSED_TODAY" | "PLANNED_CLOSURE" | "ACUTE_TODAY" | "SPECIAL_DAY";
 
 /** Why a draft cannot be published (shown in plain German, never a raw code). */
 export type BlockCode =

@@ -28,11 +28,14 @@ export const SERVER_CONTEXT = {
   ACUTE_BASELINE: "praxisAcuteBaselineWrite",
   /** Phase 09.5E: the acute-today workflow may write the internal acute-today marker. */
   ACUTE_TODAY: "praxisAcuteTodayWrite",
+  /** Phase 09.5F: the special-day workflow may write the internal special-day marker. */
+  SPECIAL_DAY: "praxisSpecialDayWrite",
 } as const;
 
 export const isLifecycleWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.LIFECYCLE] === true;
 export const isAcuteBaselineWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.ACUTE_BASELINE] === true;
 export const isAcuteTodayWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.ACUTE_TODAY] === true;
+export const isSpecialDayWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.SPECIAL_DAY] === true;
 
 /** Semantic audit operation set by the trusted server path (validated). VERIFY: first physician confirmation (09.5E). */
 export function auditOperationOf(ctx: Record<string, unknown> | undefined | null): "SUPERSEDE" | "REVERT" | "VERIFY" | undefined {

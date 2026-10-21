@@ -8,6 +8,9 @@ import type { PulsData, ReasonCode } from "./practice-status.ts";
 import { getPracticeStatus } from "./practice-status.ts";
 import { addDays, compareDates, formatMinutes, isLocalDate, parseTime, weekdayOf, zonedToInstant, type LocalDate, type LocalTime } from "./time.ts";
 
+/** Internal, server-controlled marker of single-date special days (09.5F; never shown publicly). */
+export const SPECIAL_DAY_MARKER = "COCKPIT_SPECIAL_DAY";
+
 // ---------------------------------------------------------------- schedule derivation
 
 export interface Segment {

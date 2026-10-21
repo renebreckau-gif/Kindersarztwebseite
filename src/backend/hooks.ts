@@ -4,14 +4,14 @@
 import type { CollectionAfterChangeHook, CollectionBeforeChangeHook, CollectionBeforeOperationHook, GlobalBeforeChangeHook } from "payload";
 import type { ConfirmableKind } from "../domain/governance.ts";
 import type { Closure, OpeningHourException } from "../domain/content-types.ts";
-import { applyChangeSet, introducedUnknown } from "../domain/operations.ts";
+import { applyChangeSet, introducedUnknown, SPECIAL_DAY_MARKER } from "../domain/operations.ts";
 import { ACUTE_TODAY_MARKER, acuteExceptionProblem } from "../domain/acute.ts";
 import { announcementShapeProblems, normalizeText } from "../domain/announcements.ts";
 import { closureFromDoc, exceptionFromDoc, verificationToDoc, type ClosureDoc, type ExceptionDoc } from "../data/payload-mapping.ts";
 import { activeRole } from "./access.ts";
 import { actorFromUser, auditForWrite, berlinToday, ProvenanceRejected, reviewDueFor, verificationForWrite, type StaffUserDoc } from "./provenance.ts";
 import { PayloadPracticeRepository, type PayloadReader } from "./payload-repository.ts";
-import { auditOperationOf, changeSetIdOf, isAcuteBaselineWrite, isAcuteTodayWrite, isBootstrap, isLifecycleWrite, isTrustedSeed, RejectedError, revertOfIn, systemActor } from "./server-context.ts";
+import { auditOperationOf, changeSetIdOf, isAcuteBaselineWrite, isAcuteTodayWrite, isBootstrap, isLifecycleWrite, isSpecialDayWrite, isTrustedSeed, RejectedError, revertOfIn, systemActor } from "./server-context.ts";
 
 type RuleRow = { ruleId?: string; weekday?: string; start?: string; end?: string; consultationType?: string; validFrom?: string | null; validUntil?: string | null; publicNote?: string | null; verification?: unknown };
 const ruleShape = (r: RuleRow) => JSON.stringify([String(r.weekday), r.start, r.end, r.consultationType, r.validFrom ?? null, r.validUntil ?? null, r.publicNote ?? null]);
@@ -102,14 +102,15 @@ export const publishGuardHook =
 /**
  * 09.5E collection guard for EVERY exception write (cockpit, REST, admin UI): SPECIAL_HOURS with an
  * ACUTE interval needs a READY physician baseline (same pure helper as the cockpit workflow). The
- * internal acute-today marker may be written only by the trusted acute-today workflow (or by the
- * server's undo of it). Retiring a record (lifecycle) is not re-checked.
+ * internal markers (acute-today 09.5E, special-day 09.5F) may be written only by their trusted
+ * workflow (or by the server's undo). Retiring a record (lifecycle) is not re-checked.
  */
 export const acuteExceptionHook: CollectionBeforeChangeHook = async ({ data, req, originalDoc }) => {
   const merged = { ...(originalDoc ?? {}), ...data } as ExceptionDoc & { recordState?: string };
   if (isLifecycleWrite(req.context) && merged.recordState === "RETIRED") return data;
-  const trusted = isAcuteTodayWrite(req.context) || isLifecycleWrite(req.context) || auditOperationOf(req.context) === "REVERT";
-  if (merged.reason === ACUTE_TODAY_MARKER && !trusted) throw new RejectedError("Diese geänderte Sprechzeit wird über „Akutsprechstunde“ im Praxis Cockpit verwaltet.", 403);
+  const serverPath = isLifecycleWrite(req.context) || auditOperationOf(req.context) === "REVERT";
+  if (merged.reason === ACUTE_TODAY_MARKER && !(serverPath || isAcuteTodayWrite(req.context))) throw new RejectedError("Diese geänderte Sprechzeit wird über „Akutsprechstunde“ im Praxis Cockpit verwaltet.", 403);
+  if (merged.reason === SPECIAL_DAY_MARKER && !(serverPath || isSpecialDayWrite(req.context))) throw new RejectedError("Diese Sonderöffnungszeit wird über „Sonderöffnungszeiten“ im Praxis Cockpit verwaltet.", 403);
   if (!(merged.intervals ?? []).some((i) => i.consultationType === "ACUTE")) return data;
   const base = await new PayloadPracticeRepository(req.payload as unknown as PayloadReader, req).getPulsData();
   const problem = acuteExceptionProblem(base, exceptionFromDoc(merged as ExceptionDoc), berlinToday());
