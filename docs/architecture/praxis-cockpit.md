@@ -18,10 +18,10 @@ Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms
 | **Real authentication** | Payload auth on `staff`, verified: login, generic failures, disabled accounts, lockout, logout with session revocation, cookie `HttpOnly; SameSite=Lax; Secure`. Artificial `.invalid` test accounts only; no real accounts. Still required before production: transactional password reset and ADMIN MFA (backend-foundation §17.9–17.10). The prototype keeps its mock login. |
 | **Public website** | Uses the same Praxis Puls engine. `resolvePuls` still consumes the **static snapshot directly** (`staticPulsData()`, synchronous). It does not load through `PracticeRepository.getPulsData()`; repository-based public loading arrives with the cutover. `DATA_SOURCE = "STATIC"` is a reserved migration-target selector, not yet an active switch. Output unchanged (tested). Release gates are unchanged. |
 | **Staff entry** | Footer link **"Mitarbeiterbereich"** (after Impressum · Datenschutz · Barrierefreiheit; not in the main navigation, dock or hero) → **`/mitarbeiter`**, the stable human entry point. STAGING without backend (Vercel today): prototype only. STAGING with a configured database (local): prototype **and** real login, clearly labelled. PRODUCTION: real login only when `RELEASE.staffPortalProductionEnabled` — the **same** decision as the request gate (`staffPortalAvailable`), so the footer can never lead to a 404; never the lab. The footer placement is a UX choice, **not** security. |
-| **Internal routes** | `/intern/anmelden` (real login); `/intern` (real cockpit: Praxis heute from the database, Nächste Termine, Prüfen); `/intern/heute/frueher-schliessen` and `/intern/heute/geschlossen` (**real writes** to the cockpit database, 09.5A); `/intern/urlaub` and `/intern/urlaub/[eintrag]` (**real** Urlaub / Schließzeit, create and edit, 09.5C; write entry POST `/intern/urlaub/veroeffentlichen`, confirmation `/intern/urlaub/veroeffentlicht`); `/intern/hinweis` and `/intern/hinweis/[eintrag]` (**real** "Hinweis veröffentlichen", 09.5D; write entry POST `/intern/hinweis/veroeffentlichen`, confirmation `/intern/hinweis/veroeffentlicht`); `/intern/verlauf/[vorgang]/zuruecknehmen` (undo preview; the undo itself is an authenticated POST to `/intern/verlauf/ruecknahme`) and `/intern/verlauf/zurueckgenommen` (09.5B); `/intern/vorschau` (Website-Vorschau + comparison with the static website); `/intern/admin` (ADMIN only). Available where the real staff portal is available: STAGING with a configured database; in PRODUCTION only with `RELEASE.staffPortalProductionEnabled` (currently `false`). On Vercel staging (no database) they answer 404. `/intern/akutsprechstunde` (**real** Akutsprechstunde, 09.5E: physician baseline `/einrichten` → POST `/bestaetigen` → `/bestaetigt`, DOCTOR only; today change `/heute` → POST `/intern/heute/veroeffentlichen`, every operational role on a READY baseline). `/intern/sonderzeiten` and `/intern/sonderzeiten/[eintrag]` (**real** Sonderöffnungszeiten / Feiertag klären, 09.5F; optional `?datum=`; write entry POST `/intern/sonderzeiten/veroeffentlichen`, confirmation `/intern/sonderzeiten/veroeffentlicht`). `/intern/feiertage` (**real** Feiertagsregel, 09.5H: every role reads; DOCTOR chooses + previews `?regel=` → POST `/intern/feiertage/bestaetigen` → `/intern/feiertage/bestaetigt`). `/intern/sprechzeiten` (**real** regular weekly plan, 09.5I: every role reads; DOCTOR edits the complete week `?bearbeiten=1` → preview `&pruefen=1` → POST `/intern/sprechzeiten/bestaetigen` → `/intern/sprechzeiten/bestaetigt`). |
+| **Internal routes** | `/intern/anmelden` (real login); `/intern` (real cockpit: Praxis heute from the database, Nächste Termine, Prüfen); `/intern/heute/frueher-schliessen` and `/intern/heute/geschlossen` (**real writes** to the cockpit database, 09.5A); `/intern/urlaub` and `/intern/urlaub/[eintrag]` (**real** Urlaub / Schließzeit, create and edit, 09.5C; write entry POST `/intern/urlaub/veroeffentlichen`, confirmation `/intern/urlaub/veroeffentlicht`); `/intern/hinweis` and `/intern/hinweis/[eintrag]` (**real** "Hinweis veröffentlichen", 09.5D; write entry POST `/intern/hinweis/veroeffentlichen`, confirmation `/intern/hinweis/veroeffentlicht`); `/intern/verlauf/[vorgang]/zuruecknehmen` (undo preview; the undo itself is an authenticated POST to `/intern/verlauf/ruecknahme`) and `/intern/verlauf/zurueckgenommen` (09.5B); `/intern/vorschau` (Website-Vorschau + comparison with the static website); `/intern/admin` (ADMIN only). Available where the real staff portal is available: STAGING with a configured database; in PRODUCTION only with `RELEASE.staffPortalProductionEnabled` (currently `false`). On Vercel staging (no database) they answer 404. `/intern/akutsprechstunde` (**real** Akutsprechstunde, 09.5E: physician baseline `/einrichten` → POST `/bestaetigen` → `/bestaetigt`, DOCTOR only; today change `/heute` → POST `/intern/heute/veroeffentlichen`, every operational role on a READY baseline). `/intern/sonderzeiten` and `/intern/sonderzeiten/[eintrag]` (**real** Sonderöffnungszeiten / Feiertag klären, 09.5F; optional `?datum=`; write entry POST `/intern/sonderzeiten/veroeffentlichen`, confirmation `/intern/sonderzeiten/veroeffentlicht`). `/intern/feiertage` (**real** Feiertagsregel, 09.5H: every role reads; DOCTOR chooses + previews `?regel=` → POST `/intern/feiertage/bestaetigen` → `/intern/feiertage/bestaetigt`). `/intern/sprechstundenarten` and `/intern/sprechstundenarten/[art]` (**real** Sprechstundenarten, 09.5J: every role reads; DOCTOR creates / changes / confirms NON-ACUTE types → POST `/intern/sprechstundenarten/bestaetigen` → `/bestaetigt`; ACUTE → `/intern/akutsprechstunde`). `/intern/sprechzeiten` (**real** regular weekly plan, 09.5I: every role reads; DOCTOR edits the complete week `?bearbeiten=1` → preview `&pruefen=1` → POST `/intern/sprechzeiten/bestaetigen` → `/intern/sprechzeiten/bestaetigt`). |
 | **Review hub** | `/review` is **project review tooling** (developers and reviewers): links to the website, the cockpit prototype and Mein Arztbesuch. It is **not** the staff entry; that is `/mitarbeiter`. Available while `SITE_STAGE = "STAGING"`; 404 in PRODUCTION. No `/intern` link, because the deployed staging has no database. |
 | **Mein Arztbesuch** | Visible on STAGING for review (`SITE_STAGE`). Not released for production: `meinArztbesuchPublished = false`, formal approvals open (`meinArztbesuchApproved = false`, records truthful); site stays `noindex` (`indexable = false`). |
-| **Next phase** | Not started; scope set by the next brief. Done: Akutsprechstunde (09.5E, `98d5b41`), date-specific Sonderöffnungszeiten / holiday resolution (09.5F, `58d4529`), replacement-practice directory + physician verification (09.5G, `8c3c3ec`), physician-confirmed global holiday policy (09.5H, `0071e3d`), physician-governed regular weekly plan (09.5I, `4becaa6`), public data cutover readiness gate (09.6A: READY_FOR_09_6B_SHADOW_READ, public cutover NO-GO — [public-data-cutover-readiness.md](public-data-cutover-readiness.md)). 09.6B Payload shadow read (`SHADOW_READ: PASS`, STATIC still authoritative). Next: 09.6C only after a real staging dataset, practice approval, GAP-1 and pg-pool error handling — not started. |
+| **Next phase** | Not started; scope set by the next brief. Done: Akutsprechstunde (09.5E, `98d5b41`), date-specific Sonderöffnungszeiten / holiday resolution (09.5F, `58d4529`), replacement-practice directory + physician verification (09.5G, `8c3c3ec`), physician-confirmed global holiday policy (09.5H, `0071e3d`), physician-governed regular weekly plan (09.5I, `4becaa6`), public data cutover readiness gate (09.6A: READY_FOR_09_6B_SHADOW_READ, public cutover NO-GO — [public-data-cutover-readiness.md](public-data-cutover-readiness.md)). 09.6B Payload shadow read (`SHADOW_READ: PASS`, STATIC still authoritative). 09.5J Sprechstundenarten (GAP-1 technically resolved). Next: 09.6C only after a real staging dataset, practice approval and DB connection error handling — not started. |
 | **Launch blockers** | `LIVE_HOST_ACCESS = OPEN` (existing webhost not accessible), and domain/DNS access unknown (project-blockers LB-13/LB-14). Production backend infrastructure: LB-15. None of these blocks staging or development. |
 
 
@@ -48,7 +48,8 @@ Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms
 | 09.5H | Global holiday policy with physician confirmation + safe holiday-calendar boundary | `0071e3d` |
 | 09.5I | Physician-governed regular weekly plan (seven explicit weekdays, NON-ACUTE only), generic weekly-schedule writes blocked | `4becaa6` |
 | 09.6A | Public data cutover readiness gate (audit, ownership matrix, guards, announcements parity) — **NO cutover**; result READY_FOR_09_6B_SHADOW_READ, public cutover NO-GO | `2e0e487` |
-| 09.6B | Static public operational snapshot (one per page; WeekHours / DayRuler from the snapshot) + consistent Payload shadow read (REPEATABLE READ, READ ONLY), shadow comparator, concurrency / outage proofs — STATIC stays authoritative; SHADOW_READ PASS, READY_FOR_09_6C NO | this commit |
+| 09.6B | Static public operational snapshot (one per page; WeekHours / DayRuler from the snapshot) + consistent Payload shadow read (REPEATABLE READ, READ ONLY), shadow comparator, concurrency / outage proofs — STATIC stays authoritative; SHADOW_READ PASS, READY_FOR_09_6C NO | `a06935c` |
+| 09.5J | Sprechstundenarten: physician workflow for NON-ACUTE consultation types (create / confirm / change / reconfirm), generic consultation-type writes closed, ACUTE stays 09.5E — GAP-1 technically resolved | this commit |
 
 **How to read this document:** §0–§14 are the Phase 09.0 architecture decision and remain valid unless a later phase note says otherwise. The phase notes at the end record what the prototype changed or proved. Statements that became outdated are marked inline ("since 09.1.x").
 
@@ -1327,4 +1328,55 @@ Baseline `0071e3d` (09.5H complete). The recurring weekly plan is standing, high
 ### Public website
 
 Still `DATA_SOURCE = "STATIC"`; the database week never reaches the public site ("Die öffentliche Website verwendet derzeit weiterhin die bisherigen Daten.").
+
+## Phase 09.5J note: Sprechstundenarten — physician management of NON-ACUTE consultation types (2026-10-21)
+
+Baseline `a06935c` (09.6B). Closes GAP-1 of the cutover readiness gate **technically**. No real wording was entered or confirmed: static `CONSULTATION_TYPES` is unchanged, and F42 stays `TO_BE_CONFIRMED`. Test and capture data are artificial ("(Test)").
+
+### Audit (before)
+
+- Write paths:
+  - generic REST / Local API by any DOCTOR (`doctorOnly`), whose provenance hook turned any wording into VERIFIED_CURRENT;
+  - `commitAcuteBaseline` (ACUTE type, as a plain DOCTOR write);
+  - `scripts/seed-dev.ts` (through the test doctor);
+  - trusted seeds in tests.
+- `explanation` is rendered nowhere publicly (no new public copy added).
+- The weekly-plan editor offers only usable types (`regularTypeUsable`: `consultationType` freshness, 60 days grace). Without a renewal path a used type would expire and the week would become uneditable.
+
+### Authority
+
+| Role | Consultation types |
+|---|---|
+| STAFF | read (overview + detail) |
+| ADMIN | read — no structural exception, no `/intern/admin` backdoor (server access refuses writes) |
+| DOCTOR | NON-ACUTE: create (fixed codes GENERAL / HEALTHY_ONLY / APPOINTMENT / OTHER only), change wording, confirm, reconfirm — only through the cockpit (trusted `CONSULTATION_TYPE` context). ACUTE only through 09.5E. |
+
+### Workflow
+
+- `/intern/sprechstundenarten` lists stored types plus codes the week or upcoming special hours reference but that are missing ("APPOINTMENT fehlt").
+  - Each card shows the label, the explanation, the internal code (secondary), the status in words ("Bestätigt bis …", "Bestätigung fällig", "Bestätigung abgelaufen", "Noch nicht ärztlich bestätigt", "Nicht mehr zur Veröffentlichung freigegeben") and the usage ("Im Wochenplan: Di, Mi, Do, Fr 08:00–10:00 Uhr", "Wird in Sonderöffnungszeiten verwendet").
+  - The ACUTE card states "Die Akutsprechstunde wird separat verwaltet." and links "Akutsprechstunde verwalten".
+- `/intern/sprechstundenarten/[art]` uses a fixed slug ↔ code mapping, never a collection id.
+  - The form has Bezeichnung (1–80, trimmed) and Erklärung (optional, ≤ 400; empty = absent). Nothing is prefilled for a new type.
+  - The preview shows AKTUELL / NACH DER ÄNDERUNG with changed fields marked, "Auf der Website würde künftig stehen: …" and the affected recurring periods.
+  - Confirmation: checkbox "Ich bestätige diese Bezeichnung und Erklärung für die Praxis." and button "Sprechstundenart ärztlich bestätigen" (or "Sprechstundenart erneut bestätigen").
+  - The physician confirms only the wording — not the hours, weekdays, acute hours or holidays (09.5I decides WHEN a type applies; 09.5J decides WHAT it is called).
+- Modes:
+  - CREATE (confirmed at once) → VERIFY
+  - CONFIRM an unconfirmed type unchanged → VERIFY
+  - RECONFIRM a due / expired type unchanged → VERIFY
+  - CHANGE → UPDATE if the type was confirmed, else VERIFY
+  - CURRENT + unchanged → "Es wurde nichts geändert." (no write, no audit)
+- Concurrency: the fingerprint covers code, label, explanation and verification (or "missing" for a create). The POST re-reads inside the transaction; a stale preview or a create raced by another writer gets "Die Sprechstundenart wurde inzwischen geändert. Bitte prüfen Sie die Angaben erneut." Duplicates are refused ("Sprechstundenart GENERAL ist mehrfach vorhanden.").
+- One transaction (type + generated provenance + audit; a failing audit rolls back). **No quick undo**; correction = another physician edit.
+- Withdrawal ("Nicht mehr verwenden") is **not implemented**: robust dependency checks against weekly rules and active special hours are a later maintenance feature. No delete.
+
+### Cockpit / Prüfen
+
+- A secondary "Praxisdaten" link "Sprechstundenarten"; no quick action, no navigation item.
+- Prüfen gets one item per NON-ACUTE type that the week or current / future special hours use and whose confirmation is due, expired, missing or duplicated → "Sprechstundenart prüfen". Unused types raise nothing.
+
+### Public website
+
+Still `DATA_SOURCE = "STATIC"`; database wording never reaches the public site. A label change never changes the engine's status, only parent-facing wording (tested; the 09.6B shadow comparator reports it as `PULS_DATA` / `WEEK_HOURS` / `DAY_RULER`).
 

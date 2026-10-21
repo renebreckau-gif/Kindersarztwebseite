@@ -504,7 +504,7 @@ Shared fields for F35–F39:
 - **RISK IF INCORRECT:** HIGH — sick child brought into healthy-only slot
 - **REQUIRED CONFIRMATION:** Practice: what visits belong in this window; appointment required?
 - **FEATURES AFFECTED:** Sprechzeiten, PRAXIS PULS
-- **NOTES:** The 2020 definition must not be reused without confirmation.
+- **NOTES:** The 2020 definition must not be reused without confirmation. Since Phase 09.5J a technical physician consultation-type workflow exists in the staff cockpit (`/intern/sprechstundenarten`); it does not change this status — only a real practice / physician confirmation would.
 
 ### F43 — Tuesday afternoon appointment-only
 - **CURRENT VALUE / CLAIM:** Di 14:00–16:00 "nur Terminsprechstunde"

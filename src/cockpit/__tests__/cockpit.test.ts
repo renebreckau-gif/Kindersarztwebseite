@@ -114,8 +114,11 @@ describe("Prüfen — only actionable items", () => {
   });
 
   test("TO_BE_CONFIRMED that does not matter operationally raises no alarm", () => {
-    const data = { ...DATA, replacementPractices: [practice("unbenutzt", OPEN)], consultationTypes: [{ code: "GENERAL" as const, label: "x", verification: OPEN }] };
+    // 09.5J: an UNUSED unconfirmed type raises nothing; a type the week uses must be confirmed (one item).
+    const data = { ...DATA, replacementPractices: [practice("unbenutzt", OPEN)], consultationTypes: [...DATA.consultationTypes, { code: "OTHER" as const, label: "x", verification: OPEN }] };
     assert.deepEqual(reviewItems(data, TODAY), []);
+    const used = { ...DATA, consultationTypes: DATA.consultationTypes.map((t) => (t.code === "GENERAL" ? { ...t, verification: OPEN } : t)) };
+    assert.deepEqual(reviewItems(used, TODAY).map((i) => [i.id, i.action?.href]), [["type-unconfirmed-GENERAL", "/intern/sprechstundenarten/sprechstunde"]]);
   });
 });
 

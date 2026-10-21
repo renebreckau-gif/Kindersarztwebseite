@@ -345,3 +345,16 @@ Baseline `2e0e487` (09.6A). **STATIC stays authoritative; no parent-visible chan
 - WeekHours renders Monday–Friday only, as before. A weekend opening in a future Payload week would appear in PULS but not in that table, so the presentation must be revisited at 09.6C (the comparison already covers all seven days).
 - The static `WORKING` reviewDue risk (2027-03-09) is unchanged.
 
+## 19. Phase 09.5J — GAP-1 technically resolved (2026-10-21)
+
+- **GAP-1: TECHNICALLY RESOLVED by 09.5J.** NON-ACUTE consultation types (GENERAL, HEALTHY_ONLY, APPOINTMENT, OTHER) now have a physician cockpit workflow (`/intern/sprechstundenarten`): create, change, confirm and reconfirm with generated provenance, audit and stale protection. Generic REST writes are closed; ACUTE stays with 09.5E. A used type that becomes due or expired raises an actionable Prüfen item, and reconfirmation makes it selectable in the weekly editor again (integration-tested).
+- **Not data readiness:** the real consultation types (label / explanation, incl. the meaning behind F42) still need a real physician confirmation in the staging / production cockpit before any cutover. Artificial test confirmations are no evidence; F42 stays `TO_BE_CONFIRMED`.
+- **`READY_FOR_09_6C: NO`** — still blocked by:
+  - no real staging operational dataset;
+  - no explicit practice approval to use it;
+  - `DB_CONNECTION_ERROR_HANDLING = OPEN` (09.6B: unhandled pg `error` on DB disconnect);
+  - the remaining verification blockers (F35–F49 practice record, F53, F54).
+
+  `PUBLIC_CUTOVER: NO-GO`.
+- 09.6B unchanged: the shadow read and the comparator stay green (step 3); the label-difference detection is kept.
+

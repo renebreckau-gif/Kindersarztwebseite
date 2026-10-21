@@ -11,6 +11,7 @@ import { evaluateFreshness } from "../domain/verification.ts";
 import { decideAnnouncement } from "../domain/publication.ts";
 import { acuteBaselineStatus } from "../domain/acute.ts";
 import { holidayPolicyStatus } from "../domain/holiday-policy.ts";
+import { TYPE_SLUG, matters, typeItems } from "./workflows/consultation-type.ts";
 import { shortRange } from "./workflows/wording.ts";
 import { addDays, compareDates, daysBetween, formatGermanDate, weekdayOf, zonedParts, zonedToInstant, formatMinutes, type LocalDate, type LocalTime } from "../domain/time.ts";
 
@@ -212,6 +213,21 @@ export function reviewItems(data: PulsData, today: LocalDate, announcements: Ann
     } else if (acute.state === "READY" && typeDue && daysBetween(today, typeDue) <= SCHEDULE_REVIEW_WARN_DAYS) {
       items.push({ id: "acute-review", title: "Akutsprechstunde erneut ärztlich bestätigen", text: `Die ärztliche Bestätigung der Akutsprechstunde läuft am ${formatGermanDate(typeDue)} ab.` });
     }
+  }
+
+  // 09.5J: a NON-ACUTE consultation type the week or upcoming special hours actually use, whose physician
+  // confirmation is due / expired / missing (or the type itself is missing) → one item per type. Unused
+  // types never raise a warning; ACUTE has its own items above.
+  for (const t of typeItems(data, today)) {
+    if (t.acute || !matters(t)) continue;
+    const name = t.stored ? `„${t.stored.label}“` : `Die Sprechstundenart ${t.code}`;
+    const where = t.usedByWeeklyRules ? "im Wochenplan" : "bei Sonderöffnungszeiten";
+    const action = { label: "Sprechstundenart prüfen", href: `/intern/sprechstundenarten/${TYPE_SLUG[t.code]}` };
+    if (!t.stored) items.push({ id: `type-missing-${t.code}`, title: "Sprechstundenart fehlt", text: `${name} wird ${where} verwendet, ist aber nicht angelegt. Die Website kann diese Zeiten nicht bezeichnen.`, action });
+    else if (t.duplicate) items.push({ id: `type-duplicate-${t.code}`, title: "Sprechstundenart prüfen", text: `${name} ist mehrfach gespeichert.`, action });
+    else if (t.status?.state === "DUE") items.push({ id: `type-review-${t.code}`, title: "Sprechstundenart erneut bestätigen", text: `${name} wird ${where} verwendet. Die ärztliche Bestätigung ist fällig.`, action });
+    else if (t.status?.state === "EXPIRED") items.push({ id: `type-expired-${t.code}`, title: "Sprechstundenart erneut bestätigen", text: `${name} wird ${where} verwendet. Die ärztliche Bestätigung ist abgelaufen; die Bezeichnung gilt derzeit nicht als bestätigt.`, action });
+    else if (t.status?.state === "UNCONFIRMED" || t.status?.state === "WITHDRAWN") items.push({ id: `type-unconfirmed-${t.code}`, title: "Sprechstundenart bestätigen", text: `${name} wird ${where} verwendet, ist aber nicht ärztlich bestätigt.`, action });
   }
 
   // 09.5H: an EXPIRED physician confirmation of the holiday rule → ONE item; the holidays it leaves

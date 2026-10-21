@@ -69,7 +69,8 @@ try {
     // 09.5I: the weekly plan is written only by the physician workflows (no generic create) — the
     // artificial lab week is imported as a trusted seed with its documented (lab) provenance.
     await payload.create({ collection: "weeklySchedules", data: docs.schedule!, overrideAccess: true, context: { [SERVER_CONTEXT.SEED]: true } });
-    for (const t of docs.consultationTypes) await payload.create({ collection: "consultationTypes", data: t, ...as(doctor) });
+    // 09.5J: consultation types are written only by the physician workflows — imported as trusted seed.
+    for (const t of docs.consultationTypes) await payload.create({ collection: "consultationTypes", data: t, overrideAccess: true, context: { [SERVER_CONTEXT.SEED]: true } });
     for (const p of docs.replacementPractices) await payload.create({ collection: "replacementPractices", data: p, ...as(doctor) });
     for (const x of docs.exceptions) await payload.create({ collection: "openingHourExceptions", data: x, ...as(staff) });
     for (const c of docs.closures) await payload.create({ collection: "closures", data: c, ...as(staff) });

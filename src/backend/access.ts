@@ -2,7 +2,7 @@
 // UI hiding is never the only protection. No role gets a bypass around server validation.
 
 import { STAFF_ROLES, type StaffRole } from "../domain/governance.ts";
-import { isAcuteBaselineWrite, isHolidayPolicyWrite, isWeeklyScheduleWrite, replacementVerifyMode } from "./server-context.ts";
+import { isAcuteBaselineWrite, isConsultationTypeWrite, isHolidayPolicyWrite, isWeeklyScheduleWrite, replacementVerifyMode } from "./server-context.ts";
 
 /** Minimal shape of the authenticated Payload user (the `staff` auth collection). */
 export interface StaffUserLike {
@@ -43,6 +43,13 @@ export const adminOrDoctorHolidayPolicy = ({ req }: ArgsLike) => {
  */
 export const doctorScheduleWorkflow = ({ req }: ArgsLike) => activeRole(req.user) === "DOCTOR" && (isAcuteBaselineWrite(req.context) || isWeeklyScheduleWrite(req.context));
 
+/**
+ * 09.5J consultation types: DOCTOR only, and only through a trusted physician workflow — 09.5J for the
+ * NON-ACUTE types, 09.5E acute baseline for ACUTE. Generic REST / admin-UI writes are refused for every
+ * role (before 09.5J any DOCTOR REST write produced verified wording).
+ */
+export const doctorConsultationTypeWorkflow = ({ req }: ArgsLike) => activeRole(req.user) === "DOCTOR" && (isConsultationTypeWrite(req.context) || isAcuteBaselineWrite(req.context));
+
 export const adminOrDoctorVerification = ({ req }: ArgsLike) => {
   const role = activeRole(req.user);
   return role === "ADMIN" || (role === "DOCTOR" && replacementVerifyMode(req.context) !== undefined);
@@ -64,7 +71,7 @@ export const adminOrSelf = ({ req, id }: ArgsLike & { id?: string | number }) =>
 export const ACCESS = {
   staff: { read: adminOrSelf, create: adminOnly, update: adminOrSelf, delete: never },
   weeklySchedules: { read: signedIn, create: doctorScheduleWorkflow, update: doctorScheduleWorkflow, delete: never },
-  consultationTypes: { read: signedIn, create: doctorOnly, update: doctorOnly, delete: never },
+  consultationTypes: { read: signedIn, create: doctorConsultationTypeWorkflow, update: doctorConsultationTypeWorkflow, delete: never },
   openingHourExceptions: { read: signedIn, create: signedIn, update: signedIn, delete: never },
   closures: { read: signedIn, create: signedIn, update: signedIn, delete: never },
   // ADMIN enters / corrects directory data (stays unverified); DOCTOR confirms it — only via the

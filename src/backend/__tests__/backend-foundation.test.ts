@@ -47,7 +47,15 @@ describe("server-side access matrix", () => {
       assert.equal(ACCESS[slug].update(req(STAFF)), false);
       assert.equal(ACCESS[slug].update(req(ADMIN)), false);
     }
-    assert.equal(ACCESS.consultationTypes.update(req(DOCTOR)), true);
+    // 09.5J: consultation types only through a trusted physician workflow (regular types / acute baseline).
+    for (const op of ["create", "update"] as const) {
+      assert.equal(ACCESS.consultationTypes[op](req(DOCTOR)), false, `${op} generic DOCTOR`);
+      for (const k of [SERVER_CONTEXT.CONSULTATION_TYPE, SERVER_CONTEXT.ACUTE_BASELINE]) {
+        assert.equal(ACCESS.consultationTypes[op](req(DOCTOR, { context: { [k]: true } })), true, `${op} ${k}`);
+        for (const u of [STAFF, ADMIN]) assert.equal(ACCESS.consultationTypes[op](req(u, { context: { [k]: true } })), false, `${op} ${u.role} ${k}`);
+      }
+      assert.equal(ACCESS.consultationTypes[op](req(DOCTOR, { context: { [SERVER_CONTEXT.WEEKLY_SCHEDULE]: true } })), false, "weekly context cannot write types");
+    }
     // 09.5I: the weekly plan only through a trusted physician workflow — no generic DOCTOR write.
     const ctx = (k: string) => ({ context: { [k]: true } });
     for (const op of ["create", "update"] as const) {

@@ -35,6 +35,8 @@ import { acuteBaselineDraft, acuteTodayDraft, type AcuteBaselineInput, type Acut
 import { specialDayDraft, type SpecialDayInput } from "./special-day.ts";
 import { PLAN_STALE, weeklyPlanDraft, type WeeklyDraft, type WeeklyPlanInput } from "./weekly-plan.ts";
 import { newRuleId } from "../../domain/weekly-plan.ts";
+import { TYPE_STALE, typeDraft, type TypeDraft, type TypeMode } from "./consultation-type.ts";
+import type { ConsultationTypeCode } from "../../domain/content-types.ts";
 import type { Blocked, ClosedTodayInput, Draft, EarlyCloseInput, PlannedClosureInput, ReadyDraft, WorkflowKind } from "./types.ts";
 
 export type WorkflowRequest =
@@ -272,7 +274,8 @@ export async function commitAcuteBaseline(payload: Payload, req: PayloadRequest,
   const op = draft.first ? { [SERVER_CONTEXT.AUDIT_OPERATION]: "VERIFY" } : {};
   const found = (await payload.find({ collection: "consultationTypes", where: { code: { equals: "ACUTE" } }, limit: 2, depth: 0, overrideAccess: true, req })).docs as { id: number | string }[];
   if (found.length > 1) throw new Error("Die Sprechstundenart „Akutsprechstunde“ ist mehrfach angelegt.");
-  await withContext(req, op, () =>
+  // 09.5J: the ACUTE type is written under the trusted acute context too (generic DOCTOR writes are closed).
+  await withContext(req, { ...op, [SERVER_CONTEXT.ACUTE_BASELINE]: true }, () =>
     found[0]
       ? payload.update({ collection: "consultationTypes", id: found[0].id, data: { label: ACUTE_LABEL } as never, ...common, context: req.context })
       : payload.create({ collection: "consultationTypes", data: { code: "ACUTE", label: ACUTE_LABEL, verification: verificationToDoc(previewVerification(draft.today)) } as never, ...common, context: req.context }),
@@ -575,6 +578,73 @@ export async function commitWeeklyPlan(payload: Payload, req: PayloadRequest, dr
   const context = { [SERVER_CONTEXT.WEEKLY_SCHEDULE]: true, ...(draft.audit === "VERIFY" ? { [SERVER_CONTEXT.AUDIT_OPERATION]: "VERIFY" } : {}) };
   await withContext(req, context, () =>
     payload.update({ collection: "weeklySchedules", id: schedule.id, data: { rules, confirmedClosedWeekdays: draft.closed.map(String) } as never, req, user: req.user, overrideAccess: false, depth: 0, context: req.context }),
+  );
+}
+
+// ---------------------------------------------------------------- Sprechstundenarten (09.5J)
+
+export type TypeResult =
+  | { ok: true; changeSetId: string; mode: TypeMode; code: ConsultationTypeCode }
+  | { ok: false; code: "UNAUTHENTICATED" | "NOT_ALLOWED" | "STALE" | "BLOCKED" | "FAILED"; message: string };
+
+export const TYPE_DOCTOR_ONLY = "Sprechstundenarten können nur ärztlich geändert und bestätigt werden.";
+
+/**
+ * DOCTOR only (checked here, by the collection access AND by the guard hook): session account → server
+ * changeSetId → transaction → re-read the type of this code (duplicates refused) → fingerprint → rebuilt
+ * draft (server date) → one write through the trusted CONSULTATION_TYPE context → audit (same transaction)
+ * → commit. Creation re-checks inside the transaction that the code still does not exist (stale otherwise).
+ * VERIFY for creation / first or renewed confirmation, UPDATE for a change of a confirmed type. No quick
+ * undo: correction = another physician edit.
+ */
+export async function confirmConsultationType(
+  payload: Payload,
+  user: (StaffUserLike & Record<string, unknown>) | null | undefined,
+  code: ConsultationTypeCode | undefined,
+  input: { label?: string; explanation?: string },
+  previewFingerprint: string,
+  confirmed: boolean,
+  now: Date = new Date(),
+): Promise<TypeResult> {
+  const role = activeRole(user);
+  if (!user || !role) return { ok: false, code: "UNAUTHENTICATED", message: "Bitte melden Sie sich erneut an." };
+  if (role !== "DOCTOR") return { ok: false, code: "NOT_ALLOWED", message: TYPE_DOCTOR_ONLY };
+  if (!confirmed) return { ok: false, code: "BLOCKED", message: "Bitte bestätigen Sie die Sprechstundenart ausdrücklich." };
+  const changeSetId = randomUUID();
+  const req = await createLocalReq({ user: user as never, context: { [SERVER_CONTEXT.CHANGE_SET]: changeSetId } }, payload);
+  await initTransaction(req);
+  try {
+    const data = await new PayloadPracticeRepository(payload as unknown as PayloadReader, req).getPulsData();
+    const draft = typeDraft(data, code, input, berlinToday(now));
+    if (draft.fingerprint !== previewFingerprint) {
+      await killTransaction(req);
+      return { ok: false, code: "STALE", message: TYPE_STALE };
+    }
+    if (!draft.ok) {
+      await killTransaction(req);
+      return { ok: false, code: "BLOCKED", message: draft.message };
+    }
+    await commitConsultationType(payload, req, draft);
+    await commitTransaction(req);
+    return { ok: true, changeSetId, mode: draft.mode, code: draft.code };
+  } catch (e) {
+    await killTransaction(req);
+    const err = e as { isPublic?: boolean; message?: string } | null;
+    return { ok: false, code: "FAILED", message: err && typeof err === "object" && err.isPublic && typeof err.message === "string" ? err.message : "Die Sprechstundenart konnte nicht gespeichert werden. Es wurde nichts verändert." };
+  }
+}
+
+/** The physician type write inside the given transaction (exported for the rollback tests). */
+export async function commitConsultationType(payload: Payload, req: PayloadRequest, draft: Extract<TypeDraft, { ok: true }>): Promise<void> {
+  const found = (await payload.find({ collection: "consultationTypes", where: { code: { equals: draft.code } }, limit: 2, depth: 0, overrideAccess: true, req })).docs as { id: number | string }[];
+  if (found.length > 1) throw new Error(`Sprechstundenart ${draft.code} ist mehrfach vorhanden.`);
+  const context = { [SERVER_CONTEXT.CONSULTATION_TYPE]: true, ...(draft.audit === "VERIFY" ? { [SERVER_CONTEXT.AUDIT_OPERATION]: "VERIFY" } : {}) };
+  const wording = { label: draft.next.label, explanation: draft.next.explanation ?? null };
+  const common = { req, user: req.user, overrideAccess: false as const, depth: 0 };
+  await withContext(req, context, () =>
+    found[0]
+      ? payload.update({ collection: "consultationTypes", id: found[0].id, data: wording as never, ...common, context: req.context })
+      : payload.create({ collection: "consultationTypes", data: { code: draft.code, ...wording, verification: verificationToDoc(previewVerification(berlinToday())) } as never, ...common, context: req.context }),
   );
 }
 

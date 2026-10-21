@@ -43,6 +43,11 @@ export const SERVER_CONTEXT = {
    * unchanged and keeps its stored provenance. The opposite of ACUTE_BASELINE — never both at once.
    */
   WEEKLY_SCHEDULE: "praxisWeeklyScheduleWrite",
+  /**
+   * Phase 09.5J: the physician workflow for NON-ACUTE consultation types (label + explanation, create /
+   * change / reconfirm). Never ACUTE (that stays ACUTE_BASELINE); the code of a stored type is immutable.
+   */
+  CONSULTATION_TYPE: "praxisConsultationTypeWrite",
 } as const;
 
 export const isLifecycleWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.LIFECYCLE] === true;
@@ -51,6 +56,7 @@ export const isAcuteTodayWrite = (ctx: Record<string, unknown> | undefined | nul
 export const isSpecialDayWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.SPECIAL_DAY] === true;
 export const isHolidayPolicyWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.HOLIDAY_POLICY] === true;
 export const isWeeklyScheduleWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.WEEKLY_SCHEDULE] === true;
+export const isConsultationTypeWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.CONSULTATION_TYPE] === true;
 /** The physician replacement action of this write, if the trusted server workflow set one. */
 export function replacementVerifyMode(ctx: Record<string, unknown> | undefined | null): "VERIFY" | "WITHDRAW" | undefined {
   const v = ctx?.[SERVER_CONTEXT.REPLACEMENT_VERIFY];

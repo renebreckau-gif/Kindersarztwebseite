@@ -870,8 +870,9 @@ body.intern {
   flex-wrap: wrap;
   gap: var(--space-2) var(--space-4);
 }
-/* 09.5H: long rule labels wrap beside their radio instead of dropping below it on phones. */
-.cp-policy-form .cp-choice > span {
+/* 09.5H (09.5J: also confirmation checkboxes): long labels wrap beside their control instead of dropping below it on phones. */
+.cp-policy-form .cp-choice > span,
+.cp-publish .cp-choice > span {
   flex: 1 1 0;
   min-width: 0;
   padding-block: var(--space-2);

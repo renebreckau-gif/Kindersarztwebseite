@@ -219,6 +219,8 @@ describe("runtime after bootstrap", { skip: skipDb }, () => {
     // (step 24 proves the generated provenance of the weekly-plan workflow).
     assert.equal((await http("/api/weeklySchedules", { method: "POST", cookie: doctor, body: schedule })).status, 403, "DOCTOR generic schedule");
     assert.equal((await http("/api/weeklySchedules", { method: "POST", cookie: doctor, body: { ...schedule, praxisWeeklyScheduleWrite: true, context: { praxisWeeklyScheduleWrite: true } } })).status, 403, "context cannot be sent");
+    // 09.5J: consultation types likewise only through the physician workflows.
+    assert.equal((await http("/api/consultationTypes", { method: "POST", cookie: doctor, body: { code: "GENERAL", label: "X", verification: FAKE } })).status, 403, "DOCTOR generic consultation type");
     const id = doc<{ id: number }>((await payload.find({ collection: "closures", where: { recordId: { equals: "it-urlaub" } }, overrideAccess: true })).docs[0]).id;
     assert.equal((await http(`/api/closures/${id}`, { method: "DELETE", cookie: admin })).status, 403, "nothing deletable, not even by ADMIN");
     assert.equal(await count("closures", { recordId: { equals: "it-urlaub" } }), 1);

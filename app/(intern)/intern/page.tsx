@@ -198,11 +198,16 @@ export default async function Intern() {
             ) : (
               <p className="cp-muted">Alles geklärt.</p>
             )}
-            {/* 09.5H / 09.5I: standing practice data — quiet secondary links, not daily quick actions. */}
+            {/* 09.5H / 09.5I / 09.5J: standing practice data — quiet secondary links, not daily quick actions. */}
             <ul className="cp-practice-links" aria-label="Praxisdaten">
               <li>
                 <Link href="/intern/sprechzeiten" className="cp-text-link">
                   Regelmäßige Sprechzeiten
+                </Link>
+              </li>
+              <li>
+                <Link href="/intern/sprechstundenarten" className="cp-text-link">
+                  Sprechstundenarten
                 </Link>
               </li>
               <li>

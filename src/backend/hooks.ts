@@ -9,11 +9,12 @@ import { ACUTE_TODAY_MARKER, acuteExceptionProblem } from "../domain/acute.ts";
 import { announcementShapeProblems, normalizeText } from "../domain/announcements.ts";
 import { closureFromDoc, exceptionFromDoc, scheduleFromDoc, verificationToDoc, type ClosureDoc, type ExceptionDoc, type RuleDoc, type WeeklyScheduleDoc } from "../data/payload-mapping.ts";
 import { acuteBoundaryProblems, weeklyScheduleProblems } from "../domain/weekly-plan.ts";
+import { normalizeTypeWording, typeWriteProblems } from "../domain/consultation-types.ts";
 import { activeRole } from "./access.ts";
 import { actorFromUser, auditForWrite, berlinToday, ProvenanceRejected, reviewDueFor, verificationForWrite, withdrawnProvenance, type StaffUserDoc } from "./provenance.ts";
 import { normalizeReplacement, replacementProblems, STRUCTURAL_FIELDS, structuralKey } from "../domain/replacement.ts";
 import { PayloadPracticeRepository, type PayloadReader } from "./payload-repository.ts";
-import { auditOperationOf, changeSetIdOf, isAcuteBaselineWrite, isAcuteTodayWrite, isBootstrap, isHolidayPolicyWrite, isLifecycleWrite, isSpecialDayWrite, isTrustedSeed, isWeeklyScheduleWrite, RejectedError, replacementVerifyMode, revertOfIn, systemActor } from "./server-context.ts";
+import { auditOperationOf, changeSetIdOf, isAcuteBaselineWrite, isAcuteTodayWrite, isBootstrap, isConsultationTypeWrite, isHolidayPolicyWrite, isLifecycleWrite, isSpecialDayWrite, isTrustedSeed, isWeeklyScheduleWrite, RejectedError, replacementVerifyMode, revertOfIn, systemActor } from "./server-context.ts";
 
 type RuleRow = { ruleId?: string; weekday?: string; start?: string; end?: string; consultationType?: string; validFrom?: string | null; validUntil?: string | null; publicNote?: string | null; verification?: unknown };
 const ruleShape = (r: RuleRow) => JSON.stringify([String(r.weekday), r.start, r.end, r.consultationType, r.validFrom ?? null, r.validUntil ?? null, r.publicNote ?? null]);
@@ -140,6 +141,29 @@ export const weeklyScheduleGuardHook: CollectionBeforeChangeHook = async ({ data
   const problems = weekly ? weeklyScheduleProblems(schedule, types, berlinToday()) : acuteBoundaryProblems(schedule);
   if (problems.length) throw new RejectedError(problems[0].message, 409);
   return data;
+};
+
+/**
+ * 09.5J consultation types, EVERY write path (cockpit, REST, admin UI), BEFORE provenance: only the two
+ * trusted physician workflows may write — 09.5J (NON-ACUTE wording) or 09.5E (ACUTE only), never both,
+ * DOCTOR only. The stored code is immutable; label / explanation are validated and normalised with the SAME
+ * pure helper the cockpit uses. The ACUTE workflow owns only the ACUTE label: its explanation stays as stored.
+ * The trusted seed (no account) imports documented data unchanged.
+ */
+export const consultationTypeGuardHook: CollectionBeforeChangeHook = ({ data, req, originalDoc }) => {
+  if (!req.user && isTrustedSeed(req.context)) return data;
+  const regular = isConsultationTypeWrite(req.context);
+  const acute = isAcuteBaselineWrite(req.context);
+  if (regular && acute) throw new RejectedError("Akutsprechstunde und Sprechstundenarten werden getrennt bestätigt.", 400);
+  if (!regular && !acute) throw new RejectedError("Sprechstundenarten werden im Praxis Cockpit unter „Sprechstundenarten“ ärztlich bestätigt.", 403);
+  if (activeRole(req.user) !== "DOCTOR") throw new RejectedError("Diese Angabe kann nur eine Ärztin oder ein Arzt bestätigen.", 403);
+  const stored = (originalDoc ?? null) as { code?: string; label?: string; explanation?: string | null } | null;
+  if (acute && stored && data.explanation !== undefined && (data.explanation ?? null) !== (stored.explanation ?? null)) throw new RejectedError("Hier darf nur die Akutsprechstunde geändert werden.", 400);
+  const merged = { code: data.code ?? stored?.code, label: data.label ?? stored?.label, explanation: acute ? stored?.explanation : data.explanation !== undefined ? data.explanation : stored?.explanation };
+  const problems = typeWriteProblems({ ...merged, code: data.code ?? undefined }, stored, regular ? "REGULAR" : "ACUTE");
+  if (problems.length) throw new RejectedError(problems[0], 400);
+  const wording = normalizeTypeWording(merged).wording!;
+  return { ...data, label: wording.label, ...(acute ? {} : { explanation: wording.explanation ?? null }) };
 };
 
 type HolidayRow = { date?: string; name?: string | null };

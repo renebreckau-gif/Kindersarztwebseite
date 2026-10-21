@@ -6,7 +6,7 @@ import type { CollectionBeforeChangeHook, CollectionConfig, Field, GlobalConfig 
 import type { ConfirmableKind } from "../domain/governance.ts";
 import { ACCESS, activeRole, adminOnly, adminOrDoctorHolidayPolicy, signedIn } from "./access.ts";
 import { CONSULTATION_TYPE_OPTIONS, localDate, localTime, recordId, verification } from "./fields.ts";
-import { acuteExceptionHook, announcementShapeHook, auditHook, globalAuditHook, holidayPolicyHook, provenanceHook, weeklyScheduleGuardHook, publishGuardHook, replacementGuardHook, retiredRecordGuard, staffCreateGuard, staffOperationGuard } from "./hooks.ts";
+import { acuteExceptionHook, announcementShapeHook, auditHook, globalAuditHook, consultationTypeGuardHook, holidayPolicyHook, provenanceHook, weeklyScheduleGuardHook, publishGuardHook, replacementGuardHook, retiredRecordGuard, staffCreateGuard, staffOperationGuard } from "./hooks.ts";
 import { ANNOUNCEMENT_DEFAULT_PRIORITY, ANNOUNCEMENT_TEXT_MAX, ANNOUNCEMENT_TITLE_MAX } from "../domain/announcements.ts";
 import { isLifecycleWrite, RejectedError } from "./server-context.ts";
 
@@ -160,7 +160,8 @@ export const ConsultationTypes = tracked(
     { name: "label", label: "Bezeichnung", type: "text", required: true, maxLength: 80 },
     { name: "explanation", label: "Erklärung", type: "textarea", maxLength: 400 },
   ],
-  { labels: { singular: "Sprechstundenart", plural: "Sprechstundenarten" } },
+  // 09.5J: written ONLY by the trusted physician workflows (regular types / acute baseline) — guard first.
+  { labels: { singular: "Sprechstundenart", plural: "Sprechstundenarten" }, validate: [consultationTypeGuardHook] },
 );
 
 export const OpeningHourExceptions = tracked(

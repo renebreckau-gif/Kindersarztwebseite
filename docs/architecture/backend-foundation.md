@@ -533,6 +533,24 @@ Safety and seeding:
 - Tests / diagnostics only; the public site stays STATIC.
 - Finding: a pg pool connection terminated by a DB shutdown raises an unhandled `error` event. Plain Node processes crash; the Next.js server logs it and survives. This must be handled deliberately before public Payload reads.
 
+### 17.11g Sprechstundenarten (Phase 09.5J, 2026-10-21)
+
+- **REST hardening:**
+  - `consultationTypes` create / update = DOCTOR **and** a trusted workflow context (`doctorConsultationTypeWorkflow`): the new `SERVER_CONTEXT.CONSULTATION_TYPE` (NON-ACUTE wording) or `ACUTE_BASELINE` (ACUTE only).
+  - Generic REST / admin-UI writes are refused for every role (403); before 09.5J any DOCTOR REST write produced verified wording.
+  - `commitAcuteBaseline` now writes the ACUTE type under `ACUTE_BASELINE`.
+  - `scripts/seed-dev.ts` imports types as a trusted seed.
+- **`consultationTypeGuardHook`** runs on every write path, before provenance. It enforces:
+  - only one of the two contexts, DOCTOR only;
+  - the stored code is immutable;
+  - the regular context never writes ACUTE, and the acute context only ACUTE (and cannot change the stored explanation);
+  - label / explanation are validated and normalised with the same pure helper as the cockpit (`src/domain/consultation-types.ts`).
+
+  The trusted seed is the explicit exception.
+- **Provenance / audit:** existing kind `CONSULTATION_TYPE` (DOCTOR, reviewDue + 182 days); audit via the collection hook in the same transaction (VERIFY through the trusted `AUDIT_OPERATION`, else UPDATE). Rollback integration-tested. No schema change.
+- Clean proof: step 25/25 `21-consultation-types.test.ts`; step 6 asserts the closed DOCTOR REST write.
+- **DB_CONNECTION_ERROR_HANDLING = OPEN** (09.6B finding, not touched here).
+
 ### 17.12 npm audit (2026-10-13): 16 findings, none fixed by force
 
 | Package (path) | Severity | Reachable here? | Fix |
