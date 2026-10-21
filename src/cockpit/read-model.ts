@@ -227,6 +227,7 @@ export function reviewItems(data: PulsData, today: LocalDate, announcements: Ann
     }
   }
 
+  const flaggedPractices = new Set<string>();
   for (const c of notExpired(data.closures, today)) {
     for (const a of c.replacements) {
       if (compareDates(a.until, today) < 0) continue;
@@ -234,13 +235,30 @@ export function reviewItems(data: PulsData, today: LocalDate, announcements: Ann
       const from = compareDates(a.from, today) < 0 ? today : a.from;
       const usableAt = (d: LocalDate) => p && ["CURRENT", "REVIEW_DUE"].includes(evaluateFreshness(p.verification, d, "replacementPractice"));
       if (!p || !usableAt(from) || !usableAt(a.until)) {
+        if (p) flaggedPractices.add(p.id);
         items.push({
           id: `replacement-${c.id}-${a.replacementPracticeId}-${a.from}`,
           title: `Vertretung ${p?.practiceName ?? "unbekannt"} nicht nutzbar`,
           text: `${CLOSURE_TITLE[c.kind]} ${dateRange(c.startDate, c.endDate)}: Die Vertretungsangaben sind für ${dateRange(a.from, a.until)} nicht ärztlich bestätigt oder laufen vorher ab. Die Website zeigt dann nur die Notfall-Hinweise.`,
+          // 09.5G: straight to the directory entry (physician confirmation / ADMIN correction).
+          ...(p ? { action: { label: "Vertretung prüfen", href: `/intern/vertretungen/${encodeURIComponent(p.id)}` } } : {}),
         });
       }
     }
+  }
+
+  // 09.5G: a once-confirmed directory entry whose confirmation EXPIRED needs a physician — one item
+  // per practice, merged with a closure warning for the same practice. Never-confirmed ADMIN drafts
+  // stay in /intern/vertretungen ("ärztliche Bestätigung erforderlich"), not on the home screen.
+  for (const p of data.replacementPractices) {
+    if (flaggedPractices.has(p.id) || p.verification.status !== "VERIFIED_CURRENT") continue;
+    if (evaluateFreshness(p.verification, today, "replacementPractice") !== "REVIEW_EXPIRED") continue;
+    items.push({
+      id: `replacement-review-${p.id}`,
+      title: "Vertretungspraxis erneut bestätigen",
+      text: `Die ärztliche Bestätigung von ${p.practiceName} ist abgelaufen. Die Praxis kann bis zur erneuten Bestätigung nicht als Vertretung ausgewählt werden.`,
+      action: { label: "Vertretung prüfen", href: `/intern/vertretungen/${encodeURIComponent(p.id)}` },
+    });
   }
 
   for (const x of [...notExpired(data.closures, today), ...notExpired(data.exceptions, today)]) {

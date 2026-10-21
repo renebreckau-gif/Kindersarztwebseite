@@ -6,7 +6,7 @@ import type { CollectionBeforeChangeHook, CollectionConfig, Field, GlobalConfig 
 import type { ConfirmableKind } from "../domain/governance.ts";
 import { ACCESS, activeRole, adminOnly, signedIn } from "./access.ts";
 import { CONSULTATION_TYPE_OPTIONS, localDate, localTime, recordId, verification } from "./fields.ts";
-import { acuteExceptionHook, announcementShapeHook, auditHook, holidayPolicyHook, provenanceHook, publishGuardHook, retiredRecordGuard, staffCreateGuard, staffOperationGuard } from "./hooks.ts";
+import { acuteExceptionHook, announcementShapeHook, auditHook, holidayPolicyHook, provenanceHook, publishGuardHook, replacementGuardHook, retiredRecordGuard, staffCreateGuard, staffOperationGuard } from "./hooks.ts";
 import { ANNOUNCEMENT_DEFAULT_PRIORITY, ANNOUNCEMENT_TEXT_MAX, ANNOUNCEMENT_TITLE_MAX } from "../domain/announcements.ts";
 import { isLifecycleWrite, RejectedError } from "./server-context.ts";
 
@@ -226,7 +226,8 @@ export const ReplacementPractices = tracked(
     { name: "website", label: "Webseite", type: "text" },
     { name: "publicNote", label: "Öffentlicher Hinweis", type: "text", maxLength: 160 },
   ],
-  { labels: { singular: "Vertretungspraxis", plural: "Vertretungspraxen" } },
+  // 09.5G: ADMIN = structural data (always unverified afterwards), DOCTOR = confirmation of the stored data.
+  { validate: [replacementGuardHook], labels: { singular: "Vertretungspraxis", plural: "Vertretungspraxen" } },
 );
 
 export const Announcements = tracked(

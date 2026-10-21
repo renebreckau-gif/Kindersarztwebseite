@@ -2,6 +2,7 @@
 // UI hiding is never the only protection. No role gets a bypass around server validation.
 
 import { STAFF_ROLES, type StaffRole } from "../domain/governance.ts";
+import { replacementVerifyMode } from "./server-context.ts";
 
 /** Minimal shape of the authenticated Payload user (the `staff` auth collection). */
 export interface StaffUserLike {
@@ -9,7 +10,7 @@ export interface StaffUserLike {
   role?: string | null;
   active?: boolean | null;
 }
-type ArgsLike = { req: { user?: StaffUserLike | null } };
+type ArgsLike = { req: { user?: StaffUserLike | null; context?: Record<string, unknown> } };
 
 /** Role of an active, signed-in staff account — or null (signed out, disabled, unknown role). */
 export function activeRole(user: StaffUserLike | null | undefined): StaffRole | null {
@@ -21,6 +22,15 @@ export const signedIn = ({ req }: ArgsLike) => activeRole(req.user) !== null;
 export const doctorOnly = ({ req }: ArgsLike) => activeRole(req.user) === "DOCTOR";
 export const doctorOrAdmin = ({ req }: ArgsLike) => ["DOCTOR", "ADMIN"].includes(activeRole(req.user) ?? "");
 export const adminOnly = ({ req }: ArgsLike) => activeRole(req.user) === "ADMIN";
+/**
+ * 09.5G replacement directory: ADMIN writes structural data; a DOCTOR may update ONLY through the
+ * trusted server verification workflow (server context, never reachable over HTTP) — so a generic
+ * REST write by a DOCTOR can never create verified data with browser-chosen content.
+ */
+export const adminOrDoctorVerification = ({ req }: ArgsLike) => {
+  const role = activeRole(req.user);
+  return role === "ADMIN" || (role === "DOCTOR" && replacementVerifyMode(req.context) !== undefined);
+};
 /** History is kept: operational records are ended or replaced, never deleted through the API. */
 export const never = () => false;
 
@@ -41,8 +51,9 @@ export const ACCESS = {
   consultationTypes: { read: signedIn, create: doctorOnly, update: doctorOnly, delete: never },
   openingHourExceptions: { read: signedIn, create: signedIn, update: signedIn, delete: never },
   closures: { read: signedIn, create: signedIn, update: signedIn, delete: never },
-  // ADMIN enters directory data (stays unverified); DOCTOR confirms it.
-  replacementPractices: { read: signedIn, create: doctorOrAdmin, update: doctorOrAdmin, delete: never },
+  // ADMIN enters / corrects directory data (stays unverified); DOCTOR confirms it — only via the
+  // trusted verification workflow (09.5G). Nobody deletes.
+  replacementPractices: { read: signedIn, create: adminOnly, update: adminOrDoctorVerification, delete: never },
   announcements: { read: signedIn, create: signedIn, update: signedIn, delete: never },
   // Append-only: written by server hooks with overrideAccess only.
   auditEvents: { read: doctorOrAdmin, create: never, update: never, delete: never },

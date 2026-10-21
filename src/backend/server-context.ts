@@ -30,17 +30,27 @@ export const SERVER_CONTEXT = {
   ACUTE_TODAY: "praxisAcuteTodayWrite",
   /** Phase 09.5F: the special-day workflow may write the internal special-day marker. */
   SPECIAL_DAY: "praxisSpecialDayWrite",
+  /**
+   * Phase 09.5G: the physician replacement-practice workflow ("VERIFY" confirms the STORED data,
+   * "WITHDRAW" = "Nicht mehr als Vertretung verwenden"). Server code only — never HTTP input.
+   */
+  REPLACEMENT_VERIFY: "praxisReplacementVerify",
 } as const;
 
 export const isLifecycleWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.LIFECYCLE] === true;
 export const isAcuteBaselineWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.ACUTE_BASELINE] === true;
 export const isAcuteTodayWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.ACUTE_TODAY] === true;
 export const isSpecialDayWrite = (ctx: Record<string, unknown> | undefined | null) => ctx?.[SERVER_CONTEXT.SPECIAL_DAY] === true;
+/** The physician replacement action of this write, if the trusted server workflow set one. */
+export function replacementVerifyMode(ctx: Record<string, unknown> | undefined | null): "VERIFY" | "WITHDRAW" | undefined {
+  const v = ctx?.[SERVER_CONTEXT.REPLACEMENT_VERIFY];
+  return v === "VERIFY" || v === "WITHDRAW" ? v : undefined;
+}
 
-/** Semantic audit operation set by the trusted server path (validated). VERIFY: first physician confirmation (09.5E). */
-export function auditOperationOf(ctx: Record<string, unknown> | undefined | null): "SUPERSEDE" | "REVERT" | "VERIFY" | undefined {
+/** Semantic audit operation set by the trusted server path (validated). VERIFY: physician confirmation (09.5E/G); END: withdrawn (09.5G). */
+export function auditOperationOf(ctx: Record<string, unknown> | undefined | null): "SUPERSEDE" | "REVERT" | "VERIFY" | "END" | undefined {
   const v = ctx?.[SERVER_CONTEXT.AUDIT_OPERATION];
-  return v === "SUPERSEDE" || v === "REVERT" || v === "VERIFY" ? v : undefined;
+  return v === "SUPERSEDE" || v === "REVERT" || v === "VERIFY" || v === "END" ? v : undefined;
 }
 
 export function revertOfIn(ctx: Record<string, unknown> | undefined | null): string | undefined {

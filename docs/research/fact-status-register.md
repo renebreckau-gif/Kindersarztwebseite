@@ -616,7 +616,7 @@ Shared fields for F35–F39:
 - **RISK IF INCORRECT:** HIGH — families sent to wrong practice/phone
 - **REQUIRED CONFIRMATION:** Practice + each replacement practice's own data; resolve Kreuter/Fuchs relationship and Reich address
 - **FEATURES AFFECTED:** Vertretung, PRAXIS PULS
-- **NOTES:** Third-party data (source-policy §3). Only reusable as a directory after verification.
+- **NOTES:** Third-party data (source-policy §3). Only reusable as a directory after verification. 2026-10-21 (09.5G): the technical directory + physician-verification workflow now exists in the cockpit (`/intern/vertretungen`). Nothing was imported; this fact stays TO_BE_CONFIRMED until the practice enters and a physician confirms real entries.
 
 ### F54 — Upcoming closures 2026/2027
 - **CURRENT VALUE / CLAIM:** none published

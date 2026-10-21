@@ -154,9 +154,9 @@ describe("Website-Vorschau", () => {
 });
 
 describe("role-aware navigation", () => {
-  test("ALL: Übersicht + Website-Vorschau; ADMIN additionally Verwaltung", () => {
-    for (const role of ["STAFF", "DOCTOR"] as const) assert.deepEqual(cockpitNav(role).map((n) => n.href), ["/intern", "/intern/vorschau"]);
-    assert.deepEqual(cockpitNav("ADMIN").map((n) => n.href), ["/intern", "/intern/vorschau", "/intern/admin"]);
+  test("ALL: Übersicht + Website-Vorschau + Vertretungen (09.5G); ADMIN additionally Verwaltung", () => {
+    for (const role of ["STAFF", "DOCTOR"] as const) assert.deepEqual(cockpitNav(role).map((n) => n.href), ["/intern", "/intern/vorschau", "/intern/vertretungen"]);
+    assert.deepEqual(cockpitNav("ADMIN").map((n) => n.href), ["/intern", "/intern/vorschau", "/intern/vertretungen", "/intern/admin"]);
   });
 });
 

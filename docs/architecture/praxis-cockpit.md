@@ -21,7 +21,7 @@ Builds on: [cms-requirements.md](cms-requirements.md) · [cms-comparison.md](cms
 | **Internal routes** | `/intern/anmelden` (real login); `/intern` (real cockpit: Praxis heute from the database, Nächste Termine, Prüfen); `/intern/heute/frueher-schliessen` and `/intern/heute/geschlossen` (**real writes** to the cockpit database, 09.5A); `/intern/urlaub` and `/intern/urlaub/[eintrag]` (**real** Urlaub / Schließzeit, create and edit, 09.5C; write entry POST `/intern/urlaub/veroeffentlichen`, confirmation `/intern/urlaub/veroeffentlicht`); `/intern/hinweis` and `/intern/hinweis/[eintrag]` (**real** "Hinweis veröffentlichen", 09.5D; write entry POST `/intern/hinweis/veroeffentlichen`, confirmation `/intern/hinweis/veroeffentlicht`); `/intern/verlauf/[vorgang]/zuruecknehmen` (undo preview; the undo itself is an authenticated POST to `/intern/verlauf/ruecknahme`) and `/intern/verlauf/zurueckgenommen` (09.5B); `/intern/vorschau` (Website-Vorschau + comparison with the static website); `/intern/admin` (ADMIN only). Available where the real staff portal is available: STAGING with a configured database; in PRODUCTION only with `RELEASE.staffPortalProductionEnabled` (currently `false`). On Vercel staging (no database) they answer 404. `/intern/akutsprechstunde` (**real** Akutsprechstunde, 09.5E: physician baseline `/einrichten` → POST `/bestaetigen` → `/bestaetigt`, DOCTOR only; today change `/heute` → POST `/intern/heute/veroeffentlichen`, every operational role on a READY baseline). `/intern/sonderzeiten` and `/intern/sonderzeiten/[eintrag]` (**real** Sonderöffnungszeiten / Feiertag klären, 09.5F; optional `?datum=`; write entry POST `/intern/sonderzeiten/veroeffentlichen`, confirmation `/intern/sonderzeiten/veroeffentlicht`). |
 | **Review hub** | `/review` is **project review tooling** (developers and reviewers): links to the website, the cockpit prototype and Mein Arztbesuch. It is **not** the staff entry; that is `/mitarbeiter`. Available while `SITE_STAGE = "STAGING"`; 404 in PRODUCTION. No `/intern` link, because the deployed staging has no database. |
 | **Mein Arztbesuch** | Visible on STAGING for review (`SITE_STAGE`). Not released for production: `meinArztbesuchPublished = false`, formal approvals open (`meinArztbesuchApproved = false`, records truthful); site stays `noindex` (`indexable = false`). |
-| **Next phase** | Not started; scope set by the next brief. Done: Akutsprechstunde (09.5E, `98d5b41`), date-specific Sonderöffnungszeiten / holiday resolution (09.5F). Separate later decisions: replacement-directory verification, a global holiday policy, a physician-governed weekly-schedule editor, the public data cutover. |
+| **Next phase** | Not started; scope set by the next brief. Done: Akutsprechstunde (09.5E, `98d5b41`), date-specific Sonderöffnungszeiten / holiday resolution (09.5F, `58d4529`), replacement-practice directory + physician verification (09.5G). Separate later decisions: a global holiday policy, a physician-governed weekly-schedule editor, the public data cutover. |
 | **Launch blockers** | `LIVE_HOST_ACCESS = OPEN` (existing webhost not accessible), and domain/DNS access unknown (project-blockers LB-13/LB-14). Production backend infrastructure: LB-15. None of these blocks staging or development. |
 
 
@@ -1170,7 +1170,7 @@ Still `DATA_SOURCE = "STATIC"`: `/heute` keeps the static acute fallback ("Aktue
 
 ## Phase 09.5F note: date-specific Sonderöffnungszeiten + Feiertag klären (2026-10-21)
 
-Baseline `98d5b41` (09.5E complete). One workflow for "geänderte Sprechzeiten an einem bestimmten Tag", also used to resolve an unresolved public holiday. A DATE-SPECIFIC operational exception — not a weekly-schedule editor, not recurring rules, not a global holiday policy, not a bulk editor.
+Baseline `98d5b41` (09.5E complete) · **complete, commit `58d4529`**. One workflow for "geänderte Sprechzeiten an einem bestimmten Tag", also used to resolve an unresolved public holiday. A DATE-SPECIFIC operational exception — not a weekly-schedule editor, not recurring rules, not a global holiday policy, not a bulk editor.
 
 ### Model and routes
 
@@ -1203,4 +1203,40 @@ Same pipeline as 09.5A–E (server draft → engine preview with useful moments:
 ### Public website
 
 Still `DATA_SOURCE = "STATIC"`: a database special day or holiday resolution appears only in `/intern` and `/intern/vorschau`. Confirmation: "In der Testumgebung veröffentlicht." / "Die öffentliche Website verwendet weiterhin die bisherigen Daten." The public review gate (10.5A.1) is unchanged.
+
+## Phase 09.5G note: Vertretungspraxen — directory management + physician verification (2026-10-21)
+
+Baseline `58d4529` (09.5F complete). Task-oriented lifecycle of the replacement-practice directory. **No real directory was imported or seeded** (F53 stays `TO_BE_CONFIRMED`); every fixture is artificial ("Praxis Beispiel …", `example.invalid`).
+
+### Audit (before)
+
+- Collection access allowed **DOCTOR or ADMIN** to create / update; a DOCTOR's generic REST write produced VERIFIED_CURRENT provenance for browser-chosen data. ADMIN writes already ended TO_BE_CONFIRMED (correct).
+- No server shape validation beyond required / max length.
+- The old lab prototype (`/lab/praxis-cockpit/vertretung-pruefen`) let ADMIN confirm — not carried over.
+- Urlaub already offered only usable entries (`evaluateFreshness` + `isUsable`).
+
+### Authority (enforced on the server)
+
+| Role | Directory |
+|---|---|
+| STAFF | read; uses only usable entries in Urlaub / Heute geschlossen |
+| ADMIN | create and correct the structural data — always TO_BE_CONFIRMED afterwards (a correction invalidates a previous confirmation automatically); never confirms |
+| DOCTOR | confirms exactly the STORED data, or "Nicht mehr als Vertretung verwenden"; no structural editing — generic REST create / update by a DOCTOR is refused |
+
+### Workflow
+
+- `/intern/vertretungen` (list, cards, status in words: "Bestätigt bis 21. April 2027", "Noch nicht ärztlich bestätigt", "Bestätigung abgelaufen", "Nicht mehr zur Veröffentlichung freigegeben"); `/intern/vertretungen/neu` (ADMIN); `/intern/vertretungen/[eintrag]` (detail: ADMIN edit with AKTUELL / NACH DER ÄNDERUNG, changed fields marked, "Nach dieser Änderung muss die Vertretungspraxis erneut ärztlich bestätigt werden."; DOCTOR confirmation with the stored data read-only, the instruction and the explicit checkbox "Ich habe die Vertretung mit der Praxis abgestimmt und die angezeigten Kontaktdaten geprüft."); POST `/speichern` (ADMIN), POST `/bestaetigen` (DOCTOR); `/gespeichert` (truthful confirmation — never "freigegeben" or "auf der Website").
+- Fields: Praxisname, Straße, PLZ, Ort, Telefon; optional E-Mail, Webseite (http/https only), öffentlicher Hinweis (≤ 160). No contact-person names are collected or shown.
+- Freshness only via `evaluateFreshness(…, "replacementPractice")` / `isUsable`. Current technical policy: confirmation valid for rund sechs Monate (reviewDue = today + 182, standing-data policy, grace 0) — a project safety policy, not a legal requirement. A DOCTOR sees "Erneut bestätigen" when expired or within 30 days of reviewDue.
+- Concurrency: a fingerprint of the stored record (incl. verification) travels with every form; the POST re-reads inside the transaction — "Die Angaben wurden inzwischen geändert. Bitte prüfen Sie die Vertretungspraxis erneut." No last-write-wins for ADMIN edits either.
+- Audit: CREATE / UPDATE (ADMIN), VERIFY (DOCTOR), END ("Nicht mehr als Vertretung verwenden" = existing status OUTDATED_DO_NOT_PUBLISH, immediately unusable). One transaction each; a failing audit write rolls everything back. **No quick undo** — standing reference data; correction = new ADMIN edit (unverified) or new physician confirmation; no lifecycle fields.
+- No free-text replacement anywhere: closures reference directory entries only.
+
+### Cockpit
+
+- Navigation "Vertretungen" for every role (actions role-specific). Home unchanged except Prüfen: the closure warning for an unusable replacement now links "Vertretung prüfen"; a once-confirmed entry whose confirmation expired raises one item "Vertretungspraxis erneut bestätigen" (merged with a closure warning for the same practice). Never-confirmed ADMIN drafts are listed only in `/intern/vertretungen`.
+
+### Public website
+
+Still `DATA_SOURCE = "STATIC"`; directory data from the database never reaches the public site.
 

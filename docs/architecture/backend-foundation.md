@@ -503,6 +503,12 @@ Safety and seeding:
 
 - No schema change, no new collection. The exception guard hook (`acuteExceptionHook`) now protects a second server-only marker, `COCKPIT_SPECIAL_DAY` (context `SERVER_CONTEXT.SPECIAL_DAY`, set only by the cockpit publish path); client writes that carry it, or that edit a record carrying it, are refused (403). Lifecycle and REVERT writes of the server's undo remain allowed.
 
+### 17.11c Vertretungspraxen (Phase 09.5G, 2026-10-21)
+
+- **Access hardened:** `replacementPractices` create = ADMIN only; update = ADMIN, or DOCTOR **only** with the trusted server context `SERVER_CONTEXT.REPLACEMENT_VERIFY` ("VERIFY" / "WITHDRAW", server code only — never HTTP). A DOCTOR can no longer create verified directory data with browser-chosen content via REST.
+- **`replacementGuardHook`** (every write path): in the physician context only a DOCTOR, only on an existing record, and no structural change (the STORED values are written back; a differing value is refused); otherwise server validation + normalisation, after which the provenance hook makes ADMIN writes TO_BE_CONFIRMED.
+- **Provenance / audit:** VERIFY → VERIFIED_CURRENT generated from the DOCTOR session (reviewDue + 182 days); WITHDRAW → OUTDATED_DO_NOT_PUBLISH; audit operations VERIFY / END are accepted trusted operations. No schema change.
+
 ### 17.12 npm audit (2026-10-13): 16 findings, none fixed by force
 
 | Package (path) | Severity | Reachable here? | Fix |

@@ -44,6 +44,11 @@ const normalizedPuls = (data: PulsData) => ({
     holidayPolicy: data.holidayPolicy,
 });
 
+/** 09.5G: fingerprint of ONE stored record (e.g. a replacement practice incl. its verification). */
+export function recordFingerprint(value: unknown): string {
+  return hash(value);
+}
+
 export function datasetFingerprint(data: PulsData): string {
   return hash(normalizedPuls(data));
 }

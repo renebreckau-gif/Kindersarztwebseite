@@ -9,9 +9,10 @@ import { ACUTE_TODAY_MARKER, acuteExceptionProblem } from "../domain/acute.ts";
 import { announcementShapeProblems, normalizeText } from "../domain/announcements.ts";
 import { closureFromDoc, exceptionFromDoc, verificationToDoc, type ClosureDoc, type ExceptionDoc } from "../data/payload-mapping.ts";
 import { activeRole } from "./access.ts";
-import { actorFromUser, auditForWrite, berlinToday, ProvenanceRejected, reviewDueFor, verificationForWrite, type StaffUserDoc } from "./provenance.ts";
+import { actorFromUser, auditForWrite, berlinToday, ProvenanceRejected, reviewDueFor, verificationForWrite, withdrawnProvenance, type StaffUserDoc } from "./provenance.ts";
+import { normalizeReplacement, replacementProblems, STRUCTURAL_FIELDS, structuralKey } from "../domain/replacement.ts";
 import { PayloadPracticeRepository, type PayloadReader } from "./payload-repository.ts";
-import { auditOperationOf, changeSetIdOf, isAcuteBaselineWrite, isAcuteTodayWrite, isBootstrap, isLifecycleWrite, isSpecialDayWrite, isTrustedSeed, RejectedError, revertOfIn, systemActor } from "./server-context.ts";
+import { auditOperationOf, changeSetIdOf, isAcuteBaselineWrite, isAcuteTodayWrite, isBootstrap, isLifecycleWrite, isSpecialDayWrite, isTrustedSeed, RejectedError, replacementVerifyMode, revertOfIn, systemActor } from "./server-context.ts";
 
 type RuleRow = { ruleId?: string; weekday?: string; start?: string; end?: string; consultationType?: string; validFrom?: string | null; validUntil?: string | null; publicNote?: string | null; verification?: unknown };
 const ruleShape = (r: RuleRow) => JSON.stringify([String(r.weekday), r.start, r.end, r.consultationType, r.validFrom ?? null, r.validUntil ?? null, r.publicNote ?? null]);
@@ -59,6 +60,15 @@ export const provenanceHook =
     } catch (e) {
       if (e instanceof ProvenanceRejected) throw new RejectedError(e.message, actor ? 403 : 401);
       throw e;
+    }
+    // 09.5G: "Nicht mehr als Vertretung verwenden" — immediately unusable (existing OUTDATED status).
+    if (kind === "REPLACEMENT_PRACTICE" && replacementVerifyMode(req.context) === "WITHDRAW") {
+      try {
+        return { ...data, verification: verificationToDoc(withdrawnProvenance(actor, today)) };
+      } catch (e) {
+        if (e instanceof ProvenanceRejected) throw new RejectedError(e.message, actor ? 403 : 401);
+        throw e;
+      }
     }
     // 09.5E: only the trusted acute-baseline workflow (server context) may change the ACUTE subset alone.
     if (isAcuteBaselineWrite(req.context) && kind === "WEEKLY_SCHEDULE") {
@@ -116,6 +126,32 @@ export const acuteExceptionHook: CollectionBeforeChangeHook = async ({ data, req
   const problem = acuteExceptionProblem(base, exceptionFromDoc(merged as ExceptionDoc), berlinToday());
   if (problem) throw new RejectedError(problem, 409);
   return data;
+};
+
+/**
+ * 09.5G replacement directory, EVERY write path (cockpit, REST, admin UI):
+ * - physician workflow (trusted context): DOCTOR only, on an existing record, and NOTHING structural
+ *   may change — the confirmation applies to exactly the stored data (incoming structural fields are
+ *   dropped; a differing value is refused);
+ * - any other write (ADMIN): server validation + normalisation; the provenance hook then makes the
+ *   record TO_BE_CONFIRMED (ADMIN cannot confirm), so a structural correction always needs a new
+ *   physician confirmation.
+ */
+export const replacementGuardHook: CollectionBeforeChangeHook = ({ data, req, originalDoc, operation }) => {
+  if (!req.user && isTrustedSeed(req.context)) return data;
+  const mode = replacementVerifyMode(req.context);
+  if (mode) {
+    if (activeRole(req.user) !== "DOCTOR" || operation !== "update" || !originalDoc) throw new RejectedError("Diese Angabe kann nur eine Ärztin oder ein Arzt bestätigen.", 403);
+    if (structuralKey({ ...originalDoc, ...data }) !== structuralKey(originalDoc)) throw new RejectedError("Bei der ärztlichen Bestätigung können die Angaben nicht geändert werden.", 400);
+    // Exactly the STORED values are written back (Payload validates the hook's output); the provenance
+    // hook then adds the physician's verification.
+    const stored = originalDoc as Record<string, unknown>;
+    return Object.fromEntries(["recordId", ...STRUCTURAL_FIELDS].map((f) => [f, stored[f]]));
+  }
+  const merged = normalizeReplacement({ ...(originalDoc ?? {}), ...data });
+  const problems = replacementProblems(merged);
+  if (problems.length) throw new RejectedError(problems.map((p) => p.message).join(" "), 400);
+  return { ...data, ...merged, email: merged.email ?? null, website: merged.website ?? null, publicNote: merged.publicNote ?? null };
 };
 
 /**

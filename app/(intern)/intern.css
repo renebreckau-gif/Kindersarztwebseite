@@ -1168,3 +1168,98 @@ body.intern {
   }
 }
 
+/* ---- 09.5G Vertretungspraxen: one practice per card (no wide table); calm attention, never alarm ---- */
+.cp-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.cp-dir-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  gap: var(--space-4);
+}
+.cp-dir-card {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  min-width: 0;
+}
+.cp-dir-card .cp-btn {
+  justify-self: start;
+  margin-top: var(--space-2);
+}
+.cp-dir-status {
+  margin: 0;
+  font-weight: 600;
+}
+.cp-dir-attention::before {
+  content: "";
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  margin-right: var(--space-2);
+  border-radius: 50%;
+  background: var(--palette-coral, #e8846b);
+}
+.cp-dir-meta {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.cp-dir-data div {
+  display: grid;
+  grid-template-columns: minmax(0, 10rem) minmax(0, 1fr);
+  gap: var(--space-3);
+}
+.cp-dir-data dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.cp-dir-changes tr.cp-dir-changed td:last-child {
+  font-weight: 600;
+}
+.cp-dir-changes .cp-badge {
+  margin-left: var(--space-2);
+}
+@media (max-width: 30em) {
+  .cp-dir-data div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .cp-dir-changes thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .cp-dir-changes tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    padding: var(--space-2) 0;
+    border-top: 1px solid var(--line);
+  }
+  .cp-dir-changes tbody th {
+    grid-column: 1 / -1;
+    border-top: 0;
+  }
+  .cp-dir-changes td {
+    border-top: 0;
+  }
+}
+
+/* 09.5G: four navigation entries (ADMIN) — on phones they wrap instead of being cut off. */
+@media (max-width: 30em) {
+  .cp-nav {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    gap: 0 var(--space-1);
+  }
+}
+

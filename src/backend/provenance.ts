@@ -40,6 +40,12 @@ export function verificationForWrite(actor: Actor | null, kind: ConfirmableKind,
   throw new ProvenanceRejected("Diese Angabe kann nur eine Ärztin oder ein Arzt bestätigen.");
 }
 
+/** 09.5G "Nicht mehr als Vertretung verwenden": immediately unusable, attributed to the physician. */
+export function withdrawnProvenance(actor: Actor | null, today: LocalDate): FactVerification {
+  if (!actor || !canConfirm(actor.role, "REPLACEMENT_PRACTICE")) throw new ProvenanceRejected("Diese Angabe kann nur eine Ärztin oder ein Arzt bestätigen.");
+  return { ...buildProvenance(actor, "REPLACEMENT_PRACTICE", today, today), status: "OUTDATED_DO_NOT_PUBLISH" };
+}
+
 export function auditForWrite(input: {
   id: string;
   now: Date;

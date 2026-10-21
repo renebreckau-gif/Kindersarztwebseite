@@ -211,3 +211,22 @@ export function specialDayQuery(i: SpecialDayInput): string {
   if (i.message) p.set("hinweis", i.message);
   return p.toString();
 }
+
+// ---------------------------------------------------------------- Vertretungspraxen (09.5G)
+
+/** Only the structural fields an ADMIN types — never id, provenance, status or role. */
+export function parseReplacement(src: { get: Get }): { practiceName?: string; street?: string; postalCode?: string; city?: string; phone?: string; email?: string; website?: string; publicNote?: string } {
+  return {
+    practiceName: src.get("name"),
+    street: src.get("strasse"),
+    postalCode: src.get("plz"),
+    city: src.get("ort"),
+    phone: src.get("telefon"),
+    email: src.get("email"),
+    website: src.get("webseite"),
+    publicNote: src.get("hinweis"),
+  };
+}
+
+export const REPLACEMENT_PARAM = { practiceName: "name", street: "strasse", postalCode: "plz", city: "ort", phone: "telefon", email: "email", website: "webseite", publicNote: "hinweis" } as const;
+

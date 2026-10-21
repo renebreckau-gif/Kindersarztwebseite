@@ -12,7 +12,10 @@
 import { randomUUID } from "node:crypto";
 import { commitTransaction, createLocalReq, initTransaction, killTransaction, type Payload, type PayloadRequest } from "payload";
 import type { PulsData } from "../../domain/practice-status.ts";
-import { announcementToDoc, closureToDoc, exceptionToDoc, verificationToDoc, type RuleDoc, type WeeklyScheduleDoc } from "../../data/payload-mapping.ts";
+import { announcementToDoc, closureToDoc, exceptionToDoc, replacementPracticeFromDoc, verificationToDoc, type ReplacementPracticeDoc, type RuleDoc, type WeeklyScheduleDoc } from "../../data/payload-mapping.ts";
+import type { ReplacementInput } from "../../domain/replacement.ts";
+import { berlinToday } from "../../backend/provenance.ts";
+import { REPLACEMENT_STALE, replacementDraft, replacementFingerprint, replacementRecordId } from "./replacement.ts";
 import { ACUTE_LABEL, previewVerification } from "../../domain/acute.ts";
 import type { Announcement } from "../../domain/content-types.ts";
 import { activeRole, type StaffUserLike } from "../../backend/access.ts";
@@ -56,7 +59,7 @@ export async function previewWorkflow(payload: Payload, request: WorkflowRequest
 }
 
 /** A new record never reuses the id of an existing (also RETIRED) record: append -2, -3, … */
-async function freeRecordId(payload: Payload, req: PayloadRequest, collection: LifecycleCollection, wanted: string): Promise<string> {
+async function freeRecordId(payload: Payload, req: PayloadRequest, collection: LifecycleCollection | "replacementPractices", wanted: string): Promise<string> {
   for (let n = 1; ; n++) {
     const id = n === 1 ? wanted : `${wanted}-${n}`;
     const hit = await payload.find({ collection, where: { recordId: { equals: id } }, limit: 1, depth: 0, overrideAccess: true, req });
@@ -321,6 +324,123 @@ export async function publishAcuteBaseline(
     const publicMessage = err && typeof err === "object" && err.isPublic && typeof err.message === "string" ? err.message : undefined;
     return { ok: false, code: "FAILED", message: publicMessage ?? "Die Akutsprechstunde konnte nicht gespeichert werden. Es wurde nichts verändert." };
   }
+}
+
+// ---------------------------------------------------------------- Vertretungspraxen (09.5G)
+
+export type DirectoryResult =
+  | { ok: true; recordId: string; mode: "NEW" | "EDIT" | "VERIFY" | "WITHDRAW"; changeSetId: string }
+  | { ok: false; code: "UNAUTHENTICATED" | "NOT_ALLOWED" | "STALE" | "BLOCKED" | "FAILED"; message: string };
+
+const failed = (e: unknown, fallback: string): DirectoryResult => {
+  const err = e as { isPublic?: boolean; message?: string } | null;
+  return { ok: false, code: "FAILED", message: err && typeof err === "object" && err.isPublic && typeof err.message === "string" ? err.message : fallback };
+};
+
+const findReplacement = async (payload: Payload, req: PayloadRequest, recordId: string) =>
+  (await payload.find({ collection: "replacementPractices", where: { recordId: { equals: recordId } }, limit: 1, depth: 0, overrideAccess: true, req })).docs[0] as (ReplacementPracticeDoc & { id: number | string }) | undefined;
+
+/**
+ * ADMIN only: create or correct the STRUCTURAL data of one directory entry inside one transaction.
+ * The provenance hook makes the record TO_BE_CONFIRMED (ADMIN cannot confirm) — a correction of a
+ * verified entry therefore always needs a new physician confirmation. Edit: re-read + fingerprint
+ * (no last-write-wins). The record id of a new entry is generated here.
+ */
+export async function saveReplacement(
+  payload: Payload,
+  user: (StaffUserLike & Record<string, unknown>) | null | undefined,
+  raw: Partial<Record<keyof ReplacementInput, unknown>>,
+  target?: { recordId: string; fingerprint: string },
+): Promise<DirectoryResult> {
+  const role = activeRole(user);
+  if (!user || !role) return { ok: false, code: "UNAUTHENTICATED", message: "Bitte melden Sie sich erneut an." };
+  if (role !== "ADMIN") return { ok: false, code: "NOT_ALLOWED", message: "Vertretungspraxen legt die Verwaltung an und korrigiert sie." };
+  const changeSetId = randomUUID();
+  const req = await createLocalReq({ user: user as never, context: { [SERVER_CONTEXT.CHANGE_SET]: changeSetId } }, payload);
+  await initTransaction(req);
+  try {
+    const doc = target ? await findReplacement(payload, req, target.recordId) : undefined;
+    if (target && !doc) {
+      await killTransaction(req);
+      return { ok: false, code: "BLOCKED", message: "Diese Vertretungspraxis wurde nicht gefunden." };
+    }
+    const current = doc ? replacementPracticeFromDoc(doc) : undefined;
+    if (current && replacementFingerprint(current) !== target!.fingerprint) {
+      await killTransaction(req);
+      return { ok: false, code: "STALE", message: REPLACEMENT_STALE };
+    }
+    const draft = replacementDraft(current, raw, berlinToday());
+    if (!draft.ok) {
+      await killTransaction(req);
+      return { ok: false, code: "BLOCKED", message: draft.message };
+    }
+    const recordId = await commitReplacement(payload, req, draft.input, doc);
+    await commitTransaction(req);
+    return { ok: true, recordId, mode: draft.mode, changeSetId };
+  } catch (e) {
+    await killTransaction(req);
+    return failed(e, "Die Vertretungspraxis konnte nicht gespeichert werden. Es wurde nichts verändert.");
+  }
+}
+
+/** Write the structural data inside the given transaction (exported for the rollback tests). */
+export async function commitReplacement(payload: Payload, req: PayloadRequest, input: ReplacementInput, doc?: { id: number | string }): Promise<string> {
+  const fields = { practiceName: input.practiceName, street: input.street, postalCode: input.postalCode, city: input.city, phone: input.phone, email: input.email ?? null, website: input.website ?? null, publicNote: input.publicNote ?? null };
+  const common = { req, user: req.user, overrideAccess: false as const, depth: 0, context: req.context };
+  if (doc) {
+    const updated = (await payload.update({ collection: "replacementPractices", id: doc.id, data: fields as never, ...common })) as unknown as { recordId: string };
+    return updated.recordId;
+  }
+  const recordId = await freeRecordId(payload, req, "replacementPractices", replacementRecordId(input.practiceName));
+  await payload.create({ collection: "replacementPractices", data: { ...fields, recordId, contactPersons: [], verification: { status: "TO_BE_CONFIRMED", sourceIds: [] } } as never, ...common });
+  return recordId;
+}
+
+/**
+ * DOCTOR only: confirm exactly the STORED data ("VERIFY", audit VERIFY) or make it immediately
+ * unusable ("WITHDRAW", audit END). Re-read + record fingerprint inside the transaction — a physician
+ * never confirms data they did not see. Provenance is generated by the hook (DOCTOR, Berlin date,
+ * reviewDue by the standing-data policy). No quick undo: standing reference data.
+ */
+export async function verifyReplacement(
+  payload: Payload,
+  user: (StaffUserLike & Record<string, unknown>) | null | undefined,
+  recordId: string,
+  fingerprint: string,
+  confirmed: boolean,
+  mode: "VERIFY" | "WITHDRAW" = "VERIFY",
+): Promise<DirectoryResult> {
+  const role = activeRole(user);
+  if (!user || !role) return { ok: false, code: "UNAUTHENTICATED", message: "Bitte melden Sie sich erneut an." };
+  if (role !== "DOCTOR") return { ok: false, code: "NOT_ALLOWED", message: "Diese Angabe kann nur eine Ärztin oder ein Arzt bestätigen." };
+  if (!confirmed) return { ok: false, code: "BLOCKED", message: mode === "VERIFY" ? "Bitte bestätigen Sie, dass die Vertretung abgestimmt und die Kontaktdaten geprüft sind." : "Bitte bestätigen Sie, dass diese Praxis nicht mehr als Vertretung ausgewählt werden soll." };
+  const changeSetId = randomUUID();
+  const req = await createLocalReq({ user: user as never, context: { [SERVER_CONTEXT.CHANGE_SET]: changeSetId } }, payload);
+  await initTransaction(req);
+  try {
+    const doc = await findReplacement(payload, req, recordId);
+    if (!doc) {
+      await killTransaction(req);
+      return { ok: false, code: "BLOCKED", message: "Diese Vertretungspraxis wurde nicht gefunden." };
+    }
+    if (replacementFingerprint(replacementPracticeFromDoc(doc)) !== fingerprint) {
+      await killTransaction(req);
+      return { ok: false, code: "STALE", message: REPLACEMENT_STALE };
+    }
+    await commitVerification(payload, req, doc.id, mode);
+    await commitTransaction(req);
+    return { ok: true, recordId, mode, changeSetId };
+  } catch (e) {
+    await killTransaction(req);
+    return failed(e, "Die Bestätigung konnte nicht gespeichert werden. Es wurde nichts verändert.");
+  }
+}
+
+/** The physician write inside the given transaction (exported for the rollback tests). */
+export async function commitVerification(payload: Payload, req: PayloadRequest, id: number | string, mode: "VERIFY" | "WITHDRAW"): Promise<void> {
+  await withContext(req, { [SERVER_CONTEXT.REPLACEMENT_VERIFY]: mode, [SERVER_CONTEXT.AUDIT_OPERATION]: mode === "VERIFY" ? "VERIFY" : "END" }, () =>
+    payload.update({ collection: "replacementPractices", id, data: {} as never, req, user: req.user, overrideAccess: false, depth: 0, context: req.context }),
+  );
 }
 
 // ---------------------------------------------------------------- "Hinweis veröffentlichen" (09.5D)
