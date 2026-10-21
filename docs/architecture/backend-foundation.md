@@ -549,7 +549,15 @@ Safety and seeding:
   The trusted seed is the explicit exception.
 - **Provenance / audit:** existing kind `CONSULTATION_TYPE` (DOCTOR, reviewDue + 182 days); audit via the collection hook in the same transaction (VERIFY through the trusted `AUDIT_OPERATION`, else UPDATE). Rollback integration-tested. No schema change.
 - Clean proof: step 25/25 `21-consultation-types.test.ts`; step 6 asserts the closed DOCTOR REST write.
-- **DB_CONNECTION_ERROR_HANDLING = OPEN** (09.6B finding, not touched here).
+- *(09.5J state)* DB_CONNECTION_ERROR_HANDLING was OPEN — resolved in 09.6B.1 (§17.11h).
+
+### 17.11h PostgreSQL connection resilience (Phase 09.6B.1, 2026-10-21)
+
+- **Failure mode:** pg-pool re-emits an idle client's connection error on the **pool** (`pool.emit("error", …)`). Without a pool `error` listener this throws, so an uncaught exception kills a standalone Node process. The 09.6B observation was that a DB stop killed a Payload script while the Next server only survived through its last-resort handler.
+- **Pool-level handling:** `src/backend/postgres-resilience.ts` provides one idempotent listener per pool (WeakMap), logs code only, and does not rethrow, exit or retry. The pool has already removed the dead client.
+- **Initialization point:** `payload.config.ts` → `postgresAdapter({ pg: resilientPg, … })`, the documented option to inject node-postgres. `resilientPg.Pool` installs the handler in its constructor, so every pool the adapter creates (primary + read replicas) has it before the first connection. Payload creates the pool once per adapter (`if (!this.pool)`), and `getPayload()` returns the cached instance, so the listener count stays 1 (tested).
+- **Recovery semantics:** during an outage, queries / transactions reject (fail-safe readers return `FAILED`). After the restart the same process opens new connections; reads, transactional writes + audit and login work again without a restart (integration step 26 + measured run).
+- **Not changed:** pool sizing / idle / lifetime options, write transaction defaults, `connectionTimeoutMillis` (locally connection refusal is immediate; a production value is a 09.6D decision against the real network). No process-wide exception handler (guard test).
 
 ### 17.12 npm audit (2026-10-13): 16 findings, none fixed by force
 

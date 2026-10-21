@@ -12,6 +12,7 @@ import { postgresAdapter } from "@payloadcms/db-postgres";
 import { buildConfig } from "payload";
 import { COLLECTIONS, GLOBALS } from "./src/backend/collections.ts";
 import { assertNoPatientFields } from "./src/backend/privacy.ts";
+import { resilientPg } from "./src/backend/postgres-resilience.ts";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -40,6 +41,10 @@ export default buildConfig({
   serverURL,
   csrf: serverURL ? [serverURL] : [],
   db: postgresAdapter({
+    // 09.6B.1: node-postgres whose Pool attaches ONE `error` listener in its constructor — an idle pooled
+    // connection dropped by a database outage is logged calmly instead of crashing the process
+    // (documented adapter option "Optionally inject your own node-postgres"; src/backend/postgres-resilience.ts).
+    pg: resilientPg,
     pool: { connectionString: requireEnv("DATABASE_URI") },
     // Never push schema automatically: every database (also local) is built from migrations.
     push: false,

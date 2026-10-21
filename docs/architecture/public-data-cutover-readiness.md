@@ -1,6 +1,8 @@
 # Public data cutover — readiness gate (Phase 09.6A)
 
-Date: 2026-10-21 · Baseline `4becaa6` (09.5I) · **Audit only — no cutover.** · 09.6B (shadow read) implemented — see §18.
+Date: 2026-10-21 · Baseline `4becaa6` (09.5I) · **Audit only — no cutover.** · 09.6B (shadow read) implemented — see §18 · 09.5J (GAP-1) §19 · 09.6B.1 (DB connection resilience) §20.
+
+> **Reading note:** §1–§17 record the 09.6A gate. Rows that changed since then are marked *current (date/phase)*. Where §1–§17 still mention GAP-1 or the pool finding as *open*, that is the 09.6A state; the current state is in §19 / §20.
 
 > **Decision**
 > - **Next technical phase: `READY_FOR_09_6B_SHADOW_READ`.** The repository, mapping and parity proof are complete for every field the engine and the notice / homepage selection use. The shadow-read harness can be built and proven with artificial fixtures and a migrated copy of the static data.
@@ -42,7 +44,7 @@ Classes: **OP** dynamic operational (candidate for Payload public read) · **ED*
 | PUBLIC DATA AREA | CURRENT SOURCE | FUTURE SOURCE | COCKPIT-MANAGED? | VERIFICATION GATE | FAIL-SAFE | CUTOVER PHASE | BLOCKERS |
 |---|---|---|---|---|---|---|---|
 | Weekly schedule (OP) | `schedule.ts` `RULES`, `confirmedClosedWeekdays` | Payload `weeklySchedules` | Yes — `/intern/sprechzeiten` (09.5I, DOCTOR) | `openingHours` freshness, DOCTOR provenance, invariant guard | engine UNKNOWN | first slice | real week entered + confirmed (F35–F43, LB-00 record) |
-| Consultation types (OP) | `schedule.ts` `CONSULTATION_TYPES` | Payload `consultationTypes` | **ACUTE only** (09.5E). GENERAL / HEALTHY_ONLY / APPOINTMENT: **no task workflow** | `consultationType` freshness, DOCTOR | label omitted; weekly editor blocks unusable types | first slice | **GAP-1** (§9), F42 |
+| Consultation types (OP) | `schedule.ts` `CONSULTATION_TYPES` | Payload `consultationTypes` | Yes — *current (09.5J)*: NON-ACUTE types via `/intern/sprechstundenarten` (DOCTOR), ACUTE via `/intern/akutsprechstunde` (09.5E); generic writes closed. *(09.6A: ACUTE only, no task workflow — GAP-1.)* | `consultationType` freshness, DOCTOR | label omitted; weekly editor blocks unusable types | first slice | F42 (real wording still unconfirmed) |
 | Exceptions / special hours (OP) | `PULS_DATA.exceptions` (empty) | Payload `openingHourExceptions` | Yes — today (09.5A), Sonderzeiten (09.5F), acute today (09.5E) | grace 0, provenance, publish guard | UNKNOWN | first slice | — (data as needed) |
 | Closures / vacation + replacement assignments (OP) | `PULS_DATA.closures` (empty) | Payload `closures` | Yes — Urlaub (09.5C), Heute geschlossen (09.5A) | grace 0, directory entries must be usable | no replacement shown → phone / Notfall | first slice | F54 (real closures), FB-09 (owner) |
 | Replacement practices (OP) | `PULS_DATA.replacementPractices` (empty) | Payload `replacementPractices` | Yes — `/intern/vertretungen` (09.5G: ADMIN data, DOCTOR verify) | `replacementPractice` freshness, grace 0 | closure shows phone / Notfall | first slice | F53 / FB-10 |
@@ -135,7 +137,7 @@ declare function loadPublicOperationalData(): Promise<PublicOperationalSnapshot>
 | Closures + replacement assignments | yes — 09.5C / 09.5A | |
 | Replacement directory | yes — 09.5G | |
 | Announcements | yes — 09.5D | |
-| **Non-ACUTE consultation types** (label, explanation, verification) | **NO — GAP-1** | Only REST by a DOCTOR (`/intern/admin` is ADMIN-only, and ADMIN cannot confirm them). The weekly editor offers only verified, fresh types; `consultationType` freshness expires after reviewDue + 60 days. Without a renewal path, the regular week would eventually become uneditable. **Pre-cutover blocker:** a physician consultation-type workflow (label / explanation / confirm), or an explicit decision. Not built in 09.6A. |
+| **Non-ACUTE consultation types** (label, explanation, verification) | *current:* **yes — 09.5J (DOCTOR)**, GAP-1 technically resolved (§19). *09.6A state:* **NO — GAP-1** | Only REST by a DOCTOR (`/intern/admin` is ADMIN-only, and ADMIN cannot confirm them). The weekly editor offers only verified, fresh types; `consultationType` freshness expires after reviewDue + 60 days. Without a renewal path, the regular week would eventually become uneditable. **Pre-cutover blocker:** a physician consultation-type workflow (label / explanation / confirm), or an explicit decision. Not built in 09.6A. |
 | **Emergency information** | **NO — GAP-2** | No Payload collection. Closures carry `emergencyInformationIds`, but PULS actions link to the static `/notfall`. Emergency data stays **static** and outside the first slice, with its own verification (LB-10). A future dynamic version needs its own physician-governed workflow. |
 
 **Schema coverage:** every field read by `getPracticeStatus()`, `selectPublicAnnouncements()` and `selectHomepageHighlight()` round-trips without loss:
@@ -168,10 +170,10 @@ Known representational differences:
 
 | Category | Items |
 |---|---|
-| **RESOLVED** | F40 weekend (practice 2026-10-11) · SEC-01 preview gate (df5a05c) · technical cockpit workflows 09.5A–I · static ↔ Payload parity (incl. announcements) · generic weekly-schedule REST bypass (closed 09.5I) |
+| **RESOLVED** | F40 weekend (practice 2026-10-11) · SEC-01 preview gate (df5a05c) · technical cockpit workflows 09.5A–J · static ↔ Payload parity (incl. announcements) · generic weekly-schedule REST bypass (closed 09.5I) · generic consultation-type REST bypass (closed 09.5J) · PostgreSQL pool outage handling (09.6B.1) |
 | **OPEN — PRACTICE** | LB-00 recorded practice confirmation (see project-blockers) · LB-01, LB-03, LB-08, LB-09, LB-11 · FB-01–04, FB-06–16 · F53, F54 · Phase 10.1B–10.5B answers · real dynamic data entry + confirmation |
 | **OPEN — LEGAL** | LB-02, LB-04–LB-07 (Impressum, privacy, controller, processors), F18 e-mail policy |
-| **OPEN — TECHNICAL** | GAP-1 consultation-type workflow · GAP-2 emergency stays static (document / later workflow) · single public loader + consistent snapshot (§5) · `WeekHours` / `DayRuler` read `RULES` directly · outage fail-safe implementation (§6) · LB-10 third-party emergency verification (T) · `npm audit` re-decision (§15) |
+| **OPEN — TECHNICAL** | ~~GAP-1 consultation-type workflow~~ (*resolved technically 09.5J*) · ~~single public loader + consistent snapshot, `WeekHours` / `DayRuler`~~ (*09.6B*) · ~~DB disconnect handling~~ (*09.6B.1*) · GAP-2 emergency stays static (document / later workflow) · single public loader + consistent snapshot (§5) · `WeekHours` / `DayRuler` read `RULES` directly · outage fail-safe implementation (§6) · LB-10 third-party emergency verification (T) · `npm audit` re-decision (§15) |
 | **OPEN — INFRASTRUCTURE** | LB-15 (all of §10), LB-13 host, LB-14 registrar / DNS |
 | **NOT REQUIRED FOR INITIAL CUTOVER** | NH-01–NH-13 · Discovery publication · Phase 10 content (required for the full site launch, not for the operational-data architecture) · team photos |
 
@@ -274,7 +276,7 @@ Never convert `TO_BE_CONFIRMED` to `VERIFIED_CURRENT` during an import because a
 | **09.6A** | Readiness gate (this document) — **done** | STATIC |
 | 09.6B | **Payload shadow read** — tests / internal diagnostics read STATIC **and** PAYLOAD, compare domain snapshots, PULS results, announcement selection and homepage highlight. Introduce `loadPublicOperationalData()` with the static path only; consistent-read strategy (§5); route `WeekHours` / `DayRuler` through the snapshot. No parent-visible effect. Proven with artificial fixtures + a migrated copy of the static data (technical parity ≠ content approval). | STATIC |
 | 09.6C | Staging public operational read from Payload — only with real staging data and explicit approval; outage + consistency acceptance (§14) | PAYLOAD on staging only |
-| 09.6D | Production infrastructure + auth-security gate (§10, §12), GAP-1 resolved, dependency update decision | — |
+| 09.6D | Production infrastructure + auth-security gate (§10, §12), dependency update decision, production connection-timeout decision (§20) *(GAP-1: resolved technically in 09.5J)* | — |
 | 09.6E | Final production cutover — only after the launch blockers, domain / DNS and a rehearsed rollback (§13) | PAYLOAD |
 
 ## 18. Phase 09.6B — implemented: static public snapshot + Payload shadow read (2026-10-21)
@@ -283,8 +285,8 @@ Baseline `2e0e487` (09.6A). **STATIC stays authoritative; no parent-visible chan
 
 **Result: `SHADOW_READ: PASS` · `READY_FOR_09_6C: NO` · `PUBLIC_CUTOVER: NO-GO`.**
 - 09.6C needs a real staging operational dataset, explicit practice approval to use it and a deliberate scope decision.
-- GAP-1 (non-ACUTE consultation types) is still open and makes a maintained Payload week impractical.
-- The pg-pool hardening below is also needed first.
+- *(09.6B state)* GAP-1 (non-ACUTE consultation types) was still open — resolved technically in 09.5J (§19).
+- *(09.6B state)* The pg-pool hardening below was also needed first — done in 09.6B.1 (§20).
 
 ### Public side (STATIC)
 
@@ -338,7 +340,7 @@ Baseline `2e0e487` (09.6A). **STATIC stays authoritative; no parent-visible chan
 
 ### Still open
 
-- GAP-1 consultation-type workflow (pre-cutover blocker).
+- ~~GAP-1 consultation-type workflow~~ — resolved technically in 09.5J (§19).
 - GAP-2 emergency information stays static, outside the snapshot.
 - No real staging dataset.
 - No caching / revalidation (pages stay per-request).
@@ -352,9 +354,59 @@ Baseline `2e0e487` (09.6A). **STATIC stays authoritative; no parent-visible chan
 - **`READY_FOR_09_6C: NO`** — still blocked by:
   - no real staging operational dataset;
   - no explicit practice approval to use it;
-  - `DB_CONNECTION_ERROR_HANDLING = OPEN` (09.6B: unhandled pg `error` on DB disconnect);
+  - ~~`DB_CONNECTION_ERROR_HANDLING = OPEN`~~ → TECHNICALLY RESOLVED in 09.6B.1 (§20);
   - the remaining verification blockers (F35–F49 practice record, F53, F54).
 
   `PUBLIC_CUTOVER: NO-GO`.
 - 09.6B unchanged: the shadow read and the comparator stay green (step 3); the label-difference detection is kept.
+
+## 20. Phase 09.6B.1 — PostgreSQL connection resilience (2026-10-21)
+
+Baseline `c820ae7` (09.5J). **`DB_CONNECTION_ERROR_HANDLING = TECHNICALLY RESOLVED`** — all acceptance tests passed. This is not "production ready".
+
+### Root cause (reproduced before the fix)
+
+- In pg-pool 8.x (pg 8.20.0), an **idle** pooled client whose connection is terminated gets `error` (`57P01 terminating connection due to administrator command` / "Connection terminated unexpectedly"). pg-pool's idle listener removes the client and **re-emits the error on the pool** (`pool.emit("error", err, client)`).
+- The adapter's pool had **no** `error` listener (`listenerCount 0`), so `EventEmitter` throws and the error is uncaught.
+- Reproduction: a standalone Payload process held 5 connections (4 idle). After the DB stop it **exited with code 1**: `Unhandled 'error' event … Emitted 'error' event on BoundPool instance`.
+
+### Fix (supported surface only)
+
+- `src/backend/postgres-resilience.ts`: `installPostgresPoolErrorHandler(pool)` attaches exactly one `error` listener per pool (WeakMap, idempotent).
+  - It logs `{"level":"warn","msg":"PostgreSQL-Verbindung im Pool wurde unterbrochen.","code":"57P01"}`: code only, never the URI, credentials or config.
+  - It does **not** rethrow, does **not** `process.exit` and does **not** retry. The pool has already dropped the dead client, and the next query opens a new connection.
+- `resilientPg` is node-postgres whose `Pool` installs the handler **in its constructor**, before any connection exists. It is injected through the documented adapter option `postgresAdapter({ pg })` ("Optionally inject your own node-postgres", typed `pg?: typeof pg`), and `connect()` creates the pool with `new this.pg.Pool(poolOptions)` (read replicas likewise).
+  - The pool itself is also typed publicly (`DatabaseAdapter.pool: Pool`), which is how tests count listeners.
+  - No private fields, no node_modules patch, no fork, no parallel pg infrastructure, no version change.
+- Not done (deliberately): no process-wide `uncaughtException` / `unhandledRejection` handler (a guard test forbids it in application code), no `process.exit`, no `idleTimeoutMillis` / `max` / lifetime tuning, no retry loops.
+- Build safety: the handler is attached at pool construction, which only happens when Payload connects. `next build` without `DATABASE_URI` (placeholder) opens no connection, and a staging deployment without a database never constructs a pool.
+
+### Proofs
+
+- **Unit tests:**
+  - one listener after any number of installs, a separate one per pool;
+  - background error consumed and counted, logged without secrets;
+  - the same event without a handler would throw;
+  - query rejections are untouched;
+  - the real `resilientPg.Pool` has its listener at construction, with no connection opened;
+  - config wiring;
+  - guard against process-wide handlers and `process.exit`.
+- **Integration step 26** (`22-db-resilience.test.ts`, last step, stops and starts only the isolated cluster on 5433), with the real standalone probe (`scripts/probe-db-resilience.ts`, no process-wide handler):
+  - **DB up:** 1 listener; repeated `getPayload()` returns the same instance with still 1 listener; 4 parallel queries succeed.
+  - **DB down:** the process is alive with the same PID; ≥ 1 background error handled; still 1 listener. A real query **rejects**, and the shadow read returns `FAILED` (fail-safe PulsData, 0 announcements, no static), both bounded at under 10 s.
+  - **DB up again:** same PID; read OK; a transactional write + audit OK; no "Uncaught / Unhandled", no URI or password in stderr.
+  - **The suite's Next server:** public `/`, `/heute`, `/heute/sprechzeiten` are 200 during the outage. Afterwards `/intern/anmelden` is 200, **login works again** and REST reads work, without a restart. Its stderr shows only the calm pool warning — no `uncaughtException`.
+- **Measured run** (explicit PIDs):
+  - Probe PID 10268: up OK; down → alive, 4 idle errors handled, query rejected after **1 ms**, shadow `FAILED` after **2 ms**; up → same PID, read and write + audit OK.
+  - Next PID 12216: alive throughout; public 200; backend recovered.
+- Full clean suite 26/26 green (09.5E–J, 09.6B shadow incl. REPEATABLE READ concurrency, preview security). With PostgreSQL stopped, all 23 public routes return 200.
+
+### Connection timeout — measured, not changed
+
+- Locally a stopped cluster **refuses** connections at once (`ECONNREFUSED`): reads fail in milliseconds, so there is no hang and nothing to fix here. `connectionTimeoutMillis` is therefore **unchanged** (pg default: no timeout).
+- A production network can **black-hole** connections (no RST), and then a new connection would wait indefinitely. This is a **09.6D production decision** (e.g. 3–5 s), to be measured against the real provider and network. It is not set blindly now.
+
+### Readiness
+
+`READY_FOR_09_6C: NO` — still missing: a real staging dataset, explicit practice approval, real physician confirmations (F35–F49, F53, F54, the real consultation types). `PUBLIC_CUTOVER: NO-GO` — production DB, backups, restore test, PITR, monitoring, maintenance owner, MFA, reset e-mail, host / DNS, real accounts and practice approvals are all still missing.
 
