@@ -1,6 +1,6 @@
 # Offene Fragen an die Praxis – gesammelter Stand
 
-Stand: **2026-11-16** (nach Praxisangabe #1, Phase 10.0B; Recht/Impressum ergänzt in 10.0C; erstellt in 09.6A am 2026-10-21). **Nur vorbereitet, nicht verschickt.** Dieses Dokument ist die eine Sammelliste, um Antworten der Praxis einzuholen. Es ändert keinen Faktenstatus. Was mit der Praxisangabe vom 16.11.2026 beantwortet ist, steht in [practice-input-2026-11-16.md](practice-input-2026-11-16.md). Details stehen in den verlinkten Dokumenten; hier steht jede Frage nur kurz.
+Stand: **2026-11-16** (nach Praxisangabe #1, Phase 10.0B; Recht/Impressum ergänzt in 10.0C; nach Inhaltsarchitektur gruppiert in 10.0D; erstellt in 09.6A am 2026-10-21). **Nur vorbereitet, nicht verschickt.** Dieses Dokument ist die eine Sammelliste, um Antworten der Praxis einzuholen. Es ändert keinen Faktenstatus. Was mit der Praxisangabe vom 16.11.2026 beantwortet ist, steht in [practice-input-2026-11-16.md](practice-input-2026-11-16.md). Details stehen in den verlinkten Dokumenten; hier steht jede Frage nur kurz.
 
 Quellen:
 - [Faktenregister](../research/fact-status-register.md) · [Projekt-Blocker](../research/project-blockers.md) · [Readiness-Gate](../architecture/public-data-cutover-readiness.md) · [Praxisangabe 16.11.2026](practice-input-2026-11-16.md)
@@ -20,56 +20,75 @@ Als aktuelle Praxisangabe übernommen (Quelle „Praxisangabe, übermittelt durc
 - Feiertage grundsätzlich geschlossen, Brückentage grundsätzlich normal geöffnet / Einzelfall (F49 – Praxisangabe liegt vor; siehe H1)
 - Aktuelle Team-Arbeitsliste (F26, F27, F29, F30, neu F118, F119; Katharina Weis F28 nicht mehr in der Liste)
 
-## 1. Hohe Priorität vor dem Start
+Die Gruppen folgen der festgelegten Inhaltsarchitektur ([public-content-architecture.md](../architecture/public-content-architecture.md), 10.0D): jede Gruppe gehört zu dem Seitenbereich, für den die Antworten gebraucht werden. Nummern (H…, K…) sind unverändert, damit bestehende Verweise gültig bleiben.
+
+## 1. Operative Daten (Heute / Praxis Puls / Notfall)
 
 | # | Frage | Fakten / Blocker |
 |---|---|---|
 | H1 | **Namentliche Bestätigung** der Praxisangabe vom 16.11.2026: Wer aus der Praxis bestätigt Sprechzeiten, Kontaktdaten und die Feiertagsregel (Name, Datum)? Erst dann wird die Feiertagsregel öffentlich angewendet („an Feiertagen geschlossen“) und die Prüffrist der Sprechzeiten verlängert. | F35–F39, F43, F49 · LB-00 |
 | H5 | Notfall- und Klinikangaben: Die Praxis hat fünf Kontakte genannt (AMEOS Aschersleben, Helios Sangerhausen, St. Elisabeth Halle, Uniklinikum Halle, Giftnotruf Erfurt). Wir prüfen sie bei den Einrichtungen; danach braucht es die Freigabe der Praxis. | F58, F61–F64 · LB-10 |
-
-## 2. Praxis Puls / Betrieb
-
-| # | Frage | Fakten / Blocker |
-|---|---|---|
 | P1 | Gibt es eine Akutsprechstunde? An welchen Tagen und genau von wann bis wann? *Vorläufiger Staging-Wert vorhanden (08:00–09:00 Uhr, nur Testdaten), finale Praxisbestätigung noch offen.* | F44–F46 · FB-01–03 |
 | P4 | Welche Urlaube und Schließzeiten sind für 2026/2027 geplant? *Vorläufiger Staging-Wert vorhanden (24.12.2026–03.01.2027, nur Prüfansicht), finale Praxisbestätigung noch offen.* | F54 · FB-07 |
 | P5 | Vertretungspraxen: Die Liste vom 06.11.2025 (8 Praxen; ein Eintrag gestrichen) ist rund ein Jahr alt. Für jede Praxis bitte aktuell ärztlich bestätigen (im Praxis Cockpit unter „Vertretungen“) – und die Faxnummer der MVZ Sangerhausen (handschriftlich, nicht lesbar). | F53 · FB-10 |
 | P6 | Wer pflegt künftig Schließzeiten, Vertretungen und Hinweise im Praxis Cockpit, und wer bestätigt als Ärztin? | FB-09 |
 | P7 | Wann ist die Praxis telefonisch erreichbar? | F19 · FB-08 |
-| P8 | Gilt die Maskenregel (Kinder über 6 mit Infekt) noch? Für wen genau? | F47, F94 · FB-11 |
 | P9 | Welche Sprechstundenarten (Bezeichnung und kurze Erklärung) sollen auf der Website stehen? (Wird ärztlich bestätigt.) Derzeit öffentlich: „Sprechstunde“ und „Nur Terminsprechstunde“. | F43 |
 
-## 3. Kontakt / digitale Services
+H1 und H5 haben hohe Priorität vor dem Start.
+
+## 2. Gut vorbereitet / Neu bei uns (`/praxis/gut-vorbereitet`, `/praxis/neu-bei-uns`)
+
+| # | Frage | Fakten / Blocker |
+|---|---|---|
+| K6 | „Gut vorbereitet“: Gesundheitskarte zu jedem Besuch? Impfpass zu Impfterminen? Keine Impfung ohne Impfpass? | F91–F93 · 10.1B |
+| P8 | Gilt die Maskenregel (Kinder über 6 mit Infekt) noch? Für wen genau? | F47, F94 · FB-11 |
+| K3 | Nehmen Sie neue Patientinnen und Patienten auf? Unter welchen Bedingungen? Wie läuft der erste Besuch bzw. der Besuch mit einem Neugeborenen ab? | F77–F79 · FB-14/15 |
+| K2 | Wie vereinbart man einen Termin (Telefon, App, online)? | F48 · FB-13 |
+
+## 3. Leistungen (`/praxis/leistungen`)
+
+| # | Frage | Fakten / Blocker |
+|---|---|---|
+| Z3 | Welches Leistungsspektrum gilt heute (Liste von 2020, inkl. U10/U11/J2 und DMP)? | F66–F74 · FB-12 |
+
+## 4. Rezepte / Praxis-App (`/praxis/rezepte`, `/praxis/praxis-app`)
+
+| # | Frage | Fakten / Blocker |
+|---|---|---|
+| K5 | Rezepte: Welche können ohne Termin angefragt werden, und über welchen Weg? Muss die Karte vorher eingelesen sein? Welche Angaben braucht die Praxis, und wann ist das Rezept da? Gibt es E-Rezept und/oder Papier? Wer darf anfragen? | F101–F109 · 10.3B |
+| K4 | Praxis-App: Name und Anbieter? Download-Links? Welche Funktionen nutzen Familien tatsächlich? Wie melden sie sich an? | F95–F100 · 10.2B |
+
+## 5. Kosten (`/praxis/kosten`)
+
+| # | Frage | Fakten / Blocker |
+|---|---|---|
+| Z1 | Welche Leistungen sollen mit Preis auf die Website? Gibt es eine aktuelle Preisliste (z. B. Kita-Tauglichkeitsbescheinigung)? Wer hält sie aktuell? | F110–F113, F117 · 10.4B |
+| Z2 | Welche Zahlungsarten gibt es? Stimmt „keine Barzahlung“? Wird vor Ort oder per Rechnung bezahlt? | F114–F116 · 10.4B |
+
+## 6. Kontakt (`/praxis/kontakt`)
 
 | # | Frage | Fakten / Blocker |
 |---|---|---|
 | K1 | Wofür dürfen Familien die E-Mail-Adresse nutzen, und wofür nicht? | F18 · LB-11 |
-| K2 | Wie vereinbart man einen Termin (Telefon, App, online)? | F48 · FB-13 |
-| K3 | Nehmen Sie neue Patientinnen und Patienten auf? Unter welchen Bedingungen? Wie läuft der erste Besuch bzw. der Besuch mit einem Neugeborenen ab? | F77–F79 · FB-14/15 |
-| K4 | Praxis-App: Name und Anbieter? Download-Links? Welche Funktionen nutzen Familien tatsächlich? Wie melden sie sich an? | F95–F100 · 10.2B |
-| K5 | Rezepte: Welche können ohne Termin angefragt werden, und über welchen Weg? Muss die Karte vorher eingelesen sein? Welche Angaben braucht die Praxis, und wann ist das Rezept da? Gibt es E-Rezept und/oder Papier? Wer darf anfragen? | F101–F109 · 10.3B |
-| K6 | „Gut vorbereitet“: Gesundheitskarte zu jedem Besuch? Impfpass zu Impfterminen? Keine Impfung ohne Impfpass? | F91–F93 · 10.1B |
 | K7 | Soll die Faxnummer weiter angezeigt werden? | F16 · NH-13 |
 
-## 4. Team / Einwilligung
+K1 entscheidet auch, ob E-Mail auf der Rezepte-Seite als Weg genannt werden darf (F104).
+
+## 7. Team / Fotos (`/praxis/aerztinnen`, `/praxis/team`)
 
 | # | Frage | Fakten / Blocker |
 |---|---|---|
 | T1 | Ist die aktuelle Liste (2 Ärztinnen + Steffi Christmann, Andrea Zahn, Anke Bettche, Nicole Schulz, Jana Brandt, Peggy Kejs) vollständig? Bitte bestätigen, dass Katharina Weis und Firuza Rafiyeva nicht mehr in der Praxis sind. | F24, F28, F31 · LB-08 |
 | T2 | Welche öffentliche Bezeichnung soll bei jeder Person stehen? Für Anke Bettche fehlt eine Angabe. Überschrift des Teambereichs? Welche Titel hat Dr. Böhme genau? | F23, F32 · LB-05 |
 | T3 | Dürfen die Namen veröffentlicht werden? Bitte für jede Person einzeln und schriftlich. | F33 · LB-09 |
+| M1 | Dürfen Fotos der Teammitglieder veröffentlicht werden? Bitte für jede Person einzeln und schriftlich, getrennt von der Namenseinwilligung. | F33, F34 · LB-09 |
+| M2 | Neue Fotos machen oder vorhandene verwenden? Falls vorhanden: Bilder, Zuordnung und Rechte (Fotograf/in). | F11, F34 · LB-12 |
+| M3 | Gibt es ein Logo, und dürfen wir es verwenden? | F12 · LB-12 |
 
-## 5. Preise / Zahlung
+## 8. Legal (Footer: Impressum, Datenschutz)
 
-| # | Frage | Fakten / Blocker |
-|---|---|---|
-| Z1 | Welche Leistungen sollen mit Preis auf die Website? Gibt es eine aktuelle Preisliste (z. B. Kita-Tauglichkeitsbescheinigung)? Wer hält sie aktuell? | F110–F113, F117 · 10.4B |
-| Z2 | Welche Zahlungsarten gibt es? Stimmt „keine Barzahlung“? Wird vor Ort oder per Rechnung bezahlt? | F114–F116 · 10.4B |
-| Z3 | Welches Leistungsspektrum gilt heute (Liste von 2020, inkl. U10/U11/J2 und DMP)? | F66–F74 · FB-12 |
-
-## 6. Recht / Datenschutz (zusammen mit rechtlicher Prüfung)
-
-### LEGAL / IMPRESSUM
+### Impressum
 
 Stand 10.0C: `/impressum` zeigt nur bestätigte Angaben (Praxis, Kontakt, Ärztekammer, KVSA, Berufsordnung). Offen ist der Rest; Details und Quellen: [impressum-legal-review-2026-11.md](impressum-legal-review-2026-11.md).
 
@@ -89,14 +108,6 @@ Stand 10.0C: `/impressum` zeigt nur bestätigte Angaben (Praxis, Kontakt, Ärzte
 | R7 | Wer schließt die Auftragsverarbeitungsverträge (AVV) mit Datenbank-, Hosting- und E-Mail-Anbieter ab? | LB-15 |
 | R8 | Zugang zum bisherigen Webhost, zum Domain-Registrar und zur DNS-Verwaltung: Wer hat ihn? | LB-13, LB-14 |
 
-## 7. Medien / Fotos
-
-| # | Frage | Fakten / Blocker |
-|---|---|---|
-| M1 | Dürfen Fotos der Teammitglieder veröffentlicht werden? Bitte für jede Person einzeln und schriftlich, getrennt von der Namenseinwilligung. | F33, F34 · LB-09 |
-| M2 | Neue Fotos machen oder vorhandene verwenden? Falls vorhanden: Bilder, Zuordnung und Rechte (Fotograf/in). | F11, F34 · LB-12 |
-| M3 | Gibt es ein Logo, und dürfen wir es verwenden? | F12 · LB-12 |
-
 ## DEFERRED / vorerst nicht veröffentlichen
 
 | Thema | Stand |
@@ -105,4 +116,4 @@ Stand 10.0C: `/impressum` zeigt nur bestätigte Angaben (Praxis, Kontakt, Ärzte
 
 ---
 
-**Umfang:** 33 offene Fragen in 7 Gruppen: 2 hohe Priorität, 7 Praxis Puls/Betrieb, 7 Kontakt/digitale Services, 3 Team, 3 Preise, 8 Recht (5 Impressum, 3 Datenschutz/Betrieb; Stand 10.0C), 3 Medien. Mit der Praxisangabe vom 16.11.2026 erledigt bzw. ersetzt: H2, H3, H4, P3 (Inhalt liegt vor; namentliche Bestätigung → H1); zurückgestellt: P2. Nicht enthalten: Mein Arztbesuch (eigene Freigabedokumente: [discovery-approval-package.md](discovery-approval-package.md), [discovery-ai-child-publication-decision.md](discovery-ai-child-publication-decision.md)) und Nice-to-have-Angaben (NH-01–NH-12).
+**Umfang:** 33 offene Fragen (unverändert; in 10.0D nur nach der Inhaltsarchitektur neu gruppiert, keine neue Frage): Operative Daten 8 (davon 2 hohe Priorität), Gut vorbereitet / Neu bei uns 4, Leistungen 1, Rezepte / Praxis-App 2, Kosten 2, Kontakt 2, Team / Fotos 6, Legal 8. Mit der Praxisangabe vom 16.11.2026 erledigt bzw. ersetzt: H2, H3, H4, P3 (Inhalt liegt vor; namentliche Bestätigung → H1); zurückgestellt: P2. Nicht enthalten: Mein Arztbesuch (eigene Freigabedokumente: [discovery-approval-package.md](discovery-approval-package.md), [discovery-ai-child-publication-decision.md](discovery-ai-child-publication-decision.md)) und Nice-to-have-Angaben (NH-01–NH-12).

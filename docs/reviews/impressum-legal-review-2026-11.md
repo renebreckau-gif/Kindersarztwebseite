@@ -4,7 +4,7 @@ Stand: **2026-11-16** · Baseline `85ea7e1` · **Keine rechtliche Freigabe.**
 
 Dieses Dokument bereitet die spätere rechtliche Finalisierung vor. Es behauptet nicht, dass das Impressum rechtssicher, vollständig rechtlich geprüft oder datenschutzkonform ist. `/impressum` zeigt seit 10.0C nur Angaben, die bestätigt (VERIFIED_CURRENT) und gegen die offiziellen Quellen geprüft sind; alles andere bleibt offen und wird weder erfunden noch aus dem alten Text übernommen.
 
-Quellen im Projekt: [Faktenregister](../research/fact-status-register.md) (F01–F18) · [Projekt-Blocker](../research/project-blockers.md) (LB-02, LB-04, LB-05, LB-07, LB-16, Legal gate) · [Praxisangabe 16.11.2026](practice-input-2026-11-16.md) · [Rückfragen an die Praxis](practice-confirmation-backlog.md) (§6, R1–R5) · Code: `src/content/impressum.ts`, `src/site/legal.tsx`.
+Quellen im Projekt: [Faktenregister](../research/fact-status-register.md) (F01–F18) · [Projekt-Blocker](../research/project-blockers.md) (LB-02, LB-04, LB-05, LB-07, LB-16, Legal gate) · [Praxisangabe 16.11.2026](practice-input-2026-11-16.md) · [Rückfragen an die Praxis](practice-confirmation-backlog.md) (§8 Legal, R1–R5) · Code: `src/content/impressum.ts`, `src/site/legal.tsx`.
 
 ## 1. KNOWN / VERIFIED – öffentlich angezeigt
 
