@@ -1,6 +1,6 @@
 # Public data cutover — readiness gate (Phase 09.6A)
 
-Date: 2026-10-21 · Baseline `4becaa6` (09.5I) · **Audit only — no cutover.** · 09.6B (shadow read) implemented — see §18 · 09.5J (GAP-1) §19 · 09.6B.1 (DB connection resilience) §20.
+Date: 2026-10-21 · Baseline `4becaa6` (09.5I) · **Audit only — no cutover.** · 09.6B (shadow read) implemented — see §18 · 09.5J (GAP-1) §19 · 09.6B.1 (DB connection resilience) §20 · 10.0B (practice input #1) §21.
 
 > **Reading note:** §1–§17 record the 09.6A gate. Rows that changed since then are marked *current (date/phase)*. Where §1–§17 still mention GAP-1 or the pool finding as *open*, that is the 09.6A state; the current state is in §19 / §20.
 
@@ -410,3 +410,15 @@ Baseline `c820ae7` (09.5J). **`DB_CONNECTION_ERROR_HANDLING = TECHNICALLY RESOLV
 
 `READY_FOR_09_6C: NO` — still missing: a real staging dataset, explicit practice approval, real physician confirmations (F35–F49, F53, F54, the real consultation types). `PUBLIC_CUTOVER: NO-GO` — production DB, backups, restore test, PITR, monitoring, maintenance owner, MFA, reset e-mail, host / DNS, real accounts and practice approvals are all still missing.
 
+## 21. Phase 10.0B — practice input intake #1 (2026-11-16)
+
+Content reconciliation only — **no data-source change** (`DATA_SOURCE = "STATIC"`, no public Payload read, `RELEASE` flags unchanged). Evidence: [practice-input-2026-11-16.md](../reviews/practice-input-2026-11-16.md).
+
+- **Static public data changed:** contact data (F01, F13–F18) now `VERIFIED_CURRENT` as working data with transparent provenance „Praxisangabe, übermittelt durch Projektinhaber“ (`PRACTICE_INPUT`, source `PI-2026-11-16`, standing review 182 days) — no invented confirmer; LB-00 (named sign-off) stays open.
+- **Weekly hours unchanged** (input states the same times; reviewDue 2027-01-07 **not** extended). Timeline risk stays: from **2027-03-09** the static PULS resolves to UNKNOWN until a named re-confirmation (tested).
+- **HEALTHY_ONLY** removed from the static public rules / types (deferred, F41/F42); the code, the 09.5J workflow and the Payload shadow support remain. A future Payload dataset must not re-introduce it publicly without a new decision.
+- **Holidays (F49):** practice statement recorded, but no named confirmation → static policy `REQUIRE_EXPLICIT_ENTRY` unchanged, weekday holidays stay fail-safe UNKNOWN.
+- **Not imported anywhere (no DB, no public content):** replacement candidates (TO_BE_CONFIRMED), five emergency candidates, acute 08:00–09:00 and vacation 24.12.2026–03.01.2027 (STAGING_PLACEHOLDER_DO_NOT_PUBLISH, only labelled review / lab fixtures).
+- Shadow parity: the integration proof seeds Payload from the new `PULS_DATA` — static ↔ Payload equal (clean-DB proof 207/207).
+
+`READY_FOR_09_6C: NO` (unchanged reasons: no real staging dataset, no explicit practice approval for the cutover, no named physician confirmations for F35–F49, F53, F54). `PUBLIC_CUTOVER: NO-GO`.

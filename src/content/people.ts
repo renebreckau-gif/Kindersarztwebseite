@@ -35,15 +35,32 @@ export const DOCTORS: Doctor[] = [
   // F24 (physician in training) TO_BE_CONFIRMED and F25 OUTDATED — not modelled as current.
 ];
 
-/** Role labels (F32) are unconfirmed; names only. */
-export const TEAM: TeamMember[] = ["Andrea Zahn", "Steffi Christmann", "Katharina Weis", "Anke Bettche", "Peggy Kejs"].map((name, i) => ({
-  id: `team-${i + 1}`,
-  name, // F26–F30
+/**
+ * CURRENT working roster = the team list of the practice input 2026-11-16 (docs/reviews/practice-input-
+ * 2026-11-16.md), in that order. Role labels (F32) stay unconfirmed: names only, `role` empty — the roles
+ * the practice named are kept as evidence in team-review.ts. People new in this list (F118, F119) carry no
+ * verified record yet. Katharina Weis (F28) is not in the current list → no longer modelled as current
+ * (historical fact kept in the register). Nobody becomes public: consent (F33) is pending for everyone.
+ */
+const ROSTER: { id: string; name: string; fact: string; verification: TeamMember["verification"] }[] = [
+  { id: "team-2", name: "Steffi Christmann", fact: "F27", verification: PERSON_VERIFIED },
+  { id: "team-1", name: "Andrea Zahn", fact: "F26", verification: PERSON_VERIFIED },
+  { id: "team-4", name: "Anke Bettche", fact: "F29", verification: PERSON_VERIFIED },
+  { id: "team-6", name: "Nicole Schulz", fact: "F118", verification: UNCONFIRMED },
+  { id: "team-7", name: "Jana Brandt", fact: "F119", verification: UNCONFIRMED },
+  { id: "team-5", name: "Peggy Kejs", fact: "F30", verification: PERSON_VERIFIED },
+];
+/** Fact id of each current team member (register F26–F30, F118–F119). */
+export const TEAM_FACT: Record<string, string> = Object.fromEntries(ROSTER.map((m) => [m.name, m.fact]));
+
+export const TEAM: TeamMember[] = ROSTER.map((m, i) => ({
+  id: m.id,
+  name: m.name,
   role: "",
   displayOrder: i + 1,
   active: true,
   publicationConsent: CONSENT_PENDING,
-  verification: PERSON_VERIFIED,
+  verification: m.verification,
 }));
 
 /**

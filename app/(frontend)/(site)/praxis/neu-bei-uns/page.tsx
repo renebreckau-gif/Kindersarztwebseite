@@ -37,7 +37,7 @@ export default async function NeuBeiUns({ searchParams }: { searchParams: Search
               body: (
                 <>
                   <p>
-                    Bitte nur mit gesunden Kindern: {typeSummary("HEALTHY_ONLY", snapshot.puls).join("; ")}. Nur Terminsprechstunde: {typeSummary("APPOINTMENT", snapshot.puls).join("; ")}.
+                    Nur Terminsprechstunde: {typeSummary("APPOINTMENT", snapshot.puls).join("; ")}.
                   </p>
                   <p>
                     <Link href="/heute/sprechzeiten">Alle Sprechzeiten</Link>
@@ -74,7 +74,7 @@ export default async function NeuBeiUns({ searchParams }: { searchParams: Search
         <InternalNote>
           <p>
             Nicht veröffentlicht, weil unbestätigt: Terminvereinbarung (F48), Aufnahme neuer Familien, Was mitbringen, Ankommen und Empfang, Barrierefreiheit, Kinderwagen, Parken, Nahverkehr
-            (F77–F88), Straße und Hausnummer (F13). „Was mitbringen“ und „Bei Infekt“ liegen der Praxis als Freigabeentwurf vor (Arbeitspaket 10.1, F91–F94).
+            (F77–F88). „Was mitbringen“ und „Bei Infekt“ liegen der Praxis als Freigabeentwurf vor (Arbeitspaket 10.1, F91–F94).
           </p>
         </InternalNote>
       </Section>

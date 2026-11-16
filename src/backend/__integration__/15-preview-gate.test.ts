@@ -10,7 +10,8 @@ import { http, skipHttp } from "./helpers.ts";
 
 const markup = (html: string) => html.replace(/<script[\s\S]*?<\/script>/g, "");
 const DOCTORS = ["Nadine Probst", "Dr. med. Elke Böhme"];
-const STAFF = ["Andrea Zahn", "Steffi Christmann", "Katharina Weis", "Anke Bettche", "Peggy Kejs"];
+// Layout preview: only the confirmed people of the current roster (practice input 2026-11-16).
+const STAFF = ["Andrea Zahn", "Steffi Christmann", "Anke Bettche", "Peggy Kejs"];
 
 describe("public review preview: STAGING only", { skip: skipHttp }, () => {
   test("without the query: no unconsented name as a person card or roster entry", async () => {
@@ -24,6 +25,7 @@ describe("public review preview: STAGING only", { skip: skipHttp }, () => {
   test("STAGING + ?vorschau=freigabe: editorial preview retained and labelled", async () => {
     const team = markup((await http("/praxis/team?vorschau=freigabe")).body);
     for (const n of STAFF) assert.ok(team.includes(n), n);
+    for (const n of ["Nicole Schulz", "Jana Brandt", "Katharina Weis"]) assert.ok(!team.includes(n), `${n}: unconfirmed / not on the current list → not in the layout preview`);
     const doctors = markup((await http("/praxis/aerztinnen?vorschau=freigabe")).body);
     for (const n of DOCTORS) assert.ok(doctors.includes(`>${n}</h2>`), n);
     const home = markup((await http("/?vorschau=freigabe&zeit=2026-10-06T09:30")).body);

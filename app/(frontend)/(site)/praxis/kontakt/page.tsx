@@ -60,7 +60,7 @@ export default async function Kontakt({ searchParams }: { searchParams: Search }
         <p className={u.lead}>Die Wegbeschreibung folgt hier – ohne eingebettete Karte, damit Ihre Daten nicht ungefragt an Kartendienste gehen. Bis dahin helfen wir Ihnen gern telefonisch weiter.</p>
         <InternalNote>
           <p>
-            Straße und Hausnummer (F13) sind unbestätigt (Schreibweise in den Quellen uneinheitlich) – deshalb noch keine Adresse und kein Routen-Link (LB-03). Parken, Nahverkehr, Eingang,
+            Anschrift „Untere Bahnhofstraße 9“ (F13) aus der Praxisangabe vom 16.11.2026 (Arbeitsdaten; namentliche Freigabe vor dem Launch: LB-00). Ein Routen-Link ist noch nicht vorgesehen. Parken, Nahverkehr, Eingang,
             Barrierefreiheit und Kinderwagen (F77–F88) sind unbestätigt. Nutzung der E-Mail für Patientenanliegen (F18) unbestätigt.
           </p>
         </InternalNote>

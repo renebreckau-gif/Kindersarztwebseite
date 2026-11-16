@@ -34,7 +34,8 @@ export default async function StartseitePruefansicht({ searchParams }: { searchP
   const highlight = selectHomepageHighlight({ result: puls.result, announcements: exampleAnnouncements(example, today), today });
   return (
     <div className="ds-root">
-      <StartPage puls={puls} snapshot={snapshot} highlight={highlight} tag="Testdaten" />
+      {/* 10.0B: the vacation example uses the PROVISIONAL staging value (24.12.2026–03.01.2027) — labelled as such. */}
+      <StartPage puls={puls} snapshot={snapshot} highlight={highlight} tag={example === "urlaub" ? "Testdaten · vorläufig" : "Testdaten"} />
     </div>
   );
 }

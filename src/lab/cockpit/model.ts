@@ -55,11 +55,15 @@ const rule = (id: string, weekday: IsoWeekday, start: LocalTime, end: LocalTime,
   verification: MOCK_VERIFIED,
 });
 
-/** Mock week: Mon–Fri 08–12 and 14–16, acute consultation 10–11 inside the morning. */
+/**
+ * Mock week: Mon–Fri 08–12 and 14–16, acute consultation 08–09 inside the morning — the PROVISIONAL staging
+ * example from the practice input 2026-11-16 ("first hour of the opening"; STAGING_PLACEHOLDER_DO_NOT_PUBLISH,
+ * not a practice fact — F44/F45 stay TO_BE_CONFIRMED). Test data of this prototype only.
+ */
 export const MOCK_RULES: OpeningHoursRule[] = ([1, 2, 3, 4, 5] as IsoWeekday[]).flatMap((d) => [
   rule(`m${d}-vm`, d, "08:00", "12:00"),
   rule(`m${d}-nm`, d, "14:00", "16:00"),
-  rule(`m${d}-akut`, d, "10:00", "11:00", "ACUTE"),
+  rule(`m${d}-akut`, d, "08:00", "09:00", "ACUTE"),
 ]);
 
 export const MOCK_TYPES: ConsultationType[] = [

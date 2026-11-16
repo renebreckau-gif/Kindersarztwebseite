@@ -8,7 +8,7 @@ import { weekdayOf, type IsoWeekday } from "@/domain/time.ts";
 
 export const metadata: Metadata = {
   title: "Sprechzeiten",
-  description: "Sprechzeiten der Kinderarztpraxis in Hettstedt: alle regulären Zeiten der Woche, Zeiten nur für gesunde Kinder und die Terminsprechstunde.",
+  description: "Sprechzeiten der Kinderarztpraxis in Hettstedt: alle regulären Zeiten der Woche und die Terminsprechstunde.",
 };
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
@@ -26,12 +26,6 @@ export default async function Sprechzeiten({ searchParams }: { searchParams: Sea
         <dl className={u.legend}>
           <div>
             <dt>
-              <span className={u.swHealthy} aria-hidden="true" /> Bitte nur gesunde Kinder
-            </dt>
-            <dd>In diesen Zeiten bitte nur mit gesunden Kindern kommen.</dd>
-          </div>
-          <div>
-            <dt>
               <span className={u.swAppointment} aria-hidden="true" /> Nur Terminsprechstunde
             </dt>
             <dd>Nur mit vereinbartem Termin.</dd>
@@ -43,7 +37,7 @@ export default async function Sprechzeiten({ searchParams }: { searchParams: Sea
         <p className={u.lead}>Aktuelle Informationen zur Akutsprechstunde werden geprüft. Bitte kontaktieren Sie die Praxis.</p>
         <CallAction />
         <InternalNote>
-          <p>Akutzeiten (F44–F46) und die Bedeutung von „nur gesunde Patienten“ (F42) sind unbestätigt und werden nicht veröffentlicht.</p>
+          <p>Akutzeiten (F44–F46) sind unbestätigt und werden nicht veröffentlicht. Zeitfenster für bestimmte Patientengruppen (F41/F42) sind auf Wunsch des Projektinhabers vorerst zurückgestellt (16.11.2026).</p>
         </InternalNote>
       </Section>
 

@@ -6,7 +6,7 @@ import { after, before, describe, test } from "node:test";
 import assert from "node:assert/strict";
 import type { Payload } from "payload";
 import { getPracticeStatus } from "../../domain/practice-status.ts";
-import { zonedToInstant } from "../../domain/time.ts";
+import { addDays, formatGermanDate, formatShortRange, weekdayOf, zonedParts, zonedToInstant } from "../../domain/time.ts";
 import { PULS_DATA } from "../../content/schedule.ts";
 import { docsFromPulsData } from "../../data/payload-mapping.ts";
 import { PayloadPracticeRepository, type PayloadReader } from "../payload-repository.ts";
@@ -74,30 +74,36 @@ describe("real cockpit read experience", { skip: skipDb }, () => {
     // ADMIN enters a replacement practice — it stays unconfirmed (physician scope).
     const rp = await http("/api/replacementPractices", { method: "POST", cookie: admin, body: { recordId: "it-vertretung", practiceName: "Praxis Beispiel (Test)", street: "Teststraße 1", postalCode: "00000", city: "Testort", phone: "0000 000" } });
     assert.equal(rp.status, 201, rp.body);
+    // A Mon–Fri vacation 1–2 weeks ahead of the REAL today: /intern renders at the current time, so a
+    // fixed calendar week would silently drop out of "Nächste Termine" once it has passed.
+    const today = zonedParts(new Date()).date;
+    const mon = addDays(today, 8 - weekdayOf(today) + 7); // the Monday 8–14 days ahead
+    const fri = addDays(mon, 4);
+    const tue = addDays(mon, 1);
     const closure = await http("/api/closures", {
       method: "POST",
       cookie: staff,
-      body: { recordId: "it-urlaub", kind: "VACATION", startDate: "2026-11-02", endDate: "2026-11-06", replacements: [{ replacementPracticeId: "it-vertretung", from: "2026-11-02", until: "2026-11-06" }] },
+      body: { recordId: "it-urlaub", kind: "VACATION", startDate: mon, endDate: fri, replacements: [{ replacementPracticeId: "it-vertretung", from: mon, until: fri }] },
     });
     assert.equal(closure.status, 201, closure.body);
 
-    const home = await loadCockpitHome(reader, zonedToInstant("2026-10-13", "09:30"));
+    const home = await loadCockpitHome(reader, zonedToInstant(today, "09:30"));
     const item = home.upcoming.find((i) => i.id === "it-urlaub");
     // 09.5C: the summary names each replacement period.
-    assert.ok(item && item.title === "Urlaub" && item.detail === "Vertretung: Praxis Beispiel (Test) (2.–6. November)", item?.detail);
-    assert.ok(home.review.some((r) => r.id === "replacement-it-urlaub-it-vertretung-2026-11-02"));
+    assert.ok(item && item.title === "Urlaub" && item.detail === `Vertretung: Praxis Beispiel (Test) (${formatShortRange(mon, fri)})`, item?.detail);
+    assert.ok(home.review.some((r) => r.id === `replacement-it-urlaub-it-vertretung-${mon}`));
 
     const page = await http("/intern", { cookie: staff });
     assert.equal(page.status, 200);
     assert.match(page.body, /Praxis heute/);
     assert.match(page.body, /Aus der Datenbank berechnet/);
-    assert.match(page.body, /Montag, 2\. November – Freitag, 6\. November/);
+    assert.ok(page.body.includes(`${formatGermanDate(mon)} – ${formatGermanDate(fri)}`), "upcoming vacation week");
     assert.match(page.body, /Vertretung Praxis Beispiel \(Test\) nicht nutzbar/);
 
-    const preview = await http("/intern/vorschau?datum=2026-11-03&zeit=10:00", { cookie: staff });
+    const preview = await http(`/intern/vorschau?datum=${tue}&zeit=10:00`, { cookie: staff });
     assert.match(preview.body, /Abweichung zur aktuellen Website/);
     assert.match(preview.body, /Schließung: Website „keine“ · Datenbank „Urlaub/);
-    const { comparison } = await loadPreview(reader, PULS_DATA, zonedToInstant("2026-11-03", "10:00"));
+    const { comparison } = await loadPreview(reader, PULS_DATA, zonedToInstant(tue, "10:00"));
     assert.equal(comparison.equal, false);
     assert.equal(comparison.database.status, "VACATION");
   });

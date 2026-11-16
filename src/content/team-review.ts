@@ -6,7 +6,7 @@
 // content, no bios. No AI or synthetic portraits of real people (media policy) — the review
 // uses a neutral initial, never a face. Name consent and photo consent are separate.
 
-import { DOCTORS, TEAM } from "./people.ts";
+import { DOCTORS, TEAM, TEAM_FACT } from "./people.ts";
 import type { ApprovalSection } from "./approval-review.ts";
 
 export type ReviewStatus = "UNCONFIRMED";
@@ -59,10 +59,23 @@ const PREVIOUS_LABEL: Record<string, string> = {
   "Peggy Kejs": "Praxisassistentin",
 };
 
+/**
+ * Role labels the practice named in its input of 2026-11-16 — evidence only (F32 stays open), shown
+ * verbatim for confirmation, never modernised or completed. Anke Bettche: no label was given.
+ */
+const INPUT_LABEL: Record<string, string> = {
+  "Steffi Christmann": "Erzieherin",
+  "Andrea Zahn": "MFA",
+  "Nicole Schulz": "MFA",
+  "Jana Brandt": "Kinderkrankenschwester",
+  "Peggy Kejs": "Praxisassistentin",
+};
+export const INPUT_DATE_LABEL = "Praxisangabe vom 16.11.2026";
+
 export const WORKING_STATE =
   "Arbeitsstand · noch nicht zur Veröffentlichung freigegeben";
 export const TEAM_LIST_STATE =
-  "Arbeitsstand aus bisheriger Website – Vollständigkeit noch nicht bestätigt";
+  "Arbeitsstand: Praxisangabe vom 16.11.2026 – Vollständigkeit noch nicht formal bestätigt";
 
 export const PEOPLE_REVIEW: PeopleGroup[] = [
   {
@@ -128,15 +141,18 @@ export const PEOPLE_REVIEW: PeopleGroup[] = [
     id: "praxisteam",
     title: "Praxisteam",
     stateLabel: TEAM_LIST_STATE,
-    people: TEAM.map((m, i) => ({
+    people: TEAM.map((m) => ({
       id: m.id,
       name: m.name,
-      factIds: [`F${26 + i}`],
+      factIds: [TEAM_FACT[m.name]],
       workingData: [
         {
-          label: "Bisherige Website",
-          value: `„${PREVIOUS_LABEL[m.name] ?? "–"}“ – nicht automatisch übernommen`,
+          label: INPUT_DATE_LABEL,
+          value: INPUT_LABEL[m.name] ? `„${INPUT_LABEL[m.name]}“ – Rollenangabe, noch nicht als öffentliche Bezeichnung bestätigt` : "keine Rollenangabe – wird nicht ergänzt",
         },
+        ...(PREVIOUS_LABEL[m.name]
+          ? [{ label: "Bisherige Website", value: `„${PREVIOUS_LABEL[m.name]}“ – nicht automatisch übernommen` }]
+          : [{ label: "Bisherige Website", value: "nicht genannt – neu in der aktuellen Liste" }]),
       ],
       checks: [
         open("Aktuell im Team"),
@@ -154,14 +170,33 @@ export const PEOPLE_REVIEW: PeopleGroup[] = [
     ],
     notes: [
       "Die Liste gilt erst als vollständig, wenn die Praxis F31 bestätigt.",
+      "Neu gegenüber dem bisherigen Projektstand: Nicole Schulz (F118) und Jana Brandt (F119).",
     ],
   },
   {
     id: "weitere",
-    title: "Weitere aktuelle Personen",
+    title: "Nicht in der aktuellen Liste",
     stateLabel:
-      "Weitere Person aus bisherigen Informationen – aktueller Status unbestätigt",
+      "Bisherige Einträge – in der Praxisangabe vom 16.11.2026 nicht genannt; nicht als aktuell vorgeschlagen",
     people: [
+      {
+        id: "f28",
+        name: "Katharina Weis",
+        factIds: ["F28"],
+        workingData: [
+          {
+            label: "Bisherige Website",
+            value: "„Arzthelferin“ – in der aktuellen Teamliste vom 16.11.2026 nicht genannt",
+          },
+        ],
+        checks: [
+          open("Nicht mehr im Team"),
+          ...CONSENT_CHECKS,
+        ],
+        questions: [
+          "Ist Katharina Weis nicht mehr in der Praxis tätig?",
+        ],
+      },
       {
         id: "f24",
         name: "Firuza Rafiyeva",
@@ -201,6 +236,7 @@ export const TEAM_TOPICS: ApprovalSection[] = [
     factIds: ["F32"],
     known: [
       "Die bisherige Website nutzt „Arzthelferin“, „Erzieherin /Arzthelferin“ und „Praxisassistentin“ unter der Überschrift „Schwestern“.",
+      "Die Praxisangabe vom 16.11.2026 nennt Rollen für fünf Personen (bei jeder Person wörtlich aufgeführt); für Anke Bettche keine.",
     ],
     unconfirmed: [
       "Jede öffentliche Bezeichnung und die Überschrift des Teambereichs.",

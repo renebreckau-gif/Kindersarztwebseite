@@ -66,6 +66,13 @@ export function evaluateFreshness(v: FactVerification | undefined, today: LocalD
   return "REVIEW_EXPIRED";
 }
 
+/**
+ * Re-verification interval for standing practice data (opening hours, contact, team, physician-confirmed
+ * cockpit data): the project's working proposal (source-policy §6, "every 6 months"), not a legal rule.
+ */
+export const STANDING_REVIEW_DAYS = 182;
+export const standingReviewDue = (confirmedOn: LocalDate): LocalDate => addDays(confirmedOn, STANDING_REVIEW_DAYS);
+
 /** May this fact back a public, authoritative statement today? */
 export function isUsable(f: Freshness): boolean {
   return f === "CURRENT" || f === "REVIEW_DUE";

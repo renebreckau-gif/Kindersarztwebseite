@@ -20,7 +20,8 @@ const files = (dir: string): string[] =>
     return statSync(join(ROOT, rel)).isDirectory() ? files(rel) : /\.(ts|tsx)$/.test(f) ? [rel] : [];
   });
 const TODAY = "2026-10-20";
-const STAFF = ["Andrea Zahn", "Steffi Christmann", "Katharina Weis", "Anke Bettche", "Peggy Kejs", "Firuza Rafiyeva"];
+// 10.0B: current working list (practice input 2026-11-16) + the two people no longer in it.
+const STAFF = ["Andrea Zahn", "Steffi Christmann", "Anke Bettche", "Nicole Schulz", "Jana Brandt", "Peggy Kejs", "Katharina Weis", "Firuza Rafiyeva"];
 const PEOPLE_DATA = ["people.ts", "team-review.ts"];
 const PUBLIC = [...files("app/(frontend)/(site)"), ...files("src/site"), ...files("src/content").filter((f) => !f.includes("__tests__") && !PEOPLE_DATA.some((r) => f.endsWith(r)))];
 const register = read("docs/research/fact-status-register.md");
@@ -39,7 +40,7 @@ describe("consent gate unchanged (E, F, G, K)", () => {
   });
   test("G: the layout preview and the review content do not mutate the people data", () => {
     const before = structuredClone({ DOCTORS, TEAM });
-    assert.equal(publicPeople(TEAM, TODAY, true).length, 5, "preview simulates consent on copies only");
+    assert.equal(publicPeople(TEAM, TODAY, true).length, 4, "preview simulates consent on copies only — and never shows unverified people (F118, F119)");
     publicPeople(DOCTORS, TODAY, true);
     assert.ok(PEOPLE_REVIEW.length);
     assert.deepEqual({ DOCTORS, TEAM }, before);
@@ -57,11 +58,13 @@ describe("consent gate unchanged (E, F, G, K)", () => {
 });
 
 describe("facts reused, statuses unchanged (H, I)", () => {
-  test("H: F11, F23, F24, F31–F34 stay TO_BE_CONFIRMED; no new fact IDs for team topics", () => {
+  test("H: F11, F23, F24, F31–F34 stay TO_BE_CONFIRMED; the only new IDs are the two new people (10.0B)", () => {
     for (const id of ["F11", "F23", "F24", "F31", "F32", "F33", "F34"]) assert.equal(status(id), "TO_BE_CONFIRMED", id);
-    assert.doesNotMatch(register, /^\| F118 \|/m);
+    // 10.0B practice input: two new people (F118, F119, TO_BE_CONFIRMED); F28 no longer in the list → TO_BE_CONFIRMED.
+    assert.deepEqual([status("F118"), status("F119"), status("F28")], ["TO_BE_CONFIRMED", "TO_BE_CONFIRMED", "TO_BE_CONFIRMED"]);
+    assert.doesNotMatch(register, /^\| F120 \|/m);
     const used = [...PEOPLE_REVIEW.flatMap((g) => g.people.flatMap((p) => p.factIds)), ...TEAM_TOPICS.flatMap((t) => t.factIds)];
-    assert.ok(used.every((id) => Number(id.slice(1)) <= 34), used.join());
+    assert.ok(used.every((id) => Number(id.slice(1)) <= 34 || ["F118", "F119"].includes(id)), used.join());
   });
   test("I: F25 stays OUTDATED_DO_NOT_PUBLISH and is not offered as a person", () => {
     assert.equal(status("F25"), "OUTDATED_DO_NOT_PUBLISH");
@@ -74,19 +77,23 @@ describe("facts reused, statuses unchanged (H, I)", () => {
 
 describe("review content: working data, every check open (D, J)", () => {
   test("three people groups, five review topics, eight numbered sections in the requested order", () => {
-    assert.deepEqual(PEOPLE_REVIEW.map((g) => g.title), ["Ärztinnen", "Praxisteam", "Weitere aktuelle Personen"]);
+    assert.deepEqual(PEOPLE_REVIEW.map((g) => g.title), ["Ärztinnen", "Praxisteam", "Nicht in der aktuellen Liste"]);
     assert.deepEqual(TEAM_TOPICS.map((t) => t.title), ["Rollen & Bezeichnungen", "Veröffentlichung von Namen", "Fotos", "Bildrechte", "Zukünftige Team-Seite"]);
     for (const t of TEAM_TOPICS) assert.ok(t.known.length && t.unconfirmed.length && t.questions.length, t.id);
   });
-  test("names come from people.ts; Firuza separate; labels say working state", () => {
+  test("names come from people.ts (current list of 16.11.2026); people no longer listed are separate; labels say working state", () => {
     const [docs, team, other] = PEOPLE_REVIEW;
     assert.deepEqual(docs.people.map((p) => p.name), DOCTORS.map((d) => d.name));
     assert.deepEqual(team.people.map((p) => p.name), TEAM.map((t) => t.name));
-    assert.deepEqual(other.people.map((p) => p.name), ["Firuza Rafiyeva"]);
+    assert.deepEqual(TEAM.map((t) => t.name), ["Steffi Christmann", "Andrea Zahn", "Anke Bettche", "Nicole Schulz", "Jana Brandt", "Peggy Kejs"]);
+    assert.deepEqual(other.people.map((p) => p.name), ["Katharina Weis", "Firuza Rafiyeva"]);
     assert.equal(docs.stateLabel, WORKING_STATE);
     assert.equal(team.stateLabel, TEAM_LIST_STATE);
-    assert.equal(TEAM_LIST_STATE, "Arbeitsstand aus bisheriger Website – Vollständigkeit noch nicht bestätigt");
+    assert.equal(TEAM_LIST_STATE, "Arbeitsstand: Praxisangabe vom 16.11.2026 – Vollständigkeit noch nicht formal bestätigt");
     assert.ok(team.questions!.includes("Ist diese Teamliste vollständig?"));
+    // Anke Bettche: no role in the input → nothing completed.
+    assert.match(JSON.stringify(team.people.find((p) => p.name === "Anke Bettche")!.workingData), /keine Rollenangabe – wird nicht ergänzt/);
+    for (const p of team.people) assert.equal(TEAM.find((t) => t.name === p.name)!.role, "", "no role adopted into the people data");
   });
   test("name and photo consent are separate checks for every person, all UNCONFIRMED", () => {
     for (const p of PEOPLE_REVIEW.flatMap((g) => g.people)) {
@@ -101,7 +108,11 @@ describe("review content: working data, every check open (D, J)", () => {
     // Modern terms appear exactly once: in the note saying they are NOT adopted.
     const rolesNote = TEAM_TOPICS.find((t) => t.id === "rollen")!.notes![0];
     assert.match(rolesNote, /nicht eigenmächtig modernisiert \(etwa zu „MFA“ oder „Medizinische Fachangestellte“\)/);
-    assert.equal(text.split("MFA").length - 1, 1);
+    // 10.0B: "MFA" additionally appears where the PRACTICE itself used it (Andrea Zahn, Nicole Schulz) — quoted
+    // verbatim as "Praxisangabe vom 16.11.2026", never added by the project.
+    const practiceMfa = PEOPLE_REVIEW.flatMap((g) => g.people).flatMap((p) => p.workingData).filter((w) => w.label === "Praxisangabe vom 16.11.2026" && w.value.startsWith("„MFA“")).length;
+    assert.equal(practiceMfa, 2);
+    assert.equal(text.split("MFA").length - 1, 1 + practiceMfa);
     assert.equal(text.split("Medizinische Fachangestellte").length - 1, 1);
     // Person data only — the topic notes name these things as forbidden.
     assert.doesNotMatch(JSON.stringify(PEOPLE_REVIEW), /Hobby|Jahre Erfahrung|seit \d{4}|Lieblings|Warum ich|Zitat/);

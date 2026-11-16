@@ -76,7 +76,8 @@ describe("person privacy: no consent simulation outside STAGING", () => {
   });
   test("STAGING review preview may show the editorial list (labelled on screen)", () => {
     assert.equal(publicPeople(DOCTORS, today, previewFor("STAGING")).length, 2);
-    assert.equal(publicPeople(TEAM, today, previewFor("STAGING")).length, 5);
+    // 10.0B: 6 people in the current working list; F118 / F119 have no verified record yet → 4 in the layout preview.
+    assert.equal(publicPeople(TEAM, today, previewFor("STAGING")).length, 4);
   });
   test("PRODUCTION + ?vorschau=freigabe passes false → no people", () => {
     assert.equal(previewFor("PRODUCTION"), false);

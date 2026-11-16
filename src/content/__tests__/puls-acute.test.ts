@@ -52,5 +52,6 @@ test("public static source is visually unchanged: same output, static labels, no
     assert.deepEqual(a, resolvePuls({}, now, staticPulsData()));
     assert.doesNotMatch(JSON.stringify(a.view), /Akut/);
   }
-  assert.match(resolvePuls({}, zonedToInstant(DAY, "08:30")).view.reason ?? "", /Jetzt bis 10:00 Uhr: Bitte nur gesunde Kinder/);
+  // 10.0B: the healthy-only window is deferred — the public static week shows no type hint at 08:30.
+  assert.equal(resolvePuls({}, zonedToInstant(DAY, "08:30")).view.reason, undefined);
 });

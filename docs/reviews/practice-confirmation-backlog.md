@@ -1,36 +1,43 @@
-# Offene Fragen an die Praxis – gesammelter Stand (Phase 09.6A)
+# Offene Fragen an die Praxis – gesammelter Stand
 
-Stand: 2026-10-21. **Nur vorbereitet, nicht verschickt.** Dieses Dokument ist die eine Sammelliste, um Antworten der Praxis einzuholen. Es ändert keinen Faktenstatus: Erst eine dokumentierte Antwort der Praxis (Name, Datum) macht aus `TO_BE_CONFIRMED` einen bestätigten Fakt. Details stehen in den verlinkten Dokumenten; hier steht jede Frage nur kurz.
+Stand: **2026-11-16** (nach Praxisangabe #1, Phase 10.0B; erstellt in 09.6A am 2026-10-21). **Nur vorbereitet, nicht verschickt.** Dieses Dokument ist die eine Sammelliste, um Antworten der Praxis einzuholen. Es ändert keinen Faktenstatus. Was mit der Praxisangabe vom 16.11.2026 beantwortet ist, steht in [practice-input-2026-11-16.md](practice-input-2026-11-16.md). Details stehen in den verlinkten Dokumenten; hier steht jede Frage nur kurz.
 
 Quellen:
-- [Faktenregister](../research/fact-status-register.md) · [Projekt-Blocker](../research/project-blockers.md) · [Readiness-Gate](../architecture/public-data-cutover-readiness.md)
+- [Faktenregister](../research/fact-status-register.md) · [Projekt-Blocker](../research/project-blockers.md) · [Readiness-Gate](../architecture/public-data-cutover-readiness.md) · [Praxisangabe 16.11.2026](practice-input-2026-11-16.md)
 - Gut vorbereitet: [gut-vorbereitet-2026-10.md](gut-vorbereitet-2026-10.md) · Praxis-App: [praxis-app-2026-10.md](praxis-app-2026-10.md) · Rezepte: [rezepte-erezept-2026-10.md](rezepte-erezept-2026-10.md) · Kosten: [kosten-zahlungsarten-2026-10.md](kosten-zahlungsarten-2026-10.md) · Team & Fotos: [team-fotos-2026-10.md](team-fotos-2026-10.md)
 
 ---
+
+## 0. Erledigt / aktueller Input (Praxisangabe 16.11.2026)
+
+Als aktuelle Praxisangabe übernommen (Quelle „Praxisangabe, übermittelt durch Projektinhaber“; eine namentliche Bestätigung durch die Praxis vor dem Launch bleibt offen – siehe H1):
+
+- Praxisname „Kinderarztpraxis Probst & Böhme“ (F01, LB-01)
+- Anschrift **Untere Bahnhofstraße 9**, 06333 Hettstedt (F13, F14, LB-03)
+- Telefon 03476 / 851157, Fax 03476 / 854206, E-Mail kinderarztpraxis-hettstedt@gmx.de (F15–F17)
+- Ärztinnennamen Dr. med. Elke Böhme und Nadine Probst (F20, F22)
+- Reguläre Sprechzeiten Mo–Fr (F35–F39; unverändert)
+- Feiertage grundsätzlich geschlossen, Brückentage grundsätzlich normal geöffnet / Einzelfall (F49 – Praxisangabe liegt vor; siehe H1)
+- Aktuelle Team-Arbeitsliste (F26, F27, F29, F30, neu F118, F119; Katharina Weis F28 nicht mehr in der Liste)
 
 ## 1. Hohe Priorität vor dem Start
 
 | # | Frage | Fakten / Blocker |
 |---|---|---|
-| H1 | Stimmen die regulären Sprechzeiten Mo–Fr genau so? Bitte mit Name und Datum bestätigen. Die Freigabe vom 07.10.2026 war eine Projektentscheidung; eine dokumentierte Bestätigung durch die Praxis fehlt noch. | F35–F39, F41, F43 · LB-00 |
-| H2 | Stimmen Telefonnummer, PLZ/Ort und die beiden Ärztinnen (Namen)? Bitte ebenfalls mit Name und Datum bestätigen. | F14, F15, F20, F22 · LB-00 |
-| H3 | Wie lautet der offizielle Praxisname auf der Website? | F01 · LB-01 |
-| H4 | Wie wird die Straße geschrieben: „Bahnhofstraße“ oder „Bahnhofsstraße“? | F13 · LB-03 |
-| H5 | Wer soll angerufen werden, wenn die Praxis geschlossen ist? Sind die Notdienst- und Klinikangaben noch aktuell? (Wir prüfen die Angaben vorher bei den offiziellen Stellen.) | F58–F65 · LB-10 |
+| H1 | **Namentliche Bestätigung** der Praxisangabe vom 16.11.2026: Wer aus der Praxis bestätigt Sprechzeiten, Kontaktdaten und die Feiertagsregel (Name, Datum)? Erst dann wird die Feiertagsregel öffentlich angewendet („an Feiertagen geschlossen“) und die Prüffrist der Sprechzeiten verlängert. | F35–F39, F43, F49 · LB-00 |
+| H5 | Notfall- und Klinikangaben: Die Praxis hat fünf Kontakte genannt (AMEOS Aschersleben, Helios Sangerhausen, St. Elisabeth Halle, Uniklinikum Halle, Giftnotruf Erfurt). Wir prüfen sie bei den Einrichtungen; danach braucht es die Freigabe der Praxis. | F58, F61–F64 · LB-10 |
 
 ## 2. Praxis Puls / Betrieb
 
 | # | Frage | Fakten / Blocker |
 |---|---|---|
-| P1 | Gibt es eine Akutsprechstunde? An welchen Tagen und genau von wann bis wann? (Montag „ganztags“? Di–Fr „ab 10:00“ – bis wann? Donnerstagnachmittag?) | F44–F46 · FB-01–03 |
-| P2 | Was bedeutet „bitte nur gesunde Kinder“ (08–10 Uhr) genau? Wer soll in dieser Zeit nicht kommen? | F42 · FB-04 |
-| P3 | Gilt an gesetzlichen Feiertagen: grundsätzlich geschlossen, oder wird jeder Feiertag einzeln entschieden? Wie ist es mit Brückentagen? | F49 · FB-06 |
-| P4 | Welche Urlaube und Schließzeiten sind für 2026/2027 schon geplant? | F54 · FB-07 |
-| P5 | Welche Vertretungspraxen sollen genannt werden? Bitte für jede: Name, Adresse, Telefon (und ob die Angaben zum Zusammenspiel Kreuter/Fuchs und zur Adresse Reich noch stimmen). | F53 · FB-10 |
+| P1 | Gibt es eine Akutsprechstunde? An welchen Tagen und genau von wann bis wann? *Vorläufiger Staging-Wert vorhanden (08:00–09:00 Uhr, nur Testdaten), finale Praxisbestätigung noch offen.* | F44–F46 · FB-01–03 |
+| P4 | Welche Urlaube und Schließzeiten sind für 2026/2027 geplant? *Vorläufiger Staging-Wert vorhanden (24.12.2026–03.01.2027, nur Prüfansicht), finale Praxisbestätigung noch offen.* | F54 · FB-07 |
+| P5 | Vertretungspraxen: Die Liste vom 06.11.2025 (8 Praxen; ein Eintrag gestrichen) ist rund ein Jahr alt. Für jede Praxis bitte aktuell ärztlich bestätigen (im Praxis Cockpit unter „Vertretungen“) – und die Faxnummer der MVZ Sangerhausen (handschriftlich, nicht lesbar). | F53 · FB-10 |
 | P6 | Wer pflegt künftig Schließzeiten, Vertretungen und Hinweise im Praxis Cockpit, und wer bestätigt als Ärztin? | FB-09 |
 | P7 | Wann ist die Praxis telefonisch erreichbar? | F19 · FB-08 |
 | P8 | Gilt die Maskenregel (Kinder über 6 mit Infekt) noch? Für wen genau? | F47, F94 · FB-11 |
-| P9 | Welche Sprechstundenarten (Bezeichnung und kurze Erklärung) sollen auf der Website stehen? (Wird ärztlich bestätigt.) | F41–F43 · Readiness GAP-1 |
+| P9 | Welche Sprechstundenarten (Bezeichnung und kurze Erklärung) sollen auf der Website stehen? (Wird ärztlich bestätigt.) Derzeit öffentlich: „Sprechstunde“ und „Nur Terminsprechstunde“. | F43 |
 
 ## 3. Kontakt / digitale Services
 
@@ -48,8 +55,8 @@ Quellen:
 
 | # | Frage | Fakten / Blocker |
 |---|---|---|
-| T1 | Ist die Teamliste vollständig? Fehlt jemand, oder ist jemand nicht mehr dabei? Ist Firuza Rafiyeva noch in der Praxis und soll sie genannt werden? | F24, F31 · LB-08 |
-| T2 | Welche Berufs- bzw. Funktionsbezeichnung soll bei jeder Person stehen (auch die Überschrift „Schwestern“)? Welche Titel hat Dr. Böhme genau? | F23, F32 · LB-05 |
+| T1 | Ist die aktuelle Liste (2 Ärztinnen + Steffi Christmann, Andrea Zahn, Anke Bettche, Nicole Schulz, Jana Brandt, Peggy Kejs) vollständig? Bitte bestätigen, dass Katharina Weis und Firuza Rafiyeva nicht mehr in der Praxis sind. | F24, F28, F31 · LB-08 |
+| T2 | Welche öffentliche Bezeichnung soll bei jeder Person stehen? Für Anke Bettche fehlt eine Angabe. Überschrift des Teambereichs? Welche Titel hat Dr. Böhme genau? | F23, F32 · LB-05 |
 | T3 | Dürfen die Namen veröffentlicht werden? Bitte für jede Person einzeln und schriftlich. | F33 · LB-09 |
 
 ## 5. Preise / Zahlung
@@ -78,6 +85,12 @@ Quellen:
 | M2 | Neue Fotos machen oder vorhandene verwenden? Falls vorhanden: Bilder, Zuordnung und Rechte (Fotograf/in). | F11, F34 · LB-12 |
 | M3 | Gibt es ein Logo, und dürfen wir es verwenden? | F12 · LB-12 |
 
+## DEFERRED / vorerst nicht veröffentlichen
+
+| Thema | Stand |
+|---|---|
+| „Nur gesunde Kinder“ (08:00–10:00, Di–Fr) | Auf Wunsch des Projektinhabers vorerst zurückgestellt (16.11.2026) – keine aktive Rückfrage. Nicht widerlegt; die technische Unterstützung bleibt. (F41, F42 · FB-04) |
+
 ---
 
-**Umfang:** 35 Fragen in 7 Gruppen: 5 hohe Priorität, 9 Praxis Puls/Betrieb, 7 Kontakt/digitale Services, 3 Team, 3 Preise, 5 Recht, 3 Medien. Nicht enthalten: Mein Arztbesuch (eigene Freigabedokumente: [discovery-approval-package.md](discovery-approval-package.md), [discovery-ai-child-publication-decision.md](discovery-ai-child-publication-decision.md)) und Nice-to-have-Angaben (NH-01–NH-12).
+**Umfang:** 30 offene Fragen in 7 Gruppen: 2 hohe Priorität, 7 Praxis Puls/Betrieb, 7 Kontakt/digitale Services, 3 Team, 3 Preise, 5 Recht, 3 Medien. Mit der Praxisangabe vom 16.11.2026 erledigt bzw. ersetzt: H2, H3, H4, P3 (Inhalt liegt vor; namentliche Bestätigung → H1); zurückgestellt: P2. Nicht enthalten: Mein Arztbesuch (eigene Freigabedokumente: [discovery-approval-package.md](discovery-approval-package.md), [discovery-ai-child-publication-decision.md](discovery-ai-child-publication-decision.md)) und Nice-to-have-Angaben (NH-01–NH-12).

@@ -51,7 +51,7 @@ export function resolvePuls(
   const data = usable || !source.schedule ? source : { ...source, schedule: { ...source.schedule, verification: UNCONFIRMED } };
   const result = getPracticeStatus(at, data);
   const [secondary] = result.secondaryActions;
-  // Current consultation type (verified data, e.g. F41 "bitte nur gesunde Kinder") — the engine
+  // Current consultation type (verified data, e.g. F43 "Nur Terminsprechstunde") — the engine
   // reports it; we only put it into words. No new status logic. Labels come from the SAME source the
   // engine evaluated (static snapshot publicly, the database in the cockpit preview — 09.5E).
   const labelOf = (code: string) => source.consultationTypes.find((t) => t.code === code)?.label;

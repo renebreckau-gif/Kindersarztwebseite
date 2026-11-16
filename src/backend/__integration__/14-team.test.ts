@@ -7,7 +7,8 @@ import assert from "node:assert/strict";
 import { http, skipHttp } from "./helpers.ts";
 
 const markup = (html: string) => html.replace(/<script[\s\S]*?<\/script>/g, "");
-const STAFF = ["Andrea Zahn", "Steffi Christmann", "Katharina Weis", "Anke Bettche", "Peggy Kejs", "Firuza Rafiyeva"];
+// Practice input 2026-11-16 roster + the two people no longer on it (still in the draft, "Nicht in der aktuellen Liste").
+const STAFF = ["Steffi Christmann", "Andrea Zahn", "Anke Bettche", "Nicole Schulz", "Jana Brandt", "Peggy Kejs", "Katharina Weis", "Firuza Rafiyeva"];
 const PUBLIC = ["/", "/praxis", "/praxis/team", "/praxis/aerztinnen", "/praxis/kontakt", "/praxis/neu-bei-uns", "/heute"];
 
 describe("Team & Fotos: approval draft only", { skip: skipHttp }, () => {
@@ -16,13 +17,13 @@ describe("Team & Fotos: approval draft only", { skip: skipHttp }, () => {
     assert.equal(r.status, 200);
     assert.match(r.body, /<meta name="robots" content="noindex, nofollow"\/>/);
     const m = markup(r.body);
-    for (const t of ["Freigabeentwurf · nicht öffentlich", "Team &amp; Fotos", "Wer soll wie auf der Website erscheinen?", "Arbeitsstand aus bisheriger Website – Vollständigkeit noch nicht bestätigt", "Ist diese Teamliste vollständig?", "nur nach bestätigter Zuordnung, Nutzungsrechten und Einwilligung"]) assert.ok(m.includes(t), t);
+    for (const t of ["Freigabeentwurf · nicht öffentlich", "Team &amp; Fotos", "Wer soll wie auf der Website erscheinen?", "Arbeitsstand: Praxisangabe vom 16.11.2026 – Vollständigkeit noch nicht formal bestätigt", "Nicht in der aktuellen Liste", "Ist diese Teamliste vollständig?", "nur nach bestätigter Zuordnung, Nutzungsrechten und Einwilligung"]) assert.ok(m.includes(t), t);
     assert.equal((m.match(/<h1/g) ?? []).length, 1);
     assert.equal((m.match(/<h2/g) ?? []).length, 8);
-    assert.equal((m.match(/<article/g) ?? []).length, 8, "2 doctors + 5 team + 1 further person");
+    assert.equal((m.match(/<article/g) ?? []).length, 10, "2 doctors + 6 on the current list + 2 no longer on it");
     for (const n of STAFF) assert.ok(m.includes(n), n);
-    assert.equal(m.split("Noch nicht bestätigt").length - 1, 38, "33 person checks + 5 topic badges");
-    assert.equal(m.split("Kein Foto zugeordnet").length - 1, 8);
+    assert.equal(m.split("Noch nicht bestätigt").length - 1, 45, "40 person checks (2×4 doctors, 6×4 current list, 3 + 5 no longer on it) + 5 topic badges");
+    assert.equal(m.split("Kein Foto zugeordnet").length - 1, 10);
     assert.ok(!m.includes("Anne Horn"), "historical entry not offered");
     assert.ok(!/<img|<form|<input|<select|<textarea|type="checkbox"|checked/.test(m), "no photo, no form, nothing ticked");
     const hub = markup((await http("/review")).body);

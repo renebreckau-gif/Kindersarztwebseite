@@ -22,9 +22,9 @@ Owner abbreviations: **P** = practice · **L** = legal reviewer · **T** = proje
 | ID | Blocker | Facts | Owner | Notes |
 |---|---|---|---|---|
 | LB-00 | **Practice sign-off of all HIGH-risk VERIFIED_CURRENT facts** (postcode/city, phone, physicians, regular hours, healthy-only window, Tuesday appointment session) | F14, F15, F20, F22, F35–F39, F41, F43 | P | Working data is likely correct, but high-risk facts go live only with a recorded confirmation (source-policy §6). **Reconciled 09.6A — still OPEN.** Recorded evidence: 2026-10-07 a *project-level human decision* (phase-07 review addendum) released the hours for the PRAXIS PULS live state (`RELEASE.pulsPracticeSignOff = true`); the data itself still carries `WORKING` provenance "Praxisfreigabe LB-00 ausstehend" (`src/content/practice.ts`), and no named practice confirmation (person + date, like F40 on 2026-10-11) exists for F14, F15, F20, F22, F35–F39, F41, F43. Needed before the public launch; the `WORKING` reviewDue 2027-01-07 (+60 days grace) also bounds the current static PULS. |
-| LB-01 | Official public practice name | F01 | P | Two variants in use. |
+| LB-01 | ~~Official public practice name~~ | F01 | P | **Resolved as working data 2026-11-16** (practice input: „Kinderarztpraxis Probst & Böhme“, [practice-input-2026-11-16.md](../reviews/practice-input-2026-11-16.md)); the named sign-off is part of LB-00. |
 | LB-02 | Legal name and legal form (BAG, partners) | F02 | P, L | Required for Impressum and privacy controller. |
-| LB-03 | Correct street spelling | F13 | P | "Bahnhofstraße" vs. "Bahnhofsstraße". |
+| LB-03 | ~~Correct street spelling~~ | F13 | P | **Resolved as working data 2026-11-16** (practice input: „Untere Bahnhofstraße 9“, now public); the named sign-off is part of LB-00. |
 | LB-04 | Responsible person(s) for Impressum | F03 | P, L | Missing. |
 | LB-05 | Professional titles for Impressum and Team | F04, F23 | P, L | Dr. Böhme's titles ambiguous; Impressum lists one singular title. |
 | LB-06 | Current legal references for Impressum | F08 | L | Old TMG/RStV wording must not be reused. |
@@ -51,7 +51,7 @@ Owner abbreviations: **P** = practice · **L** = legal reviewer · **T** = proje
 | FB-03 | Thursday afternoon consultation type | F46 | P |
 | FB-04 | Meaning of "nur gesunde Patienten" window | F42 | P |
 | ~~FB-05~~ | ~~Weekend closed confirmed~~ — **closed 2026-10-11** (practice: Nadine Probst) | F40 | P |
-| FB-06 | Public holidays / bridge days rule (09.5H: physician workflow exists technically; the practice's rule is still unconfirmed — OPEN) | F49 | P |
+| FB-06 | Public holidays / bridge days rule (09.5H: physician workflow exists technically; practice statement received 2026-11-16, but no named confirmation — static policy unchanged, still OPEN) | F49 | P |
 | FB-07 | Upcoming closures 2026/2027 entered | F54 | P |
 | FB-08 | Telephone hours (for "telefonisch erreichbar" status) | F19 | P |
 | FB-09 | Defined owner and update routine for closures and notices | — | P |
@@ -142,7 +142,7 @@ These must not appear as current information anywhere on the new site (content, 
 
 | Class | Count |
 |---|---|
-| Launch blockers | 16 open (LB-00 … LB-15; LB-13–LB-15 added 2026-10-13 for host, registrar/DNS and production backend) |
+| Launch blockers | 14 open (LB-00 … LB-15 without LB-01 / LB-03, resolved as working data 2026-11-16; LB-13–LB-15 added 2026-10-13 for host, registrar/DNS and production backend) |
 | Feature blockers | 17 open (FB-01 … FB-18; FB-05 closed 2026-10-11) |
 | Nice to have | 13 |
 | Excluded outdated items | 9 |

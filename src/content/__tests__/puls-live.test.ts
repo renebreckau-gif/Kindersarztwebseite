@@ -18,14 +18,16 @@ test("LB-00 sign-off gate is open", () => {
 });
 
 test("normal visit (no ?vorschau) during verified hours → LIVE open state", () => {
-  // Tuesday 06.10.2026, 09:30 — F36: 08:00–11:00 (08:00–10:00 healthy children only)
+  // Tuesday 06.10.2026, 09:30 — F36: 08:00–11:00. The healthy-only window (F41/F42) is deferred
+  // (practice input 2026-11-16): a plain open state, no consultation-type hint.
   const p = resolvePuls({}, at("2026-10-06", "09:30"));
   assert.equal(p.mode, "LIVE");
   assert.equal(p.result.status, "OPEN");
   assert.equal(p.result.indicator, "OPEN");
   assert.equal(p.view.headline, "Praxis geöffnet");
   assert.equal(p.view.detail, "Heute bis 11:00 Uhr");
-  assert.equal(p.view.reason, "Jetzt bis 10:00 Uhr: Bitte nur gesunde Kinder");
+  assert.equal(p.view.reason, undefined);
+  assert.doesNotMatch(JSON.stringify(p), /gesunde/);
 });
 
 test("normal visit outside hours → LIVE closed state with next opening", () => {

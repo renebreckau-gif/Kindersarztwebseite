@@ -85,7 +85,7 @@ describe("shadow comparison (pure)", () => {
   test("consultation labels come from the snapshot's own types (09.5E rule) — a label change is visible", async () => {
     const s = await staticSnap();
     const p = asPayload(s);
-    p.puls.consultationTypes = p.puls.consultationTypes.map((t) => (t.code === "HEALTHY_ONLY" ? { ...t, label: "Anders benannt (Test)" } : t));
+    p.puls.consultationTypes = p.puls.consultationTypes.map((t) => (t.code === "APPOINTMENT" ? { ...t, label: "Anders benannt (Test)" } : t));
     assert.deepEqual(differenceKinds(compareShadow(s, p, WINDOW)), ["DAY_RULER", "PULS_DATA", "WEEK_HOURS"]);
   });
 

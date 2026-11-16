@@ -3,7 +3,7 @@
 // any client-supplied verifiedBy/lastVerified is ignored.
 
 import { buildAuditEvent, buildProvenance, canConfirm, type Actor, type AuditEventRecord, type AuditOperation, type ConfirmableKind } from "../domain/governance.ts";
-import type { FactVerification } from "../domain/verification.ts";
+import { standingReviewDue, type FactVerification } from "../domain/verification.ts";
 import { addDays, zonedParts, type LocalDate } from "../domain/time.ts";
 import { activeRole, type StaffUserLike } from "./access.ts";
 
@@ -22,7 +22,7 @@ export function actorFromUser(user: StaffUserDoc | null | undefined): Actor | nu
 export function reviewDueFor(kind: ConfirmableKind, data: { endDate?: string | null; validUntil?: string | null; openEnded?: boolean | null }, today: LocalDate): LocalDate {
   if ((kind === "EXCEPTION" || kind === "CLOSURE") && data.endDate) return data.endDate;
   if (kind === "ANNOUNCEMENT") return data.openEnded || !data.validUntil ? addDays(today, 30) : data.validUntil;
-  return addDays(today, 182);
+  return standingReviewDue(today);
 }
 
 export class ProvenanceRejected extends Error {}

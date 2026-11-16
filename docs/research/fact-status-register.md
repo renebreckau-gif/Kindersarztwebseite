@@ -30,7 +30,7 @@ Critical review of the five Phase 00 documents before assigning statuses:
 
 | ID | Fact | Status | Risk |
 |---|---|---|---|
-| F01 | Public practice name | TO_BE_CONFIRMED | HIGH |
+| F01 | Public practice name | VERIFIED_CURRENT | HIGH |
 | F02 | Legal name / legal form (BAG) | TO_BE_CONFIRMED | HIGH |
 | F03 | Responsible person(s) for Impressum | TO_BE_CONFIRMED | HIGH |
 | F04 | Professional titles in Impressum | TO_BE_CONFIRMED | HIGH |
@@ -42,7 +42,7 @@ Critical review of the five Phase 00 documents before assigning statuses:
 | F10 | Privacy policy data (controller, DPO, processors) | TO_BE_CONFIRMED | HIGH |
 | F11 | Photo credit / image rights | TO_BE_CONFIRMED | MEDIUM |
 | F12 | Logo / illustration rights | TO_BE_CONFIRMED | MEDIUM |
-| F13 | Street and house number | TO_BE_CONFIRMED | HIGH |
+| F13 | Street and house number | VERIFIED_CURRENT | HIGH |
 | F14 | Postcode and city | VERIFIED_CURRENT | HIGH |
 | F15 | Phone number | VERIFIED_CURRENT | HIGH |
 | F16 | Fax number | VERIFIED_CURRENT | MEDIUM |
@@ -57,7 +57,7 @@ Critical review of the five Phase 00 documents before assigning statuses:
 | F25 | Physician in training: Anne Horn | OUTDATED_DO_NOT_PUBLISH | MEDIUM |
 | F26 | Staff: Andrea Zahn | VERIFIED_CURRENT | MEDIUM |
 | F27 | Staff: Steffi Christmann | VERIFIED_CURRENT | MEDIUM |
-| F28 | Staff: Katharina Weis | VERIFIED_CURRENT | MEDIUM |
+| F28 | Staff: Katharina Weis | TO_BE_CONFIRMED | MEDIUM |
 | F29 | Staff: Anke Bettche | VERIFIED_CURRENT | MEDIUM |
 | F30 | Staff: Peggy Kejs | VERIFIED_CURRENT | MEDIUM |
 | F31 | Team completeness | TO_BE_CONFIRMED | MEDIUM |
@@ -134,8 +134,10 @@ Critical review of the five Phase 00 documents before assigning statuses:
 | F115 | Cash payment not accepted (10.4A) | TO_BE_CONFIRMED | MEDIUM |
 | F116 | Payment timing / process (10.4A) | TO_BE_CONFIRMED | MEDIUM |
 | F117 | Price-list validity / maintenance owner (10.4A) | TO_BE_CONFIRMED | MEDIUM |
+| F118 | Staff: Nicole Schulz (practice input 2026-11-16) | TO_BE_CONFIRMED | MEDIUM |
+| F119 | Staff: Jana Brandt (practice input 2026-11-16) | TO_BE_CONFIRMED | MEDIUM |
 
-Totals (117 facts; recounted 2026-10-21, 09.6A — F40 (practice, 2026-10-11) and F57 (external, 2026-10-07) had been promoted without updating this line): VERIFIED_CURRENT 25 · TO_BE_CONFIRMED 83 (incl. 14 missing, F77–F90, 4 staff proposals, F91–F94, 6 app candidates, F95–F100, 9 prescription-process candidates, F101–F109, and 8 pricing / payment candidates, F110–F117) · OUTDATED_DO_NOT_PUBLISH 9
+Totals (119 facts; recounted 2026-11-16, 10.0B — F01 and F13 VERIFIED_CURRENT as working data from the practice input 2026-11-16; F28 back to TO_BE_CONFIRMED (not in the current team list); new F118, F119): VERIFIED_CURRENT 26 · TO_BE_CONFIRMED 84 (incl. 14 missing, F77–F90, 4 staff proposals, F91–F94, 6 app candidates, F95–F100, 9 prescription-process candidates, F101–F109, 8 pricing / payment candidates, F110–F117, and 2 new staff entries, F118–F119) · OUTDATED_DO_NOT_PUBLISH 9
 
 Of the 23 VERIFIED_CURRENT facts, 12 are HIGH risk; 11 of these (all except 112) still require practice sign-off before launch (LB-00). *(Historical count from 2026-10-07; F40 carries its own practice confirmation, F57 an external one. The LB-00 set is unchanged — see project-blockers LB-00.)*
 
@@ -147,11 +149,11 @@ Of the 23 VERIFIED_CURRENT facts, 12 are HIGH risk; 11 of these (all except 112)
 - **CURRENT VALUE / CLAIM:** "Kinderarztpraxis Probst & Böhme"
 - **SOURCE:** S01, S08, site title; variant on S07
 - **SOURCE DATE:** S01 2026-05-18; S08 2025-09-18; S07 2022-03-07
-- **STATUS:** TO_BE_CONFIRMED
+- **STATUS:** VERIFIED_CURRENT (as working data, 2026-11-16)
 - **RISK IF INCORRECT:** HIGH — legal identity, Impressum, search/maps listings
 - **REQUIRED CONFIRMATION:** Practice: official name to be used publicly
 - **FEATURES AFFECTED:** Header, footer, Impressum, metadata, structured data
-- **NOTES:** Two variants exist (see F02). Working label for drafts only.
+- **NOTES:** Two variants exist (see F02). **Update 2026-11-16:** practice input 2026-11-16 (docs/reviews/practice-input-2026-11-16.md): public name "Kinderarztpraxis Probst & Böhme" — source "Praxisangabe, übermittelt durch Projektinhaber", channel: project owner, no named confirmer at the practice (project owner decision: sufficient for contact data as working data). Legal name / form (F02) unchanged. Named sign-off before launch: LB-00.
 
 ### F02 — Legal name / legal form
 - **CURRENT VALUE / CLAIM:** "Kinderarztpraxis BAG Probst/Böhme" (BAG = Berufsausübungsgemeinschaft)
@@ -269,11 +271,11 @@ Of the 23 VERIFIED_CURRENT facts, 12 are HIGH risk; 11 of these (all except 112)
 - **CURRENT VALUE / CLAIM:** "Untere Bahnhofstraße 9" (S01, S07) vs. "Untere Bahnhofsstraße 9" (S08, Google Maps embed on S07)
 - **SOURCE:** S01, S07, S08
 - **SOURCE DATE:** 2026-05-18 / 2022-03-07 / 2025-09-18
-- **STATUS:** TO_BE_CONFIRMED
+- **STATUS:** VERIFIED_CURRENT (as working data, 2026-11-16)
 - **RISK IF INCORRECT:** HIGH — navigation, Impressum, structured data
 - **REQUIRED CONFIRMATION:** Practice: exact official spelling
 - **FEATURES AFFECTED:** Kontakt, Impressum, footer, map/route link, structured data
-- **NOTES:** House number 9 is consistent; only spelling differs.
+- **NOTES:** House number 9 is consistent; only spelling differs. **Update 2026-11-16:** practice input 2026-11-16 (docs/reviews/practice-input-2026-11-16.md): correct spelling **"Untere Bahnhofstraße 9"**, 06333 Hettstedt. The variants "Bahnhofsstraße" / "Bahnhofstraße 9" without "Untere" are not used (S08 spelling: OUTDATED_DO_NOT_PUBLISH as a value). Source "Praxisangabe, übermittelt durch Projektinhaber" (no named confirmer; project owner decision for contact data). Named sign-off before launch: LB-00.
 
 ### F14 — Postcode and city
 - **CURRENT VALUE / CLAIM:** 06333 Hettstedt
@@ -415,7 +417,7 @@ Shared fields for F26–F30:
 - **RISK IF INCORRECT:** MEDIUM — naming a person who has left; privacy
 - **REQUIRED CONFIRMATION:** Practice sign-off of the list (F31) and consent (F33) before publication
 - **FEATURES AFFECTED:** Team
-- **NOTES:** Page actively maintained in 2026, no contradicting source. Publication still depends on F33.
+- **NOTES:** Page actively maintained in 2026, no contradicting source. Publication still depends on F33. **Update 2026-11-16 (practice input 2026-11-16 (docs/reviews/practice-input-2026-11-16.md)):** current working list = Steffi Christmann ("Erzieherin"), Andrea Zahn ("MFA"), Anke Bettche (no role given), Nicole Schulz (F118, "MFA"), Jana Brandt (F119, "Kinderkrankenschwester"), Peggy Kejs ("Praxisassistentin"). **F28 Katharina Weis is not in the current list → TO_BE_CONFIRMED** (removed from the current working roster; historical entry kept, not OUTDATED without confirmation). Roles from the input are evidence for F32, not confirmed labels.
 
 ### F31 — Team completeness
 - **CURRENT VALUE / CLAIM:** 2 physicians + 5 staff
@@ -425,7 +427,7 @@ Shared fields for F26–F30:
 - **RISK IF INCORRECT:** MEDIUM
 - **REQUIRED CONFIRMATION:** Practice: complete current list, display order, trainees on Team page?
 - **FEATURES AFFECTED:** Team
-- **NOTES:** Trainee F24 is listed elsewhere; completeness unknown.
+- **NOTES:** Trainee F24 is listed elsewhere; completeness unknown. **Update 2026-11-16:** the practice input names 2 physicians + 6 team members as the current list (see F26–F30, F118, F119); F24 (Firuza Rafiyeva) and F28 are not in it. Status stays TO_BE_CONFIRMED — no named confirmation of completeness; the staging review `/review/team` shows the new working list.
 
 ### F32 — Staff role labels
 - **CURRENT VALUE / CLAIM:** Section heading "Schwestern"; titles "Arzthelferin", "Praxisassistentin"
@@ -435,7 +437,7 @@ Shared fields for F26–F30:
 - **RISK IF INCORRECT:** LOW
 - **REQUIRED CONFIRMATION:** Practice: preferred heading and titles
 - **FEATURES AFFECTED:** Team
-- **NOTES:** Heading does not match listed roles. Do not modernise without approval.
+- **NOTES:** Heading does not match listed roles. Do not modernise without approval. **Update 2026-11-16:** the practice input names roles for five people ("Erzieherin", "MFA", "Kinderkrankenschwester", "Praxisassistentin"), none for Anke Bettche — evidence only; nothing completed or invented; status stays TO_BE_CONFIRMED.
 
 ### F33 — Consent to publish names and photos
 - **CURRENT VALUE / CLAIM:** unknown
@@ -494,7 +496,7 @@ Shared fields for F35–F39:
 - **RISK IF INCORRECT:** HIGH
 - **REQUIRED CONFIRMATION:** Practice sign-off (LB-00)
 - **FEATURES AFFECTED:** Sprechzeiten, PRAXIS PULS
-- **NOTES:** The window is stated clearly; its meaning is not (F42). Monday has no such window.
+- **NOTES:** The window is stated clearly; its meaning is not (F42). Monday has no such window. **Update 2026-11-16:** Öffentliche Verwendung auf Wunsch des Projektinhabers vorerst zurückgestellt (DEFERRED_DO_NOT_PUBLISH). The static site shows those mornings as regular consultation hours (opening hours unchanged); the status of the recorded claim is not changed.
 
 ### F42 — Meaning of "gesunde Patienten"
 - **CURRENT VALUE / CLAIM:** Not defined on current pages; 2020 notice (S02) mentions "Vorsorge, Impfungen, Gewichtskontrollen etc."
@@ -504,7 +506,7 @@ Shared fields for F35–F39:
 - **RISK IF INCORRECT:** HIGH — sick child brought into healthy-only slot
 - **REQUIRED CONFIRMATION:** Practice: what visits belong in this window; appointment required?
 - **FEATURES AFFECTED:** Sprechzeiten, PRAXIS PULS
-- **NOTES:** The 2020 definition must not be reused without confirmation. Since Phase 09.5J a technical physician consultation-type workflow exists in the staff cockpit (`/intern/sprechstundenarten`); it does not change this status — only a real practice / physician confirmation would.
+- **NOTES:** The 2020 definition must not be reused without confirmation. Since Phase 09.5J a technical physician consultation-type workflow exists in the staff cockpit (`/intern/sprechstundenarten`); it does not change this status — only a real practice / physician confirmation would. **Update 2026-11-16:** Öffentliche Verwendung auf Wunsch des Projektinhabers vorerst zurückgestellt — not disproven, not asked as an active question (backlog: DEFERRED).
 
 ### F43 — Tuesday afternoon appointment-only
 - **CURRENT VALUE / CLAIM:** Di 14:00–16:00 "nur Terminsprechstunde"
@@ -574,7 +576,7 @@ Shared fields for F35–F39:
 - **RISK IF INCORRECT:** HIGH
 - **REQUIRED CONFIRMATION:** Practice: closed on Sachsen-Anhalt public holidays? bridge days?
 - **FEATURES AFFECTED:** PRAXIS PULS
-- **NOTES:** PRAXIS PULS must not show "open" on a public holiday without confirmed data. Since Phase 09.5H a technical physician-confirmation workflow exists in the staff cockpit (`/intern/feiertage`); it does **not** change this status — the practice's actual rule has not been confirmed.
+- **NOTES:** PRAXIS PULS must not show "open" on a public holiday without confirmed data. Since Phase 09.5H a technical physician-confirmation workflow exists in the staff cockpit (`/intern/feiertage`); it does **not** change this status — the practice's actual rule has not been confirmed. **Update 2026-11-16 (practice input 2026-11-16 (docs/reviews/practice-input-2026-11-16.md)):** practice statement: public holidays closed (= `CLOSED_ON_PUBLIC_HOLIDAYS`); bridge days usually open, decided case by case (regular week unless a closure / special hours is entered). **Praxisangabe liegt vor; formale namentliche Bestätigung noch offen** (project owner decision: a public "closed" status needs a named confirmation). Status stays TO_BE_CONFIRMED; the static policy stays `REQUIRE_EXPLICIT_ENTRY`.
 
 ## 7. Closures, replacements, notices
 
@@ -893,4 +895,45 @@ The staging draft `/review/team` (content `src/content/team-review.ts`) asks the
 - **Consent model:** name consent and photo consent are separate (F33). A person may be public without a photo; a photo needs person consent + image consent + confirmed rights (F11) — rule `decidePersonPhoto` in `src/domain/publication.ts`
 - **Not consent:** appearing on the old website, an existing photo, staff feedback, employment, social-media presence
 - **Statuses unchanged:** F23, F24, F31, F32, F33, F34, F11 TO_BE_CONFIRMED; staging visibility of working data is not publication
+
+## 17. Practice input 2026-11-16 (Phase 10.0B)
+
+Source: practice input 2026-11-16 (docs/reviews/practice-input-2026-11-16.md). Relayed by the project owner; **no named confirmer at the practice is recorded** (none invented). Project owner decision 2026-11-16: sufficient for **contact data** as working data; **not** for the holiday rule, the team, emergency or replacement data.
+
+| Fact | Before | After | Reason |
+|---|---|---|---|
+| F01 practice name | TO_BE_CONFIRMED | **VERIFIED_CURRENT** (working data) | practice input; project owner decision for contact data |
+| F13 street | TO_BE_CONFIRMED | **VERIFIED_CURRENT** (working data) — "Untere Bahnhofstraße 9" | same; resolves the spelling conflict |
+| F14–F17 postcode / phone / fax / e-mail | VERIFIED_CURRENT | unchanged; evidence + verification refreshed in `src/content/practice.ts` | identical values in the input |
+| F20, F22 physician names | VERIFIED_CURRENT | unchanged (names identical; "Dr. med." for Dr. Böhme) | publication still needs consent F33 |
+| F35–F39 hours, F43 | VERIFIED_CURRENT (working) | unchanged; input states the same times — **reviewDue not extended** (no named confirmation) | evidence only |
+| F40 weekend | VERIFIED_CURRENT | unchanged — nothing derived from the card | — |
+| F41 healthy-only window / F42 meaning | VERIFIED_CURRENT / TO_BE_CONFIRMED | statuses unchanged; **public use deferred** (DEFERRED_DO_NOT_PUBLISH) | project owner decision |
+| F44, F45 acute | TO_BE_CONFIRMED | unchanged; 08:00–09:00 is a STAGING placeholder only | — |
+| F49 holidays / bridge days | TO_BE_CONFIRMED | unchanged; practice statement recorded | named confirmation open |
+| F28 Katharina Weis | VERIFIED_CURRENT | **TO_BE_CONFIRMED** | not in the current team list |
+| F24, F31, F32, F33, F34 | TO_BE_CONFIRMED | unchanged; evidence recorded | — |
+| F53 replacement directory | TO_BE_CONFIRMED | unchanged; structured candidate list from a sheet received 06.11.2025 (one entry struck out: not imported) | 09.5G physician verification pending |
+| F54 closures 2026/2027 | TO_BE_CONFIRMED | unchanged; 24.12.2026–03.01.2027 is a STAGING placeholder only | — |
+| F58, F61–F64 emergency facilities | TO_BE_CONFIRMED | unchanged; practice-provided candidates recorded, **not published** | institution check + practice approval pending (LB-10) |
+
+### F118 — Staff: Nicole Schulz
+- **CURRENT VALUE / CLAIM:** Nicole Schulz — role given as "MFA"
+- **SOURCE:** practice input 2026-11-16
+- **SOURCE DATE:** 2026-11-16
+- **STATUS:** TO_BE_CONFIRMED
+- **RISK IF INCORRECT:** MEDIUM — naming a person; privacy
+- **REQUIRED CONFIRMATION:** Practice: list (F31), public label (F32), publication consent (F33), photo consent (F34)
+- **FEATURES AFFECTED:** Team
+- **NOTES:** New compared with the previous project state. Publication consent and photo consent: TO_BE_CONFIRMED. Not public.
+
+### F119 — Staff: Jana Brandt
+- **CURRENT VALUE / CLAIM:** Jana Brandt — role given as "Kinderkrankenschwester"
+- **SOURCE:** practice input 2026-11-16
+- **SOURCE DATE:** 2026-11-16
+- **STATUS:** TO_BE_CONFIRMED
+- **RISK IF INCORRECT:** MEDIUM — naming a person; privacy
+- **REQUIRED CONFIRMATION:** Practice: list (F31), public label (F32), publication consent (F33), photo consent (F34)
+- **FEATURES AFFECTED:** Team
+- **NOTES:** New compared with the previous project state. Publication consent and photo consent: TO_BE_CONFIRMED. Not public.
 
