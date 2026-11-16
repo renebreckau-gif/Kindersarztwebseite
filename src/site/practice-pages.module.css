@@ -1,0 +1,75 @@
+/* Praxis hub groups and "Gut vorbereitet" items (Phase 10.1B). Existing tokens only; calm paper cards,
+   one column on phones, nothing to open or swipe. */
+
+/* ---------------- Praxis hub: three task groups ---------------- */
+
+.groups {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-8) var(--space-7);
+}
+.groupTitle {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  font-weight: 400;
+  line-height: var(--leading-heading);
+}
+
+@media (min-width: 64em) {
+  .groups {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+/* ---------------- Gut vorbereitet: four short items ---------------- */
+
+.items {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-width: 60rem;
+}
+.item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--space-4);
+  align-items: start;
+  height: 100%;
+  padding: var(--space-5);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-control);
+}
+.mark {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-round);
+  background: var(--plaster);
+  color: var(--color-text);
+}
+.itemTitle {
+  margin: 0.35rem 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  font-weight: 400;
+  line-height: var(--leading-heading);
+}
+.itemText {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  max-width: 34rem;
+}
+
+@media (min-width: 48em) {
+  .items {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

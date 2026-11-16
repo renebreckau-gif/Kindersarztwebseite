@@ -1,5 +1,7 @@
 # „Gut vorbereitet“: Freigabevorbereitung (Phase 10.1A)
 
+> **Stand 10.1B (2026-11-16):** Die Fragen dieses Pakets sind durch die Praxisangabe vom 16.11.2026 beantwortet (Arbeitsstand, übermittelt durch den Projektinhaber). Die vier Punkte stehen in der Testumgebung auf `/praxis/gut-vorbereitet`; die alte Maskenformulierung (F47) ist ersetzt. Vor dem Livegang fehlt die namentliche Bestätigung (LB-00). Aktueller Stand: [practice-input-2026-11-16.md](practice-input-2026-11-16.md) §9. Der Text unten ist der historische Stand von 10.1A.
+
 Stand: 2026-10-20 · Baseline `7e401e4` · STAGING, nicht indexiert
 
 ## Stand

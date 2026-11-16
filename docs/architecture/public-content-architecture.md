@@ -24,7 +24,8 @@ Builds on (does not replace): [information-architecture.md](../ux/information-ar
 | `/praxis/aerztinnen` (P-31) + `/praxis/team` (P-32) | **Kept both** (10.5A decision): physicians and their professional details on Ärztinnen, the whole practice team on Team. No duplicated long texts. |
 | `/mein-kind/impfungen` (P-26: general vaccination orientation with official sources) | **Kept** as the canonical *medical orientation* on vaccinations. Not a practice-rule page (see §5). |
 | `/praxis` (P-30: five numbered doors) | Becomes the **Praxis hub** (§6) — regrouped in 10.1B, only with routes that exist. |
-| Future: `/praxis/gut-vorbereitet`, `/praxis/rezepte`, `/praxis/praxis-app`, `/praxis/kosten` | **Locked routes, not created.** Created only by their B phase with approved content. Today they answer 404 (tests). No „coming soon“ pages. |
+| `/praxis/gut-vorbereitet` | **Created in 10.1B** (STAGING, working input F91–F94; named confirmation before PRODUCTION, LB-00). |
+| Future: `/praxis/rezepte`, `/praxis/praxis-app`, `/praxis/kosten` | **Locked routes, not created.** Created only by their B phase with approved content. Today they answer 404 (tests). No „coming soon“ pages. |
 
 ## 3. Route ownership table (reference for later phases)
 
@@ -32,7 +33,7 @@ Builds on (does not replace): [information-architecture.md](../ux/information-ar
 |---|---|---|---|---|---|
 | Praxis hub | `/praxis` | — (composition) | lists only existing, published routes | all Praxis pages | no (Start links „Praxis“ path only) |
 | Neu bei uns? | `/praxis/neu-bei-uns` *(exists)* | F48, F77, F79 (+ E1/E2 rendered) | only confirmed items (today: call, hours, address) | → Gut vorbereitet, Kontakt, Sprechzeiten | no |
-| Gut vorbereitet | `/praxis/gut-vorbereitet` *(not created)* | F91, F92, F93 (physician), F94 (physician; = F47) | 10.1A approvals; `selectPublicFirstVisitItems` | ← Neu bei uns; → Leistungen (vaccinations), Mein Kind/Impfungen | no |
+| Gut vorbereitet | `/praxis/gut-vorbereitet` *(exists since 10.1B, STAGING working input)* | F91, F92, F93 (physician), F94 (physician; = F47) | 10.1A approvals; `selectPublicFirstVisitItems` | ← Neu bei uns; → Leistungen (vaccinations), Mein Kind/Impfungen | no |
 | Wobei können wir helfen? / Leistungen | `/praxis/leistungen` *(exists, entry points only)* | F66–F74, F80–F82 | confirmed service entries only (FB-12) | → Kosten (paid services), Mein Kind/Vorsorge + Impfungen, Rezepte (F80) | no (Start's existing `NEEDS` links stay) |
 | Rezepte | `/praxis/rezepte` *(not created)* | F101–F109 (F104 ↔ F18, F105 ↔ F91) | 10.3A approvals | → Praxis-App (if F103 confirms the app channel), Kontakt | no |
 | Praxis-App | `/praxis/praxis-app` *(not created)* | F95–F100 | 10.2A approvals (F100 + legal review) | → Rezepte (one line, if F98 confirms prescriptions) | no |
@@ -69,7 +70,7 @@ A topic may be **referenced** elsewhere (one line + link), but its full explanat
 4. **Contact ↔ e-mail.** Kontakt and Start show the e-mail address as a general contact. No page describes e-mail as a channel for prescriptions, medical questions or health data until F18 / F104 define the allowed use; the defining text then lives in the contextual page (Rezepte for prescriptions, Kontakt for the general usage note).
 5. **Banners / highlights** are for temporary operational relevance only (vacation, temporary closure, important temporary notice). Never for evergreen content (app, prices, Gesundheitskarte, prescription instructions). This preserves Variant B.
 
-## 6. Praxis hub concept (implemented in 10.1B, not now)
+## 6. Praxis hub concept (implemented in 10.1B — `PRAXIS_GROUPS` in `src/content/site.ts`)
 
 `/praxis` becomes the service hub: one intent → one obvious tap, no reading before choosing. A compact grouped list (existing `BigLinks` pattern, no new card system), no introductory marketing prose before the choices.
 
@@ -134,7 +135,7 @@ The A packages keep their numbers as approval gates (10.1A–10.5A); the B imple
 
 | Wave | Step | Content | Depends on | Why this position |
 |---|---|---|---|---|
-| 1 | **10.1B** | Gut vorbereitet + Praxis hub grouping (§6) + link from Neu bei uns | F91–F94 answers (K6, P8) | Smallest, organisational; establishes the hub every later page plugs into |
+| 1 | **10.1B — done** | Gut vorbereitet + Praxis hub grouping (§6) + link from Neu bei uns | F91–F94 answers (practice input 2026-11-16) | Smallest, organisational; establishes the hub every later page plugs into |
 | 2 | **10.6B** | Leistungen section on P-33 (+ self-pay block if confirmed) | F66–F74, F80–F82 (Z3) | Kosten references services; Rezepte (F80) and vaccination wording depend on it |
 | 3 | **10.3B + 10.2B** | Rezepte and Praxis-App, one release | F101–F109, F95–F100, F18/F104 (K5, K4, K1) | The two pages reference each other (F103 ↔ F98); shipping them separately creates dangling or wrong links |
 | 4 | **10.4B** | Kosten | F110–F117 + confirmed services from wave 2 (Z1, Z2) | No price without a published service |

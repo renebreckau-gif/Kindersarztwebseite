@@ -1,7 +1,7 @@
 // Functional pictograms only (no medical/cute icon library).
 // 24-unit grid, 1.6 stroke, round caps and joins, drawn at 20–22 px.
 
-export type IconName = "phone" | "today" | "alert" | "menu" | "close" | "route" | "back" | "mail" | "calendar" | "info";
+export type IconName = "phone" | "today" | "alert" | "menu" | "close" | "route" | "back" | "mail" | "calendar" | "info" | "card" | "booklet" | "mask";
 
 export function Icon({ name, size = 22 }: { name: IconName; size?: number }) {
   const p = {
@@ -81,6 +81,28 @@ export function Icon({ name, size = 22 }: { name: IconName; size?: number }) {
       return (
         <svg {...p}>
           <path d="M15 5l-7 7 7 7" />
+        </svg>
+      );
+    // Gut vorbereitet (10.1B): neutral objects, no medical symbolism.
+    case "card":
+      return (
+        <svg {...p}>
+          <rect x="3.5" y="5.5" width="17" height="13" rx="2" />
+          <path d="M3.5 10h17M7 14.5h4" />
+        </svg>
+      );
+    case "booklet":
+      return (
+        <svg {...p}>
+          <path d="M6.5 3.5h11a1.5 1.5 0 0 1 1.5 1.5v14a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 19V5a1.5 1.5 0 0 1 1.5-1.5Z" />
+          <path d="M8.5 3.5v17M12 8.5h4M12 11.5h4" />
+        </svg>
+      );
+    case "mask":
+      return (
+        <svg {...p}>
+          <path d="M7 7.5h10a1.5 1.5 0 0 1 1.5 1.5v3.5c0 2.8-2.9 5-6.5 5s-6.5-2.2-6.5-5V9A1.5 1.5 0 0 1 7 7.5Z" />
+          <path d="M5.5 9.5H4a1.5 1.5 0 0 0 0 3h1.7M18.5 9.5H20a1.5 1.5 0 0 1 0 3h-1.7M9 10.5h6M9 13h6" />
         </svg>
       );
   }

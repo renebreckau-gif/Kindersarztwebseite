@@ -48,10 +48,10 @@ export const REVIEW_CARDS: ReviewCard[] = [
   },
   {
     id: "gut-vorbereitet",
-    title: "Gut vorbereitet – Freigabeentwurf",
-    text: "Vorschläge aus dem Praxisteam (Gesundheitskarte, Impfpass, Mundschutz bei Infekt) mit den offenen Fragen zur Freigabe. Noch nicht öffentlich.",
-    status: "Freigabeentwurf",
-    action: "Freigabeentwurf öffnen",
+    title: "Gut vorbereitet – Freigabe",
+    text: "Gesundheitskarte, Impfpass, keine Impfung ohne Impfpass, Mundschutz bei Infekt: Arbeitsstand der Praxisangabe vom 16.11.2026, in der Testumgebung veröffentlicht. Namentliche Freigabe vor dem Livegang offen.",
+    status: "Testumgebung · Freigabe offen",
+    action: "Freigabestand öffnen",
     href: "/review/gut-vorbereitet",
   },
   {

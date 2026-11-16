@@ -21,7 +21,7 @@ Owner abbreviations: **P** = practice · **L** = legal reviewer · **T** = proje
 
 | ID | Blocker | Facts | Owner | Notes |
 |---|---|---|---|---|
-| LB-00 | **Practice sign-off of all HIGH-risk VERIFIED_CURRENT facts** (postcode/city, phone, physicians, regular hours, healthy-only window, Tuesday appointment session) | F14, F15, F20, F22, F35–F39, F41, F43 | P | Working data is likely correct, but high-risk facts go live only with a recorded confirmation (source-policy §6). **Reconciled 09.6A — still OPEN.** Recorded evidence: 2026-10-07 a *project-level human decision* (phase-07 review addendum) released the hours for the PRAXIS PULS live state (`RELEASE.pulsPracticeSignOff = true`); the data itself still carries `WORKING` provenance "Praxisfreigabe LB-00 ausstehend" (`src/content/practice.ts`), and no named practice confirmation (person + date, like F40 on 2026-10-11) exists for F14, F15, F20, F22, F35–F39, F41, F43. Needed before the public launch; the `WORKING` reviewDue 2027-01-07 (+60 days grace) also bounds the current static PULS. |
+| LB-00 | **Practice sign-off of all HIGH-risk VERIFIED_CURRENT facts** (postcode/city, phone, physicians, regular hours, healthy-only window, Tuesday appointment session, Gut vorbereitet items F91–F94 — F93/F94 by a physician) | F14, F15, F20, F22, F35–F39, F41, F43, F91–F94 | P | Working data is likely correct, but high-risk facts go live only with a recorded confirmation (source-policy §6). **Reconciled 09.6A — still OPEN.** Recorded evidence: 2026-10-07 a *project-level human decision* (phase-07 review addendum) released the hours for the PRAXIS PULS live state (`RELEASE.pulsPracticeSignOff = true`); the data itself still carries `WORKING` provenance "Praxisfreigabe LB-00 ausstehend" (`src/content/practice.ts`), and no named practice confirmation (person + date, like F40 on 2026-10-11) exists for F14, F15, F20, F22, F35–F39, F41, F43. Needed before the public launch; the `WORKING` reviewDue 2027-01-07 (+60 days grace) also bounds the current static PULS. **10.1B:** F91–F94 are public on STAGING as working data (practice input 2026-11-16, no named person); a unit test fails if `SITE_STAGE` were PRODUCTION while they rest on working input only. |
 | LB-01 | ~~Official public practice name~~ | F01 | P | **Resolved as working data 2026-11-16** (practice input: „Kinderarztpraxis Probst & Böhme“, [practice-input-2026-11-16.md](../reviews/practice-input-2026-11-16.md)); the named sign-off is part of LB-00. |
 | LB-02 | Legal name and legal form (BAG, partners) | F02 | P, L | Required for Impressum and privacy controller. 10.0C: not derived from the practice name (question R1). |
 | LB-03 | ~~Correct street spelling~~ | F13 | P | **Resolved as working data 2026-11-16** (practice input: „Untere Bahnhofstraße 9“, now public); the named sign-off is part of LB-00. |
@@ -73,7 +73,7 @@ Fallback: closure shown without replacement + "Bitte informieren Sie sich telefo
 
 | ID | Blocker | Facts | Owner |
 |---|---|---|---|
-| FB-11 | Mask rule still current? Scope? | F47 | P |
+| FB-11 | ~~Mask rule still current? Scope?~~ **Resolved as working data 2026-11-16 (10.1B):** a request to wear a mask at infection (F94); the old age rule F47 is OUTDATED. Named physician confirmation → LB-00. | F47, F94 | P |
 
 Fallback: notice not shown.
 
@@ -146,7 +146,7 @@ These must not appear as current information anywhere on the new site (content, 
 | Class | Count |
 |---|---|
 | Launch blockers | 15 open (LB-00 … LB-16 without LB-01 / LB-03, resolved as working data 2026-11-16; LB-13–LB-15 added 2026-10-13 for host, registrar/DNS and production backend; LB-16 MStV question added 2026-11-16) |
-| Feature blockers | 17 open (FB-01 … FB-18; FB-05 closed 2026-10-11) |
+| Feature blockers | 16 open (FB-01 … FB-18; FB-05 closed 2026-10-11, FB-11 resolved as working data 2026-11-16) |
 | Nice to have | 13 |
 | Excluded outdated items | 9 |
 

@@ -44,10 +44,41 @@ export const SITEMAP: { label: string; href: string; children: { label: string; 
       { label: "Team", href: "/praxis/team" },
       { label: "Wobei können wir helfen?", href: "/praxis/leistungen" },
       { label: "Neu bei uns?", href: "/praxis/neu-bei-uns" },
+      { label: "Gut vorbereitet", href: "/praxis/gut-vorbereitet" },
       { label: "Kontakt & Anfahrt", href: "/praxis/kontakt" },
     ],
   },
   { label: "Entdecken", href: "/entdecken", children: [{ label: "Mein Arztbesuch", href: "/entdecken/mein-arztbesuch" }] },
+];
+
+/**
+ * The Praxis hub (/praxis), grouped by task (docs/architecture/public-content-architecture.md §6).
+ * Only routes that exist and are published; each future Praxis page (public-content-architecture.md §3) is added by
+ * their own B phase — never as placeholders. `requires` marks a link shown only while its content is public.
+ */
+export const PRAXIS_GROUPS: { id: string; title: string; links: { label: string; text: string; href: string; requires?: "first-visit" }[] }[] = [
+  {
+    id: "vor-dem-besuch",
+    title: "Vor dem Besuch",
+    links: [
+      { label: "Neu bei uns?", text: "Der erste Kontakt mit der Praxis", href: "/praxis/neu-bei-uns" },
+      { label: "Gut vorbereitet", text: "Was Sie zum Besuch mitbringen", href: "/praxis/gut-vorbereitet", requires: "first-visit" },
+    ],
+  },
+  {
+    id: "angebot",
+    title: "Angebot & Service",
+    links: [{ label: "Wobei können wir helfen?", text: "Leistungen und Anliegen", href: "/praxis/leistungen" }],
+  },
+  {
+    id: "ueber-uns",
+    title: "Über uns",
+    links: [
+      { label: "Ärztinnen", text: "Wer Ihr Kind behandelt", href: "/praxis/aerztinnen" },
+      { label: "Team", text: "Das Praxisteam", href: "/praxis/team" },
+      { label: "Kontakt & Anfahrt", text: "Telefon, E-Mail und Anschrift", href: "/praxis/kontakt" },
+    ],
+  },
 ];
 
 export const LEGAL = [

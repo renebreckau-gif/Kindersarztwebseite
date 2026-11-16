@@ -112,3 +112,19 @@ Hohes Risiko (source-policy §3: Institution **und** Praxisfreigabe nötig). Sta
 - Notfallkontakte: Abgleich mit den Einrichtungen + Praxisfreigabe (F58–F64, LB-10).
 - Akutsprechstunde: echte Zeiten (F44–F46) – bisher nur Staging-Beispiel.
 - Urlaub 2026/2027: finale Daten (F54) – bisher nur Staging-Beispiel.
+
+## 9. Nachtrag: Gut vorbereitet / Neu bei uns (Phase 10.1B, Quelle `PI-2026-11-16-GV`)
+
+Weitere Praxisangabe vom 16.11.2026, übermittelt durch den Projektinhaber im Auftrag 10.1B. Gleiche Behandlung wie §1: **VERIFIED_CURRENT als Arbeitsstand** (`PRACTICE_INPUT`), keine namentlich bestätigende Person erfunden; namentliche Bestätigung vor dem Livegang (LB-00; F93/F94 durch eine Ärztin).
+
+| Angabe | Klasse | Umsetzung |
+|---|---|---|
+| Gesundheitskarte zu jedem Besuch mitbringen | CONFIRMED_CURRENT_INPUT (F91) | öffentlich in der Testumgebung, `/praxis/gut-vorbereitet` |
+| Impfpass immer mitbringen (jeder Besuch) | CONFIRMED_CURRENT_INPUT (F92) | dito |
+| Keine Impfung ohne Impfpass (Grund: die Ärztin muss sehen, welche Impfungen schon gegeben wurden) | CONFIRMED_CURRENT_INPUT (F93) | dito, als Regel der Praxis; kein rechtlicher oder bundesweiter Anspruch |
+| Bei Krankheit / Infekt: Bitte um Mundschutz | CONFIRMED_CURRENT_INPUT (F94) | dito, als Bitte; ohne Altersgrenze, Maskenart, Ausnahme oder Konsequenz. Die alte Regel „Kinder über 6 Jahre …“ (F47) ist ersetzt → OUTDATED_DO_NOT_PUBLISH |
+| Neue Patientinnen und Patienten: Aufnahme vorher telefonisch klären; allgemeine Anfrage auch per E-Mail | TO_BE_CONFIRMED (F77) | nicht veröffentlicht; „Neu bei uns?“ nicht ausgebaut (nur Link auf „Gut vorbereitet“) |
+| Termine am besten telefonisch anfragen (nicht „nur telefonisch“) | TO_BE_CONFIRMED (F48) | nicht veröffentlicht |
+
+Nicht ergänzt, weil nicht genannt: U-Heft, Ausweis, Überweisung, Medikamentenliste, Befunde, Folgen einer fehlenden Karte. E-Mail wird nicht als Weg für Rezepte, Diagnosen oder Gesundheitsdaten beschrieben.
+

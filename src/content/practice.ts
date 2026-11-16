@@ -17,7 +17,8 @@ export const UNCONFIRMED: FactVerification = { status: "TO_BE_CONFIRMED", source
 /**
  * Practice input of 2026-11-16 (docs/reviews/practice-input-2026-11-16.md), relayed by the project owner.
  * No named person at the practice is recorded, so this is VERIFIED_CURRENT *as working data* for the
- * CONTACT data only (project owner decision 2026-11-16); the named sign-off before launch (LB-00) stays open.
+ * CONTACT data (project owner decision 2026-11-16) and the "Gut vorbereitet" items (F91–F94, project owner
+ * brief 10.1B; first-visit.ts); the named sign-off before launch (LB-00) stays open.
  * Never used for opening hours, holidays, team, acute hours, closures or emergency data.
  */
 export const INTAKE_2026_11_16 = "2026-11-16";
@@ -28,6 +29,12 @@ export const PRACTICE_INPUT: FactVerification = {
   verifiedBy: "Praxisangabe, übermittelt durch Projektinhaber",
   sourceIds: ["PI-2026-11-16"],
 };
+
+/**
+ * Working input, not a final practice confirmation: STAGING may show it; PRODUCTION needs a named
+ * confirmation first (LB-00, guarded by tests).
+ */
+export const isWorkingInput = (v: FactVerification) => v.verifiedBy === PRACTICE_INPUT.verifiedBy;
 
 const v = <T,>(value: T, verification: FactVerification = WORKING): VerifiedValue<T> => ({ value, verification });
 

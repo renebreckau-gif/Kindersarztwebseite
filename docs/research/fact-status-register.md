@@ -76,7 +76,7 @@ Critical review of the five Phase 00 documents before assigning statuses:
 | F44 | Acute consultation Monday | TO_BE_CONFIRMED | HIGH |
 | F45 | Acute consultation Tue–Fri "ab 10:00" (end time) | TO_BE_CONFIRMED | HIGH |
 | F46 | Acute consultation Thursday afternoon | TO_BE_CONFIRMED | HIGH |
-| F47 | Mask rule for children over 6 with infection | TO_BE_CONFIRMED | HIGH |
+| F47 | Mask rule for children over 6 with infection | OUTDATED_DO_NOT_PUBLISH | HIGH |
 | F48 | Appointment booking channel | TO_BE_CONFIRMED | HIGH |
 | F49 | Public holidays / bridge days | TO_BE_CONFIRMED | HIGH |
 | F50 | Summer closure 20.07.–07.08.2026 | OUTDATED_DO_NOT_PUBLISH | HIGH |
@@ -107,10 +107,10 @@ Critical review of the five Phase 00 documents before assigning statuses:
 | F75 | "Hello world!" post | OUTDATED_DO_NOT_PUBLISH | LOW |
 | F76 | Empty "Praxis" page | OUTDATED_DO_NOT_PUBLISH | LOW |
 | F77–F90 | Facts missing from the existing site | TO_BE_CONFIRMED | see §9 |
-| F91 | Health insurance card: bring to visits (proposal, 10.1A) | TO_BE_CONFIRMED | MEDIUM |
-| F92 | Vaccination booklet: bring to vaccination appointments (proposal, 10.1A) | TO_BE_CONFIRMED | MEDIUM |
-| F93 | No vaccination without the vaccination booklet (proposal, 10.1A) | TO_BE_CONFIRMED | HIGH |
-| F94 | Mask / infection guidance for visits (proposal, 10.1A) | TO_BE_CONFIRMED | HIGH |
+| F91 | Health insurance card: bring to every visit (10.1A → 10.1B) | VERIFIED_CURRENT | MEDIUM |
+| F92 | Vaccination booklet: bring to every visit (10.1A → 10.1B) | VERIFIED_CURRENT | MEDIUM |
+| F93 | No vaccination without the vaccination booklet (10.1A → 10.1B) | VERIFIED_CURRENT | HIGH |
+| F94 | Mask request at infection (10.1A → 10.1B) | VERIFIED_CURRENT | HIGH |
 | F95 | Practice app exists / currently used (10.2A) | TO_BE_CONFIRMED | MEDIUM |
 | F96 | App name / provider (10.2A) | TO_BE_CONFIRMED | MEDIUM |
 | F97 | Supported platforms / download links (10.2A) | TO_BE_CONFIRMED | MEDIUM |
@@ -137,7 +137,7 @@ Critical review of the five Phase 00 documents before assigning statuses:
 | F118 | Staff: Nicole Schulz (practice input 2026-11-16) | TO_BE_CONFIRMED | MEDIUM |
 | F119 | Staff: Jana Brandt (practice input 2026-11-16) | TO_BE_CONFIRMED | MEDIUM |
 
-Totals (119 facts; recounted 2026-11-16, 10.0B — F01 and F13 VERIFIED_CURRENT as working data from the practice input 2026-11-16; F28 back to TO_BE_CONFIRMED (not in the current team list); new F118, F119): VERIFIED_CURRENT 26 · TO_BE_CONFIRMED 84 (incl. 14 missing, F77–F90, 4 staff proposals, F91–F94, 6 app candidates, F95–F100, 9 prescription-process candidates, F101–F109, 8 pricing / payment candidates, F110–F117, and 2 new staff entries, F118–F119) · OUTDATED_DO_NOT_PUBLISH 9
+Totals (119 facts; recounted 2026-11-16, 10.1B — F91–F94 VERIFIED_CURRENT as working data from the practice input 2026-11-16 (Gut vorbereitet); F47 OUTDATED_DO_NOT_PUBLISH (superseded by F94); 10.0B: F01 and F13 VERIFIED_CURRENT as working data, F28 back to TO_BE_CONFIRMED, new F118, F119): VERIFIED_CURRENT 30 · TO_BE_CONFIRMED 79 (incl. 14 missing, F77–F90, 6 app candidates, F95–F100, 9 prescription-process candidates, F101–F109, 8 pricing / payment candidates, F110–F117, and 2 new staff entries, F118–F119) · OUTDATED_DO_NOT_PUBLISH 10
 
 Of the 23 VERIFIED_CURRENT facts, 12 are HIGH risk; 11 of these (all except 112) still require practice sign-off before launch (LB-00). *(Historical count from 2026-10-07; F40 carries its own practice confirmation, F57 an external one. The LB-00 set is unchanged — see project-blockers LB-00.)*
 
@@ -552,11 +552,11 @@ Shared fields for F35–F39:
 - **CURRENT VALUE / CLAIM:** "Kinder über 6 Jahre im Falle eines Infektes [benötigen] einen Mundschutz"
 - **SOURCE:** S01
 - **SOURCE DATE:** page 2026-05-18
-- **STATUS:** TO_BE_CONFIRMED
+- **STATUS:** OUTDATED_DO_NOT_PUBLISH (since 2026-11-16, 10.1B)
 - **RISK IF INCORRECT:** HIGH — practice-specific medical/infection rule
-- **REQUIRED CONFIRMATION:** Practice: still current? applies to accompanying adults?
-- **FEATURES AFFECTED:** Notices, PRAXIS PULS
-- **NOTES:** Contradicts the 2020 notice (F55), which is outdated. Page-level date does not confirm this section.
+- **REQUIRED CONFIRMATION:** — (superseded)
+- **FEATURES AFFECTED:** — (Gut vorbereitet uses F94)
+- **NOTES:** Contradicts the 2020 notice (F55), which is outdated. Page-level date does not confirm this section. **Superseded by F94** (practice input 2026-11-16: a simple request to wear a mask at infection — no age threshold). The old age-specific wording is kept here as historical evidence only and is never published.
 
 ### F48 — Appointment booking channel
 - **CURRENT VALUE / CLAIM:** not stated
@@ -818,7 +818,7 @@ All `TO_BE_CONFIRMED`. Source: none (absence confirmed on all pages, S01–S10).
 Shared fields for F91–F94:
 - **SOURCE:** practice-staff feedback (voice message to the project), October 2026 — an input, **not** a formal physician approval
 - **STATUS:** TO_BE_CONFIRMED (no rule is inferred from the suggestion alone)
-- **FEATURES AFFECTED:** "Gut vorbereitet" (future `/praxis/gut-vorbereitet`, linked from "Neu bei uns?"); staging approval draft `/review/gut-vorbereitet`
+- **FEATURES AFFECTED:** "Gut vorbereitet" (`/praxis/gut-vorbereitet` since 10.1B, linked from the Praxis hub and "Neu bei uns?"); staging approval workspace `/review/gut-vorbereitet`
 - **RECORDS:** `src/content/first-visit.ts` (`FirstVisitItem`), approvers and open questions alongside
 
 | ID | PROPOSED CLAIM | RISK IF INCORRECT | REQUIRED CONFIRMATION | NOTES |
@@ -827,6 +827,15 @@ Shared fields for F91–F94:
 | F92 | Bring the vaccination booklet to vaccination appointments | MEDIUM | Practice (organisational) | Refines F78. Kept separate from F93. |
 | F93 | No vaccination without the vaccination booklet | HIGH | Physician | Stronger claim; never merged with F92; not published on staff feedback alone. |
 | F94 | Mask / infection guidance for visits | HIGH | Physician | Same question as F47 (existing website: "Kinder über 6 Jahre … Mundschutz", unconfirmed). Open: required or recommended, for whom, when, wording. |
+
+**Update 10.1B (2026-11-16):** the practice input of 2026-11-16 (relayed by the project owner; [practice-input-2026-11-16.md](../reviews/practice-input-2026-11-16.md) §9, source `PI-2026-11-16-GV`) answers the 10.1A questions. F91–F94 are **VERIFIED_CURRENT as working data** (same pattern as the 10.0B contact data: `verifiedBy` "Praxisangabe, übermittelt durch Projektinhaber", no named practice person, standing review 182 days) and public on STAGING at `/praxis/gut-vorbereitet`. Before PRODUCTION a **named confirmation** is required (LB-00; F93 and F94 by a physician) — a unit test fails if `SITE_STAGE` were PRODUCTION while an item rests on working input only.
+
+| ID | CURRENT VALUE (public wording) | Change vs. 10.1A proposal |
+|---|---|---|
+| F91 | „Gesundheitskarte mitbringen“ – „Bitte bringen Sie die Gesundheitskarte Ihres Kindes zu jedem Besuch mit.“ | every visit; no consequence of a missing card stated (not confirmed) |
+| F92 | „Impfpass mitbringen“ – „Bitte bringen Sie den Impfpass zu jedem Besuch mit.“ | every visit, not only vaccination appointments |
+| F93 | „Keine Impfung ohne Impfpass“ – „Vor einer Impfung muss der bisherige Impfstatus nachvollziehbar sein.“ | practice rule confirmed in the input (reason: the physician must see earlier vaccinations); presented as the practice's rule, not a legal or nationwide one |
+| F94 | „Bei Infekt: Bitte Mundschutz tragen“ – „Wenn Ihr Kind oder eine Begleitperson erkältet oder krank ist, bitten wir um einen Mundschutz.“ | a request, not a requirement; no age threshold, mask type, exemption or enforcement; **supersedes F47** (now OUTDATED_DO_NOT_PUBLISH) |
 
 ## 13. Practice app / digital services candidates (Phase 10.2A)
 

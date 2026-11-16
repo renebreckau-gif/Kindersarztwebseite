@@ -10,13 +10,15 @@ import {
   FIRST_VISIT_APPROVALS,
   FIRST_VISIT_ITEMS,
 } from "@/content/first-visit";
+import { isWorkingInput } from "@/content/practice";
 
-// Staging-only approval draft (Phase 10.1A): the "Gut vorbereitet" proposals with their open
-// questions, for the practice to confirm. Not a parent page — never public, never in the patient
-// navigation or the dock; 404 in PRODUCTION; noindex. Nothing here is a practice rule yet.
+// Staging-only approval workspace (10.1A, updated 10.1B): the "Gut vorbereitet" items with their
+// provenance. Since 10.1B they are published on STAGING (/praxis/gut-vorbereitet) from the practice
+// input of 2026-11-16 as WORKING data; the named confirmation before PRODUCTION (LB-00) is still open.
+// Not a parent page — never in the patient navigation or the dock; 404 in PRODUCTION; noindex.
 
 export const metadata: Metadata = {
-  title: "Gut vorbereitet – Freigabeentwurf",
+  title: "Gut vorbereitet – Freigabestand",
   description: "Interner Freigabeentwurf. Nicht öffentlich.",
   robots: { index: false, follow: false },
 };
@@ -24,6 +26,7 @@ export const metadata: Metadata = {
 const STATUS_LABEL: Record<string, string> = {
   TO_BE_CONFIRMED: "Noch nicht freigegeben",
   VERIFIED_CURRENT: "Bestätigt",
+  WORKING: "Arbeitsstand – formale Freigabe offen",
   OUTDATED_DO_NOT_PUBLISH: "Veraltet – nicht veröffentlichen",
 };
 
@@ -39,13 +42,15 @@ export default function GutVorbereitetFreigabe() {
           Zur Projekt-Review
         </Link>
         <header className={s.head}>
-          <p className={s.draft}>Freigabeentwurf · nicht öffentlich</p>
+          <p className={s.draft}>Freigabestand · interne Ansicht</p>
           <h1 className={s.title}>Gut vorbereitet</h1>
-          <p className={s.subtitle}>Vorschlag zur inhaltlichen Freigabe</p>
+          <p className={s.subtitle}>Arbeitsstand und offene Freigabe</p>
           <p className={s.lead}>
-            Die Vorschläge stammen aus einem Hinweis des Praxisteams (Oktober
-            2026). Auf der Website erscheint nichts davon, bevor die Praxis die
-            offenen Fragen beantwortet und den Text bestätigt hat.
+            Die Punkte beruhen auf der Praxisangabe vom 16.11.2026,
+            übermittelt durch den Projektinhaber. Sie stehen in der
+            Testumgebung auf der Seite „Gut vorbereitet“. Vor dem Livegang
+            fehlt noch die namentliche Bestätigung durch die Praxis bzw. eine
+            Ärztin.
           </p>
         </header>
 
@@ -64,13 +69,13 @@ export default function GutVorbereitetFreigabe() {
                     </h2>
                     <p className={s.state}>
                       <span className={s.stateMark} aria-hidden="true" />
-                      {STATUS_LABEL[item.verification.status]}
+                      {STATUS_LABEL[isWorkingInput(item.verification) ? "WORKING" : item.verification.status]}
                     </p>
                   </div>
 
                   <figure className={s.proposal}>
                     <figcaption className={s.proposalLabel}>
-                      Textvorschlag
+                      Text auf der Website (Arbeitsstand)
                     </figcaption>
                     <blockquote className={s.proposalText}>
                       <p>{item.text}</p>
@@ -81,8 +86,12 @@ export default function GutVorbereitetFreigabe() {
                     <>
                       <dl className={s.meta}>
                         <div>
-                          <dt>Freigabe durch</dt>
+                          <dt>Formale Freigabe durch</dt>
                           <dd>{APPROVER_LABEL[approval.approver]}</dd>
+                        </div>
+                        <div>
+                          <dt>Vor dem Livegang</dt>
+                          <dd>{approval.finalApproval}</dd>
                         </div>
                         <div>
                           <dt>Herkunft des Textes</dt>
@@ -96,14 +105,16 @@ export default function GutVorbereitetFreigabe() {
                           </dd>
                         </div>
                       </dl>
-                      <div className={s.questions}>
-                        <h3 className={s.questionsTitle}>Offene Fragen</h3>
-                        <ul>
-                          {approval.openQuestions.map((q) => (
-                            <li key={q}>{q}</li>
-                          ))}
-                        </ul>
-                      </div>
+                      {approval.openQuestions.length > 0 ? (
+                        <div className={s.questions}>
+                          <h3 className={s.questionsTitle}>Offene Fragen</h3>
+                          <ul>
+                            {approval.openQuestions.map((q) => (
+                              <li key={q}>{q}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
                     </>
                   ) : null}
                 </article>
@@ -114,13 +125,13 @@ export default function GutVorbereitetFreigabe() {
 
         <section className={s.next} aria-labelledby="weiter-title">
           <h2 id="weiter-title" className={s.nextTitle}>
-            Nach der Freigabe
+            Stand der Veröffentlichung
           </h2>
           <p>
-            Bestätigte Punkte erscheinen später auf einer eigenen Seite „Gut
-            vorbereitet“ im Bereich Praxis, verlinkt aus „Neu bei uns?“ – als
-            kurze Karten mit einer Zeile Text. Nicht bestätigte Punkte bleiben
-            unveröffentlicht. Die Startseite bleibt unverändert.
+            Testumgebung: veröffentlicht unter /praxis/gut-vorbereitet, verlinkt
+            aus der Praxis-Übersicht und „Neu bei uns?“. Livegang: erst nach
+            der namentlichen Bestätigung (LB-00). Die Startseite bleibt
+            unverändert.
           </p>
         </section>
       </main>

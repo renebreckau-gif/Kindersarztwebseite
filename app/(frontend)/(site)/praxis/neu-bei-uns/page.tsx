@@ -66,6 +66,9 @@ export default async function NeuBeiUns({ searchParams }: { searchParams: Search
             },
           ]}
         />
+        <p className={u.lead}>
+          Was Sie zum Besuch mitbringen: <Link href="/praxis/gut-vorbereitet">Gut vorbereitet</Link>
+        </p>
       </Section>
       <Section id="fragen" title="Weitere Fragen beantworten wir gern telefonisch." tone="sun">
         <p className={u.lead}>
@@ -73,8 +76,8 @@ export default async function NeuBeiUns({ searchParams }: { searchParams: Search
         </p>
         <InternalNote>
           <p>
-            Nicht veröffentlicht, weil unbestätigt: Terminvereinbarung (F48), Aufnahme neuer Familien, Was mitbringen, Ankommen und Empfang, Barrierefreiheit, Kinderwagen, Parken, Nahverkehr
-            (F77–F88). „Was mitbringen“ und „Bei Infekt“ liegen der Praxis als Freigabeentwurf vor (Arbeitspaket 10.1, F91–F94).
+            Nicht veröffentlicht, weil unbestätigt: Ankommen und Empfang, Barrierefreiheit, Kinderwagen, Parken, Nahverkehr (F85–F88). „Was mitbringen“ steht auf „Gut vorbereitet“ (F91–F94, Arbeitsstand 16.11.2026).
+            Zur Aufnahme neuer Familien und zu Terminen liegt eine Praxisangabe vor (vorher telefonisch klären; Termine am besten telefonisch, F77, F48) – noch nicht namentlich bestätigt und daher hier nicht ausgebaut.
           </p>
         </InternalNote>
       </Section>

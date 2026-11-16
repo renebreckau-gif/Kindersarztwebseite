@@ -1,6 +1,6 @@
 # Offene Fragen an die Praxis – gesammelter Stand
 
-Stand: **2026-11-16** (nach Praxisangabe #1, Phase 10.0B; Recht/Impressum ergänzt in 10.0C; nach Inhaltsarchitektur gruppiert in 10.0D; erstellt in 09.6A am 2026-10-21). **Nur vorbereitet, nicht verschickt.** Dieses Dokument ist die eine Sammelliste, um Antworten der Praxis einzuholen. Es ändert keinen Faktenstatus. Was mit der Praxisangabe vom 16.11.2026 beantwortet ist, steht in [practice-input-2026-11-16.md](practice-input-2026-11-16.md). Details stehen in den verlinkten Dokumenten; hier steht jede Frage nur kurz.
+Stand: **2026-11-16** (nach Praxisangabe #1, Phase 10.0B; Recht/Impressum ergänzt in 10.0C; nach Inhaltsarchitektur gruppiert in 10.0D; Gut vorbereitet erledigt in 10.1B; erstellt in 09.6A am 2026-10-21). **Nur vorbereitet, nicht verschickt.** Dieses Dokument ist die eine Sammelliste, um Antworten der Praxis einzuholen. Es ändert keinen Faktenstatus. Was mit der Praxisangabe vom 16.11.2026 beantwortet ist, steht in [practice-input-2026-11-16.md](practice-input-2026-11-16.md). Details stehen in den verlinkten Dokumenten; hier steht jede Frage nur kurz.
 
 Quellen:
 - [Faktenregister](../research/fact-status-register.md) · [Projekt-Blocker](../research/project-blockers.md) · [Readiness-Gate](../architecture/public-data-cutover-readiness.md) · [Praxisangabe 16.11.2026](practice-input-2026-11-16.md)
@@ -19,6 +19,7 @@ Als aktuelle Praxisangabe übernommen (Quelle „Praxisangabe, übermittelt durc
 - Reguläre Sprechzeiten Mo–Fr (F35–F39; unverändert)
 - Feiertage grundsätzlich geschlossen, Brückentage grundsätzlich normal geöffnet / Einzelfall (F49 – Praxisangabe liegt vor; siehe H1)
 - Aktuelle Team-Arbeitsliste (F26, F27, F29, F30, neu F118, F119; Katharina Weis F28 nicht mehr in der Liste)
+- Gut vorbereitet: Gesundheitskarte und Impfpass zu jedem Besuch, keine Impfung ohne Impfpass, Bitte um Mundschutz bei Infekt (F91–F94; seit 10.1B öffentlich in der Testumgebung)
 
 Die Gruppen folgen der festgelegten Inhaltsarchitektur ([public-content-architecture.md](../architecture/public-content-architecture.md), 10.0D): jede Gruppe gehört zu dem Seitenbereich, für den die Antworten gebraucht werden. Nummern (H…, K…) sind unverändert, damit bestehende Verweise gültig bleiben.
 
@@ -39,12 +40,14 @@ H1 und H5 haben hohe Priorität vor dem Start.
 
 ## 2. Gut vorbereitet / Neu bei uns (`/praxis/gut-vorbereitet`, `/praxis/neu-bei-uns`)
 
+**Als Arbeitsstand erledigt (Praxisangabe 16.11.2026, seit 10.1B in der Testumgebung veröffentlicht):** Gesundheitskarte zu jedem Besuch mitbringen (F91) · Impfpass zu jedem Besuch mitbringen (F92) · keine Impfung ohne Impfpass (F93) · Mundschutz bei Infekt als Bitte, ohne Altersgrenze (F94; ersetzt die frühere Regel F47). Früher K6 und P8.
+
+**Vor dem Livegang:** eine namentliche Bestätigung dieser vier Punkte – F91/F92 durch die Praxis, F93/F94 durch eine Ärztin (LB-00). Keine neue inhaltliche Frage.
+
 | # | Frage | Fakten / Blocker |
 |---|---|---|
-| K6 | „Gut vorbereitet“: Gesundheitskarte zu jedem Besuch? Impfpass zu Impfterminen? Keine Impfung ohne Impfpass? | F91–F93 · 10.1B |
-| P8 | Gilt die Maskenregel (Kinder über 6 mit Infekt) noch? Für wen genau? | F47, F94 · FB-11 |
-| K3 | Nehmen Sie neue Patientinnen und Patienten auf? Unter welchen Bedingungen? Wie läuft der erste Besuch bzw. der Besuch mit einem Neugeborenen ab? | F77–F79 · FB-14/15 |
-| K2 | Wie vereinbart man einen Termin (Telefon, App, online)? | F48 · FB-13 |
+| K3 | Nehmen Sie neue Patientinnen und Patienten auf? Unter welchen Bedingungen? Wie läuft der erste Besuch bzw. der Besuch mit einem Neugeborenen ab? *Praxisangabe 16.11.2026: Aufnahme vorher telefonisch klären, allgemeine Anfrage auch per E-Mail möglich – namentliche Bestätigung offen, noch nicht veröffentlicht.* | F77–F79 · FB-14/15 |
+| K2 | Wie vereinbart man einen Termin (Telefon, App, online)? *Praxisangabe 16.11.2026: am besten telefonisch – namentliche Bestätigung offen, noch nicht veröffentlicht.* | F48 · FB-13 |
 
 ## 3. Leistungen (`/praxis/leistungen`)
 
@@ -116,4 +119,4 @@ Stand 10.0C: `/impressum` zeigt nur bestätigte Angaben (Praxis, Kontakt, Ärzte
 
 ---
 
-**Umfang:** 33 offene Fragen (unverändert; in 10.0D nur nach der Inhaltsarchitektur neu gruppiert, keine neue Frage): Operative Daten 8 (davon 2 hohe Priorität), Gut vorbereitet / Neu bei uns 4, Leistungen 1, Rezepte / Praxis-App 2, Kosten 2, Kontakt 2, Team / Fotos 6, Legal 8. Mit der Praxisangabe vom 16.11.2026 erledigt bzw. ersetzt: H2, H3, H4, P3 (Inhalt liegt vor; namentliche Bestätigung → H1); zurückgestellt: P2. Nicht enthalten: Mein Arztbesuch (eigene Freigabedokumente: [discovery-approval-package.md](discovery-approval-package.md), [discovery-ai-child-publication-decision.md](discovery-ai-child-publication-decision.md)) und Nice-to-have-Angaben (NH-01–NH-12).
+**Umfang:** 31 offene Fragen (10.1B: K6 und P8 als Arbeitsstand erledigt; in 10.0D nach der Inhaltsarchitektur gruppiert, keine neue Frage): Operative Daten 8 (davon 2 hohe Priorität), Gut vorbereitet / Neu bei uns 2 (+ Livegang-Bestätigung), Leistungen 1, Rezepte / Praxis-App 2, Kosten 2, Kontakt 2, Team / Fotos 6, Legal 8. Mit der Praxisangabe vom 16.11.2026 erledigt bzw. ersetzt: H2, H3, H4, P3 (Inhalt liegt vor; namentliche Bestätigung → H1); zurückgestellt: P2. Nicht enthalten: Mein Arztbesuch (eigene Freigabedokumente: [discovery-approval-package.md](discovery-approval-package.md), [discovery-ai-child-publication-decision.md](discovery-ai-child-publication-decision.md)) und Nice-to-have-Angaben (NH-01–NH-12).
