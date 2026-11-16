@@ -7,6 +7,8 @@
 // the old disclaimer, and the outdated TMG / RStV references (F08) and privacy paragraph (F09).
 // This is NOT a legal approval and makes no compliance claim.
 
+import type { LegalState } from "../domain/legal-readiness.ts";
+
 /** Date the official sources below were checked. */
 export const IMPRESSUM_SOURCES_CHECKED = "2026-11-16";
 
@@ -50,6 +52,15 @@ export const PROFESSIONAL_CODE = {
 
 /** "<area> <number>" → "<area> / <number>" (conventional notation in the Impressum; same number). */
 export const impressumNumber = (n: string) => n.replace(/^(\d+) /, "$1 / ");
+
+/**
+ * Current legal state — mirrors docs/research/fact-status-register.md (a test keeps them in sync).
+ * Change a status here only together with the register and real evidence; the page existing changes nothing.
+ */
+export const LEGAL_STATE: LegalState = {
+  facts: { F02: "TO_BE_CONFIRMED", F03: "TO_BE_CONFIRMED", F04: "TO_BE_CONFIRMED", F05: "VERIFIED_CURRENT", F06: "VERIFIED_CURRENT", F07: "VERIFIED_CURRENT", F10: "TO_BE_CONFIRMED" },
+  mstvApplicabilityDecided: false,
+};
 
 /** Internal staging note (InternalNote only — never parent / production content). */
 export const IMPRESSUM_REVIEW_NOTE = "Rechtliche Finalprüfung ausstehend: Rechtsform/Anbieter, verantwortliche Person(en) und vollständige Berufsbezeichnungen.";

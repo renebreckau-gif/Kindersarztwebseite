@@ -56,10 +56,10 @@ Rechtsgrundlage (Stand dieser Phase, sachlich, keine Freigabe): Das Digitale-Die
 
 ## 5. Production gate
 
-Siehe [project-blockers.md](../research/project-blockers.md) „Legal gate“: Ein Wechsel auf `SITE_STAGE = "PRODUCTION"` gilt **nicht** als legal-ready, solange F02, F03, F04 oder F10 offen sind oder LB-16 unbeantwortet ist. `SITE_STAGE` bleibt `STAGING`; der Faktenstatus (F02–F10) wird durch diese Implementierung nicht verändert.
+Siehe [project-blockers.md](../research/project-blockers.md) „Legal gate“: Ein Wechsel auf `SITE_STAGE = "PRODUCTION"` gilt **nicht** als legal-ready, solange F02, F03, F04 oder F10 offen sind oder LB-16 unbeantwortet ist. Im Code: reine Funktion `legalLaunchReady(LEGAL_STATE)` (`src/domain/legal-readiness.ts`, Zustand in `src/content/impressum.ts`) – aktuell `ready: false`, offen: F02, F03, F04, F10, LB-16. Test `src/domain/__tests__/legal-readiness.test.ts`: aktueller Stand → nicht bereit; künstlicher Vollstand → bereit; Release-Guard schlägt fehl, falls `SITE_STAGE` auf PRODUCTION stünde, solange nicht bereit; `LEGAL_STATE` muss dem Faktenregister entsprechen. STAGING rendert unabhängig davon. `SITE_STAGE` bleibt `STAGING`; der Faktenstatus (F02–F10) wird durch diese Implementierung nicht verändert.
 
 ## 6. Prüfung (10.0C)
 
-- Unit: `src/content/__tests__/impressum.test.ts` (nur bestätigte Angaben, nichts erfunden, keine Altrechtsgrundlagen, keine Compliance-Behauptung, keine Payload-Abhängigkeit).
-- Integration: Schritt 26 `23-impressum.test.ts` (HTTP-Inhalt, Links, verbotene Texte, Datenschutz-Platzhalter); Schritt 27 (DB-Ausfall) prüft `/impressum` und `/datenschutz` mit gestoppter Datenbank.
+- Unit: `src/domain/__tests__/legal-readiness.test.ts` (Gate); `src/content/__tests__/impressum.test.ts` (nur bestätigte Angaben, nichts erfunden, keine Altrechtsgrundlagen, keine Compliance-Behauptung, keine Payload-Abhängigkeit).
+- Integration: Schritt 26 `23-impressum.test.ts` (HTTP-Inhalt, Links, verbotene Texte, keine doppelten IDs, Datenschutz-Platzhalter); Schritt 27 (DB-Ausfall) prüft `/impressum` und `/datenschutz` mit gestoppter Datenbank.
 - Screenshots 390 / 768 / 1440: `docs/reviews/phase-10-0c/screenshots/`.

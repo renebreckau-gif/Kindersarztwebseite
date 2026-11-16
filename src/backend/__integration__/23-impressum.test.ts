@@ -49,6 +49,15 @@ describe("Impressum foundation", { skip: skipHttp }, () => {
     assert.ok(t.includes("Rechtliche Finalprüfung ausstehend: Rechtsform/Anbieter, verantwortliche Person(en) und vollständige Berufsbezeichnungen."), "STAGING InternalNote");
   });
 
+  test("/impressum and /datenschutz: no duplicate ids, exactly one h1", async () => {
+    for (const path of ["/impressum", "/datenschutz"]) {
+      const m = markup((await http(path)).body);
+      const ids = [...m.matchAll(/\sid="([^"]+)"/g)].map((x) => x[1]);
+      assert.deepEqual(ids.filter((id, i) => ids.indexOf(id) !== i), [], path);
+      assert.equal((m.match(/<h1/g) ?? []).length, 1, path);
+    }
+  });
+
   test("/datenschutz: still the controlled placeholder, no old privacy paragraph", async () => {
     const r = await http("/datenschutz");
     assert.equal(r.status, 200);
