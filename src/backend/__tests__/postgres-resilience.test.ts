@@ -1,5 +1,5 @@
 // Phase 09.6B.1 — PostgreSQL pool error handler (no database). The real outage / recovery proof with a
-// standalone process and the Next server is integration step 26 (22-db-resilience.test.ts).
+// standalone process and the Next server is integration step 27, the last one (22-db-resilience.test.ts).
 
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";

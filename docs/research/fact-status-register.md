@@ -193,7 +193,7 @@ Of the 23 VERIFIED_CURRENT facts, 12 are HIGH risk; 11 of these (all except 112)
 - **RISK IF INCORRECT:** MEDIUM — legal
 - **REQUIRED CONFIRMATION:** Address check against aeksa.de when the Impressum is drafted
 - **FEATURES AFFECTED:** Impressum
-- **NOTES:** Consistent with practice location; not contradicted.
+- **NOTES:** Consistent with practice location; not contradicted. Cross-checked against the official site on 2026-11-16 (Phase 10.0C, [impressum-legal-review-2026-11.md](../reviews/impressum-legal-review-2026-11.md)); shown on `/impressum`. Status unchanged.
 
 ### F06 — Competent Kassenärztliche Vereinigung
 - **CURRENT VALUE / CLAIM:** KV Sachsen-Anhalt (KVSA), Doctor-Eisenbart-Ring 2, 39120 Magdeburg, www.kvsa.de
@@ -203,7 +203,7 @@ Of the 23 VERIFIED_CURRENT facts, 12 are HIGH risk; 11 of these (all except 112)
 - **RISK IF INCORRECT:** MEDIUM — legal
 - **REQUIRED CONFIRMATION:** Address check against kvsa.de when the Impressum is drafted
 - **FEATURES AFFECTED:** Impressum
-- **NOTES:** —
+- **NOTES:** — Cross-checked against the official site on 2026-11-16 (Phase 10.0C, [impressum-legal-review-2026-11.md](../reviews/impressum-legal-review-2026-11.md)); shown on `/impressum`. Status unchanged.
 
 ### F07 — Professional code reference
 - **CURRENT VALUE / CLAIM:** "Berufsordnung der Landesärztekammer Sachsen-Anhalt", www.aeksa.de
@@ -213,7 +213,7 @@ Of the 23 VERIFIED_CURRENT facts, 12 are HIGH risk; 11 of these (all except 112)
 - **RISK IF INCORRECT:** LOW
 - **REQUIRED CONFIRMATION:** Link target check when drafting
 - **FEATURES AFFECTED:** Impressum
-- **NOTES:** —
+- **NOTES:** — Cross-checked against the official site on 2026-11-16 (Phase 10.0C, [impressum-legal-review-2026-11.md](../reviews/impressum-legal-review-2026-11.md)); shown on `/impressum`. Status unchanged.
 
 ### F08 — Legal basis cited
 - **CURRENT VALUE / CLAIM:** "Pflichtangaben nach § 5 Telemediengesetz § 55 Rundfunkstaatsvertrag (RStV)"

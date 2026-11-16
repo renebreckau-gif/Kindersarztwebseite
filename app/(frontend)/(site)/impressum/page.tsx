@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
-import { LegalPlaceholder } from "@/site/legal";
+import { LegalPage, ImpressumContent } from "@/site/legal";
 import { loadPublicPage } from "@/site/operational";
 
-export const metadata: Metadata = { title: "Impressum" };
+export const metadata: Metadata = { title: "Impressum", description: "Impressum der Kinderarztpraxis Probst & Böhme in Hettstedt." };
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function Impressum({ searchParams }: { searchParams: Search }) {
-  return <LegalPlaceholder title="Impressum" puls={(await loadPublicPage(await searchParams)).puls} blockers="Verantwortliche Personen, Rechtsform und Berufsbezeichnungen (F02–F04, LB-02…LB-05) sowie rechtliche Prüfung ausstehend. Bestätigt sind Ärztekammer (F05), KV (F06) und Berufsordnung (F07); sie werden mit dem geprüften Gesamttext veröffentlicht." />;
+  return (
+    <LegalPage title="Impressum" puls={(await loadPublicPage(await searchParams)).puls}>
+      <ImpressumContent />
+    </LegalPage>
+  );
 }

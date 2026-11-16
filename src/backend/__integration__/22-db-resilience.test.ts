@@ -106,7 +106,7 @@ describe("PostgreSQL outage and recovery (09.6B.1)", { skip }, () => {
     assert.deepEqual(failing.shadow, { source: "PAYLOAD", state: "FAILED", hasSchedule: false, announcements: 0 }, "shadow read fails closed (fail-safe, no announcements, no static)");
     assert.ok(Number(failing.queryMs) < 10_000 && Number(failing.shadowMs) < 10_000, `bounded failure (${failing.queryMs} / ${failing.shadowMs} ms)`);
     if (BASE) {
-      for (const p of ["/", "/heute", "/heute/sprechzeiten"]) assert.equal((await http(p)).status, 200, `public ${p} during the outage`);
+      for (const p of ["/", "/heute", "/heute/sprechzeiten", "/impressum", "/datenschutz"]) assert.equal((await http(p)).status, 200, `public ${p} during the outage`);
       const intern = await http("/intern/anmelden");
       assert.ok([200, 404, 503].includes(intern.status), `backend area answers calmly (${intern.status})`);
     }

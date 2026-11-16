@@ -23,10 +23,10 @@ Owner abbreviations: **P** = practice · **L** = legal reviewer · **T** = proje
 |---|---|---|---|---|
 | LB-00 | **Practice sign-off of all HIGH-risk VERIFIED_CURRENT facts** (postcode/city, phone, physicians, regular hours, healthy-only window, Tuesday appointment session) | F14, F15, F20, F22, F35–F39, F41, F43 | P | Working data is likely correct, but high-risk facts go live only with a recorded confirmation (source-policy §6). **Reconciled 09.6A — still OPEN.** Recorded evidence: 2026-10-07 a *project-level human decision* (phase-07 review addendum) released the hours for the PRAXIS PULS live state (`RELEASE.pulsPracticeSignOff = true`); the data itself still carries `WORKING` provenance "Praxisfreigabe LB-00 ausstehend" (`src/content/practice.ts`), and no named practice confirmation (person + date, like F40 on 2026-10-11) exists for F14, F15, F20, F22, F35–F39, F41, F43. Needed before the public launch; the `WORKING` reviewDue 2027-01-07 (+60 days grace) also bounds the current static PULS. |
 | LB-01 | ~~Official public practice name~~ | F01 | P | **Resolved as working data 2026-11-16** (practice input: „Kinderarztpraxis Probst & Böhme“, [practice-input-2026-11-16.md](../reviews/practice-input-2026-11-16.md)); the named sign-off is part of LB-00. |
-| LB-02 | Legal name and legal form (BAG, partners) | F02 | P, L | Required for Impressum and privacy controller. |
+| LB-02 | Legal name and legal form (BAG, partners) | F02 | P, L | Required for Impressum and privacy controller. 10.0C: not derived from the practice name (question R1). |
 | LB-03 | ~~Correct street spelling~~ | F13 | P | **Resolved as working data 2026-11-16** (practice input: „Untere Bahnhofstraße 9“, now public); the named sign-off is part of LB-00. |
-| LB-04 | Responsible person(s) for Impressum | F03 | P, L | Missing. |
-| LB-05 | Professional titles for Impressum and Team | F04, F23 | P, L | Dr. Böhme's titles ambiguous; Impressum lists one singular title. |
+| LB-04 | Responsible person(s) for Impressum | F03 | P, L | Missing. 10.0C: Impressum names nobody as responsible until confirmed (practice question R2). |
+| LB-05 | Professional titles for Impressum and Team | F04, F23 | P, L | Dr. Böhme's titles ambiguous; old Impressum listed one singular title. 10.0C: no title published (one physician's verified F21 alone would be incomplete); questions R3/R4. |
 | LB-06 | Current legal references for Impressum | F08 | L | Old TMG/RStV wording must not be reused. |
 | LB-07 | Privacy policy content (controller, DPO, hosting, processors) | F09, F10 | P, L | No privacy policy exists today. Also depends on technical decisions of later phases. |
 | LB-08 | Current team list, display order, trainees on Team page | F31, F24 | P | Team page is in launch scope. |
@@ -37,6 +37,9 @@ Owner abbreviations: **P** = practice · **L** = legal reviewer · **T** = proje
 | LB-13 | **LIVE_HOST_ACCESS = OPEN** — access to the existing live website's webhost | — | P | Recorded 2026-10-13: access is currently unavailable. Needed only for the final production cutover. It does **not** block local development, the Vercel staging deployment, backend/cockpit work, content work or testing. Nobody interacts with the existing live host until access is clarified. |
 | LB-14 | Domain registrar access and DNS management access | — | P | Recorded separately from LB-13: hosting access, registrar access and DNS access may lie with different parties. Current status of each: **UNKNOWN** (no provider ownership is assumed). Needed before production cutover. |
 | LB-15 | Production infrastructure for the Praxis Cockpit backend | — | P, T | Production PostgreSQL provider and EU region, DPA/AVV, backups + restore test, PITR, transactional email (password reset), ADMIN MFA, monitoring, named maintenance owner. See [backend-foundation.md](../architecture/backend-foundation.md) §16. Blocks only the production use of the cockpit, not the static public site. |
+| LB-16 | § 18 Abs. 2 MStV applicability — is the website a journalistic-editorial offering that needs a named responsible person? | — | L, P | Added 10.0C (2026-11-16). Legal-review question, **not** assumed YES: no responsible person is named until the review answers it (practice question R5). [impressum-legal-review-2026-11.md](../reviews/impressum-legal-review-2026-11.md) |
+
+**Legal gate (10.0C, 2026-11-16):** the Impressum is structurally in place (`/impressum`, verified facts only) but a future switch to `SITE_STAGE = "PRODUCTION"` is **not legal-ready** while any of **F02** (legal form / provider, LB-02), **F03** (responsible person(s), LB-04), **F04** (statutory professional titles incl. awarding state, LB-05) or **F10** (privacy-policy data, LB-07) is open, and while LB-16 is unanswered. Nothing in the code marks the Impressum as legally approved; the final legal review is a separate, explicit step. `SITE_STAGE` is unchanged.
 
 **Launch fallback rule:** if LB-10 is not fully resolved by launch, the Notfall page shows only confirmed entries plus 112 — never unverified facility data (source-policy §5). The launch itself is still blocked until at least the KV on-call service relevant for Hettstedt is verified or explicitly removed by the practice.
 
@@ -142,7 +145,7 @@ These must not appear as current information anywhere on the new site (content, 
 
 | Class | Count |
 |---|---|
-| Launch blockers | 14 open (LB-00 … LB-15 without LB-01 / LB-03, resolved as working data 2026-11-16; LB-13–LB-15 added 2026-10-13 for host, registrar/DNS and production backend) |
+| Launch blockers | 15 open (LB-00 … LB-16 without LB-01 / LB-03, resolved as working data 2026-11-16; LB-13–LB-15 added 2026-10-13 for host, registrar/DNS and production backend; LB-16 MStV question added 2026-11-16) |
 | Feature blockers | 17 open (FB-01 … FB-18; FB-05 closed 2026-10-11) |
 | Nice to have | 13 |
 | Excluded outdated items | 9 |

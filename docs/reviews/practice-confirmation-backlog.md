@@ -1,6 +1,6 @@
 # Offene Fragen an die Praxis – gesammelter Stand
 
-Stand: **2026-11-16** (nach Praxisangabe #1, Phase 10.0B; erstellt in 09.6A am 2026-10-21). **Nur vorbereitet, nicht verschickt.** Dieses Dokument ist die eine Sammelliste, um Antworten der Praxis einzuholen. Es ändert keinen Faktenstatus. Was mit der Praxisangabe vom 16.11.2026 beantwortet ist, steht in [practice-input-2026-11-16.md](practice-input-2026-11-16.md). Details stehen in den verlinkten Dokumenten; hier steht jede Frage nur kurz.
+Stand: **2026-11-16** (nach Praxisangabe #1, Phase 10.0B; Recht/Impressum ergänzt in 10.0C; erstellt in 09.6A am 2026-10-21). **Nur vorbereitet, nicht verschickt.** Dieses Dokument ist die eine Sammelliste, um Antworten der Praxis einzuholen. Es ändert keinen Faktenstatus. Was mit der Praxisangabe vom 16.11.2026 beantwortet ist, steht in [practice-input-2026-11-16.md](practice-input-2026-11-16.md). Details stehen in den verlinkten Dokumenten; hier steht jede Frage nur kurz.
 
 Quellen:
 - [Faktenregister](../research/fact-status-register.md) · [Projekt-Blocker](../research/project-blockers.md) · [Readiness-Gate](../architecture/public-data-cutover-readiness.md) · [Praxisangabe 16.11.2026](practice-input-2026-11-16.md)
@@ -69,13 +69,25 @@ Als aktuelle Praxisangabe übernommen (Quelle „Praxisangabe, übermittelt durc
 
 ## 6. Recht / Datenschutz (zusammen mit rechtlicher Prüfung)
 
+### LEGAL / IMPRESSUM
+
+Stand 10.0C: `/impressum` zeigt nur bestätigte Angaben (Praxis, Kontakt, Ärztekammer, KVSA, Berufsordnung). Offen ist der Rest; Details und Quellen: [impressum-legal-review-2026-11.md](impressum-legal-review-2026-11.md).
+
 | # | Frage | Fakten / Blocker |
 |---|---|---|
-| R1 | Rechtlicher Name und Rechtsform (z. B. BAG) sowie Partnerinnen? | F02 · LB-02 |
-| R2 | Wer ist für das Impressum verantwortlich, mit welchen Berufsbezeichnungen? | F03, F04 · LB-04/05 |
-| R3 | Für die Datenschutzerklärung: Verantwortliche, Datenschutzbeauftragte(r), Dienstleister (Hosting, später Datenbank und E-Mail). | F10 · LB-07 |
-| R4 | Wer schließt die Auftragsverarbeitungsverträge (AVV) mit Datenbank-, Hosting- und E-Mail-Anbieter ab? | LB-15 |
-| R5 | Zugang zum bisherigen Webhost, zum Domain-Registrar und zur DNS-Verwaltung: Wer hat ihn? | LB-13, LB-14 |
+| R1 | Wie lautet die rechtliche Praxisform / Anbieterbezeichnung genau? | F02 · LB-02 |
+| R2 | Wer ist rechtlich Anbieter bzw. verantwortlich für die Website? | F03 · LB-04 |
+| R3 | Welche Berufsbezeichnung soll für Nadine Probst im Impressum stehen? | F04, F21 · LB-05 |
+| R4 | Welche vollständige Berufs-/Zusatzbezeichnung soll für Dr. med. Elke Böhme stehen? | F04, F23 · LB-05 |
+| R5 | Falls erforderlich (rechtliche Prüfung klärt das zuerst): Wer soll Verantwortliche(r) nach § 18 Abs. 2 MStV sein? | LB-16 |
+
+### Datenschutz / Betrieb
+
+| # | Frage | Fakten / Blocker |
+|---|---|---|
+| R6 | Für die Datenschutzerklärung: Verantwortliche, Datenschutzbeauftragte(r), Dienstleister (Hosting, später Datenbank und E-Mail). | F10 · LB-07 |
+| R7 | Wer schließt die Auftragsverarbeitungsverträge (AVV) mit Datenbank-, Hosting- und E-Mail-Anbieter ab? | LB-15 |
+| R8 | Zugang zum bisherigen Webhost, zum Domain-Registrar und zur DNS-Verwaltung: Wer hat ihn? | LB-13, LB-14 |
 
 ## 7. Medien / Fotos
 
@@ -93,4 +105,4 @@ Als aktuelle Praxisangabe übernommen (Quelle „Praxisangabe, übermittelt durc
 
 ---
 
-**Umfang:** 30 offene Fragen in 7 Gruppen: 2 hohe Priorität, 7 Praxis Puls/Betrieb, 7 Kontakt/digitale Services, 3 Team, 3 Preise, 5 Recht, 3 Medien. Mit der Praxisangabe vom 16.11.2026 erledigt bzw. ersetzt: H2, H3, H4, P3 (Inhalt liegt vor; namentliche Bestätigung → H1); zurückgestellt: P2. Nicht enthalten: Mein Arztbesuch (eigene Freigabedokumente: [discovery-approval-package.md](discovery-approval-package.md), [discovery-ai-child-publication-decision.md](discovery-ai-child-publication-decision.md)) und Nice-to-have-Angaben (NH-01–NH-12).
+**Umfang:** 33 offene Fragen in 7 Gruppen: 2 hohe Priorität, 7 Praxis Puls/Betrieb, 7 Kontakt/digitale Services, 3 Team, 3 Preise, 8 Recht (5 Impressum, 3 Datenschutz/Betrieb; Stand 10.0C), 3 Medien. Mit der Praxisangabe vom 16.11.2026 erledigt bzw. ersetzt: H2, H3, H4, P3 (Inhalt liegt vor; namentliche Bestätigung → H1); zurückgestellt: P2. Nicht enthalten: Mein Arztbesuch (eigene Freigabedokumente: [discovery-approval-package.md](discovery-approval-package.md), [discovery-ai-child-publication-decision.md](discovery-ai-child-publication-decision.md)) und Nice-to-have-Angaben (NH-01–NH-12).

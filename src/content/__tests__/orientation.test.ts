@@ -103,9 +103,9 @@ test("every public page except Start has the shared back control (deterministic 
   const notfall = read("app/(frontend)/(site)/notfall/page.tsx");
   assert.match(notfall, /<PageBackNav href="\/" label="Start" \/>/);
   assert.ok(notfall.indexOf("<PageBackNav") < notfall.indexOf("tel:112"));
-  // legal pages: through the shared LegalPlaceholder
+  // legal pages: through the shared legal shell (LegalPage; the placeholders build on it)
   assert.match(read("src/site/legal.tsx"), /back=\{\{ href: "\/", label: "Start" \}\}/);
-  for (const legal of ["impressum", "datenschutz", "barrierefreiheit"]) assert.match(read(`app/(frontend)/(site)/${legal}/page.tsx`), /<LegalPlaceholder/, legal);
+  for (const legal of ["impressum", "datenschutz", "barrierefreiheit"]) assert.match(read(`app/(frontend)/(site)/${legal}/page.tsx`), /<LegalPage|<LegalPlaceholder/, legal);
   // Start is the root: no back control
   assert.equal(/back=\{|<PageBackNav/.test(read("app/(frontend)/(site)/page.tsx")), false);
 });
@@ -117,7 +117,7 @@ test("route coverage: every public page file except Start carries the back patte
   assert.ok(pages.length >= 20); // 20 files = 24 routes (the four age pages share [alter])
   for (const f of pages) {
     const isStart = f === "app/(frontend)/(site)/page.tsx";
-    assert.equal(/back=\{|<PageBackNav|<LegalPlaceholder/.test(read(f)), !isStart, f);
+    assert.equal(/back=\{|<PageBackNav|<LegalPage|<LegalPlaceholder/.test(read(f)), !isStart, f);
   }
 });
 
